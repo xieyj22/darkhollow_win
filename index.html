@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Depths of Darkhollow</title>
+<link rel="stylesheet" href="./style/main.css">
+</head>
+<body>
+<button id="lang-btn">中文</button>
+<div id="title-screen">
+<canvas id="title-particles" class="title-particles"></canvas>
+<h1 id="title-h1">DEPTHS OF DARKHOLLOW</h1>
+<h2 id="title-h2">A Roguelike Dungeon Crawler</h2>
+<button class="menu-btn" id="btn-new">New Game</button>
+<button class="menu-btn" id="btn-cont">Continue</button>
+<button class="menu-btn" id="btn-forge">⚒ The Forge</button>
+<button class="menu-btn" id="btn-help">How to Play</button>
+<div id="title-stats" class="title-stats"></div>
+<div class="controls-hint" id="title-hint"></div>
+</div>
+<div id="game-container">
+<div id="sidebar">
+<h3 id="sb-hero">⚔ Hero</h3>
+<div class="sr"><span class="sl" id="sb-nl">Name</span><span class="sv" id="s-name">-</span></div>
+<div class="sr"><span class="sl" id="sb-rl">Race</span><span class="sv" id="s-race">-</span></div>
+<div class="sr"><span class="sl" id="sb-cl">Class</span><span class="sv" id="s-class">-</span></div>
+<div class="sr"><span class="sl" id="sb-lv">Level</span><span class="sv xp" id="s-level">1</span></div>
+<div class="bar"><div class="fill bh" id="hp-fill"></div><span class="bt-text" id="hp-text"></span></div>
+<div class="bar"><div class="fill bm" id="mp-fill"></div><span class="bt-text" id="mp-text"></span></div>
+<div class="bar"><div class="fill bx" id="xp-fill"></div><span class="bt-text" id="xp-text"></span></div>
+<div class="bar"><div class="fill bt" id="hunger-fill"></div><span class="bt-text" id="hunger-text"></span></div>
+<h3 id="sb-stat">📊 Stats</h3>
+<div class="sr"><span class="sl">ATK</span><span class="sv atk" id="s-atk">5</span></div>
+<div class="sr"><span class="sl">DEF</span><span class="sv def" id="s-def">2</span></div>
+<div class="sr"><span class="sl" id="sb-gl">Gold</span><span class="sv gold" id="s-gold">0</span></div>
+<div class="sr"><span class="sl" id="sb-fl">Floor</span><span class="sv" id="s-floor">1</span></div>
+<div class="sr"><span class="sl" id="sb-tl">Turns</span><span class="sv" id="s-turns">0</span></div>
+<div class="sr"><span class="sl" id="sb-co">Combo</span><span class="sv gold" id="s-combo">0</span></div>
+<h3 id="sb-eq">🛡 Equipment</h3>
+<div class="eq"><span id="sb-wp">Weapon</span>: <span class="in" id="eq-weapon">-</span></div>
+<div class="eq"><span id="sb-ar">Armor</span>: <span class="in" id="eq-armor">-</span></div>
+<div class="eq"><span id="sb-ac">Accessory</span>: <span class="in" id="eq-accessory">-</span></div>
+<div class="eq"><span id="sb-ac2">Accessory</span>2: <span class="in" id="eq-accessory2">-</span></div>
+<h3 id="sb-ef">✨ Effects</h3>
+<div class="buff-list" id="buff-list"></div>
+<h3 id="sb-legend" style="cursor:pointer">🗺 <span id="legend-arrow">▼</span></h3>
+<div id="legend-panel" style="display:none"></div>
+<h3 id="sb-obj">🎯 Objective</h3>
+<div id="objective-panel"></div>
+<div id="sidebar-footer">
+<div class="sb-frow">
+<button class="sb-btn" id="btn-sound">🔊</button>
+<button class="sb-btn" id="btn-mute">🔇</button>
+</div>
+<div class="sb-frow">
+<button class="sb-btn" id="btn-zoom-out">A-</button>
+<button class="sb-btn" id="zoom-label">100%</button>
+<button class="sb-btn" id="btn-zoom-in">A+</button>
+</div>
+<div class="sb-frow">
+<button class="sb-btn" id="btn-back-title" style="color:#e63946;border-color:#e6394644">← Title</button>
+</div>
+</div>
+</div>
+<button id="btn-sidebar-toggle">◀</button>
+<div id="right-panel">
+<div id="map-area">
+<canvas id="game-canvas"></canvas>
+<div id="minimap-wrap"><canvas id="minimap-canvas" width="210" height="135"></canvas><div id="minimap-btns"><button class="mc-btn" id="btn-mm-out">−</button><button class="mc-btn" id="btn-mm-in">+</button></div></div>
+<div id="floor-label">Floor 1</div>
+<div id="streak-display"></div>
+<div id="keys-panel"></div>
+<button id="keys-toggle">⌨</button>
+</div>
+<div id="hotbar"></div>
+<div id="log-panel"></div>
+</div>
+</div>
+<div id="touch-controls">
+<div id="touch-dpad"><div></div><button class="tb" id="tb-up">▲</button><div></div><button class="tb" id="tb-left">◄</button><button class="tb" id="tb-center" style="font-size:14px">●</button><button class="tb" id="tb-right">►</button><div></div><button class="tb" id="tb-down">▼</button><div></div></div>
+<div id="touch-actions"><button class="tb" style="font-size:12px" id="tb-pickup">G</button><button class="tb" style="font-size:12px" id="tb-descend">&gt;</button><button class="tb" style="font-size:12px" id="tb-inventory">B</button><button class="tb" style="font-size:12px" id="tb-skill">K</button></div>
+</div>
+<div id="inventory-overlay" class="overlay"><div id="inventory-panel" class="panel"><button class="close-btn" id="btn-close-inv">✕</button><h2 id="inv-title">🎒 Inventory</h2><div id="inv-content"></div></div></div>
+<div id="help-overlay" class="overlay"><div id="help-panel" class="panel"><button class="close-btn" id="btn-close-help">✕</button><h2 id="help-title">📖 How to Play</h2><div id="help-body"></div></div></div>
+<div id="skill-overlay" class="overlay"><div id="skill-panel" class="panel"><button class="close-btn" id="btn-close-skill">✕</button><h2 id="sk-title">⚡ Skills</h2><div id="sk-content"></div></div></div>
+<div id="achievement-overlay" class="overlay"><div id="achievement-panel" class="panel"><button class="close-btn" id="btn-close-ach">✕</button><h2 id="ach-title">🏆 Achievements</h2><div id="ach-content"></div></div></div>
+<div id="talent-overlay" class="overlay"><div id="talent-panel" class="panel"><button class="close-btn" id="btn-close-talent">✕</button><h2 id="talent-title">🌳 Talents</h2><div id="talent-header">Points: <span id="talent-pts">0</span></div><div id="talent-grid"></div></div></div>
+<div id="forge-overlay" class="overlay"><div id="forge-panel" class="panel" style="min-width:500px;max-width:650px"><button class="close-btn" id="btn-close-forge">✕</button><h2 id="forge-title">⚒ The Forge</h2><div id="forge-echoes">💀 <span id="forge-se-label">Soul Echoes</span>: <span id="forge-se-count">0</span></div><div id="forge-tabs"></div><div id="forge-content"></div></div></div>
+<div id="death-screen"><h1 id="death-h1">YOU HAVE PERISHED</h1><div class="death-stats" id="death-stats"></div><div id="death-echoes" class="death-echoes"></div><button class="menu-btn" id="btn-try-again" style="margin-top:30px">Try Again</button><button class="menu-btn" id="btn-death-title">Title Screen</button></div>
+<div id="victory-screen"><h1>🌟 VICTORY 🌟</h1><h2 id="vic-sub"></h2><div class="victory-stats" id="vic-stats"></div><div id="vic-echoes" class="victory-echoes"></div><button class="menu-btn" id="btn-play-again" style="margin-top:30px">Play Again</button><button class="menu-btn" id="btn-vic-title">Title Screen</button></div>
+<div id="event-popup"><h3 id="ev-title"></h3><p id="ev-desc"></p><div id="ev-buttons"></div></div>
+<div id="tooltip"></div>
+<script type="module" src="./src/main.ts"></script>
+</body>
+</html>

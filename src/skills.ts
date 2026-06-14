@@ -1,0 +1,219 @@
+// Skill system
+import type { Enemy } from './types.js';
+import { G, lang } from './state.js';
+import { dst, rng } from './utils.js';
+import { snd } from './audio.js';
+import { flt, shake } from './effects.js';
+import { addMsg } from './messages.js';
+import { recalc, killEnemy, checkLevelUp, checkAch, checkAchs, playerVictory } from './combat.js';
+import { FINAL } from './config.js';
+import { CLASSES } from './data.js';
+import { bonusGold, bonusExp } from './meta.js';
+import { getSkillModifiers, onPlayerKill, getSpellPenMult } from './talents.js';
+
+let _endTurn: (() => void) | null = null;
+export function setEndTurnFn(fn: () => void): void { _endTurn = fn; }
+
+// Helper: process AOE kills with talent triggers, streak, and achievement checks
+function processAoeKills(killedEnemies: Enemy[]): void {
+  if (!G) return;
+  const p = G.player;
+  for (const e of killedEnemies) {
+    // Streak
+    p.streak++;
+    if (p.streak > p.bestStreak) p.bestStreak = p.streak;
+    if (p.streak >= 3) {
+      const bonus = bonusExp(Math.floor(e.exp * .2 * p.streak));
+      p.exp += bonus;
+      addMsg(`🔥 ${p.streak}x${lang === 'zh' ? '连杀！' : ' kill streak! '}+${bonus}XP`, 'ml');
+      checkAch('streak5');
+    }
+    // Boss kill — keep in sync with attack() / killEnemy()
+    if (e.isBoss) {
+      p.bossesKilledThisRun++;
+      checkAch('boss_kill');
+      if (G.floor === FINAL) { playerVictory(); return; }
+    }
+    // Talent on-kill triggers
+    onPlayerKill(e);
+  }
+  checkAchs();
+}
+
+export function findNearestEnemy(): Enemy | null {
+  if (!G) return null;
+  let best: Enemy | null = null, bd = 999;
+  for (const e of G.enemies) {
+    if (e.isAlly) continue;
+    const d = dst(G.player.x, G.player.y, e.x, e.y);
+    if (d < bd && d <= 6) { bd = d; best = e; }
+  }
+  return best;
+}
+
+export function executeSkill(sk: { cost: number; effect: string; cd: number }): void {
+  if (!G) return;
+  const p = G.player;
+  if (p.mp < sk.cost || p.skillCd > 0) { addMsg(lang === 'zh' ? '技能冷却中或魔力不足！' : 'Skill on cooldown or not enough MP!', 'mi'); return; }
+  p.mp -= sk.cost; p.skillCd = sk.cd; snd('spell');
+
+  const mods = getSkillModifiers(p.ci);
+
+  switch (sk.effect) {
+    case 'stun': {
+      // Warrior — Shield Bash (possibly AOE via whirlwind talent)
+      if (mods.aoe) {
+        // Whirlwind: hit all adjacent enemies
+        const enemies = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 1.5);
+        const killed: Enemy[] = [];
+        for (const e of enemies) {
+          let dmg = Math.floor(p.atk * 1.5 * mods.dmgMult);
+          e.hp -= dmg; e.stunned = 2;
+          flt(e.x, e.y, `-${dmg} ⚡`, '#4895ef');
+          if (e.hp <= 0) killed.push(e);
+          if (mods.alsoFear) e.feared = rng(3, 5);
+        }
+        G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
+        for (const e of killed) { p.exp += bonusExp(e.exp); p.gold += bonusGold(e.goldDrop); p.kills++; }
+        processAoeKills(killed);
+        addMsg(lang === 'zh' ? `🌀 旋风斩！命中${enemies.length}个敌人！` : `🌀 Whirlwind! Hit ${enemies.length}!`, 'msk');
+        if (killed.length > 0) checkLevelUp();
+      } else {
+        const e = findNearestEnemy();
+        if (e) {
+          let dmg = Math.floor(p.atk * 1.5 * mods.dmgMult);
+          e.hp -= dmg; e.stunned = 2;
+          addMsg(lang === 'zh' ? `盾击！对${e.name}造成${dmg}伤害并眩晕！` : `Shield Bash! ${dmg} dmg to ${e.name}, stunned!`, 'msk');
+          flt(e.x, e.y, `-${dmg} ⚡`, '#4895ef');
+          if (e.hp <= 0) killEnemy(e);
+          if (mods.alsoFear) {
+            const nearby = G.enemies.filter(en => !en.isAlly && dst(p.x, p.y, en.x, en.y) <= 5);
+            nearby.forEach(en => en.feared = rng(3, 5));
+            if (nearby.length) addMsg(lang === 'zh' ? `📢 战吼！${nearby.length}个敌人被恐惧！` : `📢 War Cry! ${nearby.length} enemies feared!`, 'mi');
+          }
+        }
+      }
+      break;
+    }
+    case 'burst': {
+      // Rogue — Shadow Strike
+      const e = findNearestEnemy();
+      if (e) {
+        let dmg = Math.floor(p.atk * 2.5 * mods.dmgMult);
+        // Death mark: force crit
+        if (mods.forceCrit) {
+          dmg = Math.floor(dmg * 2);
+          addMsg(lang === 'zh' ? `☠ 死亡标记暴击！` : `☠ Death Mark CRIT!`, 'mc');
+        }
+        // AOE: fan of knives
+        if (mods.aoe) {
+          const enemies = G.enemies.filter(en => !en.isAlly && dst(p.x, p.y, en.x, en.y) <= 3);
+          const killed: Enemy[] = [];
+          for (const en of enemies) {
+            const d = mods.forceCrit ? Math.floor(p.atk * 2.5 * mods.dmgMult * 2) : Math.floor(p.atk * 2.5 * mods.dmgMult);
+            en.hp -= d; flt(en.x, en.y, `-${d} 💀`, '#9b5de5');
+            if (en.hp <= 0) killed.push(en);
+          }
+          G.enemies = G.enemies.filter(en => en.hp > 0 || en.isAlly);
+          for (const en of killed) { p.exp += bonusExp(en.exp); p.gold += bonusGold(en.goldDrop); p.kills++; }
+          processAoeKills(killed);
+          addMsg(lang === 'zh' ? `🔪 飞刀扇！命中${enemies.length}个！` : `🔪 Fan of Knives! Hit ${enemies.length}!`, 'msk');
+          if (killed.length > 0) checkLevelUp();
+        } else {
+          e.hp -= dmg;
+          addMsg(lang === 'zh' ? `暗影突袭！对${e.name}造成${dmg}伤害！` : `Shadow Strike! ${dmg} to ${e.name}!`, 'msk');
+          flt(e.x, e.y, `-${dmg} 💀`, '#9b5de5'); shake();
+          if (e.hp <= 0) killEnemy(e);
+        }
+      }
+      break;
+    }
+    case 'aoe': {
+      // Mage — Arcane Blast
+      const baseRadius = 5 + mods.radiusBonus;
+      const spellPen = getSpellPenMult();
+      const enemies = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= baseRadius);
+      const killed: Enemy[] = [];
+      for (const e of enemies) {
+        let dmg = Math.floor((p.atk + p.level * 3) * p.spellPower * mods.dmgMult * spellPen);
+        e.hp -= dmg; flt(e.x, e.y, `-${dmg}`, '#4895ef');
+        if (e.hp <= 0) killed.push(e);
+        if (mods.alsoSlow) {
+          // Slow effect — reduce enemy effectiveness (simplified as losing next turn)
+          e.stunned = Math.max(e.stunned, 1);
+        }
+      }
+      // Chain lightning: hit up to 2 extra enemies further away
+      // Filter out already-dead enemies before selecting chain targets
+      if (mods.chainCount > 0) {
+        const chainTargets = G.enemies.filter(e => !e.isAlly && e.hp > 0 && dst(p.x, p.y, e.x, e.y) > baseRadius && dst(p.x, p.y, e.x, e.y) <= baseRadius + 4);
+        for (let i = 0; i < Math.min(mods.chainCount, chainTargets.length); i++) {
+          const ct = chainTargets[i];
+          const chainDmg = Math.floor((p.atk + p.level * 2) * p.spellPower * mods.dmgMult * 0.6);
+          ct.hp -= chainDmg; flt(ct.x, ct.y, `-${chainDmg}⚡`, '#ffd700');
+          if (ct.hp <= 0) killed.push(ct);
+          addMsg(lang === 'zh' ? `⚡ 连锁闪电命中${ct.name}！-${chainDmg}` : `⚡ Chain hits ${ct.name}! -${chainDmg}`, 'mc');
+        }
+      }
+      G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
+      for (const e of killed) { p.exp += bonusExp(e.exp); p.gold += bonusGold(e.goldDrop); p.kills++; }
+      processAoeKills(killed);
+      addMsg(lang === 'zh' ? `奥术爆破！命中${enemies.length}个敌人！` : `Arcane Blast! Hit ${enemies.length}!`, 'msk'); shake(); checkLevelUp();
+      break;
+    }
+    case 'heal': {
+      // Paladin — Holy Light
+      const baseHeal = Math.floor(p.maxHp * .4);
+      const healMult = 1 + (p.healBonus || 0);
+      const heal = Math.floor(baseHeal * healMult * mods.dmgMult);
+      p.hp = Math.min(p.maxHp, p.hp + heal); p.poisonTurns = 0;
+      addMsg(lang === 'zh' ? `圣光术！恢复${heal}HP，中毒已清除！` : `Holy Light! +${heal} HP, poison cleared!`, 'mh');
+      flt(p.x, p.y, `+${heal} ❤️`, '#80ed99'); snd('heal');
+
+      // Consecrate: also deal holy damage to nearby enemies
+      if (mods.alsoHolyDmg) {
+        const enemies = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 4);
+        const holyKilled: Enemy[] = [];
+        for (const e of enemies) {
+          const holyDmg = Math.floor(p.level * 2 * p.spellPower);
+          e.hp -= holyDmg; flt(e.x, e.y, `-${holyDmg}✨`, '#ffd700');
+          if (e.hp <= 0) holyKilled.push(e);
+        }
+        G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
+        for (const e of holyKilled) { p.exp += bonusExp(e.exp); p.gold += bonusGold(e.goldDrop); p.kills++; }
+        processAoeKills(holyKilled);
+        if (enemies.length) addMsg(lang === 'zh' ? `✨ 净化！${enemies.length}个敌人受到神圣伤害！` : `✨ Consecrate! ${enemies.length} enemies take holy dmg!`, 'mc');
+        if (holyKilled.length > 0) checkLevelUp();
+      }
+
+      // Judgment: also stun nearest enemy
+      if (mods.alsoStun) {
+        const e = findNearestEnemy();
+        if (e) {
+          e.stunned = 2;
+          addMsg(lang === 'zh' ? `⚡ 审判！${e.name}被眩晕2回合！` : `⚡ Judgment! ${e.name} stunned for 2 turns!`, 'mc');
+          flt(e.x, e.y, '⚡STUN', '#ffd700');
+        }
+      }
+
+      // Holy Nova: also heal allies
+      if (mods.alsoHeal) {
+        const allies = G.enemies.filter(e => e.isAlly && dst(p.x, p.y, e.x, e.y) <= 5);
+        for (const a of allies) {
+          const allyHeal = Math.floor(p.maxHp * 0.2);
+          a.hp = Math.min(a.maxHp, a.hp + allyHeal);
+          flt(a.x, a.y, `+${allyHeal}`, '#80ed99');
+        }
+        if (allies.length) addMsg(lang === 'zh' ? `💫 神圣新星！治疗了${allies.length}个友方！` : `💫 Holy Nova! Healed ${allies.length} allies!`, 'mh');
+      }
+      break;
+    }
+  }
+  // Smoke Screen — blind (stun) enemies near the player after the skill fires
+  if (mods.alsoBlind) {
+    const blindTargets = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 4);
+    for (const e of blindTargets) e.stunned = Math.max(e.stunned, 2);
+    if (blindTargets.length) addMsg(lang === 'zh' ? `💨 烟幕！${blindTargets.length}个敌人被致盲！` : `💨 Smoke Screen! ${blindTargets.length} enemies blinded!`, 'mi');
+  }
+  if (_endTurn) _endTurn();
+}
