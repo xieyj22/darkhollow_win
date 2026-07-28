@@ -8,6 +8,7 @@ import { dst } from './utils.js';
 import { snd } from './audio.js';
 import { flt } from './effects.js';
 import { fxDash } from './fx.js';
+import { setPlayerTween } from './render.js';
 import { t } from './i18n.js';
 import { attack } from './combat.js';
 import { addItemWithOverflow } from './items.js';
@@ -77,7 +78,7 @@ export function movePlayer(dx: number, dy: number): void {
 
   const pfx = G.player.x, pfy = G.player.y;
   G.player.x = nx; G.player.y = ny;
-  fxDash(pfx, pfy, nx, ny, '#ffd700');
+  setPlayerTween(pfx, pfy, nx, ny);
 
   // Auto-pickup items
   const itemsHere = G.items.filter(i => i.x === nx && i.y === ny);

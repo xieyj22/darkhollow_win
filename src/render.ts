@@ -1,5 +1,5 @@
 // Canvas rendering + minimap
-import { G, canvas, ctx, miniCtx, minimapScale, lang } from './state.js';
+import { G, canvas, ctx, miniCtx, minimapScale, lang, reducedMotion } from './state.js';
 import { setCanvas, setMiniCanvas } from './state.js';
 import { TS, MW, MH, TL, FINAL } from './config.js';
 import { clamp, dst, darken, darkenTinted } from './utils.js';
@@ -10,6 +10,38 @@ import { captureSnapshot } from './particles.js';
 
 // Themed monospace font matching CSS --font-mono
 const FONT = "'JetBrains Mono', Consolas, 'Courier New', monospace";
+
+// Player tween — player lives in the dynamic layer (particles.tick) so its
+// position can slide between tiles. Logic stays discrete (turn-based).
+interface PlayerTween { fx: number; fy: number; tx: number; ty: number; t0: number; }
+let _playerTween: PlayerTween | null = null;
+const TWEEN_DUR_MS = 90;
+
+export function setPlayerTween(fx: number, fy: number, tx: number, ty: number): void {
+  if (reducedMotion) { _playerTween = null; return; } // reduced-motion: instant
+  _playerTween = { fx, fy, tx, ty, t0: performance.now() };
+}
+
+// Called every frame by particles.ts tick() on top of the snapshot.
+export function drawPlayerLayer(c: CanvasRenderingContext2D): void {
+  if (!G) return;
+  let lx = G.player.x, ly = G.player.y;
+  if (_playerTween) {
+    const p = Math.min(1, (performance.now() - _playerTween.t0) / TWEEN_DUR_MS);
+    const e = 1 - (1 - p) * (1 - p); // easeOutQuad
+    lx = _playerTween.fx + (_playerTween.tx - _playerTween.fx) * e;
+    ly = _playerTween.fy + (_playerTween.ty - _playerTween.fy) * e;
+    if (p >= 1) _playerTween = null;
+  }
+  const px = (lx - G.vx) * TS, py = (ly - G.vy) * TS;
+  const pGrad = c.createRadialGradient(px + TS / 2, py + TS / 2, 2, px + TS / 2, py + TS / 2, TS * 1.5);
+  pGrad.addColorStop(0, 'rgba(255,215,0,0.12)');
+  pGrad.addColorStop(0.5, 'rgba(255,215,0,0.05)');
+  pGrad.addColorStop(1, 'rgba(255,215,0,0)');
+  c.fillStyle = pGrad; c.fillRect(px - TS * 0.5, py - TS * 0.5, TS * 2, TS * 2);
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  drawPlayerSprite(c, px, py, G.player.ci);
+}
 
 // Cached minimap — redrawn only when the game state changes, not every frame
 let minimapCanvas: HTMLCanvasElement | null = null;
@@ -202,14 +234,6 @@ export function render(): void {
 
   // Player — radial glow
   const px = (G.player.x - G.vx) * TS, py = (G.player.y - G.vy) * TS;
-  c.fillStyle = '#2a1a00'; c.fillRect(px, py, TS, TS);
-  const pGrad = c.createRadialGradient(px + TS / 2, py + TS / 2, 2, px + TS / 2, py + TS / 2, TS * 1.5);
-  pGrad.addColorStop(0, 'rgba(255,215,0,0.12)');
-  pGrad.addColorStop(0.5, 'rgba(255,215,0,0.05)');
-  pGrad.addColorStop(1, 'rgba(255,215,0,0)');
-  c.fillStyle = pGrad; c.fillRect(px - TS * 0.5, py - TS * 0.5, TS * 2, TS * 2);
-  c.textAlign = 'center'; c.textBaseline = 'middle';
-  drawPlayerSprite(c, px, py, G.player.ci);
 
   // Vignette overlay
   const vCx = px + TS / 2, vCy = py + TS / 2;

@@ -20,13 +20,13 @@ import { maybeEvent, showEvent, closeEvent, checkTraps, checkTiles } from './eve
 import { createPlayer, movePlayer, pickupItem, descendStairs, doWait, setEndTurnFn as setPlayerEndTurn, setEnterFloorFn } from './player.js';
 import { endTurn, setPlayerDeathFn } from './turn.js';
 import { initGame, enterFloor } from './game.js';
-import { render, renderMinimap, resizeCanvas, updateUI, markMinimapDirty } from './render.js';
+import { render, renderMinimap, resizeCanvas, updateUI, markMinimapDirty, drawPlayerLayer } from './render.js';
 import { initInput, initTouchControls } from './input.js';
 import { saveGame, loadGame } from './save.js';
 import { setRecalcFn, setKillEnemyFn } from './relics.js';
 import { paintIcon } from './sprites.js';
 import { renderForge, renderTitleStats } from './meta.js';
-import { startParticles, stopParticles } from './particles.js';
+import { startParticles, stopParticles, setDrawPlayerLayerFn } from './particles.js';
 import { openOptions, closeOptions, renderOptions, applyOptionsUI, applyTextScale, applyColorblind, applyBarCues } from './options.js';
 
 // ===== Wire up late-bound dependencies =====
@@ -39,6 +39,7 @@ setEnterFloorFn(enterFloor);
 setPlayerDeathFn(playerDeath);
 setRecalcFn(recalc);
 setKillEnemyFn(killEnemy);
+setDrawPlayerLayerFn(drawPlayerLayer);
 
 // Expose to window for cross-module access
 (window as any).__initAudio = initAudio;

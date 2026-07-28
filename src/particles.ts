@@ -5,6 +5,12 @@ import { AREAS } from './data.js';
 import { drawFx, clearFx } from './fx.js';
 import { applyShakeFrame, resetShake } from './effects.js';
 
+// Late-bound player-layer drawer (set from render.ts via main.ts wiring).
+let _drawPlayerLayer: ((c: CanvasRenderingContext2D) => void) | null = null;
+export function setDrawPlayerLayerFn(fn: ((c: CanvasRenderingContext2D) => void) | null): void {
+  _drawPlayerLayer = fn;
+}
+
 interface Particle {
   x: number;
   y: number;
@@ -94,6 +100,9 @@ function tick(): void {
     animFrame = requestAnimationFrame(tick);
     return;
   }
+
+  // Player layer — drawn from the tweened position on top of the snapshot.
+  if (_drawPlayerLayer) _drawPlayerLayer(c);
 
   // Spawn new particles
   const aMax = reducedMotion ? 0.12 : 0.35;
