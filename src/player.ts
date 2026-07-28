@@ -7,7 +7,6 @@ import { addMsg } from './messages.js';
 import { dst } from './utils.js';
 import { snd } from './audio.js';
 import { flt } from './effects.js';
-import { fxDash } from './fx.js';
 import { setPlayerTween } from './render.js';
 import { t } from './i18n.js';
 import { attack } from './combat.js';

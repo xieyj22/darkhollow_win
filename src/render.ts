@@ -232,7 +232,7 @@ export function render(): void {
     }
   }
 
-  // Player — radial glow
+  // Player screen position (used by vignette)
   const px = (G.player.x - G.vx) * TS, py = (G.player.y - G.vy) * TS;
 
   // Vignette overlay
