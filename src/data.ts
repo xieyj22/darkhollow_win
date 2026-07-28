@@ -162,14 +162,21 @@ export const ENEMIES: EnemyDef[] = [
 ];
 
 export const BOSSES: BossDef[] = [
-  { n: { en: 'Goblin King', zh: '哥布林王' }, ch: '♚', c: '#ffd700', hp: 60, atk: 10, def: 4, exp: 100, g: [50, 80], fl: 5 },
+  { n: { en: 'Goblin King', zh: '哥布林王' }, ch: '♚', c: '#ffd700', hp: 60, atk: 10, def: 4, exp: 100, g: [50, 80], fl: 5,
+    summon: { chance: 0.4, cd: 3, maxAdds: 2 },
+    phases: [{ hpThreshold: 0.4, atkM: 1.4, newAi: 'chase' }] },
   { n: { en: 'Spider Queen', zh: '蜘蛛女王' }, ch: '♛', c: '#8a2be2', hp: 90, atk: 14, def: 6, exp: 180, g: [70, 120], fl: 10,
-    summon: { chance: 0.4, cd: 3, maxAdds: 2 } },
-  { n: { en: 'Vampire Lord', zh: '吸血鬼领主' }, ch: '▼', c: '#dc143c', hp: 120, atk: 18, def: 8, exp: 280, g: [100, 180], fl: 15 },
+    summon: { chance: 0.4, cd: 3, maxAdds: 2 },
+    phases: [{ hpThreshold: 0.5, atkM: 1.3, newAi: 'ambush' }] },
+  { n: { en: 'Vampire Lord', zh: '吸血鬼领主' }, ch: '▼', c: '#dc143c', hp: 120, atk: 18, def: 8, exp: 280, g: [100, 180], fl: 15, el: 'shadow',
+    summon: { chance: 0.5, cd: 3, maxAdds: 4 },
+    phases: [{ hpThreshold: 0.5, atkM: 1.3, newAi: 'lifesteal' }] },
   { n: { en: 'Elder Lich', zh: '远古巫妖' }, ch: '☯', c: '#9932cc', hp: 150, atk: 22, def: 10, exp: 400, g: [150, 250], fl: 20,
-    summon: { chance: 0.4, cd: 3, maxAdds: 3 } },
-  { n: { en: 'Dragon Emperor', zh: '龙皇' }, ch: '♜', c: '#ff8c00', hp: 200, atk: 28, def: 14, exp: 600, g: [250, 500], fl: 25,
-    summon: { chance: 0.35, cd: 4, maxAdds: 2 } },
+    summon: { chance: 0.4, cd: 3, maxAdds: 3 },
+    phases: [{ hpThreshold: 0.5, atkM: 1.4, newAi: 'ranged' }] },
+  { n: { en: 'Dragon Emperor', zh: '龙皇' }, ch: '♜', c: '#ff8c00', hp: 200, atk: 28, def: 14, exp: 600, g: [250, 500], fl: 25, el: 'fire',
+    summon: { chance: 0.35, cd: 4, maxAdds: 2 },
+    phases: [{ hpThreshold: 0.3, atkM: 1.6, newAi: 'chase', newEl: 'fire' }] },
   // === New bosses ===
   { n: { en: 'Leviathan', zh: '利维坦' }, ch: '≈', c: '#00ced1', hp: 280, atk: 35, def: 14, exp: 800, g: [200, 400], fl: 30, el: 'ice',
     phases: [
