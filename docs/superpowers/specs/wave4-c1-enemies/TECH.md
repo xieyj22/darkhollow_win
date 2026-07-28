@@ -31,19 +31,19 @@
 
 | en / zh | ch | c | hp | atk | def | exp | g | ai | mf | el |
 |---------|----|----|----|-----|-----|-----|------|------|----|----|
-| Guard Captain / 护卫长 | ♝ | #4a5a6a | 95 | 26 | 16 | 70 | [25,55] | chase | 16 | — |
-| Gargoyle / 石像鬼 | Γ | #708090 | 85 | 30 | 12 | 75 | [20,50] | ambush | 17 | — |
-| Inquisitor / 审判官 | ✠ | #d4af37 | 75 | 32 | 8 | 80 | [30,60] | ranged | 18 | holy |
-| Siege Golem / 攻城魔像 | ◍ | #696969 | 125 | 34 | 15 | 85 | [35,70] | chase | 19 | — |
-| Fire Drake / 火飞龙 | ¤ | #ff6347 | 115 | 34 | 12 | 95 | [40,80] | ranged | 21 | fire |
-| Dragon Cultist / 龙教徒 | ☧ | #8b0000 | 95 | 30 | 10 | 90 | [30,65] | summon | 22 | — |
-| Magma Elemental / 岩浆元素 | ● | #ff4500 | 135 | 32 | 16 | 100 | [40,85] | chase | 23 | fire |
-| Half-Dragon Knight / 半龙骑士 | † | #b22222 | 115 | 38 | 14 | 110 | [45,90] | chase | 24 | — |
-| Storm Wraith / 风暴幽灵 | ⚡ | #4682b4 | 100 | 36 | 10 | 100 | [40,80] | ranged | 25 | lightning |
+| Castellan / 铁卫统领 | ♝ | #4a5a6a | 95 | 26 | 16 | 70 | [25,55] | chase | 16 | — |
+| Gargoyle / 石化魔像 | Γ | #708090 | 85 | 30 | 12 | 75 | [20,50] | ambush | 17 | — |
+| Inquisitor / 圣裁官 | ✠ | #d4af37 | 75 | 32 | 8 | 80 | [30,60] | ranged | 18 | holy |
+| Siege Golem / 破城巨像 | ◍ | #696969 | 125 | 34 | 15 | 85 | [35,70] | chase | 19 | — |
+| Pyro Drake / 烈焰飞龙 | ¤ | #ff6347 | 115 | 34 | 12 | 95 | [40,80] | ranged | 21 | fire |
+| Drake Zealot / 龙血信徒 | ☧ | #8b0000 | 95 | 30 | 10 | 90 | [30,65] | summon | 22 | — |
+| Magma Behemoth / 熔岩巨兽 | ● | #ff4500 | 135 | 32 | 16 | 100 | [40,85] | chase | 23 | fire |
+| Drakeborn Knight / 龙裔骑士 | † | #b22222 | 115 | 38 | 14 | 110 | [45,90] | chase | 24 | — |
+| Storm Wraith / 雷霆怨灵 | ⚡ | #4682b4 | 100 | 36 | 10 | 100 | [40,80] | ranged | 25 | lightning |
 
 每条结构(示例,Guard Captain):
 ```ts
-{ n: { en: 'Guard Captain', zh: '护卫长' }, ch: '♝', c: '#4a5a6a', hp: 95, atk: 26, def: 16, exp: 70, g: [25, 55], ai: 'chase', mf: 16 },
+{ n: { en: 'Castellan', zh: '铁卫统领' }, ch: '♝', c: '#4a5a6a', hp: 95, atk: 26, def: 16, exp: 70, g: [25, 55], ai: 'chase', mf: 16 },
 ```
 - `ch` 字形:选不与现有 44 敌人冲突的 Unicode;上表为建议值,实现时确认无冲突(尤其 ✠/†/⚡)。
 - `c` 颜色:主题色建议,可微调。
