@@ -272,11 +272,13 @@ canvas.lic,canvas.hic{width:22px;height:22px;image-rendering:pixelated;vertical-
 .hb-slot.empty:hover{border-color:var(--border-default);background:#1a1a2eee}
 
 /* ===== Responsive (sidebar 多断点) ===== */
-@media(max-width:480px){#sidebar{width:170px;min-width:170px;font-size:var(--fs-floor);padding:6px}#log-panel{height:80px;min-height:80px;font-size:var(--fs-sm)}.bar{height:16px}.bt-text{font-size:var(--fs-floor);line-height:16px}#hotbar{padding:3px 6px}.hb-slot{flex:1 1 0;min-width:0;max-width:44px;height:40px}.hb-slot .hb-icon{font-size:13px}.hb-slot .hb-sub{font-size:var(--fs-floor)}}
+@media(max-width:480px){#sidebar{width:170px;min-width:170px;font-size:var(--fs-floor);padding:6px}}
 @media(min-width:481px) and (max-width:720px){#sidebar{width:200px;min-width:200px;font-size:var(--fs-sm)}}
 @media(min-width:721px) and (max-width:1024px){#sidebar{width:230px;min-width:230px}}
 @media(min-width:1025px) and (max-width:1440px){#sidebar{width:250px;min-width:250px}}
 @media(min-width:1441px){#sidebar{width:280px;min-width:280px;font-size:var(--fs-base)}}
+/* 非sidebar 紧凑微调:中窄屏 ≤720 都生效(置于 ≤600px 块之前,保证 60px log-panel 在更小屏覆盖 80px) */
+@media(max-width:720px){#log-panel{height:80px;min-height:80px;font-size:var(--fs-sm)}.bar{height:16px}.bt-text{font-size:var(--fs-floor);line-height:16px}#hotbar{padding:3px 6px}.hb-slot{flex:1 1 0;min-width:0;max-width:44px;height:40px}.hb-slot .hb-icon{font-size:13px}.hb-slot .hb-sub{font-size:var(--fs-floor)}}
 @media(max-width:600px){#sidebar{display:none}#touch-controls{display:block}#log-panel{height:60px;min-height:60px}}
 @media(pointer:coarse){#touch-controls{display:block}}
 
