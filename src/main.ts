@@ -3,12 +3,12 @@ import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';
 
 // Main entry point — wires all modules together
-import { G, setGameState, setLang, lang, setMuted, muted, setUiZoom, uiZoom, setMinimapScale, minimapScale, setLegendVisible, legendVisible, setKeysVisible, keysVisible, setInvOpen, setHelpOpen, setSkillOpen, setAchOpen, setTalentOpen } from './state.js';
+import { G, setGameState, setLang, lang, setMuted, muted, setUiZoom, uiZoom, setMinimapScale, minimapScale, setLegendVisible, legendVisible, setKeysVisible, keysVisible, setInvOpen, setHelpOpen, setSkillOpen, setAchOpen, setTalentOpen, setSafeZone, safeZone, setReducedMotion, reducedMotion, setMenuOpen } from './state.js';
 import { MH, MW, FOV, MAX_INV, FINAL, TL, TS } from './config.js';
 import { rng, pick, clamp, dst, darken } from './utils.js';
 import { L, t, tMsg, rareName, itemName, RARITY_C } from './i18n.js';
 import { RACES, CLASSES, WEAPONS, ARMORS, ACCESSORIES, POTIONS, SCROLLS, CONSUMABLES, TRAPS, ELITE_PREFIX, ENEMIES, BOSSES, ACH_DEFS, TALENT_TREES } from './data.js';
-import { initAudio, getAudioContext, snd } from './audio.js';
+import { initAudio, getAudioContext, snd, setBgmScene, setMasterVol, setMusicVol, setSfxVol, getMasterVol, getMusicVol, getSfxVol, isMuted, setMutedState } from './audio.js';
 import { flt, shake } from './effects.js';
 import { genDungeon, computeFOV } from './dungeon.js';
 import { addMsg } from './messages.js';
@@ -23,8 +23,11 @@ import { initGame, enterFloor } from './game.js';
 import { render, renderMinimap, resizeCanvas, updateUI, markMinimapDirty } from './render.js';
 import { initInput, initTouchControls } from './input.js';
 import { saveGame, loadGame } from './save.js';
+import { setRecalcFn, setKillEnemyFn } from './relics.js';
+import { paintIcon } from './sprites.js';
 import { renderForge, renderTitleStats } from './meta.js';
 import { startParticles, stopParticles } from './particles.js';
+import { openOptions, closeOptions, renderOptions, applyOptionsUI, applyTextScale, applyColorblind, applyBarCues } from './options.js';
 
 // ===== Wire up late-bound dependencies =====
 setCombatGenItem(genItem);
@@ -34,6 +37,8 @@ setSkillsEndTurn(endTurn);
 setPlayerEndTurn(endTurn);
 setEnterFloorFn(enterFloor);
 setPlayerDeathFn(playerDeath);
+setRecalcFn(recalc);
+setKillEnemyFn(killEnemy);
 
 // Expose to window for cross-module access
 (window as any).__initAudio = initAudio;
@@ -48,6 +53,12 @@ setPlayerDeathFn(playerDeath);
 (window as any).__markMinimapDirty = markMinimapDirty;
 (window as any).__toggleLang = toggleLang;
 (window as any).__toggleSound = toggleSound;
+(window as any).__updateSoundBtn = updateSoundBtn;
+(window as any).__updateLangUI = updateLangUI;
+(window as any).__openPause = openPause;
+(window as any).__closePause = closePause;
+(window as any).__closeOptions = closeOptions;
+(window as any).__renderOptions = renderOptions;
 
 // ===== Title Screen Particles =====
 let titleAnim: number | null = null;
@@ -149,6 +160,7 @@ function returnToTitle(): void {
   document.getElementById('title-screen')!.style.display = 'flex';
   setGameState(null);
   stopParticles();
+  setBgmScene('title');
   initTitleParticles();
 }
 
@@ -180,6 +192,14 @@ function updateLangUI(): void {
   $('sb-legend')!.innerHTML = '🗺 ' + t('legendToggle') + ' <span id="legend-arrow">' + (legendVisible ? '▲' : '▼') + '</span>';
   $('sb-obj')!.textContent = '🎯 ' + (lang === 'zh' ? '游戏目标' : 'Objective');
   $('keys-toggle')!.textContent = t('keysToggle');
+  $('pause-title')!.textContent = t('pauseTitle');
+  $('btn-pause-resume')!.textContent = t('pauseResume');
+  $('btn-pause-settings')!.textContent = t('pauseSettings');
+  $('btn-pause-quit')!.textContent = t('pauseQuit');
+  $('opt-title')!.textContent = t('optionsTitle');
+  $('btn-options')!.textContent = '⚙ ' + t('options');
+  $('btn-options-title')!.textContent = t('options');
+  if (document.getElementById('options-overlay')?.classList.contains('active')) renderOptions();
   if (G) updateUI();
 }
 
@@ -193,8 +213,9 @@ function toggleLang(): void {
 
 // ===== Sound toggle =====
 function toggleSound(): void {
-  const newMuted = !muted;
-  setMuted(newMuted);
+  const newMuted = !isMuted();
+  setMutedState(newMuted);            // audio.ts owns the persisted mute state
+  setMuted(newMuted);                 // mirror into state.muted for UI reads
   (window as any).__muted = newMuted;
   updateSoundBtn();
   addMsg(newMuted ? t('muted') : t('unmuted'), 'mi');
@@ -207,6 +228,18 @@ function updateSoundBtn(): void {
     if (muted) { on.style.display = 'none'; off.style.display = 'block'; off.classList.add('active'); }
     else { on.style.display = 'block'; on.classList.add('active'); off.style.display = 'none'; }
   }
+}
+
+// Sync audio-panel sliders + mute mirror from persisted prefs.
+function applyAudioUI(): void {
+  const set = (id: string, v: number) => { const el = document.getElementById(id) as HTMLInputElement | null; if (el) el.value = String(Math.round(v * 100)); };
+  set('vol-master', getMasterVol());
+  set('vol-music', getMusicVol());
+  set('vol-sfx', getSfxVol());
+  const m = isMuted();
+  setMuted(m);                        // mirror so updateSoundBtn reads correctly
+  (window as any).__muted = m;
+  updateSoundBtn();
 }
 
 // ===== Zoom =====
@@ -222,6 +255,29 @@ function applyZoom(): void {
   if (lbl) lbl.textContent = Math.round(uiZoom * 100) + '%';
 }
 
+// ===== Safe zone (accessibility) — mirrors adjustZoom/applyZoom =====
+function adjustSafe(dir: number): void {
+  const n = dir === 0 ? 16 : clamp(safeZone + dir * 4, 0, 64);
+  setSafeZone(n);
+  applySafe();
+}
+function applySafe(): void {
+  document.documentElement.style.setProperty('--safe', safeZone + 'px');
+  const lbl = document.getElementById('safe-label');
+  if (lbl) lbl.textContent = String(safeZone);
+}
+
+// ===== Reduced motion (accessibility) =====
+function applyReducedMotion(): void {
+  document.body.classList.toggle('reduced-motion', reducedMotion);
+  const btn = document.getElementById('btn-motion');
+  if (btn) btn.textContent = (reducedMotion ? '🎞️ On' : '🎞️ Off');
+}
+function toggleReducedMotion(): void {
+  setReducedMotion(!reducedMotion);
+  applyReducedMotion();
+}
+
 function minimapZoom(dir: number): void {
   const newScale = clamp(minimapScale + dir, 2, 5);
   setMinimapScale(newScale);
@@ -231,7 +287,7 @@ function minimapZoom(dir: number): void {
 }
 
 // ===== Legend toggle =====
-function toggleLegend(): void {
+export function toggleLegend(): void {
   const newVis = !legendVisible;
   setLegendVisible(newVis);
   const panel = document.getElementById('legend-panel')!;
@@ -243,24 +299,37 @@ function toggleLegend(): void {
 
 function renderLegend(): void {
   const zh = lang === 'zh';
-  const items = [
-    { ch: '#', c: '#555', t: zh ? '墙壁' : 'Wall' }, { ch: '·', c: '#444', t: zh ? '地面' : 'Floor' },
-    { ch: '>', c: '#7ec8e3', t: zh ? '楼梯' : 'Stairs' }, { ch: '≈', c: '#1a5276', t: zh ? '水域' : 'Water' },
+  const charItems = [
+    { ch: '#', c: '#666', t: zh ? '墙壁' : 'Wall' }, { ch: '·', c: '#555', t: zh ? '地面' : 'Floor' },
+    { ch: '+', c: '#8b4513', t: zh ? '门' : 'Door' }, { ch: '≈', c: '#1a5276', t: zh ? '水域' : 'Water' },
     { ch: '*', c: '#ff4500', t: zh ? '岩浆(伤血)' : 'Lava (dmg)' }, { ch: '~', c: '#00ced1', t: zh ? '深渊水' : 'Abyss Water' },
-    { ch: 'Ø', c: '#4895ef', t: zh ? '喷泉' : 'Fountain' }, { ch: '♦', c: '#06d6a0', t: zh ? '神殿' : 'Shrine' },
-    { ch: '^', c: '#f4845f', t: zh ? '陷阱' : 'Trap' }, { ch: '@', c: '#ffd700', t: zh ? '玩家' : 'You' },
-    { ch: 'g', c: '#228b22', t: zh ? '敌人' : 'Enemy' }, { ch: '★', c: '#ffd700', t: zh ? 'Boss' : 'Boss' },
-    { ch: '♥', c: '#e63946', t: zh ? '药水' : 'Potion' }, { ch: '☀', c: '#9b5de5', t: zh ? '卷轴' : 'Scroll' },
-    { ch: '†', c: '#f4845f', t: zh ? '武器' : 'Weapon' }, { ch: '▣', c: '#7ec8e3', t: zh ? '护甲' : 'Armor' },
-    { ch: '◯', c: '#daa520', t: zh ? '食物' : 'Food' }, { ch: '$', c: '#ffd700', t: zh ? '金币' : 'Gold' },
-    { ch: '○', c: '#06d6a0', t: zh ? '饰品' : 'Accessory' },
   ];
-  document.getElementById('legend-panel')!.innerHTML =
-    `<div class="legend-items">${items.map(i => `<div class="legend-item"><span class="ls" style="color:${i.c}">${i.ch}</span><span class="ld">${i.t}</span></div>`).join('')}</div>`;
+  const spr: Array<[string, string, string]> = [
+    ['STAIR', '#7ec8e3', zh ? '楼梯' : 'Stairs'],
+    ['WARRIOR', '#ffd700', zh ? '玩家' : 'You'],
+    ['GOBLIN', '#228b22', zh ? '敌人' : 'Enemy'],
+    ['BOSS', '#ffd700', zh ? 'Boss' : 'Boss'],
+    ['W_SWORD', '#f4845f', zh ? '武器' : 'Weapon'],
+    ['I_SHIELD', '#7ec8e3', zh ? '护甲' : 'Armor'],
+    ['I_RING', '#daa520', zh ? '饰品' : 'Accessory'],
+    ['P_HEALTH', '#e63946', zh ? '药水' : 'Potion'],
+    ['I_SCROLL', '#9b5de5', zh ? '卷轴' : 'Scroll'],
+    ['I_FOOD', '#f4845f', zh ? '食物' : 'Food'],
+    ['I_GOLD', '#ffd700', zh ? '金币' : 'Gold'],
+    ['FOUNTAIN', '#4895ef', zh ? '喷泉' : 'Fountain'],
+    ['SHRINE', '#06d6a0', zh ? '神殿' : 'Shrine'],
+    ['TRAP', '#a0522d', zh ? '陷阱' : 'Trap'],
+  ];
+  const panel = document.getElementById('legend-panel')!;
+  panel.innerHTML = `<div class="legend-items">` +
+    charItems.map(i => `<div class="legend-item"><span class="ls" style="color:${i.c}">${i.ch}</span><span class="ld">${i.t}</span></div>`).join('') +
+    spr.map(([k, c, t]) => `<div class="legend-item"><canvas class="lic" width="16" height="16" data-kind="${k}" data-color="${c}"></canvas><span class="ld">${t}</span></div>`).join('') +
+    `</div>`;
+  panel.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'GOBLIN', cv.dataset.color || '#ccc'));
 }
 
 // ===== Keys toggle =====
-function toggleKeys(): void {
+export function toggleKeys(): void {
   const newVis = !keysVisible;
   setKeysVisible(newVis);
   document.getElementById('keys-panel')!.style.display = newVis ? 'block' : 'none';
@@ -285,7 +354,10 @@ function renderKeyHints(): void {
 // ===== Tooltip =====
 function initTooltip(): void {
   const gameCanvas = document.getElementById('game-canvas')!;
-  gameCanvas.addEventListener('mousemove', (e: MouseEvent) => {
+  const tt = document.getElementById('tooltip')!;
+  let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const showTooltip = (e: MouseEvent) => {
     if (!G) return;
     const g = G; // narrow type for closure
     const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -297,7 +369,6 @@ function initTooltip(): void {
     const item = g.items.find(it => it.x === mx && it.y === my && g.player.visible?.[my]?.[mx] && dst(g.player.x, g.player.y, it.x, it.y) <= 3);
     const trap = g.traps ? g.traps.find(tr => tr.x === mx && tr.y === my && !tr.triggered && !tr.hidden && g.player.visible?.[my]?.[mx]) : null;
     const tile = mx >= 0 && mx < MW && my >= 0 && my < MH ? g.dungeon.map[my][mx] : null;
-    const tt = document.getElementById('tooltip')!;
     if (enemy) {
       tt.style.display = 'block'; tt.style.left = (e.clientX + 15) + 'px'; tt.style.top = (e.clientY + 15) + 'px';
       tt.style.borderColor = enemy.c + '66';
@@ -326,22 +397,55 @@ function initTooltip(): void {
       tt.style.display = 'none';
       tt.style.borderColor = '';
     }
+  };
+
+  gameCanvas.addEventListener('mousemove', (e: MouseEvent) => {
+    if (!G) return;
+    // Debounce so the tooltip doesn't flicker while sweeping the mouse across tiles
+    if (hoverTimer) clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(() => { hoverTimer = null; showTooltip(e); }, 250);
   });
-  gameCanvas.addEventListener('mouseleave', () => { document.getElementById('tooltip')!.style.display = 'none'; });
+  gameCanvas.addEventListener('mouseleave', () => {
+    if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+    tt.style.display = 'none';
+    tt.style.borderColor = '';
+  });
 }
 
 // ===== Overlay Animation Helpers =====
+let lastFocused: HTMLElement | null = null;
 export function showOverlay(id: string): void {
   const el = document.getElementById(id);
   if (!el) return;
+  lastFocused = document.activeElement as HTMLElement;
   el.style.display = 'flex';
-  requestAnimationFrame(() => el.classList.add('active'));
+  el.tabIndex = -1; // allow programmatic focus as a fallback target
+  requestAnimationFrame(() => {
+    el.classList.add('active');
+    // Move focus into the panel — prefer the close button, else first focusable, else the panel.
+    const target = el.querySelector<HTMLElement>('.close-btn')
+      || el.querySelector<HTMLElement>('button,[tabindex="0"]');
+    (target || el).focus();
+  });
 }
 export function hideOverlay(id: string): void {
   const el = document.getElementById(id);
   if (!el) return;
   el.classList.remove('active');
   setTimeout(() => { if (!el.classList.contains('active')) el.style.display = 'none'; }, 200);
+  // Restore focus to whatever opened the overlay
+  if (lastFocused) { try { lastFocused.focus(); } catch { /* element may be gone */ } lastFocused = null; }
+}
+
+// ===== Pause menu (in-game ESC / Start) =====
+function openPause(): void {
+  if (!G || G.gameOver) return;
+  setMenuOpen(true);
+  showOverlay('pause-overlay');
+}
+function closePause(): void {
+  setMenuOpen(false);
+  hideOverlay('pause-overlay');
 }
 
 // ===== Bind HTML buttons =====
@@ -382,9 +486,14 @@ function bindButtons(): void {
 
   on('btn-sound', toggleSound);
   on('btn-mute', toggleSound);
-  on('btn-zoom-out', () => adjustZoom(-1));
-  on('zoom-label', () => adjustZoom(0));
-  on('btn-zoom-in', () => adjustZoom(1));
+  // Options + pause menu entries (audio/zoom/safe/motion now live in the Options panel)
+  on('btn-options', () => openOptions('game'));
+  on('btn-options-title', () => openOptions('title'));
+  on('btn-close-options', closeOptions);
+  on('btn-close-pause', closePause);
+  on('btn-pause-resume', closePause);
+  on('btn-pause-settings', () => { closePause(); openOptions('pause'); });
+  on('btn-pause-quit', () => { if (confirm(t('quitConfirm'))) { closePause(); returnToTitle(); } });
   on('btn-mm-out', () => minimapZoom(-1));
   on('btn-mm-in', () => minimapZoom(1));
 
@@ -405,11 +514,28 @@ function bindButtons(): void {
 window.addEventListener('load', () => {
   updateLangUI();
   applyZoom();
+  applySafe();
+  applyReducedMotion();
+  applyTextScale();
+  applyColorblind();
+  applyBarCues();
+  applyAudioUI();
   initTitleParticles();
   bindButtons();
   initInput();
   initTouchControls();
   initTooltip();
+
+  // Browsers suspend AudioContext until a user gesture — unlock on first input,
+  // then start the title BGM if we're still on the title screen.
+  const unlock = () => {
+    initAudio();
+    if (document.getElementById('title-screen')!.style.display !== 'none') setBgmScene('title');
+    document.removeEventListener('pointerdown', unlock);
+    document.removeEventListener('keydown', unlock);
+  };
+  document.addEventListener('pointerdown', unlock);
+  document.addEventListener('keydown', unlock);
 
   window.addEventListener('resize', () => {
     const c = document.getElementById('title-particles') as HTMLCanvasElement;

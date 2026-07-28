@@ -7,7 +7,8 @@ import { spawnEnemies } from './enemies.js';
 import { genItem, genFood } from './items.js';
 import { createPlayer } from './player.js';
 import { updateUI, render, resizeCanvas } from './render.js';
-import { snd } from './audio.js';
+import { snd, setBgmScene } from './audio.js';
+import { autoSave } from './save.js';
 import { t } from './i18n.js';
 import { addMsg } from './messages.js';
 import { rng, pick } from './utils.js';
@@ -40,6 +41,13 @@ export function enterFloor(floor: number): void {
     G!.traps = G!.dungeon.traps;
     const sr = G!.dungeon.rooms[0];
     G!.player.x = sr.cx; G!.player.y = sr.cy;
+    // Reset transient combat state so debuffs/buffs from the previous floor
+    // don't bleed into the new one (e.g. poison ticking, slow, invisibility
+    // letting you walk past every enemy for free).
+    G!.player.buffs = [];
+    G!.player.poisonTurns = 0;
+    G!.player.poisonDmg = 0;
+    G!.player.slowed = 0;
     G!.player.explored = Array.from({ length: MH }, () => Array(MW).fill(false));
     G!.enemies = spawnEnemies(floor, G!.dungeon.rooms);
     G!.items = [];
@@ -96,6 +104,10 @@ export function enterFloor(floor: number): void {
     }
 
     updatePlayerFOV(G!.player, G!.dungeon.map, G!.traps);
+    // BGM: biome explore theme, or boss theme on boss floors.
+    setBgmScene(floor % 5 === 0 ? 'boss' : 'explore', area?.id);
+    if (floor % 5 === 0) snd('boss');
+    autoSave();
   };
 
   if (doTransition) {

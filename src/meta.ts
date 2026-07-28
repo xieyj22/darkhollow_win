@@ -202,9 +202,9 @@ export function renderForge(): void {
   const countEl = document.getElementById('forge-se-count');
   if (countEl) countEl.textContent = String(meta.soulEchoes);
 
-  // Render tab buttons
+  // Render tab buttons (rebuild every render so language switches update labels)
   const tabsEl = document.getElementById('forge-tabs');
-  if (tabsEl && tabsEl.children.length <= 1) {
+  if (tabsEl) {
     const categories = [
       { id: 'stats', icon: '⚔', label: zh ? '属性' : 'Stats' },
       { id: 'survival', icon: '❤', label: zh ? '生存' : 'Survival' },

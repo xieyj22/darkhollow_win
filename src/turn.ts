@@ -9,7 +9,9 @@ import { processEnemies, checkPlayerTraps } from './enemies.js';
 import { maybeEvent } from './events.js';
 import { updateUI, render } from './render.js';
 import { flt } from './effects.js';
-import { modifyPoisonDamage, getBonusMpRegen } from './talents.js';
+import { autoSave } from './save.js';
+import { modifyPoisonDamage, getBonusMpRegen, onPlayerDeath } from './talents.js';
+import { relicOnDeath } from './relics.js';
 
 export function endTurn(): void {
   if (!G) return;
@@ -40,8 +42,8 @@ export function endTurn(): void {
       addMsg(t('hungerDmg') + dmg + t('hungerDmgSuf'), 'mt');
       flt(G.player.x, G.player.y, `-${dmg}`, '#f4845f');
       if (G.player.hp <= 0) {
-        playerDeath(lang === 'zh' ? '饥饿' : 'starvation');
-        updateUI(); render(); return;
+        if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
+        else { playerDeath(lang === 'zh' ? '饥饿' : 'starvation'); updateUI(); render(); return; }
       }
     }
   }
@@ -61,8 +63,8 @@ export function endTurn(): void {
     addMsg(t('poisonTurn') + actualPoisonDmg + t('poisonTurnSuf'), 'mc');
     flt(G.player.x, G.player.y, `-${actualPoisonDmg}`, '#32cd32');
     if (G.player.hp <= 0) {
-      playerDeath(lang === 'zh' ? '中毒' : 'poison');
-      updateUI(); render(); return;
+      if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
+      else { playerDeath(lang === 'zh' ? '中毒' : 'poison'); updateUI(); render(); return; }
     }
   }
 
@@ -89,6 +91,8 @@ export function endTurn(): void {
   updatePlayerFOV(G.player, G.dungeon.map, G.traps);
   updateUI();
   render();
+  // Autosave every 5 turns — protects progress without spamming storage.
+  if (G.player.turns % 5 === 0) autoSave();
 }
 
 // Late-bound playerDeath to avoid importing combat.ts circularly

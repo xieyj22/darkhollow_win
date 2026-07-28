@@ -7,6 +7,7 @@ import { addMsg } from './messages.js';
 import { dst } from './utils.js';
 import { snd } from './audio.js';
 import { flt } from './effects.js';
+import { fxDash } from './fx.js';
 import { t } from './i18n.js';
 import { attack } from './combat.js';
 import { addItemWithOverflow } from './items.js';
@@ -51,6 +52,7 @@ export function createPlayer(ri: number, ci: number): Player {
     bossCheatDeathUsed: false,
     combatReviveUsed: false,
     bossesKilledThisRun: 0,
+    relics: [],
   };
   // Apply meta upgrades (permanent bonuses from The Forge)
   applyMetaUpgrades(player);
@@ -73,7 +75,9 @@ export function movePlayer(dx: number, dy: number): void {
     return;
   }
 
+  const pfx = G.player.x, pfy = G.player.y;
   G.player.x = nx; G.player.y = ny;
+  fxDash(pfx, pfy, nx, ny, '#ffd700');
 
   // Auto-pickup items
   const itemsHere = G.items.filter(i => i.x === nx && i.y === ny);

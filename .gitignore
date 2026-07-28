@@ -33,3 +33,6 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Claude Code (local settings & tools)
+.claude/

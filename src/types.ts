@@ -401,6 +401,8 @@ export interface Player {
   bossCheatDeathUsed: boolean;
   combatReviveUsed: boolean;
   bossesKilledThisRun: number;
+  // Relics owned this run (run-scoped; reset on new run)
+  relics: string[];
 }
 
 // --- Dungeon ---
@@ -451,6 +453,19 @@ export interface AchievementDef {
   icon: string;
   n: I18nText;
   d: I18nText;
+}
+
+// --- Relics (run-defining passive artifacts) ---
+
+export interface RelicDef {
+  id: string;
+  n: I18nText;
+  d: I18nText;
+  ch: string;       // map/panel glyph
+  c: string;        // glyph color
+  rarity: number;   // 0-4 (reuses RARITY_C palette)
+  effect: string;   // effect key (interpreted in relics.ts)
+  value: number;    // effect magnitude
 }
 
 // --- Save Data ---

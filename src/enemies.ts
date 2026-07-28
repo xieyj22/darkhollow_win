@@ -8,31 +8,29 @@ import { flt } from './effects.js';
 import { ENEMIES, BOSSES, ELITE_PREFIX, AREAS } from './data.js';
 import { addMsg } from './messages.js';
 import { attack, killEnemy, checkLevelUp } from './combat.js';
-import { onPlayerDamaged, onEnemyHitPlayer, onPlayerDodged, onPlayerDeath } from './talents.js';
+import { onPlayerDamaged, onEnemyHitPlayer, onPlayerDodged, onPlayerDeath, getManaShieldReduction } from './talents.js';
 
 export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const ens: Enemy[] = [];
   const el = ENEMIES.filter(e => e.mf <= floor);
   // Scale enemy count with floor, more enemies in deeper areas
   const area = AREAS.find(a => floor >= a.floorStart && floor <= a.floorEnd);
-  const cnt = rng(6, 10) + Math.floor(floor / 2);
 
-  for (let i = 0; i < cnt; i++) {
-    const rm = pick(rooms);
-    if (rm === rooms[0]) continue;
+  // Build one enemy inside a given room (returns null for the start room).
+  const makeIn = (rm: Room): Enemy | null => {
+    if (rm === rooms[0]) return null;
     const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
     const se = el.filter(e => e.mf <= floor && e.mf >= Math.max(1, floor - 4));
     const base = se.length > 0 ? pick(se) : pick(el);
     const fs = 1 + (floor - 1) * .12 + (area ? area.enemyScaleBonus : 0);
     let nm = lang === 'zh' ? base.n.zh : base.n.en;
     let hpM = 1, atkM = 1, defAdd = 0, expM = 1, goldM = 1, isElite = false;
-
     if (floor >= 3 && Math.random() < Math.min(.25, .05 + floor * .01)) {
       const pf = pick(ELITE_PREFIX);
       nm = (lang === 'zh' ? pf.n.zh : pf.n.en) + nm;
       hpM = pf.hpM; atkM = pf.atkM; defAdd = pf.defM || 0; expM = pf.expM; goldM = pf.goldM; isElite = true;
     }
-    ens.push({
+    return {
       name: nm, ch: base.ch, c: base.c, x, y,
       hp: Math.floor(base.hp * fs * hpM), maxHp: Math.floor(base.hp * fs * hpM),
       atk: Math.floor(base.atk * fs * atkM), def: Math.floor((base.def + defAdd) * fs),
@@ -42,7 +40,17 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
       res: base.res ? { ...base.res } : {},
       skillCd: 0,
       tags: base.tags ? [...base.tags] : [],
-    });
+    };
+  };
+
+  // Guarantee at least one enemy in every non-start room, then scatter extras
+  // so no cleared-out rooms feel empty.
+  const otherRooms = rooms.filter(r => r !== rooms[0]);
+  for (const rm of otherRooms) { const e = makeIn(rm); if (e) ens.push(e); }
+  const extra = rng(2, 5) + Math.floor(floor / 3);
+  for (let i = 0; i < extra; i++) {
+    const rm = otherRooms.length ? pick(otherRooms) : pick(rooms);
+    const e = makeIn(rm); if (e) ens.push(e);
   }
   const bd = BOSSES.find(b => b.fl === floor);
   if (bd) {
@@ -96,6 +104,7 @@ export function processEnemies(): void {
   // enemies removed mid-loop (killed by an ally/counter) must be skipped.
   const queue = G.enemies.slice();
   for (const e of queue) {
+    if (G.gameOver) return;
     if (!G.enemies.includes(e)) continue;
     if (e.isAlly) { processAlly(e); continue; }
     if (e.stunned > 0) { e.stunned--; continue; }
@@ -142,7 +151,11 @@ export function processEnemies(): void {
             onPlayerDodged();
             break;
           }
-          const dmg = Math.max(1, Math.floor(e.atk * .7) - G.player.def + rng(-1, 1));
+          let dmg = Math.max(1, Math.floor(e.atk * .7) - G.player.def + rng(-1, 1));
+          // Ranged attacks previously bypassed attack() — apply Mana Shield here
+          // so the talent isn't useless against ranged enemies.
+          const msr = getManaShieldReduction();
+          if (msr > 0) dmg = Math.max(1, Math.floor(dmg * (1 - msr)));
           G.player.hp -= dmg;
           addMsg(lang === 'zh' ? `${e.name}远程攻击-${dmg}！` : `${e.name} blasts you for ${dmg}!`, 'mc');
           flt(G.player.x, G.player.y, `-${dmg}`, '#9b5de5'); snd('hit');

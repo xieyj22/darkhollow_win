@@ -1,0 +1,183 @@
+// Transient combat FX — hit-flash, death bursts, spell beams & bolts.
+// Drawn on top of the rendered snapshot every frame by particles.ts tick().
+// All coordinates are MAP TILE coords; converted to screen px at draw time so
+// they stay aligned with the camera viewport (G.vx/G.vy). Short-lived & pooled.
+import { G, reducedMotion } from './state.js';
+import { TS } from './config.js';
+
+type FxKind = 'flash' | 'beam' | 'bolt' | 'dash';
+
+interface Fx {
+  kind: FxKind;
+  x: number; y: number;     // origin tile
+  tx: number; ty: number;   // target tile (beam endpoint / bolt destination)
+  life: number; maxLife: number;
+  color: string;
+  size: number;             // base radius in px
+}
+
+interface Spark {
+  x: number; y: number;     // screen px
+  vx: number; vy: number;
+  life: number; maxLife: number;
+  size: number; color: string;
+}
+
+const fxs: Fx[] = [];
+const sparks: Spark[] = [];
+const MAX_FX = 48;
+const MAX_SPARKS = 220;
+
+function trim<T>(arr: T[], max: number): void {
+  if (arr.length > max) arr.splice(0, arr.length - max);
+}
+
+function pxX(tx: number): number { return G ? (tx - G.vx) * TS + TS / 2 : tx * TS; }
+function pxY(ty: number): number { return G ? (ty - G.vy) * TS + TS / 2 : ty * TS; }
+
+function rgb(hex: string): [number, number, number] {
+  const h = hex.replace('#', '');
+  if (h.length !== 6) return [255, 255, 255];
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+}
+
+// Expanding flash at a tile — hit confirmation / impact glow.
+export function fxFlash(x: number, y: number, color: string, scale = 1): void {
+  if (reducedMotion) return;
+  fxs.push({ kind: 'flash', x, y, tx: x, ty: y, life: 0, maxLife: 9, color, size: TS * 0.75 * scale });
+  trim(fxs, MAX_FX);
+}
+
+// Jagged energy beam between two tiles — chain lightning / judgment.
+export function fxBeam(x1: number, y1: number, x2: number, y2: number, color: string): void {
+  if (reducedMotion) return;
+  fxs.push({ kind: 'beam', x: x1, y: y1, tx: x2, ty: y2, life: 0, maxLife: 8, color, size: 2 });
+  trim(fxs, MAX_FX);
+}
+
+// Travelling projectile orb from origin to destination tile — spell bolt.
+export function fxBolt(x1: number, y1: number, x2: number, y2: number, color: string): void {
+  if (reducedMotion) return;
+  fxs.push({ kind: 'bolt', x: x1, y: y1, tx: x2, ty: y2, life: 0, maxLife: 7, color, size: TS * 0.4 });
+  trim(fxs, MAX_FX);
+}
+
+// Quick motion trail between two tiles — player movement feedback (softer than a beam).
+export function fxDash(x1: number, y1: number, x2: number, y2: number, color: string): void {
+  if (reducedMotion) return;
+  fxs.push({ kind: 'dash', x: x1, y: y1, tx: x2, ty: y2, life: 0, maxLife: 5, color, size: 0 });
+  trim(fxs, MAX_FX);
+}
+
+// Particle burst — enemy death / explosion. count & power tune the spray.
+export function fxBurst(x: number, y: number, color: string, count = 12, power = 1): void {
+  if (reducedMotion) count = Math.min(count, 4);
+  const cx = pxX(x), cy = pxY(y);
+  for (let i = 0; i < count; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const spd = (0.6 + Math.random() * 2.4) * power;
+    sparks.push({
+      x: cx, y: cy,
+      vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+      life: 0, maxLife: 18 + Math.random() * 18,
+      size: 1 + Math.random() * 2.2,
+      color,
+    });
+  }
+  trim(sparks, MAX_SPARKS);
+}
+
+export function clearFx(): void { fxs.length = 0; sparks.length = 0; }
+
+// Draw & advance every active FX/spark. Called once per frame by particles.ts.
+export function drawFx(c: CanvasRenderingContext2D): void {
+  if (!fxs.length && !sparks.length) return;
+  c.save();
+  c.globalCompositeOperation = 'lighter'; // additive — glows stack brightly
+
+  if (sparks.length) {
+    const alive: Spark[] = [];
+    for (const s of sparks) {
+      s.life++;
+      s.x += s.vx; s.y += s.vy;
+      s.vx *= 0.92; s.vy *= 0.92; s.vy += 0.05; // drag + slight gravity
+      const t = s.life / s.maxLife;
+      if (t >= 1) continue;
+      const [r, g, b] = rgb(s.color);
+      c.globalAlpha = 1 - t;
+      c.fillStyle = `rgb(${r},${g},${b})`;
+      c.beginPath();
+      c.arc(s.x, s.y, s.size * (1 - t * 0.4), 0, Math.PI * 2);
+      c.fill();
+      alive.push(s);
+    }
+    sparks.length = 0;
+    for (const s of alive) sparks.push(s);
+  }
+
+  if (fxs.length) {
+    const alive: Fx[] = [];
+    for (const f of fxs) {
+      f.life++;
+      const t = f.life / f.maxLife;
+      if (t >= 1) continue;
+      const [r, g, b] = rgb(f.color);
+      const a = 1 - t;
+      if (f.kind === 'flash') {
+        const cx = pxX(f.x), cy = pxY(f.y);
+        const rad = Math.max(0.5, f.size * (0.5 + t * 1.5));
+        const grad = c.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        grad.addColorStop(0, `rgba(255,255,255,${0.85 * a})`);
+        grad.addColorStop(0.4, `rgba(${r},${g},${b},${0.55 * a})`);
+        grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+        c.globalAlpha = 1;
+        c.fillStyle = grad;
+        c.beginPath(); c.arc(cx, cy, rad, 0, Math.PI * 2); c.fill();
+      } else if (f.kind === 'beam') {
+        const x1 = pxX(f.x), y1 = pxY(f.y), x2 = pxX(f.tx), y2 = pxY(f.ty);
+        c.globalAlpha = a;
+        c.strokeStyle = `rgba(${r},${g},${b},${a})`;
+        c.lineWidth = 2 + (1 - t) * 2;
+        c.shadowColor = f.color; c.shadowBlur = 8;
+        c.beginPath();
+        const segs = 6;
+        c.moveTo(x1, y1);
+        for (let i = 1; i < segs; i++) {
+          const tt = i / segs;
+          const jx = x1 + (x2 - x1) * tt + (Math.random() - 0.5) * 8;
+          const jy = y1 + (y2 - y1) * tt + (Math.random() - 0.5) * 8;
+          c.lineTo(jx, jy);
+        }
+        c.lineTo(x2, y2);
+        c.stroke();
+        c.shadowBlur = 0;
+      } else if (f.kind === 'dash') {
+        const x1 = pxX(f.x), y1 = pxY(f.y), x2 = pxX(f.tx), y2 = pxY(f.ty);
+        c.globalAlpha = a * 0.55;
+        c.strokeStyle = f.color;
+        c.lineWidth = 3;
+        c.shadowColor = f.color; c.shadowBlur = 6;
+        c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+        c.shadowBlur = 0;
+      } else { // bolt — travelling orb
+        const tt = Math.min(1, t * 1.7);
+        const bx = pxX(f.x) + (pxX(f.tx) - pxX(f.x)) * tt;
+        const by = pxY(f.y) + (pxY(f.ty) - pxY(f.y)) * tt;
+        const rad = Math.max(1, f.size);
+        const grad = c.createRadialGradient(bx, by, 0, bx, by, rad * 2.6);
+        grad.addColorStop(0, `rgba(255,255,255,${a})`);
+        grad.addColorStop(0.4, `rgba(${r},${g},${b},${0.8 * a})`);
+        grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+        c.globalAlpha = 1;
+        c.fillStyle = grad;
+        c.beginPath(); c.arc(bx, by, rad * 2.6, 0, Math.PI * 2); c.fill();
+      }
+      alive.push(f);
+    }
+    fxs.length = 0;
+    for (const f of alive) fxs.push(f);
+  }
+
+  c.globalAlpha = 1;
+  c.restore();
+}

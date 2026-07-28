@@ -3,8 +3,11 @@ import type { Enemy, Element, Item } from './types.js';
 import { G, lang } from './state.js';
 import { FINAL } from './config.js';
 import { rng, dst } from './utils.js';
-import { snd } from './audio.js';
+import { snd, setBgmScene } from './audio.js';
 import { flt, shake } from './effects.js';
+import { fxFlash, fxBurst } from './fx.js';
+import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic } from './relics.js';
+import { unlockAchievement } from './steam.js';
 import { t } from './i18n.js';
 import { ACH_DEFS, EQUIPMENT_SETS } from './data.js';
 import { addMsg } from './messages.js';
@@ -46,6 +49,11 @@ export function getElementMult(atkEl: Element, defEl: Element): number {
 export function getElementSymbol(el: string): string {
   return ELEMENT_SYMBOLS[el] || '';
 }
+
+// Element → flash/particle color for combat FX
+const FX_EL_COLOR: Record<string, string> = {
+  fire: '#ff7a45', ice: '#7ec8e3', lightning: '#fff2a8', shadow: '#b583f6', holy: '#ffd700', none: '#ffffff',
+};
 
 export function attack(atk: { atk: number; name?: string; ai?: string; hp?: number; maxHp?: number; def?: number; el?: Element; res?: Partial<Record<Element, number>> }, def: { hp: number; maxHp: number; def: number; name: string; x: number; y: number; exp: number; goldDrop: number; isBoss?: boolean; isAlly?: boolean; el?: Element; res?: Partial<Record<Element, number>> }, isP: boolean): boolean {
   if (!G) return false;
@@ -90,21 +98,26 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
   if (isP) {
     // Talent trigger: modify damage before applying (executioner, etc.)
     dmg = onPlayerHitEnemy(def as Enemy, dmg);
+    // Relic on-hit (execute, elemental bonus, lifesteal)
+    dmg = relicOnHitEnemy(def as Enemy, dmg);
 
     // Critical hit (with talent crit multiplier)
     if (Math.random() < G.player.critChance) {
       const critMult = getCritMultiplier();
       dmg = Math.floor(dmg * critMult);
       addMsg(lang === 'zh' ? `暴击！对${def.name}造成${dmg}伤害${elSym}！` : `CRIT! You deal ${dmg}${elSym} to ${def.name}!`, 'mc');
-      flt(def.x, def.y, `-${dmg} CRIT!${elSym}`, '#ffd700', 'crit'); snd('crit'); shake();
+      fxFlash(def.x, def.y, atkEl !== 'none' ? FX_EL_COLOR[atkEl] : '#ffd700', 1.6);
+      flt(def.x, def.y, `-${dmg} CRIT!${elSym}`, '#ffd700', 'crit'); snd('crit'); shake(2, def.x - G.player.x, def.y - G.player.y);
     } else {
       addMsg(lang === 'zh' ? `你击中${def.name}，造成${dmg}伤害${elSym}。` : `You hit ${def.name} for ${dmg}${elSym}.`, 'mc');
-      flt(def.x, def.y, `-${dmg}${elSym}`, '#ff6b6b'); snd('hit');
+      fxFlash(def.x, def.y, atkEl !== 'none' ? FX_EL_COLOR[atkEl] : ((def as any).c || '#ff6b6b'));
+      flt(def.x, def.y, `-${dmg}${elSym}`, '#ff6b6b'); snd('hit'); shake(1, def.x - G.player.x, def.y - G.player.y);
     }
   } else {
     // Enemy attacks player
     addMsg(lang === 'zh' ? `${atk.name || 'Enemy'}击中你，造成${dmg}伤害${elSym}！` : `${atk.name || 'Enemy'} hits you for ${dmg}${elSym}!`, 'mc');
-    flt(G.player.x, G.player.y, `-${dmg}${elSym}`, '#e63946'); snd('hit'); shake();
+    fxFlash(G.player.x, G.player.y, '#e63946');
+    flt(G.player.x, G.player.y, `-${dmg}${elSym}`, '#e63946'); snd('hit'); shake(1.4, G.player.x - (atk as any).x, G.player.y - (atk as any).y);
   }
 
   def.hp -= dmg;
@@ -123,8 +136,11 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
 
   if (def.hp <= 0) {
     if (isP) {
+      fxBurst(def.x, def.y, (def as any).c || (atkEl !== 'none' ? FX_EL_COLOR[atkEl] : '#ff6b6b'), def.isBoss ? 26 : 12, def.isBoss ? 1.6 : 1);
       addMsg(lang === 'zh' ? `${def.name}被击败！+${bonusExp(def.exp)}经验` : `${def.name} defeated! +${bonusExp(def.exp)} XP`, 'mc');
-      G.player.exp += bonusExp(def.exp); G.player.gold += bonusGold(def.goldDrop); G.player.kills++;
+      G.player.exp += Math.floor(bonusExp(def.exp) * getRelicExpMult());
+      G.player.gold += Math.floor(bonusGold(def.goldDrop) * getRelicGoldMult());
+      G.player.kills++;
       addMsg(lang === 'zh' ? `获得${bonusGold(def.goldDrop)}金币。` : `Found ${bonusGold(def.goldDrop)} gold.`, 'mp');
       snd('pickup');
 
@@ -145,6 +161,11 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
 
       // Talent trigger: on kill
       onPlayerKill(def as Enemy);
+
+      // Relic drop — bosses always, elites often
+      if ((def as Enemy).isBoss || ((def as Enemy).isElite && Math.random() < 0.4)) {
+        grantRandomRelic(def.x, def.y, G.floor);
+      }
 
       // Loot drop — uses late-bound genItem
       if (Math.random() < .3 && _genItem) {
@@ -173,10 +194,9 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
       // Check if player died even after damage mods
       if (G.player.hp <= 0) {
         // Talent auto-revive check
-        if (onPlayerDeath()) {
-          // Player was revived — don't die
-          return false;
-        }
+        if (onPlayerDeath()) return false;
+        // Relic revive (Phoenix Heart)
+        if (relicOnDeath()) return false;
         playerDeath(def.name);
       } else {
         // Player survived via cheat death / damage prevention
@@ -191,6 +211,7 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
   if (!isP) {
     onPlayerDamaged(dmg);
     onEnemyHitPlayer(atk as Enemy);
+    relicOnDamaged(atk as Enemy, dmg);
   }
 
   return false;
@@ -212,7 +233,7 @@ export function checkLevelUp(): void {
     recalc();
     addMsg(lang === 'zh' ? `升级！你现在是${p.level}级！` : `LEVEL UP! Level ${p.level}!`, 'ml');
     addMsg(`+${hg}HP +${mg}MP +${ag}ATK +${dg}DEF`, 'ml');
-    flt(p.x, p.y, 'LEVEL UP!', '#ffd700'); snd('levelup'); checkAch('lvl10');
+    flt(p.x, p.y, 'LEVEL UP!', '#ffd700'); snd('levelup'); checkAchs();
   }
 }
 
@@ -272,6 +293,9 @@ export function recalc(): void {
   // Talent bonuses — delegated to talents.ts
   applyTalentBonuses(p);
 
+  // Relic bonuses
+  applyRelicBonuses(p);
+
   // Clamp derived combat stats to sane caps (avoid 100%+ invincibility)
   p.critChance = Math.min(0.85, p.critChance);
   p.dodgeChance = Math.min(0.75, p.dodgeChance);
@@ -287,7 +311,7 @@ function applySetBonus(p: any, type: string, value: number): void {
   switch (type) {
     case 'dodge': p.dodgeChance += value / 100; break;
     case 'crit': p.critChance += value / 100; break;
-    case 'maxhp': p.maxHp += value; p.baseMaxHp += value; break;
+    case 'maxhp': p.maxHp += value; break;
     case 'el_res_fire': p.elRes['fire'] = (p.elRes['fire'] || 0) + value / 100; break;
     case 'el_res_ice': p.elRes['ice'] = (p.elRes['ice'] || 0) + value / 100; break;
     case 'el_res_holy': p.elRes['holy'] = (p.elRes['holy'] || 0) + value / 100; break;
@@ -315,7 +339,7 @@ export function playerDeath(killer: string): void {
   if (!G) return;
   G.gameOver = true;
   addMsg(lang === 'zh' ? `你被${killer}杀死了……` : `You were slain by ${killer}...`, 'md');
-  snd('death');
+  snd('death'); setBgmScene('death');
 
   // Calculate soul echoes and update meta stats
   const p = G.player;
@@ -339,7 +363,7 @@ export function playerDeath(killer: string): void {
 export function playerVictory(): void {
   if (!G) return;
   G.gameOver = true; G.won = true;
-  addMsg(t('loreVictory'), 'ml'); snd('victory'); checkAch('win');
+  addMsg(t('loreVictory'), 'ml'); snd('victory'); setBgmScene('victory'); checkAch('win');
   checkAch('creator_kill');
 
   // Calculate soul echoes and update meta stats
@@ -367,6 +391,8 @@ export function checkAch(id: string): void {
   G.player.achievements.add(id);
   // Persist to meta save
   persistAchievement(id);
+  // Bridge to Steam (no-op until steamworks.js + AppID are wired)
+  unlockAchievement(id);
   const def = ACH_DEFS.find(a => a.id === id);
   if (!def) return;
   addMsg('🏆 ' + (lang === 'zh' ? def.n.zh : def.n.en) + ' — ' + (lang === 'zh' ? def.d.zh : def.d.en), 'mach');
@@ -376,6 +402,10 @@ export function checkAch(id: string): void {
 
 export function killEnemy(e: Enemy): void {
   if (!G) return;
+  fxBurst(e.x, e.y, e.c || '#ff6b6b', e.isBoss ? 26 : 12, e.isBoss ? 1.6 : 1);
+  // Relic drop — bosses always, elites often (covers skill/scroll/trap/thorns kills
+  // which route through killEnemy rather than the melee attack() path).
+  if (e.isBoss || (e.isElite && Math.random() < 0.4)) grantRandomRelic(e.x, e.y, G.floor);
   G.enemies = G.enemies.filter(en => en !== e);
   G.player.exp += bonusExp(e.exp); G.player.gold += bonusGold(e.goldDrop); G.player.kills++;
   G.player.streak++;

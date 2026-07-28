@@ -1,7 +1,9 @@
 // Ambient particle system — area-themed atmospheric particles
-import { G } from './state.js';
+import { G, reducedMotion } from './state.js';
 import { TS } from './config.js';
 import { AREAS } from './data.js';
+import { drawFx, clearFx } from './fx.js';
+import { applyShakeFrame, resetShake } from './effects.js';
 
 interface Particle {
   x: number;
@@ -94,7 +96,9 @@ function tick(): void {
   }
 
   // Spawn new particles
-  if (particles.length < MAX_PARTICLES && Math.random() < 0.15) {
+  const aMax = reducedMotion ? 0.12 : 0.35;
+  const speedMul = reducedMotion ? 0.5 : 1;
+  if (particles.length < MAX_PARTICLES && Math.random() < (reducedMotion ? 0.045 : 0.15)) {
     particles.push(spawnParticle(G.floor));
   }
 
@@ -104,14 +108,14 @@ function tick(): void {
   const alive: Particle[] = [];
   for (const p of particles) {
     p.life++;
-    p.x += p.vx;
-    p.y += p.vy;
+    p.x += p.vx * speedMul;
+    p.y += p.vy * speedMul;
 
     // Fade in then out
     const ratio = p.life / p.maxLife;
-    if (ratio < 0.1) p.alpha = ratio / 0.1 * 0.35;
-    else if (ratio > 0.7) p.alpha = (1 - ratio) / 0.3 * 0.35;
-    else p.alpha = 0.35;
+    if (ratio < 0.1) p.alpha = ratio / 0.1 * aMax;
+    else if (ratio > 0.7) p.alpha = (1 - ratio) / 0.3 * aMax;
+    else p.alpha = aMax;
 
     // Only draw if within visible FOV (approximate check)
     const tileX = Math.floor(p.x / TS) + G!.vx;
@@ -132,6 +136,11 @@ function tick(): void {
   c.globalAlpha = 1;
   particles = alive;
 
+  // Combat FX (hit-flash, bursts, projectiles) on top of the snapshot, then the
+  // per-frame screen-shake transform. Both are no-ops when nothing is active.
+  drawFx(c);
+  applyShakeFrame();
+
   animFrame = requestAnimationFrame(tick);
 }
 
@@ -147,4 +156,6 @@ export function stopParticles(): void {
   offscreenCvs = null;
   offscreenCtx = null;
   snapshotDirty = false;
+  clearFx();
+  resetShake();
 }

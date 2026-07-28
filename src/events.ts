@@ -108,7 +108,7 @@ function chestOpen(): void {
   } else {
     const cnt = rng(2, 4);
     for (let i = 0; i < cnt; i++) { const item = genItem(G.floor); item.x = G.player.x; item.y = G.player.y; G.items.push(item); }
-    addMsg(t('chestGood'), 'me'); snd('pickup');
+    addMsg(t('chestGood'), 'me'); snd('chest');
   }
   closeEvent(); updateUI(); render();
 }

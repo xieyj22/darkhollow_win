@@ -75,7 +75,7 @@ export function onPlayerHitEnemy(defender: Enemy, dmg: number): number {
     defender.hp = 0;
     addMsg(lang === 'zh' ? `💀 暗杀！${defender.name}被一击必杀！` : `💀 Assassinate! ${defender.name} is instantly killed!`, 'mc');
     flt(defender.x, defender.y, '💀INSTAKILL', '#ff0000');
-    return 9999;
+    return modifiedDmg;
   }
 
   // r_poison_blade: 20% chance to poison on hit

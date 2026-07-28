@@ -372,17 +372,22 @@ export function renderHotbar(): void {
         html += `<div class="hb-slot empty"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:#555">·</span></div>`;
         continue;
       }
-      html += `<div class="hb-slot" style="border-color:${RARITY_C[item.rarity]}44" data-qs="${i}" title="${item.name}: ${item.desc}"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:${item.c}">${item.ch}</span><span class="hb-sub" style="color:${RARITY_C[item.rarity]}">${item.name}</span></div>`;
+      html += `<div class="hb-slot" tabindex="0" role="button" style="border-color:${RARITY_C[item.rarity]}44" data-qs="${i}" title="${item.name}: ${item.desc}"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:${item.c}">${item.ch}</span><span class="hb-sub" style="color:${RARITY_C[item.rarity]}">${item.name}</span></div>`;
     } else {
       html += `<div class="hb-slot empty" data-qs="${i}"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:#555">·</span></div>`;
     }
   }
   hb.innerHTML = html;
-  // Bind click events
+  // Bind click + keyboard activation (Enter/Space) so slots are reachable without a mouse
   hb.querySelectorAll('.hb-slot').forEach(el => {
-    el.addEventListener('click', () => {
-      const qsIdx = parseInt((el as HTMLElement).dataset.qs || '0');
+    const slot = el as HTMLElement;
+    const handler = () => {
+      const qsIdx = parseInt(slot.dataset.qs || '0');
       useQuickSlot(qsIdx);
+    };
+    slot.addEventListener('click', handler);
+    slot.addEventListener('keydown', (ev: KeyboardEvent) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); handler(); }
     });
   });
 }
@@ -531,7 +536,20 @@ export function addItemWithOverflow(item: Item): void {
   if (!G) return;
   const p = G.player;
   // Food is consumed immediately on pickup, never stored.
-  if (item.type === 'food') { p.hunger = Math.min(p.maxHunger, p.hunger + (item.val || 30)); addMsg(lang === 'zh' ? `食用${item.name}！饱食度+${item.val || 30}` : `Ate ${item.name}! +${item.val || 30} hunger`, 'mh'); snd('heal'); return; }
+  if (item.type === 'food') {
+    p.hunger = Math.min(p.maxHunger, p.hunger + (item.val || 30));
+    // Higher-tier foods also heal HP (Elven Feast, Divine Ambrosia) — the item's
+    // description advertises this, so apply it here too instead of silently
+    // dropping it (food is eaten on pickup and never reaches useItem/useFood).
+    const hpHeal = item.hp || 0;
+    let healMsg = '';
+    if (hpHeal > 0) {
+      const actual = Math.min(hpHeal, p.maxHp - p.hp);
+      p.hp += actual; healMsg = ` +${actual}HP`;
+      flt(p.x, p.y, `+${actual}`, '#80ed99');
+    }
+    addMsg(lang === 'zh' ? `食用${item.name}！饱食度+${item.val || 30}${healMsg}` : `Ate ${item.name}! +${item.val || 30} hunger${healMsg}`, 'mh'); snd('heal'); return;
+  }
 
   // Determine which pool this item belongs to and its cap.
   const gear = isGear(item);

@@ -15,17 +15,39 @@ function serializeEnemies(enemies: Enemy[]): any[] {
   }));
 }
 
-export function saveGame(): void {
-  if (!G || G.gameOver) return;
+const SAVE_KEY = 'dh_save';
+
+// Write to localStorage (always, synchronous) and mirror to a file under Electron
+// (async, fire-and-forget). The file copy survives app-storage clears and is what
+// Steam Cloud will sync once wired — localStorage remains the fast synchronous store.
+function persistSave(data: string): void {
+  try { localStorage.setItem(SAVE_KEY, data); } catch { /* quota / private mode */ }
+  const dh = (window as any).dh;
+  if (dh?.saveFile) { try { dh.saveFile(data); } catch { /* ignore */ } }
+}
+
+function buildSave(): string {
+  if (!G) return '';
   const g = G;
   const qs = g.player.quickSlots.map(it => it ? g.player.inv.indexOf(it) : -1);
   // Convert Set to array for JSON serialization (JSON.stringify turns Set into {})
   const playerData = { ...g.player, achievements: Array.from(g.player.achievements as Set<string>) };
-  localStorage.setItem('dh_save', JSON.stringify({
+  return JSON.stringify({
     player: playerData, floor: g.floor, dungeon: g.dungeon,
     enemies: serializeEnemies(g.enemies), items: g.items, traps: g.traps,
     msgs: g.msgs.slice(-20), qs,
-  }));
+  });
+}
+
+// Silent autosave — no toast/sound, used by the turn loop on a cadence.
+export function autoSave(): void {
+  if (!G || G.gameOver) return;
+  persistSave(buildSave());
+}
+
+export function saveGame(): void {
+  if (!G || G.gameOver) return;
+  persistSave(buildSave());
   addMsg(t('saved'), 'mi'); snd('pickup');
 }
 
@@ -72,6 +94,10 @@ export function loadGame(): void {
     if (gameState.player.bossCheatDeathUsed === undefined) gameState.player.bossCheatDeathUsed = false;
     if (gameState.player.combatReviveUsed === undefined) gameState.player.combatReviveUsed = false;
     if (gameState.player.bossesKilledThisRun === undefined) gameState.player.bossesKilledThisRun = 0;
+    if (!gameState.player.relics) gameState.player.relics = [];
+    if (gameState.player.hunger === undefined) gameState.player.hunger = 100;
+    if (gameState.player.maxHunger === undefined) gameState.player.maxHunger = 100;
+    if (gameState.player.poisonDmg === undefined) gameState.player.poisonDmg = 0;
     // Migrate enemies missing new fields
     for (const e of gameState.enemies as Enemy[]) {
       if (e.el === undefined) (e as any).el = 'none';

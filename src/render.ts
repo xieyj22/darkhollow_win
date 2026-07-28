@@ -5,6 +5,7 @@ import { TS, MW, MH, TL, FINAL } from './config.js';
 import { clamp, dst, darken, darkenTinted } from './utils.js';
 import { RARITY_C, rareName } from './i18n.js';
 import { AREAS, EQUIPMENT_SETS } from './data.js';
+import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite } from './sprites.js';
 import { captureSnapshot } from './particles.js';
 
 // Themed monospace font matching CSS --font-mono
@@ -113,6 +114,9 @@ export function render(): void {
         if (f < 1) { fg = darken(fg, f); bg = darken(bg, f); }
       }
       c.fillStyle = bg; c.fillRect(sx, sy, TS, TS);
+      if (tile === TL.STAIR) { drawStairSprite(c, sx, sy); continue; }
+      if (tile === TL.FOUNTAIN) { drawFountainSprite(c, sx, sy); continue; }
+      if (tile === TL.SHRINE) { drawShrineSprite(c, sx, sy); continue; }
       c.fillStyle = fg;
       c.fillText(ch, sx + TS / 2, sy + TS / 2);
     }
@@ -123,8 +127,7 @@ export function render(): void {
     if (trap.triggered || (!trap.playerTrap && trap.hidden) || !G.player.visible?.[trap.y]?.[trap.x]) continue;
     const sx = (trap.x - G.vx) * TS, sy = (trap.y - G.vy) * TS;
     if (sx < 0 || sy < 0 || sx >= cvs.width || sy >= cvs.height) continue;
-    c.fillStyle = trap.c + '88';
-    c.fillText(trap.playerTrap ? '▲' : '^', sx + TS / 2, sy + TS / 2);
+    drawTrapSprite(c, sx, sy, trap.c);
   }
 
   // Items (show within full FOV) — bold glyph
@@ -145,7 +148,7 @@ export function render(): void {
       c.fillStyle = item.c + '15'; c.fillRect(sx, sy, TS, TS);
     }
     c.fillStyle = item.c;
-    c.fillText(item.ch, sx + TS / 2, sy + TS / 2);
+    drawItemSprite(c, sx, sy, item);
   }
 
   // Enemies — improved rendering
@@ -177,8 +180,9 @@ export function render(): void {
       c.fillStyle = grad; c.fillRect(sx - 4, sy - 4, TS + 8, TS + 8);
     }
 
-    c.fillStyle = e.isAlly ? '#06d6a0' : e.c; c.font = `bold ${TS - 4}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText(e.ch, sx + TS / 2, sy + TS / 2);
+    c.font = `bold ${TS - 4}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    const ec = e.isAlly ? '#06d6a0' : e.c;
+    if (e.isBoss) drawBossSprite(c, sx, sy, ec); else drawEnemySprite(c, sx, sy, ec, e);
     // Element indicator (colored corner glyph)
     if (e.el && e.el !== 'none') {
       const elIndSym: Record<string, string> = { fire: '▲', ice: '✻', lightning: '⚡', shadow: '◔', holy: '✦' };
@@ -204,12 +208,12 @@ export function render(): void {
   pGrad.addColorStop(0.5, 'rgba(255,215,0,0.05)');
   pGrad.addColorStop(1, 'rgba(255,215,0,0)');
   c.fillStyle = pGrad; c.fillRect(px - TS * 0.5, py - TS * 0.5, TS * 2, TS * 2);
-  c.fillStyle = '#ffd700'; c.font = `bold ${TS - 2}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
-  c.fillText('@', px + TS / 2, py + TS / 2);
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  drawPlayerSprite(c, px, py, G.player.ci);
 
   // Vignette overlay
   const vCx = px + TS / 2, vCy = py + TS / 2;
-  const vMaxR = Math.max(cvs.width, cvs.height) * 0.7;
+  const vMaxR = Math.max(8, Math.max(cvs.width, cvs.height) * 0.7);
   const vGrad = c.createRadialGradient(vCx, vCy, vMaxR * 0.3, vCx, vCy, vMaxR);
   vGrad.addColorStop(0, 'rgba(0,0,0,0)');
   vGrad.addColorStop(0.6, 'rgba(0,0,0,0.15)');
@@ -280,11 +284,17 @@ export function renderMinimap(): void {
   }
   for (const e of G.enemies) {
     if (!G.player.visible?.[e.y]?.[e.x] || e.isAlly) continue;
-    mic.fillStyle = e.isBoss ? '#ffd700' : '#e63946'; mic.fillRect(e.x * s, e.y * s, s, s);
+    // Filled (red / gold for boss) WITH a dark outline — shape+outline backs up the red/green cue
+    mic.fillStyle = e.isBoss ? '#ffd700' : '#e63946';
+    mic.fillRect(e.x * s, e.y * s, s, s);
+    mic.strokeStyle = '#000'; mic.lineWidth = 1;
+    mic.strokeRect(e.x * s + 0.5, e.y * s + 0.5, Math.max(1, s - 1), Math.max(1, s - 1));
   }
   for (const e of G.enemies) {
     if (!e.isAlly || !G.player.visible?.[e.y]?.[e.x]) continue;
-    mic.fillStyle = '#06d6a0'; mic.fillRect(e.x * s, e.y * s, s, s);
+    // Hollow green ring so allies read differently from filled enemies even without color
+    mic.strokeStyle = '#06d6a0'; mic.lineWidth = 1;
+    mic.strokeRect(e.x * s + 0.5, e.y * s + 0.5, Math.max(1, s - 1), Math.max(1, s - 1));
   }
   // Player dot with bright center
   mic.fillStyle = '#ffd700'; mic.fillRect(G.player.x * s - 1, G.player.y * s - 1, s + 1, s + 1);

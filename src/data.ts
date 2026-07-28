@@ -489,7 +489,7 @@ export const TALENT_TREES: TalentTree[] = [
       { id: 'p_holy_str', n: { en: 'Holy Strength', zh: '圣力' }, desc: { en: '+2 ATK per rank', zh: '每级+2攻击' }, maxRank: 3, icon: '⚔', row: 0, col: 0, effect: 'atk', valuePerRank: 2 },
       { id: 'p_divine_shield', n: { en: 'Divine Shield', zh: '圣盾' }, desc: { en: '+2 DEF per rank', zh: '每级+2防御' }, maxRank: 3, icon: '🛡', row: 0, col: 1, effect: 'def', valuePerRank: 2 },
       { id: 'p_healing_light', n: { en: 'Healing Light', zh: '治愈之光' }, desc: { en: '+10% healing per rank', zh: '每级+10%治疗量' }, maxRank: 3, icon: '💚', row: 0, col: 2, effect: 'heal_bonus', valuePerRank: 10 },
-      { id: 'p_aura', n: { en: 'Aura of Protection', zh: '守护光环' }, desc: { en: '+5% dodge for allies', zh: '友方闪避+5%' }, maxRank: 1, icon: '✨', row: 0, col: 3, requires: ['p_divine_shield'], effect: 'aura_dodge', valuePerRank: 5 },
+      { id: 'p_aura', n: { en: 'Aura of Protection', zh: '守护光环' }, desc: { en: '+5% dodge', zh: '闪避+5%' }, maxRank: 1, icon: '✨', row: 0, col: 3, requires: ['p_divine_shield'], effect: 'aura_dodge', valuePerRank: 5 },
       { id: 'p_righteous_fury', n: { en: 'Righteous Fury', zh: '正义之怒' }, desc: { en: '+3 ATK vs shadow foes', zh: '对暗影敌人+3攻击' }, maxRank: 1, icon: '🔥', row: 1, col: 0, requires: ['p_holy_str'], effect: 'bonus_vs_shadow', valuePerRank: 3 },
       { id: 'p_blessed_endurance', n: { en: 'Blessed Endurance', zh: '祝福耐力' }, desc: { en: '+15 HP per rank', zh: '每级+15HP' }, maxRank: 3, icon: '❤', row: 1, col: 1, requires: ['p_divine_shield'], effect: 'maxhp', valuePerRank: 15 },
       { id: 'p_consecrate', n: { en: 'Consecrate', zh: '净化' }, desc: { en: 'Skill also deals holy dmg', zh: '技能同时造成神圣伤害' }, maxRank: 1, icon: '🌟', row: 1, col: 2, requires: ['p_healing_light'], effect: 'skill_holy_dmg', valuePerRank: 1 },
@@ -525,4 +525,29 @@ export const META_UPGRADES: MetaUpgradeDef[] = [
   { id: 'inv_size', n: { en: 'Pack Mule', zh: '驮兽' }, d: { en: '+4 inventory slots per level', zh: '每级+4背包容量' }, icon: '🎒', maxLevel: 2, costs: [15, 30], effect: 'inv_size', valuePerLevel: 4, category: 'utility' },
   { id: 'gold_bonus', n: { en: 'Greed', zh: '贪婪' }, d: { en: '+10% gold earned', zh: '金币获取+10%' }, icon: '💎', maxLevel: 3, costs: [15, 30, 50], effect: 'gold_bonus', valuePerLevel: 10, category: 'utility' },
   { id: 'soul_bonus', n: { en: 'Soul Attunement', zh: '灵魂共鸣' }, d: { en: '+10% Soul Echoes earned', zh: '灵魂回响获取+10%' }, icon: '💀', maxLevel: 3, costs: [30, 60, 100], effect: 'soul_bonus', valuePerLevel: 10, category: 'utility' },
+];
+
+// ===== Relics (run-defining passive artifacts) =====
+import type { RelicDef } from './types.js';
+
+export const RELICS: RelicDef[] = [
+  // Offense
+  { id: 'war_totem', n: { en: 'War Totem', zh: '战神图腾' }, d: { en: '+15% ATK', zh: '+15% 攻击力' }, ch: '⚒️', c: '#e63946', rarity: 1, effect: 'atk_pct', value: 15 },
+  { id: 'assassin_sigil', n: { en: "Assassin's Sigil", zh: '刺客印记' }, d: { en: '+12% crit chance', zh: '+12% 暴击率' }, ch: '🗡️', c: '#9b5de5', rarity: 2, effect: 'crit', value: 12 },
+  { id: 'executioners_axe', n: { en: "Executioner's Axe", zh: '处刑者之斧' }, d: { en: '+40% dmg to foes below 30% HP', zh: '对生命低于30%的敌人+40%伤害' }, ch: '🪓', c: '#ff4500', rarity: 2, effect: 'execute', value: 40 },
+  // Sustain / survival
+  { id: 'vampiric_fang', n: { en: 'Vampiric Fang', zh: '吸血獠牙' }, d: { en: 'Heal 15% of damage dealt', zh: '造成伤害的15%转化为生命' }, ch: '🦷', c: '#b5179e', rarity: 2, effect: 'lifesteal', value: 15 },
+  { id: 'phoenix_heart', n: { en: 'Phoenix Heart', zh: '凤凰之心' }, d: { en: 'Revive once at 50% HP', zh: '死亡时复活一次（50%生命）' }, ch: '🔥', c: '#ff6b35', rarity: 4, effect: 'revive', value: 50 },
+  { id: 'stone_skin', n: { en: 'Stone Skin', zh: '石肤符文' }, d: { en: '+5 DEF', zh: '+5 防御' }, ch: '🪨', c: '#8d99ae', rarity: 1, effect: 'def', value: 5 },
+  { id: 'giants_belt', n: { en: "Giant's Belt", zh: '巨人腰带' }, d: { en: '+40 Max HP', zh: '+40 最大生命' }, ch: '🟫', c: '#06d6a0', rarity: 1, effect: 'maxhp', value: 40 },
+  // Elements
+  { id: 'ember_core', n: { en: 'Ember Core', zh: '余烬核心' }, d: { en: 'Attacks deal bonus fire damage', zh: '攻击附加火焰伤害' }, ch: '🌟', c: '#ff7a45', rarity: 2, effect: 'el_fire', value: 6 },
+  { id: 'frost_heart', n: { en: 'Frost Heart', zh: '冰霜之心' }, d: { en: 'Bonus ice dmg + 20% slow chance', zh: '附加冰霜伤害，20%几率减速' }, ch: '❄️', c: '#7ec8e3', rarity: 2, effect: 'el_ice', value: 6 },
+  // Economy
+  { id: 'greed_idol', n: { en: 'Greed Idol', zh: '贪婪神像' }, d: { en: '+30% gold from kills', zh: '击杀金币+30%' }, ch: '💰', c: '#ffd700', rarity: 1, effect: 'gold_pct', value: 30 },
+  { id: 'scholar_lens', n: { en: 'Scholar Lens', zh: '学者透镜' }, d: { en: '+25% XP', zh: '经验+25%' }, ch: '📖', c: '#4895ef', rarity: 1, effect: 'exp_pct', value: 25 },
+  // Magic
+  { id: 'arcane_focus', n: { en: 'Arcane Focus', zh: '奥术聚焦' }, d: { en: '+25% spell power', zh: '+25% 法术强度' }, ch: '🔮', c: '#9b5de5', rarity: 2, effect: 'spell_pct', value: 25 },
+  // Counter
+  { id: 'thorned_bramble', n: { en: 'Thorned Bramble', zh: '荆棘护甲' }, d: { en: 'Reflect 30% of damage taken', zh: '反弹30%受到的伤害' }, ch: '🌵', c: '#06d6a0', rarity: 2, effect: 'thorns', value: 30 },
 ];
