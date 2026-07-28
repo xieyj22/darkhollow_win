@@ -175,7 +175,7 @@ function updateLangUI(): void {
   $('btn-forge')!.textContent = t('forgeBtn');
   $('lang-btn')!.textContent = lang === 'en' ? '中文' : 'EN';
   $('sb-hero')!.textContent = '⚔ ' + t('hero'); $('sb-nl')!.textContent = t('name'); $('sb-rl')!.textContent = t('race');
-  $('sb-cl')!.textContent = t('cls'); $('sb-lv')!.textContent = t('level'); $('sb-stat')!.textContent = '📊 ' + t('stats');
+  $('sb-cl')!.textContent = t('cls'); $('sb-lv')!.textContent = t('level');
   $('sb-gl')!.textContent = t('gold'); $('sb-fl')!.textContent = t('floor'); $('sb-tl')!.textContent = t('turns');
   $('sb-co')!.textContent = t('combo'); $('sb-eq')!.textContent = '🛡 ' + t('equip');
   $('sb-wp')!.textContent = t('weapon'); $('sb-ar')!.textContent = t('armor'); $('sb-ac')!.textContent = t('accessory'); $('sb-ac2')!.textContent = t('accessory');
@@ -191,7 +191,7 @@ function updateLangUI(): void {
     ? '<span>WASD/方向键</span> 移动 · <span>1-9</span> 快捷道具 · <span>B</span> 背包 · <span>G</span> 拾取 · <span>&gt;</span> 下楼 · <span>K</span> 技能 · <span>F</span> 等待 · <span>Ctrl+S</span> 保存'
     : '<span>WASD/Arrows</span> move · <span>1-9</span> quick items · <span>B</span> inventory · <span>G</span> pickup · <span>&gt;</span> descend · <span>K</span> skill · <span>F</span> wait · <span>Ctrl+S</span> save';
   $('sb-legend')!.innerHTML = '🗺 ' + t('legendToggle') + ' <span id="legend-arrow">' + (legendVisible ? '▲' : '▼') + '</span>';
-  $('sb-obj')!.textContent = '🎯 ' + (lang === 'zh' ? '游戏目标' : 'Objective');
+  $('obj-label')!.textContent = lang === 'zh' ? '游戏目标' : 'Objective';
   $('keys-toggle')!.textContent = t('keysToggle');
   $('pause-title')!.textContent = t('pauseTitle');
   $('btn-pause-resume')!.textContent = t('pauseResume');
@@ -296,6 +296,15 @@ export function toggleLegend(): void {
   panel.style.display = newVis ? 'block' : 'none';
   arrow.textContent = newVis ? '▲' : '▼';
   if (newVis) renderLegend();
+}
+
+// ===== Objective toggle =====
+export function toggleObjective(): void {
+  const panel = document.getElementById('objective-panel')!;
+  const arrow = document.getElementById('obj-arrow')!;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  arrow.textContent = open ? '▸' : '▼';
 }
 
 function renderLegend(): void {
@@ -499,6 +508,7 @@ function bindButtons(): void {
   on('btn-mm-in', () => minimapZoom(1));
 
   document.getElementById('sb-legend')!.addEventListener('click', toggleLegend);
+  document.getElementById('sb-obj')!.addEventListener('click', toggleObjective);
   on('keys-toggle', toggleKeys);
 
   // Sidebar toggle (class on game-container so the toggle button is never clipped)

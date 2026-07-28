@@ -31,24 +31,30 @@
 <div class="bar"><div class="fill bm" id="mp-fill"></div><span class="bt-text" id="mp-text"></span></div>
 <div class="bar"><div class="fill bx" id="xp-fill"></div><span class="bt-text" id="xp-text"></span></div>
 <div class="bar"><div class="fill bt" id="hunger-fill"></div><span class="bt-text" id="hunger-text"></span></div>
-<h3 id="sb-stat">📊 Stats</h3>
-<div class="sr"><span class="sl">ATK</span><span class="sv atk" id="s-atk">5</span></div>
-<div class="sr"><span class="sl">DEF</span><span class="sv def" id="s-def">2</span></div>
-<div class="sr"><span class="sl" id="sb-gl">Gold</span><span class="sv gold" id="s-gold">0</span></div>
-<div class="sr"><span class="sl" id="sb-fl">Floor</span><span class="sv" id="s-floor">1</span></div>
-<div class="sr"><span class="sl" id="sb-tl">Turns</span><span class="sv" id="s-turns">0</span></div>
-<div class="sr"><span class="sl" id="sb-co">Combo</span><span class="sv gold" id="s-combo">0</span></div>
+<div class="stat-inline">
+  <span><span class="sl">ATK</span> <span class="sv atk" id="s-atk">5</span></span>
+  <span><span class="sl">DEF</span> <span class="sv def" id="s-def">2</span></span>
+  <span><span class="sl" id="sb-gl">Gold</span> <span class="sv gold" id="s-gold">0</span></span>
+  <span><span class="sl" id="sb-fl">Floor</span> <span class="sv" id="s-floor">1</span></span>
+</div>
+<div class="stat-inline minor">
+  <span><span class="sl" id="sb-tl">Turns</span> <span class="sv" id="s-turns">0</span></span>
+  <span><span class="sl" id="sb-co">Combo</span> <span class="sv gold" id="s-combo">0</span></span>
+</div>
 <h3 id="sb-eq">🛡 Equipment</h3>
-<div class="eq"><span id="sb-wp">Weapon</span>: <span class="in" id="eq-weapon">-</span></div>
-<div class="eq"><span id="sb-ar">Armor</span>: <span class="in" id="eq-armor">-</span></div>
-<div class="eq"><span id="sb-ac">Accessory</span>: <span class="in" id="eq-accessory">-</span></div>
-<div class="eq"><span id="sb-ac2">Accessory</span>2: <span class="in" id="eq-accessory2">-</span></div>
+<div class="eq-grid">
+  <div class="eq"><span id="sb-wp">Weapon</span>: <span class="in" id="eq-weapon">-</span></div>
+  <div class="eq"><span id="sb-ar">Armor</span>: <span class="in" id="eq-armor">-</span></div>
+  <div class="eq"><span id="sb-ac">Accessory</span>: <span class="in" id="eq-accessory">-</span></div>
+  <div class="eq"><span id="sb-ac2">Accessory</span>2: <span class="in" id="eq-accessory2">-</span></div>
+</div>
 <h3 id="sb-ef">✨ Effects</h3>
 <div class="buff-list" id="buff-list"></div>
 <h3 id="sb-legend" style="cursor:pointer">🗺 <span id="legend-arrow">▼</span></h3>
 <div id="legend-panel" style="display:none"></div>
-<h3 id="sb-obj">🎯 Objective</h3>
-<div id="objective-panel"></div>
+<h3 id="sb-obj" style="cursor:pointer">🎯 <span id="obj-arrow">▸</span> <span id="obj-label">Objective</span></h3>
+<div id="objective-summary"></div>
+<div id="objective-panel" style="display:none"></div>
 <div id="sidebar-footer">
 <div class="sb-frow">
 <button class="sb-btn sb-options" id="btn-options" title="Options">⚙ Options</button>

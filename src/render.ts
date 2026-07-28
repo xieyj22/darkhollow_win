@@ -429,11 +429,15 @@ function renderObjective(): void {
   const totalBosses = 8;
   const nextBoss = Math.ceil(fl / 5) * 5;
   const bossesKilled = Math.floor((fl - 1) / 5);
+  // 常驻 summary(始终显示一行进度)
+  const sum = document.getElementById('objective-summary');
+  if (sum) sum.innerHTML =
+    `<div class="obj-row"><span class="ol">${zh ? '层' : 'F'}</span><span class="ov">${fl}/${FINAL}</span></div>` +
+    `<div class="obj-bar"><div class="fill" style="width:${(fl / FINAL) * 100}%"></div></div>`;
+  // 详情 panel(默认折叠)
   const panel = document.getElementById('objective-panel')!;
   panel.innerHTML =
     `<div class="obj-row"><span class="ol">${zh ? '目标' : 'Goal'}</span><span class="ov">${zh ? '击败创世者(第40层)' : 'Beat The Creator (F40)'}</span></div>` +
-    `<div class="obj-row"><span class="ol">${zh ? '进度' : 'Progress'}</span><span class="ov">${fl}/${FINAL}</span></div>` +
-    `<div class="obj-bar"><div class="fill" style="width:${(fl / FINAL) * 100}%"></div></div>` +
     `<div class="obj-row"><span class="ol">${zh ? '下个Boss' : 'Next Boss'}</span><span class="ov${fl === nextBoss && fl % 5 === 0 ? ' boss' : ''}">${zh ? '第' : 'F'} ${nextBoss}${fl === nextBoss && fl % 5 === 0 ? (zh ? ' ⚠ 当前层！' : ' ⚠ HERE!') : ''}</span></div>` +
     `<div class="obj-row"><span class="ol">${zh ? 'Boss击杀' : 'Bosses'}</span><span class="ov${bossesKilled >= totalBosses ? ' done' : ''}">${bossesKilled}/${totalBosses}</span></div>`;
 }
