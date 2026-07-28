@@ -131,7 +131,10 @@ export function applyMetaUpgrades(p: Player): void {
   }
   if (u['blood_pact']) {
     const lv = u['blood_pact'];
-    p.baseMaxHp -= 10 * lv;        // recalc 基于 baseMaxHp,生效且不被覆盖
+    const delta = 10 * lv;
+    p.baseMaxHp -= delta;
+    p.maxHp -= delta;
+    p.hp -= delta;
     p.talents.points += lv;
   }
 }
