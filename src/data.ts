@@ -543,6 +543,14 @@ export const META_UPGRADES: MetaUpgradeDef[] = [
   { id: 'inv_size', n: { en: 'Pack Mule', zh: '驮兽' }, d: { en: '+4 inventory slots per level', zh: '每级+4背包容量' }, icon: '🎒', maxLevel: 2, costs: [15, 30], effect: 'inv_size', valuePerLevel: 4, category: 'utility' },
   { id: 'gold_bonus', n: { en: 'Greed', zh: '贪婪' }, d: { en: '+10% gold earned', zh: '金币获取+10%' }, icon: '💎', maxLevel: 3, costs: [15, 30, 50], effect: 'gold_bonus', valuePerLevel: 10, category: 'utility' },
   { id: 'soul_bonus', n: { en: 'Soul Attunement', zh: '灵魂共鸣' }, d: { en: '+10% Soul Echoes earned', zh: '灵魂回响获取+10%' }, icon: '💀', maxLevel: 3, costs: [30, 60, 100], effect: 'soul_bonus', valuePerLevel: 10, category: 'utility' },
+  { id: 'start_relic', n: { en: 'Heirloom', zh: '传家宝' },
+    d: { en: 'Start each run with a random rarity-1 relic', zh: '每局开局获得一个随机稀有度1圣物' },
+    icon: '🏺', maxLevel: 1, costs: [40], effect: 'start_relic',
+    valuePerLevel: 1, category: 'utility' },
+  { id: 'blood_pact', n: { en: 'Blood Pact', zh: '鲜血契约' },
+    d: { en: '-10 max HP per level, +1 talent point per level', zh: '每级-10最大生命,+1天赋点' },
+    icon: '🩸', maxLevel: 2, costs: [30, 60], effect: 'blood_pact',
+    valuePerLevel: 1, category: 'talent' },
 ];
 
 // ===== Relics (run-defining passive artifacts) =====

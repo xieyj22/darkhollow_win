@@ -1,7 +1,7 @@
 // Meta progression system — Soul Echoes, The Forge, persistent achievements, run stats
 import type { MetaSave, MetaStats, SoulEchoBreakdown, Player } from './types.js';
 import { lang } from './state.js';
-import { META_UPGRADES, ACH_DEFS } from './data.js';
+import { META_UPGRADES, ACH_DEFS, RELICS } from './data.js';
 import { snd } from './audio.js';
 
 const META_KEY = 'dh_meta';
@@ -119,6 +119,21 @@ export function applyMetaUpgrades(p: Player): void {
 
   // Talent points
   if (u['extra_talent']) { p.talents.points += u['extra_talent']; }
+
+  // Gameplay-altering metas (Wave 4-C4)
+  if (u['start_relic']) {
+    const pool = RELICS.filter(r => r.rarity === 1);
+    if (pool.length) {
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      if (!p.relics) p.relics = [];
+      if (!p.relics.includes(pick.id)) p.relics.push(pick.id);
+    }
+  }
+  if (u['blood_pact']) {
+    const lv = u['blood_pact'];
+    p.baseMaxHp -= 10 * lv;        // recalc 基于 baseMaxHp,生效且不被覆盖
+    p.talents.points += lv;
+  }
 }
 
 // Get meta FOV bonus
