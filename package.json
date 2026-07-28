@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "electron:preview": "npm run build && electron .",
-    "dist": "npm run build && electron-builder --win portable"
+    "dist": "npm run build && electron-builder --win portable",
+    "gen:icon": "node scripts/gen-icon.mjs"
   },
   "build": {
     "appId": "com.darkhollow.game",
@@ -23,6 +24,7 @@
       "electron/**/*"
     ],
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         {
           "target": "portable",
@@ -35,8 +37,10 @@
   },
   "devDependencies": {
     "@fontsource/jetbrains-mono": "^5.2.8",
+    "@napi-rs/canvas": "^1.0.2",
     "electron": "^42.4.0",
     "electron-builder": "^26.15.3",
+    "png-to-ico": "^3.0.2",
     "typescript": "^5.7.0",
     "vite": "^6.0.0"
   }
