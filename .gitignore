@@ -36,3 +36,6 @@ Desktop.ini
 
 # Claude Code (local settings & tools)
 .claude/
+
+# Superpowers SDD workspace (scratch — ledger/briefs/reports)
+.superpowers/
