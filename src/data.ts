@@ -568,4 +568,9 @@ export const RELICS: RelicDef[] = [
   { id: 'arcane_focus', n: { en: 'Arcane Focus', zh: '奥术聚焦' }, d: { en: '+25% spell power', zh: '+25% 法术强度' }, ch: '🔮', c: '#9b5de5', rarity: 2, effect: 'spell_pct', value: 25 },
   // Counter
   { id: 'thorned_bramble', n: { en: 'Thorned Bramble', zh: '荆棘护甲' }, d: { en: 'Reflect 30% of damage taken', zh: '反弹30%受到的伤害' }, ch: '🌵', c: '#06d6a0', rarity: 2, effect: 'thorns', value: 30 },
+  // Wave 4-C3 — on-kill / on-dodge / on-crit triggers + r0/r3 fill
+  { id: 'soul_harvester', n: { en: 'Soul Harvester', zh: '猎魂者' }, d: { en: 'Kills restore 10% MP', zh: '击杀回复10%MP' }, ch: '💀', c: '#9b5de5', rarity: 2, effect: 'kill_mp', value: 10 },
+  { id: 'wind_step', n: { en: 'Wind Step', zh: '御风步' }, d: { en: 'Dodging heals 8% HP', zh: '闪避回复8%HP' }, ch: '🌬', c: '#7ec8e3', rarity: 2, effect: 'dodge_hp', value: 8 },
+  { id: 'executioner_pact', n: { en: 'Executioner Pact', zh: '处刑契约' }, d: { en: 'Crits heal 15% of damage', zh: '暴击吸取15%伤害' }, ch: '⚔', c: '#b91c3c', rarity: 3, effect: 'crit_lifesteal', value: 15 },
+  { id: 'worn_amulet', n: { en: 'Worn Amulet', zh: '磨损护符' }, d: { en: '+10 max HP', zh: '+10 最大生命' }, ch: '📿', c: '#8b7355', rarity: 0, effect: 'hp', value: 10 },
 ];

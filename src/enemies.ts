@@ -9,6 +9,7 @@ import { ENEMIES, BOSSES, ELITE_PREFIX, AREAS } from './data.js';
 import { addMsg } from './messages.js';
 import { attack, killEnemy, checkLevelUp } from './combat.js';
 import { onPlayerDamaged, onEnemyHitPlayer, onPlayerDodged, onPlayerDeath, getManaShieldReduction } from './talents.js';
+import { relicOnDodge } from './relics.js';
 
 export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const ens: Enemy[] = [];
@@ -149,6 +150,7 @@ export function processEnemies(): void {
           if (Math.random() < G.player.dodgeChance) {
             addMsg(lang === 'zh' ? `你闪避了${e.name}的远程攻击！` : `You dodge ${e.name}'s blast!`, 'mi');
             onPlayerDodged();
+            relicOnDodge(); // relic trigger: wind_step
             break;
           }
           let dmg = Math.max(1, Math.floor(e.atk * .7) - G.player.def + rng(-1, 1));

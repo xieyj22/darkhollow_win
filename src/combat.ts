@@ -6,7 +6,7 @@ import { rng, dst } from './utils.js';
 import { snd, setBgmScene } from './audio.js';
 import { flt, shake } from './effects.js';
 import { fxFlash, fxBurst } from './fx.js';
-import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic } from './relics.js';
+import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic, relicOnKill, relicOnDodge, relicOnCrit } from './relics.js';
 import { unlockAchievement } from './steam.js';
 import { t } from './i18n.js';
 import { ACH_DEFS, EQUIPMENT_SETS } from './data.js';
@@ -68,6 +68,7 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
   if (!isP && Math.random() < G.player.dodgeChance) {
     addMsg(t('dodgeMsg'), 'mi');
     onPlayerDodged(); // talent trigger: r_shadow_dance
+    relicOnDodge(); // relic trigger: wind_step
     return false;
   }
 
@@ -105,6 +106,7 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
     if (Math.random() < G.player.critChance) {
       const critMult = getCritMultiplier();
       dmg = Math.floor(dmg * critMult);
+      relicOnCrit(def as Enemy, dmg); // relic trigger: executioner_pact
       addMsg(lang === 'zh' ? `暴击！对${def.name}造成${dmg}伤害${elSym}！` : `CRIT! You deal ${dmg}${elSym} to ${def.name}!`, 'mc');
       fxFlash(def.x, def.y, atkEl !== 'none' ? FX_EL_COLOR[atkEl] : '#ffd700', 1.6);
       flt(def.x, def.y, `-${dmg} CRIT!${elSym}`, '#ffd700', 'crit'); snd('crit'); shake(2, def.x - G.player.x, def.y - G.player.y);
@@ -161,6 +163,7 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
 
       // Talent trigger: on kill
       onPlayerKill(def as Enemy);
+      relicOnKill(def as Enemy); // relic trigger: soul_harvester
 
       // Relic drop — bosses always, elites often
       if ((def as Enemy).isBoss || ((def as Enemy).isElite && Math.random() < 0.4)) {
@@ -429,6 +432,7 @@ export function killEnemy(e: Enemy): void {
 
   // Talent trigger: on kill
   onPlayerKill(e);
+  relicOnKill(e); // relic trigger: soul_harvester
 
   checkLevelUp(); checkAchs();
 

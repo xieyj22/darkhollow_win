@@ -11,7 +11,7 @@ import { FINAL } from './config.js';
 import { CLASSES } from './data.js';
 import { bonusGold, bonusExp } from './meta.js';
 import { getSkillModifiers, onPlayerKill, getSpellPenMult } from './talents.js';
-import { grantRandomRelic } from './relics.js';
+import { grantRandomRelic, relicOnKill } from './relics.js';
 
 let _endTurn: (() => void) | null = null;
 export function setEndTurnFn(fn: () => void): void { _endTurn = fn; }
@@ -40,6 +40,7 @@ function processAoeKills(killedEnemies: Enemy[]): void {
     }
     // Talent on-kill triggers
     onPlayerKill(e);
+    relicOnKill(e); // relic trigger: soul_harvester
   }
   checkAchs();
 }

@@ -29,6 +29,7 @@ export function applyRelicBonuses(p: Player): void {
       case 'assassin_sigil': p.critChance += 0.12; break;
       case 'stone_skin': p.def += 5; break;
       case 'giants_belt': p.maxHp += 40; break;
+      case 'worn_amulet': p.maxHp += 10; break;
       case 'arcane_focus': p.spellPower += 0.25; break;
     }
   }
@@ -100,6 +101,36 @@ export function relicOnDeath(): boolean {
     return true;
   }
   return false;
+}
+
+// ===== On kill — restore MP (soul_harvester) =====
+export function relicOnKill(_enemy: Enemy): void {
+  if (!G) return;
+  const p = G.player;
+  if (hasRelic('soul_harvester')) {
+    const mp = Math.floor(p.maxMp * 0.10);
+    if (mp > 0) { p.mp = Math.min(p.maxMp, p.mp + mp); flt(p.x, p.y, `+${mp}MP`, '#9b5de5'); }
+  }
+}
+
+// ===== On dodge — heal HP (wind_step) =====
+export function relicOnDodge(): void {
+  if (!G) return;
+  const p = G.player;
+  if (hasRelic('wind_step')) {
+    const hp = Math.floor(p.maxHp * 0.08);
+    if (hp > 0) { p.hp = Math.min(p.maxHp, p.hp + hp); flt(p.x, p.y, `+${hp}`, '#80ed99'); }
+  }
+}
+
+// ===== On crit — lifesteal (executioner_pact) =====
+export function relicOnCrit(_defender: Enemy, dmg: number): void {
+  if (!G) return;
+  const p = G.player;
+  if (hasRelic('executioner_pact')) {
+    const heal = Math.floor(dmg * 0.15);
+    if (heal > 0) { p.hp = Math.min(p.maxHp, p.hp + heal); flt(p.x, p.y, `+${heal}`, '#ff6b6b'); }
+  }
 }
 
 // ===== Economy multipliers =====
