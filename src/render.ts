@@ -17,9 +17,23 @@ interface PlayerTween { fx: number; fy: number; tx: number; ty: number; t0: numb
 let _playerTween: PlayerTween | null = null;
 const TWEEN_DUR_MS = 90;
 
+// Current visual position of the player tween, or null when none is active.
+// Shared by setPlayerTween (so a new tween resumes from the current visual spot
+// instead of the stale goal of the previous tween) and drawPlayerLayer.
+function currentTweenPos(): { lx: number; ly: number } | null {
+  if (!_playerTween) return null;
+  const p = Math.min(1, (performance.now() - _playerTween.t0) / TWEEN_DUR_MS);
+  const e = 1 - (1 - p) * (1 - p); // easeOutQuad
+  return { lx: _playerTween.fx + (_playerTween.tx - _playerTween.fx) * e,
+           ly: _playerTween.fy + (_playerTween.ty - _playerTween.fy) * e };
+}
+
 export function setPlayerTween(fx: number, fy: number, tx: number, ty: number): void {
   if (reducedMotion) { _playerTween = null; return; } // reduced-motion: instant
-  _playerTween = { fx, fy, tx, ty, t0: performance.now() };
+  // Resume from the current visual position if a tween is still in flight, so
+  // holding a direction key never visibly snaps back to the previous tile.
+  const cur = currentTweenPos();
+  _playerTween = { fx: cur ? cur.lx : fx, fy: cur ? cur.ly : fy, tx, ty, t0: performance.now() };
 }
 
 // Called every frame by particles.ts tick() on top of the snapshot.
@@ -27,11 +41,9 @@ export function drawPlayerLayer(c: CanvasRenderingContext2D): void {
   if (!G) return;
   let lx = G.player.x, ly = G.player.y;
   if (_playerTween) {
-    const p = Math.min(1, (performance.now() - _playerTween.t0) / TWEEN_DUR_MS);
-    const e = 1 - (1 - p) * (1 - p); // easeOutQuad
-    lx = _playerTween.fx + (_playerTween.tx - _playerTween.fx) * e;
-    ly = _playerTween.fy + (_playerTween.ty - _playerTween.fy) * e;
-    if (p >= 1) _playerTween = null;
+    const cur = currentTweenPos();
+    if (cur) { lx = cur.lx; ly = cur.ly; }
+    if (performance.now() - _playerTween.t0 >= TWEEN_DUR_MS) _playerTween = null;
   }
   const px = (lx - G.vx) * TS, py = (ly - G.vy) * TS;
   const pGrad = c.createRadialGradient(px + TS / 2, py + TS / 2, 2, px + TS / 2, py + TS / 2, TS * 1.5);
@@ -400,7 +412,7 @@ export function updateUI(): void {
     }
   }
 
-  if (!p.buffs.length && p.poisonTurns <= 0 && setIds.every(id => (p.setBonusActive[id] || 0) < 2)) {
+  if (!p.buffs.length && p.poisonTurns <= 0 && p.slowed <= 0 && setIds.every(id => (p.setBonusActive[id] || 0) < 2)) {
     bd.innerHTML = '<div style="color:#555">' + (lang === 'zh' ? '无' : 'None') + '</div>';
   }
 
@@ -428,7 +440,7 @@ function renderObjective(): void {
   const fl = G.floor;
   const totalBosses = 8;
   const nextBoss = Math.ceil(fl / 5) * 5;
-  const bossesKilled = Math.floor((fl - 1) / 5);
+  const bossesKilled = G.player.bossesKilledThisRun;
   // 常驻 summary(始终显示一行进度)
   const sum = document.getElementById('objective-summary');
   if (sum) sum.innerHTML =

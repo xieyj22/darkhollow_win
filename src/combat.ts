@@ -407,7 +407,9 @@ export function killEnemy(e: Enemy): void {
   // which route through killEnemy rather than the melee attack() path).
   if (e.isBoss || (e.isElite && Math.random() < 0.4)) grantRandomRelic(e.x, e.y, G.floor);
   G.enemies = G.enemies.filter(en => en !== e);
-  G.player.exp += bonusExp(e.exp); G.player.gold += bonusGold(e.goldDrop); G.player.kills++;
+  G.player.exp += Math.floor(bonusExp(e.exp) * getRelicExpMult());
+  G.player.gold += Math.floor(bonusGold(e.goldDrop) * getRelicGoldMult());
+  G.player.kills++;
   G.player.streak++;
   if (G.player.streak > G.player.bestStreak) G.player.bestStreak = G.player.streak;
   if (G.player.streak >= 3) {

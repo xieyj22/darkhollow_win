@@ -77,7 +77,6 @@ export function movePlayer(dx: number, dy: number): void {
 
   const pfx = G.player.x, pfy = G.player.y;
   G.player.x = nx; G.player.y = ny;
-  setPlayerTween(pfx, pfy, nx, ny);
 
   // Auto-pickup items
   const itemsHere = G.items.filter(i => i.x === nx && i.y === ny);
@@ -99,6 +98,10 @@ export function movePlayer(dx: number, dy: number): void {
   checkTraps();
   if (G.gameOver) return;
   checkTiles();
+  // Teleport-style tiles (e.g. abyss, traps) rewrite G.player.x/y during checkTiles().
+  // In that case the move's (nx,ny) is no longer the player's position, so the old→new
+  // slide would visually cross the map — skip the tween and let the player snap.
+  if (G.player.x === nx && G.player.y === ny) setPlayerTween(pfx, pfy, nx, ny);
   if (_endTurn) _endTurn();
 }
 
