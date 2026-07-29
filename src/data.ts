@@ -159,6 +159,15 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Divine Golem', zh: '神圣魔像' }, ch: '⊕', c: '#c0c0c0', hp: 200, atk: 30, def: 25, exp: 130, g: [40, 90], ai: 'chase', mf: 38, el: 'holy' },
   { n: { en: 'Cosmic Horror', zh: '宇宙恐怖' }, ch: '∇', c: '#1a0033', hp: 160, atk: 48, def: 12, exp: 150, g: [60, 120], ai: 'erratic', mf: 39, el: 'shadow', tags: ['demon'] },
   { n: { en: 'Archon', zh: '执政官' }, ch: '♔', c: '#ffffff', hp: 180, atk: 45, def: 18, exp: 160, g: [70, 140], ai: 'ranged', mf: 40, el: 'holy' },
+  // === Wave 6b: 主题敌人填中段辨识度 ===
+  { n: { en: 'Cave Beetle', zh: '洞穴甲虫' }, ch: '⬟', c: '#7a5230', hp: 14, atk: 5, def: 4, exp: 8, g: [2, 6], ai: 'ambush', mf: 2 },
+  { n: { en: 'Dire Bat', zh: '巨蝠' }, ch: '⬣', c: '#4a4a4a', hp: 12, atk: 6, def: 1, exp: 9, g: [3, 7], ai: 'erratic', mf: 3 },
+  { n: { en: 'Bone Pile', zh: '骸骨堆' }, ch: '≡', c: '#dcdcdc', hp: 45, atk: 8, def: 10, exp: 25, g: [8, 18], ai: 'ambush', mf: 7, tags: ['undead'] },
+  { n: { en: 'Crypt Warden', zh: '墓穴守卫' }, ch: '☩', c: '#8a8a8a', hp: 55, atk: 16, def: 8, exp: 40, g: [14, 30], ai: 'chase', mf: 9, tags: ['undead'] },
+  { n: { en: 'Fire Imp', zh: '火焰小妖' }, ch: 'æ', c: '#ff7847', hp: 50, atk: 16, def: 5, exp: 38, g: [12, 26], ai: 'erratic', mf: 12, el: 'fire', tags: ['demon'] },
+  { n: { en: 'Magma Hound', zh: '熔岩犬' }, ch: 'Ð', c: '#b22222', hp: 70, atk: 18, def: 8, exp: 45, g: [15, 30], ai: 'chase', mf: 13, el: 'fire', tags: ['beast'] },
+  { n: { en: 'Cinder Wraith', zh: '余烬怨灵' }, ch: '§', c: '#ff6347', hp: 60, atk: 22, def: 6, exp: 50, g: [18, 35], ai: 'phase', mf: 15, el: 'fire', tags: ['spirit'] },
+  { n: { en: 'Dread Legionnaire', zh: '恐惧军团兵' }, ch: '☨', c: '#5a5a6a', hp: 110, atk: 30, def: 14, exp: 85, g: [30, 60], ai: 'chase', mf: 18, el: 'shadow' },
 ];
 
 export const BOSSES: BossDef[] = [
