@@ -122,6 +122,12 @@ export function spawnBranchEnemies(rooms: Room[], entryFloor: number): Enemy[] {
 // Boss phase check — call after boss takes damage
 export function processBossPhase(boss: Enemy): void {
   if (!G || !boss.isBoss) return;
+  // Branch mini-boss is static (no phases). G.floor stays = main entry floor
+  // inside a branch, so without this guard a boss-floor entry (entry % 5 === 0)
+  // would resolve the entry floor's boss def and wrongly apply its phases to
+  // the mini-boss. branchMode is always false on the main line (F1-40), so this
+  // is a zero-impact change to main-line behavior.
+  if (G.branchMode) return;
   const fl = G.floor;
   const bd = BOSSES.find(b => b.fl === fl);
   if (!bd || !bd.phases) return;
