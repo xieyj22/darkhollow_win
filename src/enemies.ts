@@ -305,6 +305,12 @@ function processAlly(ally: Enemy): void {
 // --- Boss summon (point 4): bosses with a summon def randomly call adds ---
 function tryBossSummon(boss: Enemy): void {
   if (!G) return;
+  // Branch mini-boss is static (no summon). Same fl-coupling hole as
+  // processBossPhase: G.floor = main entry floor in a branch, so a boss-floor
+  // entry (entry % 5 === 0) would resolve the entry floor's boss def and the
+  // mini-boss would summon that floor's adds. branchMode is always false on
+  // the main line (F1-40), so zero main-line impact.
+  if (G.branchMode) return;
   const fl = G.floor;
   const bd = BOSSES.find(b => b.fl === fl);
   if (!bd || !bd.summon) return;
