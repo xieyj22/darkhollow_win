@@ -841,7 +841,7 @@ function pickEnemyTemplate(e: Enemy): { tpl: Template; key: string } {
   if (/wraith|ghost|spirit|specter|怨灵|幽/.test(n))return { tpl: TEMPLATES.WRAITH, key: 'WRAITH' };
   if (/elemental|behemoth|熔岩|元素/.test(n))       return { tpl: TEMPLATES.ELEMENTAL, key: 'ELEMENTAL' };
   if (/cultist|zealot|inquisitor|信徒|裁官/.test(n))return { tpl: TEMPLATES.CULTIST, key: 'CULTIST' };
-  if (/bat|raven|bird|spider|rat|wolf|hound|beast|serpent|snak|蝙蝠|蜘|鼠|狼|蛛|蛇/.test(n)) return { tpl: TEMPLATES.BEAST, key: 'BEAST' };
+  if (/bat|raven|bird|spider|rat|wolf|hound|beast|beetle|serpent|snak|蝙蝠|蜘|鼠|狼|蛛|蛇|甲虫/.test(n)) return { tpl: TEMPLATES.BEAST, key: 'BEAST' };
   return { tpl: TEMPLATES.GOBLIN, key: 'GOBLIN' };
 }
 

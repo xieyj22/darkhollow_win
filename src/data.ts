@@ -167,7 +167,7 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Fire Imp', zh: '火焰小妖' }, ch: 'æ', c: '#ff7847', hp: 50, atk: 16, def: 5, exp: 38, g: [12, 26], ai: 'erratic', mf: 12, el: 'fire', tags: ['demon'] },
   { n: { en: 'Magma Hound', zh: '熔岩犬' }, ch: 'Ð', c: '#b22222', hp: 70, atk: 18, def: 8, exp: 45, g: [15, 30], ai: 'chase', mf: 13, el: 'fire', tags: ['beast'] },
   { n: { en: 'Cinder Wraith', zh: '余烬怨灵' }, ch: '§', c: '#ff6347', hp: 60, atk: 22, def: 6, exp: 50, g: [18, 35], ai: 'phase', mf: 15, el: 'fire', tags: ['spirit'] },
-  { n: { en: 'Dread Legionnaire', zh: '恐惧军团兵' }, ch: '☨', c: '#5a5a6a', hp: 110, atk: 30, def: 14, exp: 85, g: [30, 60], ai: 'chase', mf: 18, el: 'shadow' },
+  { n: { en: 'Dread Legionnaire', zh: '恐惧军团兵' }, ch: '☨', c: '#5a5a6a', hp: 110, atk: 30, def: 14, exp: 85, g: [30, 60], ai: 'chase', mf: 18, el: 'shadow', tags: ['construct'] },
 ];
 
 export const BOSSES: BossDef[] = [
