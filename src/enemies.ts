@@ -10,6 +10,7 @@ import { addMsg } from './messages.js';
 import { attack, killEnemy, checkLevelUp } from './combat.js';
 import { onPlayerDamaged, onEnemyHitPlayer, onPlayerDodged, onPlayerDeath, getManaShieldReduction } from './talents.js';
 import { relicOnDodge } from './relics.js';
+import { setEnemyTween } from './render.js';
 
 export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const ens: Enemy[] = [];
@@ -135,7 +136,7 @@ export function processEnemies(): void {
         if (d < 8) {
           const dx = Math.sign(G.player.x - e.x), dy = Math.sign(G.player.y - e.y);
           const nx = e.x + dx, ny = e.y + dy;
-          if (nx >= 0 && nx < MW && ny >= 0 && ny < MH && G.dungeon.map[ny][nx] !== TL.VOID && !G.enemies.some(o => o !== e && o.x === nx && o.y === ny) && !(nx === G.player.x && ny === G.player.y)) { e.x = nx; e.y = ny; }
+          if (nx >= 0 && nx < MW && ny >= 0 && ny < MH && G.dungeon.map[ny][nx] !== TL.VOID && !G.enemies.some(o => o !== e && o.x === nx && o.y === ny) && !(nx === G.player.x && ny === G.player.y)) { const ox = e.x, oy = e.y; e.x = nx; e.y = ny; setEnemyTween(e, ox, oy, nx, ny); }
         } else randMove(e); break;
       case 'ranged':
         if (d < 2) { attack(e, G.player as any, false); if (G.gameOver) return; }
@@ -308,7 +309,10 @@ function tryMove(e: Enemy, dx: number, dy: number): boolean {
   if (G.dungeon.map[ny][nx] === TL.WALL || G.dungeon.map[ny][nx] === TL.VOID) return false;
   if (G.enemies.some(o => o !== e && o.x === nx && o.y === ny)) return false;
   if (nx === G.player.x && ny === G.player.y) return false;
-  e.x = nx; e.y = ny; return true;
+  const ox = e.x, oy = e.y;
+  e.x = nx; e.y = ny;
+  setEnemyTween(e, ox, oy, nx, ny);
+  return true;
 }
 
 function randMove(e: Enemy): boolean {

@@ -11,6 +11,12 @@ export function setDrawPlayerLayerFn(fn: ((c: CanvasRenderingContext2D) => void)
   _drawPlayerLayer = fn;
 }
 
+// Late-bound enemy-layer drawer (set from render.ts via main.ts wiring).
+let _drawEnemyLayer: ((c: CanvasRenderingContext2D) => void) | null = null;
+export function setDrawEnemyLayerFn(fn: ((c: CanvasRenderingContext2D) => void) | null): void {
+  _drawEnemyLayer = fn;
+}
+
 interface Particle {
   x: number;
   y: number;
@@ -100,6 +106,9 @@ function tick(): void {
     animFrame = requestAnimationFrame(tick);
     return;
   }
+
+  // Enemy layer — tweened positions + idle bob, drawn under the player.
+  if (_drawEnemyLayer) _drawEnemyLayer(c);
 
   // Player layer — drawn from the tweened position on top of the snapshot.
   if (_drawPlayerLayer) _drawPlayerLayer(c);

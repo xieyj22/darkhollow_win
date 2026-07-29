@@ -6,6 +6,7 @@ import { clamp, dst, darken, darkenTinted } from './utils.js';
 import { RARITY_C, rareName } from './i18n.js';
 import { AREAS, EQUIPMENT_SETS } from './data.js';
 import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite } from './sprites.js';
+import type { Enemy } from './types.js';
 import { captureSnapshot } from './particles.js';
 
 // Themed monospace font matching CSS --font-mono
@@ -36,6 +37,29 @@ export function setPlayerTween(fx: number, fy: number, tx: number, ty: number): 
   _playerTween = { fx: cur ? cur.lx : fx, fy: cur ? cur.ly : fy, tx, ty, t0: performance.now() };
 }
 
+// Enemy tween — enemies also live in the dynamic layer so they slide between
+// tiles like the player. WeakMap keyed by the Enemy object: auto-cleared on GC,
+// so it never pollutes the Enemy type or save data.
+interface EnemyTween { fx: number; fy: number; tx: number; ty: number; t0: number; }
+const _enemyTweens = new WeakMap<Enemy, EnemyTween>();
+
+export function setEnemyTween(e: Enemy, fx: number, fy: number, tx: number, ty: number): void {
+  if (reducedMotion) { _enemyTweens.delete(e); return; }      // reduced-motion: instant
+  if (fx === tx && fy === ty) { _enemyTweens.delete(e); return; } // no displacement
+  _enemyTweens.set(e, { fx, fy, tx, ty, t0: performance.now() });
+}
+
+// Visual position of an enemy: tweened while a tween is in flight, else its
+// logical tile. Clears the entry once the tween finishes.
+function enemyVisualPos(e: Enemy): { lx: number; ly: number } {
+  const tw = _enemyTweens.get(e);
+  if (!tw) return { lx: e.x, ly: e.y };
+  const p = Math.min(1, (performance.now() - tw.t0) / TWEEN_DUR_MS);
+  if (p >= 1) { _enemyTweens.delete(e); return { lx: e.x, ly: e.y }; }
+  const ee = 1 - (1 - p) * (1 - p); // easeOutQuad
+  return { lx: tw.fx + (tw.tx - tw.fx) * ee, ly: tw.fy + (tw.ty - tw.fy) * ee };
+}
+
 // Called every frame by particles.ts tick() on top of the snapshot.
 export function drawPlayerLayer(c: CanvasRenderingContext2D): void {
   if (!G) return;
@@ -53,6 +77,59 @@ export function drawPlayerLayer(c: CanvasRenderingContext2D): void {
   c.fillStyle = pGrad; c.fillRect(px - TS * 0.5, py - TS * 0.5, TS * 2, TS * 2);
   c.textAlign = 'center'; c.textBaseline = 'middle';
   drawPlayerSprite(c, px, py, G.player.ci);
+}
+
+// Enemies live in the dynamic layer too (like the player): tweened position
+// via setEnemyTween + a subtle idle bob. Drawn under the player layer.
+export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
+  if (!G) return;
+  const cvs = (window as any).__canvas as HTMLCanvasElement;
+  c.font = `bold ${TS - 4}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+  for (const e of G.enemies) {
+    if (!G.player.visible?.[e.y]?.[e.x]) continue;
+    const { lx, ly } = enemyVisualPos(e);
+    const sx = (lx - G.vx) * TS, sy = (ly - G.vy) * TS;
+    if (sx < 0 || sy < 0 || sx >= cvs.width || sy >= cvs.height) continue;
+
+    const lowHp = e.hp > 0 && e.hp / e.maxHp <= 0.25;
+    c.fillStyle = e.isBoss ? '#3a0000' : e.isElite ? '#2a1a00' : lowHp ? '#250a0a' : '#1a0a0a';
+    c.fillRect(sx, sy, TS, TS);
+
+    if (e.isBoss) {
+      const grad = c.createRadialGradient(sx + TS / 2, sy + TS / 2, 2, sx + TS / 2, sy + TS / 2, TS * 1.5);
+      grad.addColorStop(0, 'rgba(255,215,0,0.18)');
+      grad.addColorStop(0.5, 'rgba(255,215,0,0.08)');
+      grad.addColorStop(1, 'rgba(255,215,0,0)');
+      c.fillStyle = grad; c.fillRect(sx - TS * 0.5, sy - TS * 0.5, TS * 2, TS * 2);
+    }
+    if (e.isElite && e.el !== 'none') {
+      const elColors: Record<string, string> = { fire: '255,69,0', ice: '100,149,237', lightning: '255,215,0', shadow: '128,0,128', holy: '255,255,200' };
+      const ecg = elColors[e.el] || '255,255,255';
+      const grad = c.createRadialGradient(sx + TS / 2, sy + TS / 2, 1, sx + TS / 2, sy + TS / 2, TS);
+      grad.addColorStop(0, `rgba(${ecg},0.12)`);
+      grad.addColorStop(1, `rgba(${ecg},0)`);
+      c.fillStyle = grad; c.fillRect(sx - 4, sy - 4, TS + 8, TS + 8);
+    }
+
+    // Idle bob — subtle vertical sine, desynced per enemy; off in reduced-motion.
+    const bob = reducedMotion ? 0 : Math.sin(performance.now() / 350 + (e.x * 1.7 + e.y * 2.3));
+
+    const ec = e.isAlly ? '#06d6a0' : e.c;
+    if (e.isBoss) drawBossSprite(c, sx, sy + bob, ec); else drawEnemySprite(c, sx, sy + bob, ec, e);
+    if (e.el && e.el !== 'none') {
+      const elIndSym: Record<string, string> = { fire: '▲', ice: '✻', lightning: '⚡', shadow: '◔', holy: '✦' };
+      const elIndColor: Record<string, string> = { fire: '#ff7a45', ice: '#7ec8e3', lightning: '#fff2a8', shadow: '#b583f6', holy: '#ffd700' };
+      c.font = `${Math.floor(TS / 3)}px ${FONT}`;
+      c.fillStyle = elIndColor[e.el] || '#fff';
+      c.fillText(elIndSym[e.el] || '', sx + TS - 4, sy + 4);
+    }
+    if (e.hp < e.maxHp) {
+      const bw = TS - 2, bh = e.isBoss ? 6 : 4, by = e.isBoss ? sy - 5 : sy - 3;
+      c.fillStyle = e.isBoss ? '#332' : '#300'; c.fillRect(sx + 1, by, bw, bh);
+      c.fillStyle = e.isBoss ? '#ffd700' : '#e63946'; c.fillRect(sx + 1, by, Math.max(1, bw * (e.hp / e.maxHp)), bh - 1);
+      c.fillStyle = 'rgba(255,255,255,0.15)'; c.fillRect(sx + 1, by, Math.max(1, bw * (e.hp / e.maxHp)), 1);
+    }
+  }
 }
 
 // Cached minimap — redrawn only when the game state changes, not every frame
@@ -193,55 +270,6 @@ export function render(): void {
     }
     c.fillStyle = item.c;
     drawItemSprite(c, sx, sy, item);
-  }
-
-  // Enemies — improved rendering
-  for (const e of G.enemies) {
-    if (!G.player.visible?.[e.y]?.[e.x]) continue;
-    const sx = (e.x - G.vx) * TS, sy = (e.y - G.vy) * TS;
-    if (sx < 0 || sy < 0 || sx >= cvs.width || sy >= cvs.height) continue;
-
-    // Low-HP red tint
-    const lowHp = e.hp > 0 && e.hp / e.maxHp <= 0.25;
-    c.fillStyle = e.isBoss ? '#3a0000' : e.isElite ? '#2a1a00' : lowHp ? '#250a0a' : '#1a0a0a';
-    c.fillRect(sx, sy, TS, TS);
-
-    // Boss radial aura
-    if (e.isBoss) {
-      const grad = c.createRadialGradient(sx + TS / 2, sy + TS / 2, 2, sx + TS / 2, sy + TS / 2, TS * 1.5);
-      grad.addColorStop(0, 'rgba(255,215,0,0.18)');
-      grad.addColorStop(0.5, 'rgba(255,215,0,0.08)');
-      grad.addColorStop(1, 'rgba(255,215,0,0)');
-      c.fillStyle = grad; c.fillRect(sx - TS * 0.5, sy - TS * 0.5, TS * 2, TS * 2);
-    }
-    // Elite element glow
-    if (e.isElite && e.el !== 'none') {
-      const elColors: Record<string, string> = { fire: '255,69,0', ice: '100,149,237', lightning: '255,215,0', shadow: '128,0,128', holy: '255,255,200' };
-      const ec = elColors[e.el] || '255,255,255';
-      const grad = c.createRadialGradient(sx + TS / 2, sy + TS / 2, 1, sx + TS / 2, sy + TS / 2, TS);
-      grad.addColorStop(0, `rgba(${ec},0.12)`);
-      grad.addColorStop(1, `rgba(${ec},0)`);
-      c.fillStyle = grad; c.fillRect(sx - 4, sy - 4, TS + 8, TS + 8);
-    }
-
-    c.font = `bold ${TS - 4}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
-    const ec = e.isAlly ? '#06d6a0' : e.c;
-    if (e.isBoss) drawBossSprite(c, sx, sy, ec); else drawEnemySprite(c, sx, sy, ec, e);
-    // Element indicator (colored corner glyph)
-    if (e.el && e.el !== 'none') {
-      const elIndSym: Record<string, string> = { fire: '▲', ice: '✻', lightning: '⚡', shadow: '◔', holy: '✦' };
-      const elIndColor: Record<string, string> = { fire: '#ff7a45', ice: '#7ec8e3', lightning: '#fff2a8', shadow: '#b583f6', holy: '#ffd700' };
-      c.font = `${Math.floor(TS / 3)}px ${FONT}`;
-      c.fillStyle = elIndColor[e.el] || '#fff';
-      c.fillText(elIndSym[e.el] || '', sx + TS - 4, sy + 4);
-    }
-    // HP bar — thicker and gold for bosses
-    if (e.hp < e.maxHp) {
-      const bw = TS - 2, bh = e.isBoss ? 6 : 4, by = e.isBoss ? sy - 5 : sy - 3;
-      c.fillStyle = e.isBoss ? '#332' : '#300'; c.fillRect(sx + 1, by, bw, bh);
-      c.fillStyle = e.isBoss ? '#ffd700' : '#e63946'; c.fillRect(sx + 1, by, Math.max(1, bw * (e.hp / e.maxHp)), bh - 1);
-      c.fillStyle = 'rgba(255,255,255,0.15)'; c.fillRect(sx + 1, by, Math.max(1, bw * (e.hp / e.maxHp)), 1);
-    }
   }
 
   // Player screen position (used by vignette)
