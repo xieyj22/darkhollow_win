@@ -179,6 +179,96 @@ const TEMPLATES: Record<string, Template> = {
     "................",
     "................",
   ],
+  DRAGON: [
+    "...K........K...",
+    "..KK........KK..",
+    ".KDMMMMMMMMDK...",
+    "KDMMMMMMMMMMDMDK",
+    "DMMMMMKKKKMMMMMD",
+    "DMMMMEEMMEEMMMMD",
+    "DMMMMMMMMMMMMMMD",
+    "..DMMMMMMMMMMD..",
+    "...DMMMMMMMMMD..",
+    "...DKMMMMMMMKD..",
+    "..DDMMMMMMMMDD..",
+    "...DKMMKKMMD....",
+    "....DMMMMMD.....",
+    ".....DMMMD......",
+    "......KKK.......",
+    "................",
+  ],
+  GOLEM: [
+    "....KKKKKKKK....",
+    "..KKMMMMMMMMKK..",
+    "..KMMEMMMEMMMK..",
+    "..KMMMMMMMMMMK..",
+    ".KMMMMMMMMMMMMK.",
+    "KMMMMMMMMMMMMMMK",
+    "KMDMMMMMMMMMDMMK",
+    "KMMMMMMMMMMMMMMK",
+    "DKMMMMMMMMMMMMKD",
+    ".KMMMMMMMMMMMMK.",
+    "..KMMMMMMMMMMK..",
+    "..KMMMMMMMMMMK..",
+    "..KMMMMMMMMMMK..",
+    "..KKMMMMMMMMKK..",
+    "...KKKKKKKKKK...",
+    "................",
+  ],
+  WRAITH: [
+    "......KKKK......",
+    ".....KMMMMK.....",
+    "...KMMMMMMMMK...",
+    "..KMMWMMMMWMMK..",
+    "..KMMEMMMMMEMK..",
+    "..KMMMMMMMMMMK..",
+    "..KMMMMMMMMMMK..",
+    "..DMMMMMMMMMMD..",
+    "...DMMMMMMMMD...",
+    "....DKMMMMKD....",
+    "....DMMWWMMD....",
+    ".....DMMWMD.....",
+    ".....DWMMWD.....",
+    "......DWWD......",
+    "................",
+    "................",
+  ],
+  ELEMENTAL: [
+    "......LLLL......",
+    "....LLMMMMLL....",
+    "...LMMMMMMMML...",
+    "..LMMMEMMMEMML..",
+    "..LMMMMMMMMMML..",
+    ".LMMMMMMMMMMMML.",
+    ".LMMMMMMMMMMMML.",
+    ".LMMMMMMMMMMMML.",
+    ".LMMMDMMMMDMMML.",
+    ".LMMMMMMMMMMMML.",
+    "..LMMMMMMMMMML..",
+    "..LMMMMMMMMMML..",
+    "...LMMMMMMMML...",
+    "....DMMMMMMD....",
+    ".....DMMMMD.....",
+    "................",
+  ],
+  CULTIST: [
+    "......KKKK......",
+    ".....KMMMMK.....",
+    "...KMMMMMMMMK...",
+    "..KMMEMMMMEMMK..",
+    "..KMMMMMMMMMMK..",
+    "..DMMMMMMMMMMD..",
+    ".DMMMMMMMMMMMMD.",
+    "DMMMMMMMMMMMMMMD",
+    "DMMMDMMMMMMDMMMD",
+    "DMMMMMMMMMMMMMMD",
+    ".DMMMMMMMMMMMMD.",
+    "..DMMMMMMMMMMD..",
+    "..DMMMMMMMMMMD..",
+    "..KKMMMMMMMMKK..",
+    ".KKKKKKKKKKKKKK.",
+    "................",
+  ],
   BOSS: [
     ".K..K....K..K...",
     ".KKKK....KKKK...",
@@ -605,6 +695,11 @@ const TEMPLATES: Record<string, Template> = {
   ],
 };
 
+// Dev-time sanity: every template row must be exactly N(16) chars.
+for (const [k, tpl] of Object.entries(TEMPLATES)) {
+  for (const row of tpl) if (row.length !== N) console.error(`TEMPLATE ${k} bad row len ${row.length}: "${row}"`);
+}
+
 // Blend a hex color toward white (amt 0..1).
 function lighten(hex: string, amt: number): string {
   const h = hex.replace('#', '');
@@ -645,6 +740,23 @@ const STAIR_PAL: Record<string, string> = {
 // ===== Offscreen sprite cache (16×16, drawn once per template+palette signature) =====
 const spriteCache = new Map<string, HTMLCanvasElement>();
 
+const OUTLINE_COLOR = '#0a0a0a';
+// Dark silhouette cache (all opaque pixels -> outline color), keyed by sprite sig.
+const silCache = new Map<string, HTMLCanvasElement>();
+function getSilhouette(sig: string, sprite: HTMLCanvasElement): HTMLCanvasElement {
+  const cached = silCache.get(sig);
+  if (cached) return cached;
+  const cv = document.createElement('canvas');
+  cv.width = N; cv.height = N;
+  const cc = cv.getContext('2d')!;
+  cc.drawImage(sprite, 0, 0);
+  cc.globalCompositeOperation = 'source-in';
+  cc.fillStyle = OUTLINE_COLOR;
+  cc.fillRect(0, 0, N, N);
+  silCache.set(sig, cv);
+  return cv;
+}
+
 function getSprite(template: Template, pal: Record<string, string>, sig: string): HTMLCanvasElement {
   const cached = spriteCache.get(sig);
   if (cached) return cached;
@@ -671,11 +783,25 @@ function blit(c: CanvasRenderingContext2D, x: number, y: number, sprite: HTMLCan
   c.imageSmoothingEnabled = prev;
 }
 
+// Blit with a dark outline: stamp the silhouette at ±thickness on all 8(ish)
+// neighbor offsets, then the real sprite. Pixel-art readability on busy tiles.
+function blitOutlined(c: CanvasRenderingContext2D, x: number, y: number, sprite: HTMLCanvasElement, sig: string, thickness = 1): void {
+  const sil = getSilhouette(sig, sprite);
+  const prev = c.imageSmoothingEnabled;
+  c.imageSmoothingEnabled = false;
+  for (let dy = -thickness; dy <= thickness; dy++)
+    for (let dx = -thickness; dx <= thickness; dx++)
+      if (dx !== 0 || dy !== 0) c.drawImage(sil, Math.round(x + dx), Math.round(y + dy), TS, TS);
+  c.drawImage(sprite, Math.round(x), Math.round(y), TS, TS);
+  c.imageSmoothingEnabled = prev;
+}
+
 // ===== Public draw API =====
 
 export function drawPlayerSprite(c: CanvasRenderingContext2D, x: number, y: number, ci: number): void {
   const key = ci === 1 ? 'ROGUE' : ci === 2 ? 'MAGE' : ci === 3 ? 'PALADIN' : 'WARRIOR';
-  blit(c, x, y, getSprite(TEMPLATES[key], PLAYER_PAL, 'PLAYER:' + key));
+  const sig = 'PLAYER:' + key;
+  blitOutlined(c, x, y, getSprite(TEMPLATES[key], PLAYER_PAL, sig), sig);
 }
 
 export function drawStairSprite(c: CanvasRenderingContext2D, x: number, y: number): void {
@@ -695,24 +821,34 @@ export function drawShrineSprite(c: CanvasRenderingContext2D, x: number, y: numb
 }
 
 export function drawBossSprite(c: CanvasRenderingContext2D, x: number, y: number, color: string): void {
-  blit(c, x, y, getSprite(TEMPLATES.BOSS, buildPalette(color), 'BOSS:' + color));
+  const sig = 'BOSS:' + color;
+  blitOutlined(c, x, y, getSprite(TEMPLATES.BOSS, buildPalette(color), sig), sig, 2);
 }
 
-function pickEnemyTemplate(e: Enemy): Template {
+function pickEnemyTemplate(e: Enemy): { tpl: Template; key: string } {
   const tags = e.tags || [];
-  if (tags.includes('undead')) return TEMPLATES.SKELETON;
-  if (tags.includes('demon')) return TEMPLATES.DEMON;
+  if (tags.includes('dragon'))    return { tpl: TEMPLATES.DRAGON,    key: 'DRAGON' };
+  if (tags.includes('construct')) return { tpl: TEMPLATES.GOLEM,     key: 'GOLEM' };
+  if (tags.includes('spirit'))    return { tpl: TEMPLATES.WRAITH,    key: 'WRAITH' };
+  if (tags.includes('elemental')) return { tpl: TEMPLATES.ELEMENTAL, key: 'ELEMENTAL' };
+  if (tags.includes('cultist'))   return { tpl: TEMPLATES.CULTIST,   key: 'CULTIST' };
+  if (tags.includes('undead'))    return { tpl: TEMPLATES.SKELETON,  key: 'SKELETON' };
+  if (tags.includes('demon'))     return { tpl: TEMPLATES.DEMON,     key: 'DEMON' };
   const n = e.name;
-  if (/slime|ooze|blob|gel|史莱|黏|胶|果冻/.test(n)) return TEMPLATES.SLIME;
-  if (/bat|raven|bird|spider|rat|wolf|hound|beast|serpent|snak|蝙蝠|蜘|鼠|狼|蛛|蛇/.test(n)) return TEMPLATES.BEAST;
-  if (/dragon|drake|wyrm|wyvern|龙|蛟/.test(n)) return TEMPLATES.DEMON;
-  return TEMPLATES.GOBLIN;
+  if (/slime|ooze|blob|gel|史莱|黏|胶|果冻/.test(n)) return { tpl: TEMPLATES.SLIME, key: 'SLIME' };
+  if (/dragon|drake|wyrm|wyvern|龙|蛟/.test(n))     return { tpl: TEMPLATES.DRAGON, key: 'DRAGON' };
+  if (/golem|gargoyle|construct|魔像|巨像/.test(n)) return { tpl: TEMPLATES.GOLEM,  key: 'GOLEM' };
+  if (/wraith|ghost|spirit|specter|怨灵|幽/.test(n))return { tpl: TEMPLATES.WRAITH, key: 'WRAITH' };
+  if (/elemental|behemoth|熔岩|元素/.test(n))       return { tpl: TEMPLATES.ELEMENTAL, key: 'ELEMENTAL' };
+  if (/cultist|zealot|inquisitor|信徒|裁官/.test(n))return { tpl: TEMPLATES.CULTIST, key: 'CULTIST' };
+  if (/bat|raven|bird|spider|rat|wolf|hound|beast|serpent|snak|蝙蝠|蜘|鼠|狼|蛛|蛇/.test(n)) return { tpl: TEMPLATES.BEAST, key: 'BEAST' };
+  return { tpl: TEMPLATES.GOBLIN, key: 'GOBLIN' };
 }
 
 export function drawEnemySprite(c: CanvasRenderingContext2D, x: number, y: number, color: string, e: Enemy): void {
-  const tpl = pickEnemyTemplate(e);
-  const sig = (tpl === TEMPLATES.GOBLIN ? 'GOBLIN:' : tpl === TEMPLATES.SLIME ? 'SLIME:' : tpl === TEMPLATES.BEAST ? 'BEAST:' : tpl === TEMPLATES.SKELETON ? 'SKELETON:' : 'DEMON:') + color;
-  blit(c, x, y, getSprite(tpl, buildPalette(color), sig));
+  const { tpl, key } = pickEnemyTemplate(e);
+  const sig = key + ':' + color;
+  blitOutlined(c, x, y, getSprite(tpl, buildPalette(color), sig), sig);
 }
 
 // Pick a weapon template by its name (sword / axe / hammer / dagger / staff / spear / scythe).
@@ -749,7 +885,8 @@ function pickItemTemplate(item: Item): Template {
 
 export function drawItemSprite(c: CanvasRenderingContext2D, x: number, y: number, item: Item): void {
   const tpl = pickItemTemplate(item);
-  blit(c, x, y, getSprite(tpl, buildPalette(item.c), item.type + ':' + item.ef + ':' + item.name + ':' + item.c));
+  const sig = item.type + ':' + item.ef + ':' + item.name + ':' + item.c;
+  blitOutlined(c, x, y, getSprite(tpl, buildPalette(item.c), sig), sig);
 }
 
 // Paint a named sprite into a 16×16 canvas — used by the legend/help panels so
