@@ -203,6 +203,7 @@ export interface BossDef {
     chance: number;   // probability per eligible turn (0..1)
     cd: number;       // cooldown turns between summon attempts
     maxAdds: number;  // cap of alive summoned adds at once
+    kind?: string;    // 指定召唤敌人的 n.en;省略则用楼层随机池
   };
 }
 

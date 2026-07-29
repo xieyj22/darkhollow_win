@@ -269,9 +269,16 @@ function tryBossSummon(boss: Enemy): void {
 function bossSummonAdd(boss: Enemy): void {
   if (!G) return;
   const fl = G.floor;
-  const pool = ENEMIES.filter(en => en.mf <= fl && en.mf >= Math.max(1, fl - 8) && !en.tags?.includes('boss'));
-  if (!pool.length) return;
-  const base = pick(pool);
+  const bd = BOSSES.find(b => b.fl === fl);
+  if (!bd || !bd.summon) return;
+  const cfg = bd.summon;
+  // 优先主题小弟(按 n.en);查不到回退楼层随机池
+  let base = cfg.kind ? ENEMIES.find(en => en.n.en === cfg.kind) : undefined;
+  if (!base) {
+    const pool = ENEMIES.filter(en => en.mf <= fl && en.mf >= Math.max(1, fl - 8) && !en.tags?.includes('boss'));
+    base = pool.length ? pick(pool) : undefined;
+  }
+  if (!base) return;
   const fs = 1 + (fl - 1) * .12;
   for (let attempt = 0; attempt < 8; attempt++) {
     const sx = boss.x + rng(-2, 2), sy = boss.y + rng(-2, 2);
