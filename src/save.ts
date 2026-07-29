@@ -60,6 +60,10 @@ export function loadGame(): void {
       player: s.player, floor: s.floor, dungeon: s.dungeon,
       enemies: s.enemies, items: s.items, traps: s.traps || [],
       msgs: s.msgs || [], gameOver: false, won: false, vx: 0, vy: 0,
+      // Branch state is never restored from a save: a save taken inside the
+      // hollow would have lost the main-floor snapshot anyway, so always load
+      // as not-in-branch (prevents a stuck branchMode with no return target).
+      branchMode: false, branchReturn: null,
     };
 
     // Fix Set deserialization — achievements may be an array after JSON parse

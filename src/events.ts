@@ -10,6 +10,7 @@ import { addMsg } from './messages.js';
 import { genItem, genWeapon, genArmor, genAcc, addItemWithOverflow, itemToGold } from './items.js';
 import { recalc, playerDeath } from './combat.js';
 import { updateUI, render } from './render.js';
+import { enterBranch, exitBranch } from './game.js';
 
 // Re-export for late-binding
 export { updateUI, render } from './render.js';
@@ -259,6 +260,13 @@ export function checkTiles(): void {
     addMsg(lang === 'zh' ? `🚨 警报锣响！${n} 个敌人被激怒！` : `🚨 The alarm sounds! ${n} enemies enraged!`, 'me');
     flt(G.player.x, G.player.y, '⚠ALARM', '#daa520'); snd('trap'); shake();
     G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
+  }
+  // PORTAL — branch biome transport. Not consumed: stepping on a portal on a
+  // main floor enters the Fungal Hollow; stepping on the branch's return portal
+  // (branchMode) exits back to the recorded main-floor position.
+  if (tile === TL.PORTAL) {
+    if (G.branchMode) exitBranch();
+    else enterBranch();
   }
 }
 

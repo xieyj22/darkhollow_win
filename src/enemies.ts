@@ -14,7 +14,8 @@ import { setEnemyTween } from './render.js';
 
 export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const ens: Enemy[] = [];
-  const el = ENEMIES.filter(e => e.mf <= floor);
+  // mf >= 1 excludes branch-only enemies (mf === 0) from main-floor spawns.
+  const el = ENEMIES.filter(e => e.mf <= floor && e.mf >= 1);
   // Scale enemy count with floor, more enemies in deeper areas
   const area = AREAS.find(a => floor >= a.floorStart && floor <= a.floorEnd);
 
@@ -22,7 +23,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const makeIn = (rm: Room): Enemy | null => {
     if (rm === rooms[0]) return null;
     const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
-    const se = el.filter(e => e.mf <= floor && e.mf >= Math.max(1, floor - 4));
+    const se = el.filter(e => e.mf <= floor && e.mf >= Math.max(1, floor - 4) && e.mf >= 1);
     const base = se.length > 0 ? pick(se) : pick(el);
     const fs = 1 + (floor - 1) * .12 + (area ? area.enemyScaleBonus : 0);
     let nm = lang === 'zh' ? base.n.zh : base.n.en;
@@ -68,6 +69,51 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
       el: bd.el || 'none',
       res: {},
       skillCd: 0,
+    });
+  }
+  return ens;
+}
+
+// Branch-biome enemy spawn (portal "Fungal Hollow"). Pulls only enemies
+// tagged mf===0 and the fl===0 mini-boss (Task 2 data). Until Task 2 lands,
+// both filters come up empty and this returns [] — no branch enemies spawn.
+// Mini-boss is a STATIC isBoss (no phases/summon) so it does NOT couple to
+// G.floor via processBossPhase (the branch keeps G.floor = main floor).
+export function spawnBranchEnemies(rooms: Room[], entryFloor: number): Enemy[] {
+  const pool = ENEMIES.filter(e => e.mf === 0);
+  if (!pool.length) return [];
+  const fs = 1 + (entryFloor - 1) * .12;
+  const ens: Enemy[] = [];
+  // Branch enemies are tuned ~0.7x main-line strength (side content, not critical path).
+  const otherRooms = rooms.filter(r => r !== rooms[0]);
+  for (const rm of otherRooms) {
+    const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
+    const base = pick(pool);
+    ens.push({
+      name: lang === 'zh' ? base.n.zh : base.n.en, ch: base.ch, c: base.c, x, y,
+      hp: Math.floor(base.hp * fs * .7), maxHp: Math.floor(base.hp * fs * .7),
+      atk: Math.floor(base.atk * fs * .7), def: Math.floor(base.def * fs * .7),
+      exp: Math.floor(base.exp * fs * .7), goldDrop: Math.floor(rng(base.g[0], base.g[1]) * .7),
+      ai: base.ai, stunned: 0, feared: 0, isAlly: false,
+      el: base.el || 'none',
+      res: base.res ? { ...base.res } : {},
+      skillCd: 0,
+      tags: base.tags ? [...base.tags] : [],
+    });
+  }
+  // Static mini-boss (fl===0) at the second-to-last room center.
+  const mb = BOSSES.find(b => b.fl === 0);
+  if (mb) {
+    const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
+    ens.push({
+      name: lang === 'zh' ? mb.n.zh : mb.n.en, ch: mb.ch, c: mb.c,
+      x: br.cx, y: br.cy, ai: 'chase',
+      hp: Math.floor(mb.hp * fs), maxHp: Math.floor(mb.hp * fs),
+      atk: Math.floor(mb.atk * fs), def: Math.floor(mb.def * fs),
+      exp: Math.floor(mb.exp * fs), goldDrop: rng(mb.g[0], mb.g[1]),
+      isBoss: true, stunned: 0, feared: 0, isAlly: false,
+      el: mb.el || 'none',
+      res: {}, skillCd: 0,
     });
   }
   return ens;

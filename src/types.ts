@@ -445,6 +445,11 @@ export interface GameState {
   won: boolean;
   vx: number;
   vy: number;
+  // Portal branch biome ("Fungal Hollow"): when branchMode is true the player
+  // is inside a self-contained branch; branchReturn records the main-floor
+  // position to restore on exit. See enterBranch/exitBranch in game.ts.
+  branchMode?: boolean;
+  branchReturn?: { floor: number; x: number; y: number } | null;
 }
 
 // --- Achievements ---

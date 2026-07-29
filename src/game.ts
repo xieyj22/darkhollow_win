@@ -3,7 +3,7 @@ import type { GameState, Item } from './types.js';
 import { G, setGameState, lang } from './state.js';
 import { MH, MW, FINAL, TL } from './config.js';
 import { genDungeon, updatePlayerFOV } from './dungeon.js';
-import { spawnEnemies } from './enemies.js';
+import { spawnEnemies, spawnBranchEnemies } from './enemies.js';
 import { genItem, genFood } from './items.js';
 import { createPlayer } from './player.js';
 import { updateUI, render, resizeCanvas } from './render.js';
@@ -20,6 +20,7 @@ export function initGame(ri: number, ci: number): void {
     floor: 1, dungeon: null as any,
     enemies: [], items: [], traps: [],
     msgs: [], gameOver: false, won: false, vx: 0, vy: 0,
+    branchMode: false, branchReturn: null,
   };
   setGameState(gameState);
   enterFloor(1);
@@ -28,12 +29,14 @@ export function initGame(ri: number, ci: number): void {
   addMsg(t('loreTip2'), 'mi');
 }
 
-export function enterFloor(floor: number): void {
+export function enterFloor(floor: number, skipFade?: boolean): void {
   if (!G) return;
 
-  // Fade transition for floor changes
+  // Fade transition for floor changes. skipFade is used by exitBranch so the
+  // branch-exit setup runs synchronously (otherwise the 200ms setTimeout would
+  // overwrite the restored player position after we set it).
   const cvs = document.getElementById('game-canvas') as HTMLCanvasElement;
-  const doTransition = floor > 1 && cvs;
+  const doTransition = !skipFade && floor > 1 && cvs;
 
   const setup = () => {
     G!.floor = floor;
@@ -122,4 +125,61 @@ export function enterFloor(floor: number): void {
   } else {
     setup();
   }
+}
+
+// --- Portal branch biome ("Fungal Hollow") ---
+// A self-contained branch entered via a PORTAL tile on a main floor and exited
+// via another PORTAL in the branch's last room. branchMode/branchReturn track
+// the round-trip. Both resolve the Task-2 fungal area / branch enemy pool at
+// call time; until Task 2 lands, enterBranch no-ops (no 'fungal' area found).
+export function enterBranch(): void {
+  if (!G) return;
+  const fungal = AREAS.find(a => a.id === 'fungal');
+  if (!fungal) return;
+  G.branchReturn = { floor: G.floor, x: G.player.x, y: G.player.y };
+  G.branchMode = true;
+  const entry = G.floor;
+  G.dungeon = genDungeon(entry, fungal);
+  G.traps = G.dungeon.traps;
+  const sr = G.dungeon.rooms[0];
+  G.player.x = sr.cx; G.player.y = sr.cy;
+  // Reset transient combat state (mirrors enterFloor).
+  G.player.buffs = [];
+  G.player.poisonTurns = 0;
+  G.player.poisonDmg = 0;
+  G.player.slowed = 0;
+  G.player.explored = Array.from({ length: MH }, () => Array(MW).fill(false));
+  G.enemies = spawnBranchEnemies(G.dungeon.rooms, entry);
+  G.items = [];
+  // Reward + return portal in the last room. grantRelic (relics.ts) couples to
+  // the relic pool (Task 2 data); per the brief's sanctioned fallback we scatter
+  // a high-rarity item + gold pile instead, picked up before stepping on the portal.
+  const last = G.dungeon.rooms[G.dungeon.rooms.length - 1];
+  const rit = genItem(entry + 4);
+  rit.rarity = Math.max(3, Math.min(4, rit.rarity));
+  rit.x = last.cx; rit.y = last.cy;
+  G.items.push(rit);
+  G.items.push({ type: 'gold', name: 'Gold', value: 200 + entry * 15, ch: '$', c: '#ffd700', x: last.cx, y: last.cy, id: true, rarity: 0, desc: '' });
+  G.dungeon.map[last.cy][last.cx] = TL.PORTAL;
+  addMsg(lang === 'zh' ? '🌀 你被吸入荧光菌穴……' : '🌀 You are pulled into the Fungal Hollow...', 'md');
+  updatePlayerFOV(G.player, G.dungeon.map, G.traps);
+  setBgmScene('explore', fungal.id);
+  if ((window as any).__render) (window as any).__render();
+  if ((window as any).__updateUI) (window as any).__updateUI();
+}
+
+export function exitBranch(): void {
+  if (!G || !G.branchReturn) return;
+  const ret = G.branchReturn;
+  G.branchMode = false;
+  G.branchReturn = null;
+  // Regenerate the main floor (brief intent: no snapshot/restore). skipFade so
+  // setup is synchronous and the position override below isn't clobbered.
+  enterFloor(ret.floor, true);
+  G.player.x = ret.x;
+  G.player.y = ret.y;
+  updatePlayerFOV(G.player, G.dungeon.map, G.traps);
+  addMsg(lang === 'zh' ? '✨ 你回到了第' + ret.floor + '层。' : '✨ You return to floor ' + ret.floor + '.', 'mi');
+  if ((window as any).__render) (window as any).__render();
+  if ((window as any).__updateUI) (window as any).__updateUI();
 }

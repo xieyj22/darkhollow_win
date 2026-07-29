@@ -1,11 +1,11 @@
 // Dungeon generation and FOV computation
-import type { Room, Dungeon, Trap, Player } from './types.js';
+import type { Room, Dungeon, Trap, Player, AreaDef } from './types.js';
 import { MH, MW, TL, FINAL, FOV } from './config.js';
 import { rng, pick } from './utils.js';
 import { ALL_TRAPS, AREAS } from './data.js';
 import { getMetaFovBonus } from './meta.js';
 
-export function genDungeon(floor: number): Dungeon {
+export function genDungeon(floor: number, areaOverride?: AreaDef): Dungeon {
   const map: number[][] = Array.from({ length: MH }, () => Array(MW).fill(TL.WALL));
   const rooms: Room[] = [];
   let att = 0;
@@ -69,8 +69,10 @@ export function genDungeon(floor: number): Dungeon {
     }
   }
 
-  // Area-specific special tiles
-  const area = AREAS.find(a => floor >= a.floorStart && floor <= a.floorEnd);
+  // Area-specific special tiles. Callers may pass an explicit area (e.g. the
+  // portal branch biome) to force a biome regardless of the floor range; when
+  // omitted we fall back to the floor-range lookup, preserving old behavior.
+  const area = areaOverride ?? AREAS.find(a => floor >= a.floorStart && floor <= a.floorEnd);
   if (area?.specialTiles) {
     const st = area.specialTiles;
     const count = rng(st.count[0], st.count[1]);

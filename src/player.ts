@@ -119,6 +119,7 @@ export function pickupItem(): void {
 
 export function descendStairs(): void {
   if (!G || G.gameOver) return;
+  if (G.branchMode) { addMsg(lang === 'zh' ? '秘境中没有向下的楼梯(找传送门返回)。' : 'No stairs down in the hollow (find a portal to return).', 'mi'); return; }
   if (G.dungeon.map[G.player.y][G.player.x] !== TL.STAIR) { addMsg(t('noStairs'), 'mi'); return; }
   G.player.deepestFloor = Math.max(G.player.deepestFloor, G.floor + 1);
   enterFloor(G.floor + 1);

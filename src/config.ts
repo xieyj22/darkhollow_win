@@ -54,4 +54,5 @@ export const enum TL {
   MOSS = 13,
   CURSE = 14,
   ALARM = 15,
+  PORTAL = 16,
 }
