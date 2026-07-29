@@ -70,11 +70,9 @@ export function drawPlayerLayer(c: CanvasRenderingContext2D): void {
     if (performance.now() - _playerTween.t0 >= TWEEN_DUR_MS) _playerTween = null;
   }
   const px = (lx - G.vx) * TS, py = (ly - G.vy) * TS;
-  const pGrad = c.createRadialGradient(px + TS / 2, py + TS / 2, 2, px + TS / 2, py + TS / 2, TS * 1.5);
-  pGrad.addColorStop(0, 'rgba(255,215,0,0.12)');
-  pGrad.addColorStop(0.5, 'rgba(255,215,0,0.05)');
-  pGrad.addColorStop(1, 'rgba(255,215,0,0)');
-  c.fillStyle = pGrad; c.fillRect(px - TS * 0.5, py - TS * 0.5, TS * 2, TS * 2);
+  const pGlow = getGlow('player-glow', TS * 2, 2, TS * 1.5,
+    [[0, 'rgba(255,215,0,0.12)'], [0.5, 'rgba(255,215,0,0.05)'], [1, 'rgba(255,215,0,0)']]);
+  c.drawImage(pGlow, px - TS * 0.5, py - TS * 0.5);
   c.textAlign = 'center'; c.textBaseline = 'middle';
   drawPlayerSprite(c, px, py, G.player.ci);
 }
@@ -96,19 +94,16 @@ export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
     c.fillRect(sx, sy, TS, TS);
 
     if (e.isBoss) {
-      const grad = c.createRadialGradient(sx + TS / 2, sy + TS / 2, 2, sx + TS / 2, sy + TS / 2, TS * 1.5);
-      grad.addColorStop(0, 'rgba(255,215,0,0.18)');
-      grad.addColorStop(0.5, 'rgba(255,215,0,0.08)');
-      grad.addColorStop(1, 'rgba(255,215,0,0)');
-      c.fillStyle = grad; c.fillRect(sx - TS * 0.5, sy - TS * 0.5, TS * 2, TS * 2);
+      const aura = getGlow('boss-aura', TS * 2, 2, TS * 1.5,
+        [[0, 'rgba(255,215,0,0.18)'], [0.5, 'rgba(255,215,0,0.08)'], [1, 'rgba(255,215,0,0)']]);
+      c.drawImage(aura, sx - TS * 0.5, sy - TS * 0.5);
     }
     if (e.isElite && e.el !== 'none') {
       const elColors: Record<string, string> = { fire: '255,69,0', ice: '100,149,237', lightning: '255,215,0', shadow: '128,0,128', holy: '255,255,200' };
       const ecg = elColors[e.el] || '255,255,255';
-      const grad = c.createRadialGradient(sx + TS / 2, sy + TS / 2, 1, sx + TS / 2, sy + TS / 2, TS);
-      grad.addColorStop(0, `rgba(${ecg},0.12)`);
-      grad.addColorStop(1, `rgba(${ecg},0)`);
-      c.fillStyle = grad; c.fillRect(sx - 4, sy - 4, TS + 8, TS + 8);
+      const eg = getGlow('elite-glow:' + e.el, TS + 8, 1, TS,
+        [[0, `rgba(${ecg},0.12)`], [1, `rgba(${ecg},0)`]]);
+      c.drawImage(eg, sx - 4, sy - 4);
     }
 
     // Idle bob — subtle vertical sine, desynced per enemy; off in reduced-motion.
@@ -136,6 +131,23 @@ export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
 let minimapCanvas: HTMLCanvasElement | null = null;
 let minimapDirty = true;
 export function markMinimapDirty(): void { minimapDirty = true; }
+
+// Cached radial-gradient sprites. Each glow is a fixed pattern centered locally
+// (only its screen position changes per frame), so paint once + drawImage,
+// instead of createRadialGradient every frame.
+const glowCache = new Map<string, HTMLCanvasElement>();
+function getGlow(key: string, size: number, innerR: number, outerR: number, stops: [number, string][]): HTMLCanvasElement {
+  const cached = glowCache.get(key);
+  if (cached) return cached;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = size;
+  const cc = cv.getContext('2d')!;
+  const g = cc.createRadialGradient(size / 2, size / 2, innerR, size / 2, size / 2, outerR);
+  for (const [off, col] of stops) g.addColorStop(off, col);
+  cc.fillStyle = g; cc.fillRect(0, 0, size, size);
+  glowCache.set(key, cv);
+  return cv;
+}
 
 // Pre-rendered scanline overlay (avoids 300+ fillRect calls per frame)
 let scanlineCanvas: HTMLCanvasElement | null = null;
@@ -168,6 +180,7 @@ export function resizeCanvas(): void {
   c.height = Math.floor((area.clientHeight - 20) / TS) * TS;
   // Invalidate cached scanline overlay since canvas size changed
   scanlineCanvas = null;
+  glowCache.clear();
   // Invalidate minimap cache (canvas size or zoom may have changed)
   minimapCanvas = null;
 }
