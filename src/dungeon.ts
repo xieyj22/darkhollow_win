@@ -74,11 +74,15 @@ export function genDungeon(floor: number, areaOverride?: AreaDef): Dungeon {
   // omitted we fall back to the floor-range lookup, preserving old behavior.
   const area = areaOverride ?? AREAS.find(a => floor >= a.floorStart && floor <= a.floorEnd);
   if (area?.specialTiles) {
-    const st = area.specialTiles;
-    const count = rng(st.count[0], st.count[1]);
-    for (let i = 0; i < count; i++) {
-      const rx = rng(1, MW - 2), ry = rng(1, MH - 2);
-      if (map[ry][rx] === TL.FLOOR) map[ry][rx] = st.type;
+    // Wave 6c: specialTiles may be a single spec OR an array of specs (e.g.
+    // Fortress keeps ALARM and adds a rare PORTAL). Normalize to an array.
+    const list = Array.isArray(area.specialTiles) ? area.specialTiles : [area.specialTiles];
+    for (const st of list) {
+      const count = rng(st.count[0], st.count[1]);
+      for (let i = 0; i < count; i++) {
+        const rx = rng(1, MW - 2), ry = rng(1, MH - 2);
+        if (map[ry][rx] === TL.FLOOR) map[ry][rx] = st.type;
+      }
     }
   }
 

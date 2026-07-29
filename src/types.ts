@@ -329,7 +329,9 @@ export interface AreaDef {
   bgColor: string;
   wallChar: string;
   floorChar: string;
-  specialTiles?: AreaSpecialTile;
+  // A single special-tile spec, OR an array of them (Wave 6c: multiple types per
+  // area, e.g. Fortress keeps its ALARM from 6b and adds a rare PORTAL).
+  specialTiles?: AreaSpecialTile | AreaSpecialTile[];
   enemyScaleBonus: number;
   lore: I18nText[];
 }

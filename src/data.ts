@@ -168,6 +168,18 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Magma Hound', zh: '熔岩犬' }, ch: 'Ð', c: '#b22222', hp: 70, atk: 18, def: 8, exp: 45, g: [15, 30], ai: 'chase', mf: 13, el: 'fire', tags: ['beast'] },
   { n: { en: 'Cinder Wraith', zh: '余烬怨灵' }, ch: '§', c: '#ff6347', hp: 60, atk: 22, def: 6, exp: 50, g: [18, 35], ai: 'phase', mf: 15, el: 'fire', tags: ['spirit'] },
   { n: { en: 'Dread Legionnaire', zh: '恐惧军团兵' }, ch: '☨', c: '#5a5a6a', hp: 110, atk: 30, def: 14, exp: 85, g: [30, 60], ai: 'chase', mf: 18, el: 'shadow', tags: ['construct'] },
+  // === Wave 6c: Fungal Hollow branch enemies (mf 0 = branch-only, excluded
+  // from main-floor spawns by the mf>=1 filter in spawnEnemies). Stats tuned to
+  // ~F8-15 tier; spawnBranchEnemies applies a 0.7x side-content multiplier.
+  // Each carries a tag from pickEnemyTemplate's checked set so sprite routing is
+  // language-independent (runtime Enemy.name is localized; name regexes are
+  // case-sensitive lowercase and only reliably match the zh name). Templates:
+  // Brute→GOLEM, Spore Mother→WRAITH, Myconid→CULTIST, Knight→SKELETON, Slime→ELEMENTAL.
+  { n: { en: 'Mushroom Brute', zh: '菇蛮' }, ch: '♭', c: '#6a4a3a', hp: 70, atk: 16, def: 8, exp: 40, g: [12, 28], ai: 'chase', mf: 0, tags: ['construct'] },
+  { n: { en: 'Spore Mother', zh: '孢子之母' }, ch: '☂', c: '#5a8a5a', hp: 55, atk: 18, def: 5, exp: 45, g: [15, 30], ai: 'ranged', mf: 0, el: 'shadow', tags: ['spirit'] },
+  { n: { en: 'Myconid', zh: '蕈人' }, ch: '♟', c: '#7a4a8a', hp: 50, atk: 15, def: 6, exp: 35, g: [10, 22], ai: 'chase', mf: 0, tags: ['cultist'] },
+  { n: { en: 'Fungal Knight', zh: '菌骑' }, ch: '✟', c: '#8a7a6a', hp: 65, atk: 20, def: 10, exp: 50, g: [15, 35], ai: 'chase', mf: 0, el: 'shadow', tags: ['undead'] },
+  { n: { en: 'Glow Slime', zh: '荧光史莱姆' }, ch: '◉', c: '#5fdf8a', hp: 60, atk: 12, def: 9, exp: 32, g: [8, 20], ai: 'wander', mf: 0, tags: ['elemental'] },
 ];
 
 export const BOSSES: BossDef[] = [
@@ -202,6 +214,12 @@ export const BOSSES: BossDef[] = [
       { hpThreshold: 0.25, atkM: 2, newAi: 'chase' },
     ],
     summon: { chance: 0.5, cd: 3, maxAdds: 4 } },
+  // === Wave 6c: Fungal Hollow mini-boss (fl 0 = branch-only, never resolves via
+  // the main-line BOSSES.find(fl===floor) lookup). Static — no phases/summon —
+  // and processBossPhase early-returns when G.branchMode, so it stays a simple
+  // tank. Bosses always render via the BOSS template (drawBossSprite), so no
+  // tag is needed for sprite routing.
+  { n: { en: 'Myconid Sovereign', zh: '菌主' }, ch: '♫', c: '#9370db', hp: 150, atk: 24, def: 10, exp: 300, g: [100, 200], fl: 0, el: 'shadow' },
 ];
 
 export const ACH_DEFS: AchievementDef[] = [
@@ -386,7 +404,10 @@ export const AREAS: AreaDef[] = [
     id: 'depths', n: { en: 'Burning Depths', zh: '灼热深渊' }, floorStart: 11, floorEnd: 15,
     wallColor: '#4a2020', floorColor: '#3d2020', corrColor: '#2d1515', bgColor: '#1a0a0a',
     wallChar: '#', floorChar: '·', enemyScaleBonus: 0,
-    specialTiles: { type: TL.LAVA, ch: '~', fg: '#ff4500', bg: '#2a0a0a', count: [2, 5] },
+    specialTiles: [
+      { type: TL.LAVA, ch: '~', fg: '#ff4500', bg: '#2a0a0a', count: [2, 5] },
+      { type: TL.PORTAL, ch: '◯', fg: '#b266ff', bg: '#1a0a2a', count: [0, 1] },
+    ],
     lore: [
       { en: 'The air smells of brimstone.', zh: '空气中弥漫着硫磺的气味。' },
       { en: 'Lava glows in cracks along the walls.', zh: '墙壁裂缝中透出岩浆的红光。' },
@@ -395,7 +416,10 @@ export const AREAS: AreaDef[] = [
   {
     id: 'fortress', n: { en: 'Dark Fortress', zh: '暗黑堡垒' }, floorStart: 16, floorEnd: 20,
     wallColor: '#2d2d3d', floorColor: '#2d2d35', corrColor: '#1d1d25', bgColor: '#0a0a15',
-    specialTiles: { type: TL.ALARM, ch: '※', fg: '#daa520', bg: '#2a2a10', count: [1, 2] },
+    specialTiles: [
+      { type: TL.ALARM, ch: '※', fg: '#daa520', bg: '#2a2a10', count: [1, 2] },
+      { type: TL.PORTAL, ch: '◯', fg: '#b266ff', bg: '#1a0a2a', count: [0, 1] },
+    ],
     wallChar: '#', floorChar: '·', enemyScaleBonus: 0,
     lore: [
       { en: 'Bones crunch under your feet.', zh: '脚下传来骨头碎裂的声响。' },
@@ -440,6 +464,21 @@ export const AREAS: AreaDef[] = [
     lore: [
       { en: 'Divine light fills the halls. This is the end.', zh: '神圣的光芒充满殿堂。这是尽头。' },
       { en: 'The Creator awaits.', zh: '创世者在等待。' },
+    ],
+  },
+  // === Wave 6c: Portal branch biome. floorStart/floorEnd are sentinels (1000+)
+  // so this area NEVER resolves via the main 1-40 floor-range lookup — it is
+  // only used through genDungeon's areaOverride (enterBranch passes this def).
+  // G.floor stays at the entry floor inside the branch, so render.ts resolves
+  // the visual theme via a branchMode lookup (getCurrentArea in render.ts).
+  {
+    id: 'fungal', n: { en: 'Fungal Hollow', zh: '荧光菌穴' }, floorStart: 1000, floorEnd: 1002,
+    wallColor: '#2a1a3a', floorColor: '#1a2a1a', corrColor: '#151a15', bgColor: '#0a1a0a',
+    wallChar: '♣', floorChar: '·', enemyScaleBonus: 0.1,
+    specialTiles: { type: TL.MOSS, ch: '"', fg: '#6b8e3a', bg: '#1a2a10', count: [3, 6] },
+    lore: [
+      { en: 'Spores thick in the air.', zh: '空气中孢子浓密。' },
+      { en: 'Something vast blooms in the dark.', zh: '黑暗中有什么庞然大物在绽放。' },
     ],
   },
 ];

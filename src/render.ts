@@ -189,6 +189,16 @@ function getAreaForFloor(floor: number) {
   return AREAS.find(a => floor >= a.floorStart && floor <= a.floorEnd) || AREAS[0];
 }
 
+// Visual theme for the current view. Inside a portal branch, G.floor is the
+// main entry floor (not the fungal sentinel 1000+), so the floor-range lookup
+// would return the entry area (e.g. Fortress) and the fungal AreaDef's colors
+// would be dead data. Resolve the branch biome explicitly when branchMode.
+function getCurrentArea() {
+  if (!G) return AREAS[0];
+  if (G.branchMode) return AREAS.find(a => a.id === 'fungal') || AREAS[0];
+  return getAreaForFloor(G.floor);
+}
+
 export function render(): void {
   if (!G) return;
   const cvs = (window as any).__canvas as HTMLCanvasElement;
@@ -199,7 +209,7 @@ export function render(): void {
   G.vx = clamp(G.player.x - Math.floor(vc / 2), 0, Math.max(0, MW - vc));
   G.vy = clamp(G.player.y - Math.floor(vr / 2), 0, Math.max(0, MH - vr));
 
-  const area = getAreaForFloor(G.floor);
+  const area = getCurrentArea();
   const fovRad = 10 + (G.player.talents?.talents?.['r_night_vision'] ? 2 : 0); // approximate for falloff calc
 
   c.fillStyle = '#000';
@@ -237,6 +247,7 @@ export function render(): void {
         case TL.MOSS: ch = '"'; fg = '#6b8e3a'; bg = '#1a2a10'; break;
         case TL.CURSE: ch = '☣'; fg = '#8a2be2'; bg = '#1a0a2a'; break;
         case TL.ALARM: ch = '※'; fg = '#daa520'; bg = '#2a2a10'; break;
+        case TL.PORTAL: ch = '◯'; fg = '#b266ff'; bg = '#1a0a2a'; break;
         default: ch = ' '; fg = '#000'; bg = '#000';
       }
       if (!vis) {
@@ -349,6 +360,7 @@ export function renderMinimap(): void {
       if (tile === TL.MOSS) off.fillStyle = '#6b8e3a';
       if (tile === TL.CURSE) off.fillStyle = '#8a2be2';
       if (tile === TL.ALARM) off.fillStyle = '#daa520';
+      if (tile === TL.PORTAL) off.fillStyle = '#b266ff';
       off.fillRect(x * s, y * s, s, s);
     }
     minimapDirty = false;
@@ -463,12 +475,18 @@ export function updateUI(): void {
     bd.innerHTML = '<div style="color:#555">' + (lang === 'zh' ? '无' : 'None') + '</div>';
   }
 
-  // Floor label with area name
-  const area = getAreaForFloor(G.floor);
-  const areaName = lang === 'zh' ? area.n.zh : area.n.en;
-  let ft = `${areaName} ${G.floor}F`;
-  if (G.floor % 5 === 0) ft += ' ⚠ BOSS';
-  if (G.floor === FINAL) ft += ' ★ FINAL';
+  // Floor label with area name. Inside a branch, show the biome name instead of
+  // the floor number (G.floor = main entry floor there, which would be misleading).
+  let ft: string;
+  if (G.branchMode) {
+    ft = lang === 'zh' ? '🍄 荧光菌穴(秘境)' : '🍄 Fungal Hollow (Branch)';
+  } else {
+    const area = getAreaForFloor(G.floor);
+    const areaName = lang === 'zh' ? area.n.zh : area.n.en;
+    ft = `${areaName} ${G.floor}F`;
+    if (G.floor % 5 === 0) ft += ' ⚠ BOSS';
+    if (G.floor === FINAL) ft += ' ★ FINAL';
+  }
   $('floor-label')!.textContent = ft;
 
   const sd = $('streak-display')!;
