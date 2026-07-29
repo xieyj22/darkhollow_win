@@ -235,6 +235,31 @@ export function checkTiles(): void {
       G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
     }
   }
+  // MOSS — restores hunger, consumed
+  if (tile === TL.MOSS) {
+    const h = 5;
+    G.player.hunger = Math.min(G.player.maxHunger, G.player.hunger + h);
+    addMsg(lang === 'zh' ? `🌿 苔藓充饥！+${h} 饥饿` : `🌿 Moss snacks! +${h} hunger`, 'mh');
+    flt(G.player.x, G.player.y, `+${h}`, '#6b8e3a'); snd('heal');
+    G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
+  }
+  // CURSE — drains MP (distinct from LAVA's HP damage; not consumed)
+  if (tile === TL.CURSE) {
+    const drain = Math.max(2, Math.floor(G.player.maxMp * 0.2));
+    G.player.mp = Math.max(0, G.player.mp - drain);
+    addMsg(lang === 'zh' ? `⛧ 诅咒之地吸取了 ${drain} MP！` : `⛧ Cursed ground drains ${drain} MP!`, 'mc');
+    flt(G.player.x, G.player.y, `-${drain}MP`, '#8a2be2'); snd('hit');
+  }
+  // ALARM — aggros nearby enemies (consumed)
+  if (tile === TL.ALARM) {
+    let n = 0;
+    for (const e of G.enemies) {
+      if (!e.isAlly && !e.isBoss && dst(G.player.x, G.player.y, e.x, e.y) <= 8) { e.ai = 'chase'; n++; }
+    }
+    addMsg(lang === 'zh' ? `🚨 警报锣响！${n} 个敌人被激怒！` : `🚨 The alarm sounds! ${n} enemies enraged!`, 'me');
+    flt(G.player.x, G.player.y, '⚠ALARM', '#daa520'); snd('trap'); shake();
+    G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
+  }
 }
 
 // --- Map-entity events (point 1): chests & merchants spawn on the map ---

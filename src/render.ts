@@ -234,6 +234,9 @@ export function render(): void {
         case TL.ABYSS_WATER: ch = '~'; fg = '#00ced1'; bg = '#0a1520'; break;
         case TL.VOID_FLOOR: ch = ' '; fg = '#2a0040'; bg = '#0a0010'; break;
         case TL.CRYSTAL: ch = '◆'; fg = '#ffd700'; bg = '#1a1a05'; break;
+        case TL.MOSS: ch = '"'; fg = '#6b8e3a'; bg = '#1a2a10'; break;
+        case TL.CURSE: ch = '☣'; fg = '#8a2be2'; bg = '#1a0a2a'; break;
+        case TL.ALARM: ch = '※'; fg = '#daa520'; bg = '#2a2a10'; break;
         default: ch = ' '; fg = '#000'; bg = '#000';
       }
       if (!vis) {
@@ -343,6 +346,9 @@ export function renderMinimap(): void {
       if (tile === TL.LAVA) off.fillStyle = '#ff4500';
       if (tile === TL.ABYSS_WATER) off.fillStyle = '#00ced1';
       if (tile === TL.CRYSTAL) off.fillStyle = '#ffd700';
+      if (tile === TL.MOSS) off.fillStyle = '#6b8e3a';
+      if (tile === TL.CURSE) off.fillStyle = '#8a2be2';
+      if (tile === TL.ALARM) off.fillStyle = '#daa520';
       off.fillRect(x * s, y * s, s, s);
     }
     minimapDirty = false;

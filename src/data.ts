@@ -365,6 +365,7 @@ export const AREAS: AreaDef[] = [
   {
     id: 'caves', n: { en: 'The Caverns', zh: '地下洞穴' }, floorStart: 1, floorEnd: 5,
     wallColor: '#444', floorColor: '#333', corrColor: '#2a2a2a', bgColor: '#1a1a2e',
+    specialTiles: { type: TL.MOSS, ch: '"', fg: '#6b8e3a', bg: '#1a2a10', count: [2, 4] },
     wallChar: '#', floorChar: '·', enemyScaleBonus: 0,
     lore: [
       { en: 'Damp cave walls drip with moisture.', zh: '潮湿的洞壁上渗出水珠。' },
@@ -374,6 +375,7 @@ export const AREAS: AreaDef[] = [
   {
     id: 'crypts', n: { en: 'Ancient Crypts', zh: '远古墓穴' }, floorStart: 6, floorEnd: 10,
     wallColor: '#3d3d5c', floorColor: '#2d2d3d', corrColor: '#1d1d2d', bgColor: '#0a0a1e',
+    specialTiles: { type: TL.CURSE, ch: '☣', fg: '#8a2be2', bg: '#1a0a2a', count: [2, 4] },
     wallChar: '#', floorChar: '·', enemyScaleBonus: 0,
     lore: [
       { en: 'Ancient carvings line the corridors.', zh: '古老的雕刻布满走廊。' },
@@ -393,6 +395,7 @@ export const AREAS: AreaDef[] = [
   {
     id: 'fortress', n: { en: 'Dark Fortress', zh: '暗黑堡垒' }, floorStart: 16, floorEnd: 20,
     wallColor: '#2d2d3d', floorColor: '#2d2d35', corrColor: '#1d1d25', bgColor: '#0a0a15',
+    specialTiles: { type: TL.ALARM, ch: '※', fg: '#daa520', bg: '#2a2a10', count: [1, 2] },
     wallChar: '#', floorChar: '·', enemyScaleBonus: 0,
     lore: [
       { en: 'Bones crunch under your feet.', zh: '脚下传来骨头碎裂的声响。' },

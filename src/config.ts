@@ -51,4 +51,7 @@ export const enum TL {
   VOID_FLOOR = 10,
   CRYSTAL = 11,
   ABYSS_WATER = 12,
+  MOSS = 13,
+  CURSE = 14,
+  ALARM = 15,
 }
