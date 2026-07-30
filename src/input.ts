@@ -295,6 +295,9 @@ function renderInv(): void {
         acts.appendChild(db);
         // Assign to quick slot — point 9
         if (usable(it.type)) {
+          const ub = mkInvBtn(lang === 'zh' ? '用' : 'Use', '#06d6a0');
+          ub.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) useItem(ci); renderInv(); (window as any).__updateUI(); (window as any).__render(); };
+          acts.appendChild(ub);
           const ab = mkInvBtn(lang === 'zh' ? '装' : 'Slot', '#4895ef');
           ab.onclick = (ev) => { ev.stopPropagation(); assignTarget = (assignTarget === it ? null : it); renderInv(); };
           acts.appendChild(ab);

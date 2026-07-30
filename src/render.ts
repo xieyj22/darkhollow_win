@@ -214,8 +214,10 @@ export function render(): void {
   if (!cvs || !c) return;
 
   const vc = Math.floor(cvs.width / TS), vr = Math.floor(cvs.height / TS);
-  G.vx = clamp(G.player.x - Math.floor(vc / 2), 0, Math.max(0, MW - vc));
-  G.vy = clamp(G.player.y - Math.floor(vr / 2), 0, Math.max(0, MH - vr));
+  // Always center the player (no edge clamp) so side panels never obscure the
+  // action. Out-of-map tiles are skipped by the negative-aware bounds check below.
+  G.vx = G.player.x - Math.floor(vc / 2);
+  G.vy = G.player.y - Math.floor(vr / 2);
 
   const area = getCurrentArea();
   const torch = G.player.buffs.reduce((s, b) => b.type === 'torch' ? s + b.value : s, 0);
@@ -233,7 +235,7 @@ export function render(): void {
   for (let vy = 0; vy < vr; vy++) {
     for (let vx = 0; vx < vc; vx++) {
       const mx = G.vx + vx, my = G.vy + vy;
-      if (mx >= MW || my >= MH) continue;
+      if (mx < 0 || my < 0 || mx >= MW || my >= MH) continue;
       const sx = vx * TS, sy = vy * TS;
       const vis = G.player.visible?.[my]?.[mx];
       const exp = G.player.explored?.[my]?.[mx];
