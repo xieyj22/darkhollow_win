@@ -14,13 +14,14 @@ import { addMsg } from './messages.js';
 import { rng, pick } from './utils.js';
 import { AREAS } from './data.js';
 
-export function initGame(ri: number, ci: number): void {
+export function initGame(ri: number, ci: number, endless = false): void {
   const gameState: GameState = {
     player: createPlayer(ri, ci),
     floor: 1, dungeon: null as any,
     enemies: [], items: [], traps: [],
     msgs: [], gameOver: false, won: false, vx: 0, vy: 0,
     branchMode: false, branchReturn: null,
+    endless,
   };
   setGameState(gameState);
   enterFloor(1);

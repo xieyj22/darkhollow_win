@@ -1,7 +1,7 @@
 // Enemy generation and AI
 import type { Enemy, Room, Element } from './types.js';
 import { G, lang } from './state.js';
-import { MW, MH, TL } from './config.js';
+import { MW, MH, TL, FINAL } from './config.js';
 import { rng, pick, dst } from './utils.js';
 import { bonusExp } from './meta.js';
 import { flt } from './effects.js';
@@ -67,6 +67,26 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
       exp: Math.floor(bd.exp * bs), goldDrop: rng(bd.g[0], bd.g[1]),
       isBoss: true, stunned: 0, feared: 0, isAlly: false,
       el: bd.el || 'none',
+      res: {},
+      skillCd: 0,
+    });
+  }
+  // Endless scaled boss: every 5 floors past FINAL, reuse a random main-line
+  // BossDef with floor scaling so F45/F50/... always have a boss. Only fires
+  // in endless runs (normal mode ends at FINAL), but the floor>FINAL gate makes
+  // it self-guarding regardless.
+  if (floor > FINAL && floor % 5 === 0 && G) {
+    const base = pick(BOSSES);
+    const fs = 1 + (floor - 1) * .12;
+    const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
+    ens.push({
+      name: lang === 'zh' ? base.n.zh : base.n.en, ch: base.ch, c: base.c,
+      x: br.cx, y: br.cy, ai: 'chase',
+      hp: Math.floor(base.hp * fs), maxHp: Math.floor(base.hp * fs),
+      atk: Math.floor(base.atk * fs), def: Math.floor(base.def * fs),
+      exp: Math.floor(base.exp * fs), goldDrop: rng(base.g[0], base.g[1]),
+      isBoss: true, stunned: 0, feared: 0, isAlly: false,
+      el: base.el || 'none',
       res: {},
       skillCd: 0,
     });

@@ -158,7 +158,11 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
       if (def.isBoss) {
         G.player.bossesKilledThisRun++;
         checkAch('boss_kill');
-        if (G.floor === FINAL && !G.branchMode) { playerVictory(); return true; }
+        if (G.floor === FINAL && !G.branchMode && !G.endless) { playerVictory(); return true; }
+        // Endless: the Creator dies but the abyss keeps going — no victory.
+        if (G.floor === FINAL && G.endless) {
+          addMsg(lang === 'zh' ? '👑 你击败了创世者,但深渊仍在下探……' : '👑 You slay the Creator, yet the abyss yawns deeper...', 'md');
+        }
       }
 
       // Talent trigger: on kill
@@ -344,6 +348,10 @@ export function playerDeath(killer: string): void {
   addMsg(lang === 'zh' ? `你被${killer}杀死了……` : `You were slain by ${killer}...`, 'md');
   snd('death'); setBgmScene('death');
 
+  // Capture the previous endless best BEFORE updateRunStats so we can flag a new
+  // record on the death screen (updateRunStats raises bestEndlessFloor in-place).
+  const prevEndlessBest = G.endless ? (getMeta().stats.bestEndlessFloor || 0) : 0;
+
   // Calculate soul echoes and update meta stats
   const p = G.player;
   const echoes = calculateSoulEchoes(p.kills, G.floor, p.bossesKilledThisRun, p.gold, p.bestStreak, false);
@@ -352,13 +360,31 @@ export function playerDeath(killer: string): void {
     floor: G.floor, kills: p.kills, bossesKilled: p.bossesKilledThisRun,
     gold: p.gold, turns: p.turns, won: false, level: p.level,
     bestStreak: p.bestStreak, classIdx: p.ci,
+    endless: G.endless === true, endlessFloor: G.floor,
   });
 
+  // Endless score = deepest floor. Milestone achievements resolve via Task 2's
+  // ACH_DEFS; checkAch no-ops gracefully (persists ID, no message) until then.
+  if (G.endless) {
+    if (G.floor >= 50) checkAch('endless50');
+  }
+
+  const zh = lang === 'zh';
   document.getElementById('death-screen')!.style.display = 'flex';
-  document.getElementById('death-stats')!.innerHTML =
-    `${lang === 'zh' ? '到达第' : 'Reached Floor'} ${G.floor} · ${lang === 'zh' ? '等级' : 'Level'} ${G.player.level}<br>` +
-    `${G.player.kills} ${lang === 'zh' ? '敌人击杀' : 'enemies slain'} · ${G.player.gold} ${lang === 'zh' ? '金币' : 'gold'}<br>` +
-    `${lang === 'zh' ? '存活' : 'Survived'} ${G.player.turns} ${lang === 'zh' ? '回合' : 'turns'}`;
+  if (G.endless) {
+    const isRecord = G.floor > prevEndlessBest;
+    document.getElementById('death-stats')!.innerHTML =
+      `<span style="color:#9b5de5">♾ ${zh ? '无尽模式' : 'Endless Mode'}</span><br>` +
+      `${zh ? '下探至第' : 'Descended to Floor'} ${G.floor}${zh ? '层' : ''}<br>` +
+      (isRecord ? `<span style="color:#ffd700">★ ${zh ? '新纪录！' : 'NEW RECORD!'} ★</span><br>` : (prevEndlessBest > 0 ? `${zh ? '最佳' : 'Best'}: F${prevEndlessBest}<br>` : '')) +
+      `${zh ? '等级' : 'Level'} ${G.player.level} · ${G.player.kills} ${zh ? '击杀' : 'kills'} · ${G.player.gold} ${zh ? '金币' : 'gold'}<br>` +
+      `${zh ? '存活' : 'Survived'} ${G.player.turns} ${zh ? '回合' : 'turns'}`;
+  } else {
+    document.getElementById('death-stats')!.innerHTML =
+      `${zh ? '到达第' : 'Reached Floor'} ${G.floor} · ${zh ? '等级' : 'Level'} ${G.player.level}<br>` +
+      `${G.player.kills} ${zh ? '敌人击杀' : 'enemies slain'} · ${G.player.gold} ${zh ? '金币' : 'gold'}<br>` +
+      `${zh ? '存活' : 'Survived'} ${G.player.turns} ${zh ? '回合' : 'turns'}`;
+  }
   renderEchoBreakdown('death-echoes', echoes);
   localStorage.removeItem('dh_save');
 }
@@ -427,7 +453,11 @@ export function killEnemy(e: Enemy): void {
   if (e.isBoss) {
     G.player.bossesKilledThisRun++;
     checkAch('boss_kill');
-    if (G.floor === FINAL && !G.branchMode) { playerVictory(); return; }
+    if (G.floor === FINAL && !G.branchMode && !G.endless) { playerVictory(); return; }
+    // Endless: the Creator dies but the abyss keeps going — no victory.
+    if (G.floor === FINAL && G.endless) {
+      addMsg(lang === 'zh' ? '👑 你击败了创世者,但深渊仍在下探……' : '👑 You slay the Creator, yet the abyss yawns deeper...', 'md');
+    }
   }
 
   // Talent trigger: on kill

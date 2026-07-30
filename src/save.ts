@@ -35,7 +35,7 @@ function buildSave(): string {
   return JSON.stringify({
     player: playerData, floor: g.floor, dungeon: g.dungeon,
     enemies: serializeEnemies(g.enemies), items: g.items, traps: g.traps,
-    msgs: g.msgs.slice(-20), qs,
+    msgs: g.msgs.slice(-20), qs, endless: g.endless === true,
   });
 }
 
@@ -64,6 +64,9 @@ export function loadGame(): void {
       // hollow would have lost the main-floor snapshot anyway, so always load
       // as not-in-branch (prevents a stuck branchMode with no return target).
       branchMode: false, branchReturn: null,
+      // Endless flag persists across save/load so reloading an endless run
+      // keeps the F40-victory gate closed. Old saves without it default to Normal.
+      endless: s.endless === true,
     };
 
     // Fix Set deserialization — achievements may be an array after JSON parse

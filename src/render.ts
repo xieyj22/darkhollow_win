@@ -480,6 +480,9 @@ export function updateUI(): void {
   let ft: string;
   if (G.branchMode) {
     ft = lang === 'zh' ? '🍄 荧光菌穴(秘境)' : '🍄 Fungal Hollow (Branch)';
+  } else if (G.endless) {
+    ft = lang === 'zh' ? `♾ 无尽 ${G.floor} 层` : `♾ Endless ${G.floor}F`;
+    if (G.floor % 5 === 0) ft += ' ⚠ BOSS';
   } else {
     const area = getAreaForFloor(G.floor);
     const areaName = lang === 'zh' ? area.n.zh : area.n.en;
@@ -508,15 +511,28 @@ function renderObjective(): void {
   const bossesKilled = G.player.bossesKilledThisRun;
   // 常驻 summary(始终显示一行进度)
   const sum = document.getElementById('objective-summary');
-  if (sum) sum.innerHTML =
-    `<div class="obj-row"><span class="ol">${zh ? '层' : 'F'}</span><span class="ov">${fl}/${FINAL}</span></div>` +
-    `<div class="obj-bar"><div class="fill" style="width:${(fl / FINAL) * 100}%"></div></div>`;
+  if (G.endless) {
+    if (sum) sum.innerHTML =
+      `<div class="obj-row"><span class="ol">${zh ? '无尽' : 'Endless'}</span><span class="ov">${zh ? '第' + fl + '层' : 'F' + fl}</span></div>` +
+      `<div class="obj-bar"><div class="fill" style="width:100%"></div></div>`;
+  } else {
+    if (sum) sum.innerHTML =
+      `<div class="obj-row"><span class="ol">${zh ? '层' : 'F'}</span><span class="ov">${fl}/${FINAL}</span></div>` +
+      `<div class="obj-bar"><div class="fill" style="width:${(fl / FINAL) * 100}%"></div></div>`;
+  }
   // 详情 panel(默认折叠)
   const panel = document.getElementById('objective-panel')!;
-  panel.innerHTML =
-    `<div class="obj-row"><span class="ol">${zh ? '目标' : 'Goal'}</span><span class="ov">${zh ? '击败创世者(第40层)' : 'Beat The Creator (F40)'}</span></div>` +
-    `<div class="obj-row"><span class="ol">${zh ? '下个Boss' : 'Next Boss'}</span><span class="ov${fl === nextBoss && fl % 5 === 0 ? ' boss' : ''}">${zh ? '第' : 'F'} ${nextBoss}${fl === nextBoss && fl % 5 === 0 ? (zh ? ' ⚠ 当前层！' : ' ⚠ HERE!') : ''}</span></div>` +
-    `<div class="obj-row"><span class="ol">${zh ? 'Boss击杀' : 'Bosses'}</span><span class="ov${bossesKilled >= totalBosses ? ' done' : ''}">${bossesKilled}/${totalBosses}</span></div>`;
+  if (G.endless) {
+    panel.innerHTML =
+      `<div class="obj-row"><span class="ol">${zh ? '目标' : 'Goal'}</span><span class="ov">${zh ? '无尽下探(无终点)' : 'Endless descent (no end)'}</span></div>` +
+      `<div class="obj-row"><span class="ol">${zh ? '下个Boss' : 'Next Boss'}</span><span class="ov${fl === nextBoss && fl % 5 === 0 ? ' boss' : ''}">${zh ? '第' : 'F'} ${nextBoss}${fl === nextBoss && fl % 5 === 0 ? (zh ? ' ⚠ 当前层！' : ' ⚠ HERE!') : ''}</span></div>` +
+      `<div class="obj-row"><span class="ol">${zh ? 'Boss击杀' : 'Bosses'}</span><span class="ov">${bossesKilled}</span></div>`;
+  } else {
+    panel.innerHTML =
+      `<div class="obj-row"><span class="ol">${zh ? '目标' : 'Goal'}</span><span class="ov">${zh ? '击败创世者(第40层)' : 'Beat The Creator (F40)'}</span></div>` +
+      `<div class="obj-row"><span class="ol">${zh ? '下个Boss' : 'Next Boss'}</span><span class="ov${fl === nextBoss && fl % 5 === 0 ? ' boss' : ''}">${zh ? '第' : 'F'} ${nextBoss}${fl === nextBoss && fl % 5 === 0 ? (zh ? ' ⚠ 当前层！' : ' ⚠ HERE!') : ''}</span></div>` +
+      `<div class="obj-row"><span class="ol">${zh ? 'Boss击杀' : 'Bosses'}</span><span class="ov${bossesKilled >= totalBosses ? ' done' : ''}">${bossesKilled}/${totalBosses}</span></div>`;
+  }
 }
 
 function updateSoundBtn(): void {

@@ -452,6 +452,10 @@ export interface GameState {
   // position to restore on exit. See enterBranch/exitBranch in game.ts.
   branchMode?: boolean;
   branchReturn?: { floor: number; x: number; y: number } | null;
+  // Endless mode (chosen at new-game). When true the F40 Creator kill does NOT
+  // trigger victory — play continues F41+ with scaling + a scaled boss every 5
+  // floors; death records deepest floor as the endless score.
+  endless?: boolean;
 }
 
 // --- Achievements ---
@@ -487,6 +491,7 @@ export interface SaveData {
   traps: Trap[];
   msgs: GameMessage[];
   qs: number[];
+  endless?: boolean;
 }
 
 // --- Meta Progression ---
@@ -512,6 +517,7 @@ export interface MetaStats {
   bestStreak: number;
   highestLevel: number;
   classesWon: number[];  // class indices that have won
+  bestEndlessFloor: number;
 }
 
 export interface MetaUpgradeDef {

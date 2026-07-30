@@ -12,7 +12,7 @@ function defaultStats(): MetaStats {
   return {
     totalRuns: 0, bestFloor: 0, totalKills: 0, totalBossKills: 0,
     totalGold: 0, totalTurns: 0, wins: 0, deaths: 0,
-    bestStreak: 0, highestLevel: 0, classesWon: [],
+    bestStreak: 0, highestLevel: 0, classesWon: [], bestEndlessFloor: 0,
   };
 }
 
@@ -32,6 +32,7 @@ export function getMeta(): MetaSave {
       if (!m.upgrades) m.upgrades = {};
       if (!m.achievements) m.achievements = [];
       if (m.stats.classesWon === undefined) m.stats.classesWon = [];
+      if (m.stats.bestEndlessFloor === undefined) m.stats.bestEndlessFloor = 0;
       return m;
     }
   } catch { /* fall through */ }
@@ -189,6 +190,7 @@ export function updateRunStats(stats: {
   floor: number; kills: number; bossesKilled: number;
   gold: number; turns: number; won: boolean; level: number;
   bestStreak: number; classIdx: number;
+  endless?: boolean; endlessFloor?: number;
 }): void {
   const meta = getMeta();
   meta.stats.totalRuns++;
@@ -207,6 +209,10 @@ export function updateRunStats(stats: {
   }
   meta.stats.bestStreak = Math.max(meta.stats.bestStreak, stats.bestStreak);
   meta.stats.highestLevel = Math.max(meta.stats.highestLevel, stats.level);
+  // Endless score: deepest floor reached in an endless run.
+  if (stats.endless && stats.endlessFloor) {
+    meta.stats.bestEndlessFloor = Math.max(meta.stats.bestEndlessFloor, stats.endlessFloor);
+  }
   saveMeta(meta);
 }
 

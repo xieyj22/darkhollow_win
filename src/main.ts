@@ -117,10 +117,22 @@ function showCharSelect(): void {
     const cd = lang === 'zh' ? c.desc.zh : c.desc.en;
     return `<div class="class-opt" data-idx="${i}" style="padding:8px 15px;margin:4px 0;cursor:pointer;border:1px solid ${i === 0 ? '#e63946' : '#333'};border-radius:3px;color:${i === 0 ? '#ddd' : '#888'}"><b>${cn}</b> <span style="color:#666;font-size:.9em">${cd}</span></div>`;
   }).join('');
+  // Mode selector (Wave 6d): 0 = Normal (F40 Creator = victory), 1 = Endless
+  // (F40 kill does NOT win; F41+ continues indefinitely with score by depth).
+  // Defaults to Normal; declared inside showCharSelect so it resets each open.
+  let selMode = 0;
+  const modeOpts = [
+    { n: lang === 'zh' ? '普通模式' : 'Normal', d: lang === 'zh' ? '第40层击败创世者即胜利' : 'Beat the Creator at F40 to win' },
+    { n: lang === 'zh' ? '无尽模式' : 'Endless', d: lang === 'zh' ? 'F41+ 无限下探,以楼层为分数' : 'F41+ infinite descent, score by depth' },
+  ];
+  const modeHtml = modeOpts.map((m, i) =>
+    `<div class="mode-opt" data-idx="${i}" style="padding:8px 15px;margin:4px 0;cursor:pointer;border:1px solid ${i === 0 ? '#e63946' : '#333'};border-radius:3px;color:${i === 0 ? '#ddd' : '#888'}"><b>${m.n}</b> <span style="color:#666;font-size:.9em">${m.d}</span></div>`
+  ).join('');
   ov.innerHTML = `<h2 style="color:#e63946;margin-bottom:20px;font-size:1.8em">${t('createHero')}</h2>
   <div style="display:flex;gap:30px;margin-bottom:20px;flex-wrap:wrap;justify-content:center">
   <div><h3 style="color:#8888aa;margin-bottom:10px">${t('race')}</h3>${raceHtml}</div>
-  <div><h3 style="color:#8888aa;margin-bottom:10px">${t('cls')}</h3>${classHtml}</div></div>
+  <div><h3 style="color:#8888aa;margin-bottom:10px">${t('cls')}</h3>${classHtml}</div>
+  <div><h3 style="color:#8888aa;margin-bottom:10px">${lang === 'zh' ? '模式' : 'Mode'}</h3>${modeHtml}</div></div>
   <div style="display:flex;gap:10px;align-items:center">
   <button class="menu-btn" id="start-btn" style="margin-top:10px">${t('begin')}</button>
   <button class="menu-btn" id="char-back-btn" style="margin-top:10px;border-color:#888;color:#888">${lang === 'zh' ? '← 返回' : '← Back'}</button>
@@ -138,11 +150,17 @@ function showCharSelect(): void {
       ov.querySelectorAll('.class-opt').forEach((e: any, i: number) => { e.style.borderColor = i === selCls ? '#e63946' : '#333'; e.style.color = i === selCls ? '#ddd' : '#888'; });
     };
   });
+  ov.querySelectorAll('.mode-opt').forEach((el: any) => {
+    el.onclick = () => {
+      selMode = parseInt(el.dataset.idx);
+      ov.querySelectorAll('.mode-opt').forEach((e: any, i: number) => { e.style.borderColor = i === selMode ? '#e63946' : '#333'; e.style.color = i === selMode ? '#ddd' : '#888'; });
+    };
+  });
   document.getElementById('start-btn')!.onclick = () => {
     ov.remove();
     document.getElementById('game-container')!.style.display = 'flex';
     initAudio();
-    initGame(selRace, selCls);
+    initGame(selRace, selCls, selMode === 1);
     resizeCanvas();
     startParticles();
     updateUI();
