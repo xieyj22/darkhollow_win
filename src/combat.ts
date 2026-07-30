@@ -367,6 +367,8 @@ export function playerDeath(killer: string): void {
   // ACH_DEFS; checkAch no-ops gracefully (persists ID, no message) until then.
   if (G.endless) {
     if (G.floor >= 50) checkAch('endless50');
+    if (G.floor >= 75) checkAch('endless75');
+    if (G.floor >= 100) checkAch('endless100');
   }
 
   const zh = lang === 'zh';

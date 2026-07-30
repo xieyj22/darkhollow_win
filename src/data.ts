@@ -180,6 +180,11 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Myconid', zh: '蕈人' }, ch: '♟', c: '#7a4a8a', hp: 50, atk: 15, def: 6, exp: 35, g: [10, 22], ai: 'chase', mf: 0, tags: ['cultist'] },
   { n: { en: 'Fungal Knight', zh: '菌骑' }, ch: '✟', c: '#8a7a6a', hp: 65, atk: 20, def: 10, exp: 50, g: [15, 35], ai: 'chase', mf: 0, el: 'shadow', tags: ['undead'] },
   { n: { en: 'Glow Slime', zh: '荧光史莱姆' }, ch: '◉', c: '#5fdf8a', hp: 60, atk: 12, def: 9, exp: 32, g: [8, 20], ai: 'wander', mf: 0, tags: ['elemental'] },
+  // === Wave 6d: Endless mode (F41+) — mf 40+ exclusive strong foes ===
+  { n: { en: 'Void Titan', zh: '虚空泰坦' }, ch: '⊛', c: '#3a1a5a', hp: 220, atk: 48, def: 16, exp: 200, g: [60, 120], ai: 'chase', mf: 42, el: 'shadow', tags: ['construct'] },
+  { n: { en: 'Doom Seraph', zh: '末日炽天使' }, ch: '♰', c: '#b0b0ff', hp: 260, atk: 54, def: 14, exp: 240, g: [80, 140], ai: 'ranged', mf: 45, el: 'holy', tags: ['demon'] },
+  { n: { en: 'Entropy Beast', zh: '熵兽' }, ch: '✺', c: '#ff1493', hp: 300, atk: 58, def: 18, exp: 280, g: [90, 160], ai: 'erratic', mf: 48, el: 'shadow', tags: ['elemental'] },
+  { n: { en: 'Abyssal Tyrant', zh: '深渊暴君' }, ch: '⛉', c: '#1a0033', hp: 380, atk: 64, def: 22, exp: 350, g: [120, 200], ai: 'chase', mf: 50, el: 'shadow', tags: ['demon'] },
 ];
 
 export const BOSSES: BossDef[] = [
@@ -245,6 +250,10 @@ export const ACH_DEFS: AchievementDef[] = [
   { id: 'lvl30', icon: '⭐⭐⭐', n: { en: 'Legend', zh: '传奇' }, d: { en: 'Reach level 30', zh: '到达30级' } },
   { id: 'win', icon: '🏆', n: { en: 'Champion', zh: '冠军' }, d: { en: 'Beat the game', zh: '通关游戏' } },
   { id: 'creator_kill', icon: '🏆', n: { en: 'Godslayer', zh: '弑神者' }, d: { en: 'Defeat The Creator', zh: '击败创世者' } },
+  // Wave 6d: Endless milestones
+  { id: 'endless50', icon: '♾', n: { en: 'Abyss Delver', zh: '深渊掘进者' }, d: { en: 'Reach floor 50 in Endless', zh: '无尽模式到达50层' } },
+  { id: 'endless75', icon: '♾', n: { en: 'Void Walker', zh: '虚空行者' }, d: { en: 'Reach floor 75 in Endless', zh: '无尽模式到达75层' } },
+  { id: 'endless100', icon: '♾', n: { en: 'The Bottomless', zh: '无底之人' }, d: { en: 'Reach floor 100 in Endless', zh: '无尽模式到达100层' } },
 ];
 
 // ===== New Weapons =====
@@ -479,6 +488,17 @@ export const AREAS: AreaDef[] = [
     lore: [
       { en: 'Spores thick in the air.', zh: '空气中孢子浓密。' },
       { en: 'Something vast blooms in the dark.', zh: '黑暗中有什么庞然大物在绽放。' },
+    ],
+  },
+  // Wave 6d: Endless mode area (F41-9999) — only reached when G.endless; normal runs end at F40.
+  {
+    id: 'endless', n: { en: 'Endless Abyss', zh: '无尽深渊' }, floorStart: 41, floorEnd: 9999,
+    wallColor: '#1a0a2a', floorColor: '#150a20', corrColor: '#0a0510', bgColor: '#05000a',
+    wallChar: '▓', floorChar: '·', enemyScaleBonus: 0.15,
+    specialTiles: { type: TL.VOID_FLOOR, ch: ' ', fg: '#2a0040', bg: '#0a0010', count: [3, 8] },
+    lore: [
+      { en: 'Reality frays at the edges. There is no bottom.', zh: '现实在边缘磨损。这里没有尽头。' },
+      { en: 'The abyss goes on forever. So does something else.', zh: '深渊永无止境。别的什么也是。' },
     ],
   },
 ];
