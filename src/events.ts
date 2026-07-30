@@ -79,6 +79,7 @@ export function closeEvent(): void {
   setEventOpen(false);
   setEventActions([]);
   document.getElementById('event-popup')!.style.display = 'none';
+  if (G) render(); // refresh the snapshot so consumed map entities (merchant/chest) disappear immediately
 }
 
 function merchantBuy(): void {

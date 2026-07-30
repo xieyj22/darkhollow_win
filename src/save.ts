@@ -4,6 +4,7 @@ import { G, setGameState, lang } from './state.js';
 import { t } from './i18n.js';
 import { addMsg } from './messages.js';
 import { updateUI, render, resizeCanvas } from './render.js';
+import { startParticles } from './particles.js';
 import { MH, MW } from './config.js';
 import { updatePlayerFOV } from './dungeon.js';
 import { snd } from './audio.js';
@@ -137,6 +138,7 @@ export function loadGame(): void {
 
     addMsg(lang === 'zh' ? '存档已加载！' : 'Game loaded!', 'mi');
     updateUI(); render();
+    startParticles(); // Continue must (re)start the rAF loop that draws the player layer
     (window as any).__initAudio();
   } catch (e: any) {
     alert('Load failed: ' + e.message);
