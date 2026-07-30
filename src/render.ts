@@ -87,6 +87,11 @@ export function drawPlayerLayer(c: CanvasRenderingContext2D): void {
 
 // Enemies live in the dynamic layer too (like the player): tweened position
 // via setEnemyTween + a subtle idle bob. Drawn under the player layer.
+// Element color/symbol tables — hoisted to module level (were rebuilt per-enemy per-frame).
+const EL_COLORS: Record<string, string> = { fire: '255,69,0', ice: '100,149,237', lightning: '255,215,0', shadow: '128,0,128', holy: '255,255,200' };
+const EL_IND_SYM: Record<string, string> = { fire: '▲', ice: '✻', lightning: '⚡', shadow: '◔', holy: '✦' };
+const EL_IND_COLOR: Record<string, string> = { fire: '#ff7a45', ice: '#7ec8e3', lightning: '#fff2a8', shadow: '#b583f6', holy: '#ffd700' };
+
 export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
   if (!G) return;
   const cvs = (window as any).__canvas as HTMLCanvasElement;
@@ -107,8 +112,7 @@ export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
       c.drawImage(aura, sx - TS * 0.5, sy - TS * 0.5);
     }
     if (e.isElite && e.el !== 'none') {
-      const elColors: Record<string, string> = { fire: '255,69,0', ice: '100,149,237', lightning: '255,215,0', shadow: '128,0,128', holy: '255,255,200' };
-      const ecg = elColors[e.el] || '255,255,255';
+      const ecg = EL_COLORS[e.el] || '255,255,255';
       const eg = getGlow('elite-glow:' + e.el, TS + 8, 1, TS,
         [[0, `rgba(${ecg},0.12)`], [1, `rgba(${ecg},0)`]]);
       c.drawImage(eg, sx - 4, sy - 4);
@@ -120,11 +124,9 @@ export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
     const ec = e.isAlly ? '#06d6a0' : e.c;
     if (e.isBoss) drawBossSprite(c, sx, sy + bob, ec); else drawEnemySprite(c, sx, sy + bob, ec, e);
     if (e.el && e.el !== 'none') {
-      const elIndSym: Record<string, string> = { fire: '▲', ice: '✻', lightning: '⚡', shadow: '◔', holy: '✦' };
-      const elIndColor: Record<string, string> = { fire: '#ff7a45', ice: '#7ec8e3', lightning: '#fff2a8', shadow: '#b583f6', holy: '#ffd700' };
       c.font = `${Math.floor(TS / 3)}px ${FONT}`;
-      c.fillStyle = elIndColor[e.el] || '#fff';
-      c.fillText(elIndSym[e.el] || '', sx + TS - 4, sy + 4);
+      c.fillStyle = EL_IND_COLOR[e.el] || '#fff';
+      c.fillText(EL_IND_SYM[e.el] || '', sx + TS - 4, sy + 4);
     }
     if (e.hp < e.maxHp) {
       const bw = TS - 2, bh = e.isBoss ? 6 : 4, by = e.isBoss ? sy - 5 : sy - 3;

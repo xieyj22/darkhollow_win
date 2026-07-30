@@ -21,6 +21,7 @@ interface Spark {
   vx: number; vy: number;
   life: number; maxLife: number;
   size: number; color: string;
+  r: number; g: number; b: number;
 }
 
 const fxs: Fx[] = [];
@@ -73,6 +74,7 @@ export function fxDash(x1: number, y1: number, x2: number, y2: number, color: st
 export function fxBurst(x: number, y: number, color: string, count = 12, power = 1): void {
   if (reducedMotion) count = Math.min(count, 4);
   const cx = pxX(x), cy = pxY(y);
+  const [r, g, b] = rgb(color);
   for (let i = 0; i < count; i++) {
     const ang = Math.random() * Math.PI * 2;
     const spd = (0.6 + Math.random() * 2.4) * power;
@@ -81,7 +83,7 @@ export function fxBurst(x: number, y: number, color: string, count = 12, power =
       vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
       life: 0, maxLife: 18 + Math.random() * 18,
       size: 1 + Math.random() * 2.2,
-      color,
+      color, r, g, b,
     });
   }
   trim(sparks, MAX_SPARKS);
@@ -103,7 +105,7 @@ export function drawFx(c: CanvasRenderingContext2D): void {
       s.vx *= 0.92; s.vy *= 0.92; s.vy += 0.05; // drag + slight gravity
       const t = s.life / s.maxLife;
       if (t >= 1) continue;
-      const [r, g, b] = rgb(s.color);
+      const r = s.r, g = s.g, b = s.b;
       c.globalAlpha = 1 - t;
       c.fillStyle = `rgb(${r},${g},${b})`;
       c.beginPath();
