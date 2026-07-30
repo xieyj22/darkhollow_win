@@ -1,5 +1,5 @@
 // Meta progression system — Soul Echoes, The Forge, persistent achievements, run stats
-import type { MetaSave, MetaStats, SoulEchoBreakdown, Player } from './types.js';
+import type { MetaSave, MetaStats, SoulEchoBreakdown, Player, RunRecord } from './types.js';
 import { lang } from './state.js';
 import { META_UPGRADES, ACH_DEFS, RELICS } from './data.js';
 import { snd } from './audio.js';
@@ -20,6 +20,7 @@ export function initMeta(): MetaSave {
   return {
     version: 1, soulEchoes: 0, totalSpent: 0,
     upgrades: {}, achievements: [], stats: defaultStats(),
+    runHistory: [], endlessLeaderboard: [],
   };
 }
 
@@ -33,6 +34,8 @@ export function getMeta(): MetaSave {
       if (!m.achievements) m.achievements = [];
       if (m.stats.classesWon === undefined) m.stats.classesWon = [];
       if (m.stats.bestEndlessFloor === undefined) m.stats.bestEndlessFloor = 0;
+      if (!m.runHistory) m.runHistory = [];
+      if (!m.endlessLeaderboard) m.endlessLeaderboard = [];
       return m;
     }
   } catch { /* fall through */ }
@@ -41,6 +44,20 @@ export function getMeta(): MetaSave {
 
 export function saveMeta(m: MetaSave): void {
   localStorage.setItem(META_KEY, JSON.stringify(m));
+}
+
+// Record a finished run: push to recent history (newest first, cap 20); endless
+// runs also enter the leaderboard ranked by floor then kills (cap 10).
+export function recordRun(rec: RunRecord): void {
+  const m = getMeta();
+  m.runHistory.unshift(rec);
+  if (m.runHistory.length > 20) m.runHistory.length = 20;
+  if (rec.mode === 'endless') {
+    m.endlessLeaderboard.push({ floor: rec.floor, kills: rec.kills, classIdx: rec.classIdx, turns: rec.turns, gold: rec.gold, ts: rec.ts });
+    m.endlessLeaderboard.sort((a, b) => b.floor - a.floor || b.kills - a.kills);
+    if (m.endlessLeaderboard.length > 10) m.endlessLeaderboard.length = 10;
+  }
+  saveMeta(m);
 }
 
 // ===== Soul Echo Calculation =====

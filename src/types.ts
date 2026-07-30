@@ -496,6 +496,25 @@ export interface SaveData {
 
 // --- Meta Progression ---
 
+export interface RunRecord {
+  mode: 'normal' | 'endless';
+  floor: number;
+  kills: number;
+  classIdx: number;
+  result: 'win' | 'death';
+  turns: number;
+  gold: number;
+  ts: number;
+}
+export interface EndlessRecord {
+  floor: number;
+  kills: number;
+  classIdx: number;
+  turns: number;
+  gold: number;
+  ts: number;
+}
+
 export interface MetaSave {
   version: number;
   soulEchoes: number;
@@ -503,6 +522,8 @@ export interface MetaSave {
   upgrades: Record<string, number>;
   achievements: string[];
   stats: MetaStats;
+  runHistory: RunRecord[];
+  endlessLeaderboard: EndlessRecord[];
 }
 
 export interface MetaStats {

@@ -17,7 +17,7 @@ import {
   onPlayerDamaged, onPlayerDeath, onEnemyHitPlayer, checkDoubleStrike,
   getCritMultiplier, getManaShieldReduction,
 } from './talents.js';
-import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes } from './meta.js';
+import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun } from './meta.js';
 
 // Late-bound dependency to break circular import with items.ts
 let _genItem: ((floor: number) => any) | null = null;
@@ -362,6 +362,7 @@ export function playerDeath(killer: string): void {
     bestStreak: p.bestStreak, classIdx: p.ci,
     endless: G.endless === true, endlessFloor: G.floor,
   });
+  recordRun({ mode: G.endless ? 'endless' : 'normal', floor: G.floor, kills: p.kills, classIdx: p.ci, result: 'death', turns: p.turns, gold: p.gold, ts: Date.now() });
 
   // Endless score = deepest floor. Milestone achievements resolve via Task 2's
   // ACH_DEFS; checkAch no-ops gracefully (persists ID, no message) until then.
@@ -406,6 +407,7 @@ export function playerVictory(): void {
     gold: p.gold, turns: p.turns, won: true, level: p.level,
     bestStreak: p.bestStreak, classIdx: p.ci,
   });
+  recordRun({ mode: 'normal', floor: G.floor, kills: p.kills, classIdx: p.ci, result: 'win', turns: p.turns, gold: p.gold, ts: Date.now() });
 
   document.getElementById('victory-screen')!.style.display = 'flex';
   document.getElementById('vic-stats')!.innerHTML =

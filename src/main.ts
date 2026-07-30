@@ -25,7 +25,7 @@ import { initInput, initTouchControls } from './input.js';
 import { saveGame, loadGame } from './save.js';
 import { setRecalcFn, setKillEnemyFn } from './relics.js';
 import { paintIcon } from './sprites.js';
-import { renderForge, renderTitleStats } from './meta.js';
+import { renderForge, renderTitleStats, getMeta } from './meta.js';
 import { startParticles, stopParticles, setDrawPlayerLayerFn, setDrawEnemyLayerFn } from './particles.js';
 import { openOptions, closeOptions, renderOptions, applyOptionsUI, applyTextScale, applyColorblind, applyBarCues } from './options.js';
 
@@ -192,6 +192,7 @@ function updateLangUI(): void {
   $('title-h2')!.textContent = t('titleH2');
   $('btn-new')!.textContent = t('btnNew'); $('btn-cont')!.textContent = t('btnCont'); $('btn-help')!.textContent = t('btnHelp');
   $('btn-forge')!.textContent = t('forgeBtn');
+  $('btn-records')!.textContent = lang === 'zh' ? '📋 记录' : '📋 Records';
   $('lang-btn')!.textContent = lang === 'en' ? '中文' : 'EN';
   $('sb-hero')!.textContent = '⚔ ' + t('hero'); $('sb-nl')!.textContent = t('name'); $('sb-rl')!.textContent = t('race');
   $('sb-cl')!.textContent = t('cls'); $('sb-lv')!.textContent = t('level');
@@ -482,6 +483,28 @@ function closePause(): void {
   hideOverlay('pause-overlay');
 }
 
+// ===== Records / Leaderboard (Wave 7b) =====
+function renderRecords(): void {
+  const zh = lang === 'zh';
+  const m = getMeta();
+  const cls = (i: number) => { const c = CLASSES[i]; return c ? (zh ? c.name.zh : c.name.en) : '?'; };
+  const row = (cols: string[], color = '#ccc') =>
+    `<div style="display:flex;gap:8px;padding:3px 6px;border-bottom:1px solid #1c1c1c;color:${color};font-size:.88em">${cols.map(c => `<span style="flex:1">${c}</span>`).join('')}</div>`;
+  const hdr = (cols: string[]) => row(cols, '#777');
+  const hist = m.runHistory.length
+    ? m.runHistory.map(r => row([r.mode === 'endless' ? '♾' : '◐', cls(r.classIdx), `F${r.floor}`, `${r.kills}${zh ? '杀' : 'k'}`, r.result === 'win' ? '🏆' : '💀'], r.result === 'win' ? '#ffd700' : '#e63946')).join('')
+    : `<div style="color:#555;padding:8px">${zh ? '暂无记录' : 'No runs yet'}</div>`;
+  const lb = m.endlessLeaderboard.length
+    ? m.endlessLeaderboard.map((r, i) => row([`#${i + 1}`, cls(r.classIdx), `F${r.floor}`, `${r.kills}${zh ? '杀' : 'k'}`], i === 0 ? '#ffd700' : '#999')).join('')
+    : `<div style="color:#555;padding:8px">${zh ? '暂无无尽记录' : 'No endless runs'}</div>`;
+  (document.getElementById('records-content')!).innerHTML =
+    `<div style="color:#888;margin:6px 2px;font-size:.95em">🕐 ${zh ? '最近 20 局' : 'Recent Runs'}</div>` +
+    hdr([zh ? '模式' : 'Mode', zh ? '职业' : 'Class', zh ? '楼层' : 'Floor', zh ? '击杀' : 'Kills', zh ? '结果' : 'Result']) + hist +
+    `<div style="color:#888;margin:14px 2px 6px;font-size:.95em">♾ ${zh ? '无尽排行榜 · Top 10' : 'Endless Leaderboard · Top 10'}</div>` +
+    hdr([zh ? '排名' : 'Rank', zh ? '职业' : 'Class', zh ? '最深' : 'Deepest', zh ? '击杀' : 'Kills']) + lb;
+  (document.getElementById('records-title')!).textContent = zh ? '📋 游戏记录' : '📋 Records';
+}
+
 // ===== Bind HTML buttons =====
 function bindButtons(): void {
   const on = (id: string, fn: () => void) => {
@@ -501,6 +524,8 @@ function bindButtons(): void {
   on('btn-close-ach', () => { setAchOpen(false); hideOverlay('achievement-overlay'); });
   on('btn-close-talent', () => { setTalentOpen(false); hideOverlay('talent-overlay'); });
   on('btn-close-forge', () => { hideOverlay('forge-overlay'); });
+  on('btn-records', () => { showOverlay('records-overlay'); renderRecords(); });
+  on('btn-close-records', () => { hideOverlay('records-overlay'); });
   on('btn-back-title', () => {
     if (G && !G.gameOver) {
       // Confirm before leaving an active game
