@@ -11,6 +11,7 @@ import { attack, killEnemy, checkLevelUp } from './combat.js';
 import { onPlayerDamaged, onEnemyHitPlayer, onPlayerDodged, onPlayerDeath, getManaShieldReduction } from './talents.js';
 import { relicOnDodge } from './relics.js';
 import { setEnemyTween } from './render.js';
+import { makeEnemy } from './enemy-factory.js';
 
 export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const ens: Enemy[] = [];
@@ -33,17 +34,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
       nm = (lang === 'zh' ? pf.n.zh : pf.n.en) + nm;
       hpM = pf.hpM; atkM = pf.atkM; defAdd = pf.defM || 0; expM = pf.expM; goldM = pf.goldM; isElite = true;
     }
-    return {
-      name: nm, ch: base.ch, c: base.c, x, y,
-      hp: Math.floor(base.hp * fs * hpM), maxHp: Math.floor(base.hp * fs * hpM),
-      atk: Math.floor(base.atk * fs * atkM), def: Math.floor((base.def + defAdd) * fs),
-      exp: Math.floor(base.exp * fs * expM), goldDrop: Math.floor(rng(base.g[0], base.g[1]) * goldM),
-      ai: base.ai, stunned: 0, feared: 0, isAlly: false, isElite,
-      el: base.el || 'none',
-      res: base.res ? { ...base.res } : {},
-      skillCd: 0,
-      tags: base.tags ? [...base.tags] : [],
-    };
+    return makeEnemy(base, x, y, fs, { hpM, atkM, defAdd, expM, goldM, isElite }, nm);
   };
 
   // Guarantee at least one enemy in every non-start room, then scatter extras
@@ -59,17 +50,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   if (bd) {
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
     const bs = 1 + (floor - 1) * .1;
-    ens.push({
-      name: lang === 'zh' ? bd.n.zh : bd.n.en, ch: bd.ch, c: bd.c,
-      x: br.cx, y: br.cy, ai: 'chase',
-      hp: Math.floor(bd.hp * bs), maxHp: Math.floor(bd.hp * bs),
-      atk: Math.floor(bd.atk * bs), def: Math.floor(bd.def * bs),
-      exp: Math.floor(bd.exp * bs), goldDrop: rng(bd.g[0], bd.g[1]),
-      isBoss: true, stunned: 0, feared: 0, isAlly: false,
-      el: bd.el || 'none',
-      res: {},
-      skillCd: 0,
-    });
+    ens.push(makeEnemy(bd, br.cx, br.cy, bs, { isBoss: true }, lang === 'zh' ? bd.n.zh : bd.n.en));
   }
   // Endless scaled boss: every 5 floors past FINAL, reuse a random main-line
   // BossDef with floor scaling so F45/F50/... always have a boss. Only fires
@@ -79,17 +60,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
     const base = pick(BOSSES);
     const fs = 1 + (floor - 1) * .1; // boss scale (.1), not enemy scale (.12)
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
-    ens.push({
-      name: lang === 'zh' ? base.n.zh : base.n.en, ch: base.ch, c: base.c,
-      x: br.cx, y: br.cy, ai: 'chase',
-      hp: Math.floor(base.hp * fs), maxHp: Math.floor(base.hp * fs),
-      atk: Math.floor(base.atk * fs), def: Math.floor(base.def * fs),
-      exp: Math.floor(base.exp * fs), goldDrop: rng(base.g[0], base.g[1]),
-      isBoss: true, stunned: 0, feared: 0, isAlly: false,
-      el: base.el || 'none',
-      res: {},
-      skillCd: 0,
-    });
+    ens.push(makeEnemy(base, br.cx, br.cy, fs, { isBoss: true }, lang === 'zh' ? base.n.zh : base.n.en));
   }
   return ens;
 }
@@ -109,32 +80,13 @@ export function spawnBranchEnemies(rooms: Room[], entryFloor: number): Enemy[] {
   for (const rm of otherRooms) {
     const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
     const base = pick(pool);
-    ens.push({
-      name: lang === 'zh' ? base.n.zh : base.n.en, ch: base.ch, c: base.c, x, y,
-      hp: Math.floor(base.hp * fs * .7), maxHp: Math.floor(base.hp * fs * .7),
-      atk: Math.floor(base.atk * fs * .7), def: Math.floor(base.def * fs * .7),
-      exp: Math.floor(base.exp * fs * .7), goldDrop: Math.floor(rng(base.g[0], base.g[1]) * .7),
-      ai: base.ai, stunned: 0, feared: 0, isAlly: false,
-      el: base.el || 'none',
-      res: base.res ? { ...base.res } : {},
-      skillCd: 0,
-      tags: base.tags ? [...base.tags] : [],
-    });
+    ens.push(makeEnemy(base, x, y, fs, { hpM: .7, atkM: .7, defM: .7, expM: .7, goldM: .7 }));
   }
   // Static mini-boss (fl===0) at the second-to-last room center.
   const mb = BOSSES.find(b => b.fl === 0);
   if (mb) {
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
-    ens.push({
-      name: lang === 'zh' ? mb.n.zh : mb.n.en, ch: mb.ch, c: mb.c,
-      x: br.cx, y: br.cy, ai: 'chase',
-      hp: Math.floor(mb.hp * fs), maxHp: Math.floor(mb.hp * fs),
-      atk: Math.floor(mb.atk * fs), def: Math.floor(mb.def * fs),
-      exp: Math.floor(mb.exp * fs), goldDrop: rng(mb.g[0], mb.g[1]),
-      isBoss: true, stunned: 0, feared: 0, isAlly: false,
-      el: mb.el || 'none',
-      res: {}, skillCd: 0,
-    });
+    ens.push(makeEnemy(mb, br.cx, br.cy, fs, { isBoss: true }, lang === 'zh' ? mb.n.zh : mb.n.en));
   }
   return ens;
 }
@@ -264,15 +216,7 @@ export function processEnemies(): void {
             if (sx >= 0 && sx < MW && sy >= 0 && sy < MH &&
                 G.dungeon.map[sy]?.[sx] !== TL.WALL && G.dungeon.map[sy]?.[sx] !== TL.VOID &&
                 !G.enemies.some(o => o.x === sx && o.y === sy)) {
-              const sn: Enemy = {
-                name: lang === 'zh' ? base.n.zh : base.n.en, ch: base.ch, c: base.c, x: sx, y: sy,
-                hp: Math.floor(base.hp * fs * .5), maxHp: Math.floor(base.hp * fs * .5),
-                atk: Math.floor(base.atk * fs * .7), def: Math.floor(base.def * fs * .5),
-                exp: Math.floor(base.exp * fs * .3), goldDrop: Math.floor(rng(base.g[0], base.g[1]) * .3),
-                ai: base.ai, stunned: 0, feared: 0, isAlly: false,
-                el: base.el || 'none', res: base.res ? { ...base.res } : {}, skillCd: 0,
-                tags: base.tags ? [...base.tags] : [],
-              };
+              const sn: Enemy = makeEnemy(base, sx, sy, fs, { hpM: .5, atkM: .7, defM: .5, expM: .3, goldM: .3 });
               G.enemies.push(sn);
               addMsg(lang === 'zh' ? `${e.name}召唤了${sn.name}！` : `${e.name} summons a ${sn.name}!`, 'me');
               flt(sx, sy, '⚡SUMMON', '#9b5de5');
@@ -364,15 +308,7 @@ function bossSummonAdd(boss: Enemy): void {
     if (G.dungeon.map[sy][sx] === TL.WALL || G.dungeon.map[sy][sx] === TL.VOID) continue;
     if (G.enemies.some(o => o.x === sx && o.y === sy)) continue;
     if (sx === G.player.x && sy === G.player.y) continue;
-    const sn: Enemy = {
-      name: lang === 'zh' ? base.n.zh : base.n.en, ch: base.ch, c: base.c, x: sx, y: sy,
-      hp: Math.floor(base.hp * fs * .6), maxHp: Math.floor(base.hp * fs * .6),
-      atk: Math.floor(base.atk * fs * .8), def: Math.floor(base.def * fs * .6),
-      exp: Math.floor(base.exp * fs * .4), goldDrop: Math.floor(rng(base.g[0], base.g[1]) * .4),
-      ai: base.ai, stunned: 0, feared: 0, isAlly: false,
-      el: base.el || 'none', res: base.res ? { ...base.res } : {}, skillCd: 0,
-      tags: base.tags ? [...base.tags] : [],
-    };
+    const sn: Enemy = makeEnemy(base, sx, sy, fs, { hpM: .6, atkM: .8, defM: .6, expM: .4, goldM: .4 });
     G.enemies.push(sn);
     addMsg(lang === 'zh' ? `${boss.name}召唤了${sn.name}！` : `${boss.name} summons a ${sn.name}!`, 'me');
     flt(sx, sy, '⚡SUMMON', '#ff4500');
