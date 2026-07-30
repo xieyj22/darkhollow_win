@@ -5,6 +5,7 @@ import { MH, MW, TL, getMaxInv, getMaxConsInv, getGearInvMax } from './config.js
 import { rng, pick, dst, clamp } from './utils.js';
 import { snd } from './audio.js';
 import { flt, shake, burstSmoke } from './effects.js';
+import { fxBeam, fxBolt, fxBurst, fxFlash } from './fx.js';
 import { t, rareName, itemName, RARITY_C } from './i18n.js';
 import { ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS } from './data.js';
 import { addMsg } from './messages.js';
@@ -144,8 +145,8 @@ export function useItem(idx: number): void {
 
   if (item.type === 'potion') {
     switch (item.ef) {
-      case 'heal': { const raw = Math.floor((item.val || 0) * (1 + (p.healBonus || 0))); const h = Math.min(raw, p.maxHp - p.hp); p.hp += h; addMsg(lang === 'zh' ? `恢复${h}HP` : `Healed ${h} HP`, 'mh'); flt(p.x, p.y, `+${h}`, '#80ed99'); snd('heal'); break; }
-      case 'mana': { const h = Math.min(item.val || 0, p.maxMp - p.mp); p.mp += h; addMsg(lang === 'zh' ? `恢复${h}MP` : `Restored ${h} MP`, 'mh'); flt(p.x, p.y, `+${h}MP`, '#4895ef'); snd('heal'); break; }
+      case 'heal': { const raw = Math.floor((item.val || 0) * (1 + (p.healBonus || 0))); const h = Math.min(raw, p.maxHp - p.hp); p.hp += h; addMsg(lang === 'zh' ? `恢复${h}HP` : `Healed ${h} HP`, 'mh'); fxFlash(p.x, p.y, '#80ed99'); flt(p.x, p.y, `+${h}`, '#80ed99'); snd('heal'); break; }
+      case 'mana': { const h = Math.min(item.val || 0, p.maxMp - p.mp); p.mp += h; addMsg(lang === 'zh' ? `恢复${h}MP` : `Restored ${h} MP`, 'mh'); fxFlash(p.x, p.y, '#4895ef'); flt(p.x, p.y, `+${h}MP`, '#4895ef'); snd('heal'); break; }
       case 'str_buff': p.buffs.push({ name: lang === 'zh' ? '力量' : 'Strength', type: 'str_buff', value: item.val || 0, turns: item.dur || 30 }); addMsg(`+${item.val} ATK ${item.dur}t`, 'mi'); break;
       case 'def_buff': p.buffs.push({ name: lang === 'zh' ? '铁皮' : 'Iron Skin', type: 'def_buff', value: item.val || 0, turns: item.dur || 30 }); addMsg(`+${item.val} DEF ${item.dur}t`, 'mi'); break;
       case 'restore': p.hp = p.maxHp; p.mp = p.maxMp; addMsg(lang === 'zh' ? '完全恢复！' : 'Fully restored!', 'mh'); flt(p.x, p.y, 'FULL', '#ffd700'); snd('heal'); break;
@@ -161,14 +162,15 @@ export function useItem(idx: number): void {
       case 'fireball': {
         let k = 0;
         const es = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 4);
-        for (const e of es) { const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}`, '#ff4500'); if (e.hp <= 0) { k++; killEnemy(e); } }
+        fxFlash(p.x, p.y, '#ff4500', 1.4);
+        for (const e of es) { fxBurst(e.x, e.y, '#ff4500', 10, 1); const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}`, '#ff4500'); if (e.hp <= 0) { k++; killEnemy(e); } }
         G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
         addMsg(lang === 'zh' ? `火球术！命中${es.length}个，击杀${k}个！` : `Fireball! Hit ${es.length}, killed ${k}!`, 'mc'); shake(); checkLevelUp(); break;
       }
       case 'lightning': {
         let k = 0;
         const es = G.enemies.filter(e => !e.isAlly && p.visible?.[e.y]?.[e.x]);
-        for (const e of es) { const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}`, '#ffd700'); if (e.hp <= 0) { k++; killEnemy(e); } }
+        for (const e of es) { fxBeam(p.x, p.y, e.x, e.y, '#ffd700'); const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}`, '#ffd700'); if (e.hp <= 0) { k++; killEnemy(e); } }
         G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
         addMsg(lang === 'zh' ? `闪电！命中${es.length}个！` : `Lightning! Hit ${es.length}!`, 'mc'); shake(); checkLevelUp(); break;
       }
@@ -182,7 +184,7 @@ export function useItem(idx: number): void {
         const { rm } = pick(pool);
         p.x = rm.cx; p.y = rm.cy;
         addMsg(lang === 'zh' ? '传送！' : 'Teleported!', 'mi');
-        flt(p.x, p.y, '⚡传送', '#9b5de5');
+        fxFlash(p.x, p.y, '#9b5de5', 1.4); flt(p.x, p.y, '⚡传送', '#9b5de5');
         break;
       }
       case 'mapping': for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) p.explored[y][x] = true; addMsg(lang === 'zh' ? '地图已揭示！' : 'Map revealed!', 'mi'); break;
@@ -191,14 +193,14 @@ export function useItem(idx: number): void {
       case 'blizzard': {
         let k = 0;
         const es = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 5);
-        for (const e of es) { const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}❄`, '#00ced1'); if (e.hp <= 0) { k++; killEnemy(e); } }
+        for (const e of es) { fxBurst(e.x, e.y, '#00ced1', 8, 0.8); const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}❄`, '#00ced1'); if (e.hp <= 0) { k++; killEnemy(e); } }
         G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
         addMsg(lang === 'zh' ? `暴风雪！命中${es.length}个，击杀${k}个！` : `Blizzard! Hit ${es.length}, killed ${k}!`, 'mc'); shake(); checkLevelUp(); break;
       }
       case 'holy_blast': {
         let k = 0;
         const es = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 5);
-        for (const e of es) { const d = Math.floor((item.val || 0) * p.spellPower * (e.el === 'shadow' ? 1.5 : 1)); e.hp -= d; flt(e.x, e.y, `-${d}✨`, '#ffd700'); if (e.hp <= 0) { k++; killEnemy(e); } }
+        for (const e of es) { fxBeam(p.x, p.y, e.x, e.y, '#ffd700'); const d = Math.floor((item.val || 0) * p.spellPower * (e.el === 'shadow' ? 1.5 : 1)); e.hp -= d; flt(e.x, e.y, `-${d}✨`, '#ffd700'); if (e.hp <= 0) { k++; killEnemy(e); } }
         G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
         addMsg(lang === 'zh' ? `圣光！命中${es.length}个，击杀${k}个！` : `Holy blast! Hit ${es.length}, killed ${k}!`, 'mc'); shake(); checkLevelUp(); break;
       }
@@ -219,7 +221,7 @@ export function useItem(idx: number): void {
           }
         }
         G.enemies.push(ally);
-        addMsg(t('allyMsg'), 'msk'); flt(ally.x, ally.y, '☆SUMMON', '#06d6a0'); break;
+        addMsg(t('allyMsg'), 'msk'); fxFlash(ally.x, ally.y, '#06d6a0', 1.4); flt(ally.x, ally.y, '☆SUMMON', '#06d6a0'); break;
       }
     }
     p.inv.splice(idx, 1); recalc(); endTurn();
@@ -228,13 +230,14 @@ export function useItem(idx: number): void {
     switch (item.ef) {
       case 'bomb': {
         const es = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 3); let k = 0;
+        fxBurst(p.x, p.y, '#ff4500', 24, 1.6); fxFlash(p.x, p.y, '#ff4500', 1.8);
         for (const e of es) { const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}`, '#ff4500'); if (e.hp <= 0) { k++; killEnemy(e); } }
         G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
         addMsg(lang === 'zh' ? `💣 炸弹！命中${es.length}个，击杀${k}个！` : `💣 Bomb! Hit ${es.length}, killed ${k}!`, 'mc'); shake(); checkLevelUp(); break;
       }
       case 'throw_knife': {
         const e = _findNearestEntity();
-        if (e) { const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}`, '#c0c0c0'); addMsg(lang === 'zh' ? `飞刀命中${e.name}！-${d}` : `Knife hits ${e.name}! -${d}`, 'mc'); snd('hit'); if (e.hp <= 0) killEnemy(e); }
+        if (e) { fxBolt(p.x, p.y, e.x, e.y, '#c0c0c0'); const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}`, '#c0c0c0'); addMsg(lang === 'zh' ? `飞刀命中${e.name}！-${d}` : `Knife hits ${e.name}! -${d}`, 'mc'); snd('hit'); if (e.hp <= 0) killEnemy(e); }
         else addMsg(lang === 'zh' ? '没有目标' : 'No target', 'mi'); break;
       }
       case 'torch': p.buffs.push({ name: lang === 'zh' ? '照明' : 'Torch', type: 'torch', value: item.val || 5, turns: item.dur || 30 }); addMsg(lang === 'zh' ? `🔥 火把！视野+${item.val || 5}` : `🔥 Torch! +${item.val || 5} FOV`, 'mi'); break;
@@ -250,12 +253,12 @@ export function useItem(idx: number): void {
         addMsg(lang === 'zh' ? `💨 烟雾弹！浓烟弥漫，${nb.length}个敌人不再追击！` : `💨 Smoke bomb! ${nb.length} enemies stop chasing!`, 'mi'); snd('spell');
         break;
       }
-      case 'ward': p.warded = true; addMsg(lang === 'zh' ? '🛡 护身石激活！下次受伤无效！' : '🛡 Ward activated! Next hit blocked!', 'mi'); break;
-      case 'haste': p.freeTurn = true; addMsg(lang === 'zh' ? '⚡ 加速！获得额外行动！' : '⚡ Haste! Extra action!', 'mi'); break;
+      case 'ward': p.warded = true; fxFlash(p.x, p.y, '#4895ef', 1.2); addMsg(lang === 'zh' ? '🛡 护身石激活！下次受伤无效！' : '🛡 Ward activated! Next hit blocked!', 'mi'); break;
+      case 'haste': p.freeTurn = true; fxFlash(p.x, p.y, '#ffd700', 1.2); addMsg(lang === 'zh' ? '⚡ 加速！获得额外行动！' : '⚡ Haste! Extra action!', 'mi'); break;
       case 'antidote': p.poisonTurns = 0; p.poisonDmg = 0; p.buffs.push({ name: lang === 'zh' ? '抗毒' : 'Antidote', type: 'antidote', value: 0, turns: 15 }); addMsg(lang === 'zh' ? '✨ 解毒！中毒已治愈！' : '✨ Poison cured!', 'mi'); snd('heal'); break;
       case 'holy_water': {
         const e = _findNearestEntity();
-        if (e) { const isHolyWeak = (e.tags?.includes('undead') || e.tags?.includes('demon') || e.el === 'shadow'); const mult = isHolyWeak ? 2 : 1; const d = Math.floor((item.val || 0) * mult); e.hp -= d; flt(e.x, e.y, `-${d}✨`, '#ffd700'); addMsg(lang === 'zh' ? `圣水命中${e.name}！-${d}` : `Holy water hits ${e.name}! -${d}`, 'mc'); snd('spell'); if (e.hp <= 0) killEnemy(e); }
+        if (e) { fxBolt(p.x, p.y, e.x, e.y, '#ffd700'); const isHolyWeak = (e.tags?.includes('undead') || e.tags?.includes('demon') || e.el === 'shadow'); const mult = isHolyWeak ? 2 : 1; const d = Math.floor((item.val || 0) * mult); e.hp -= d; flt(e.x, e.y, `-${d}✨`, '#ffd700'); addMsg(lang === 'zh' ? `圣水命中${e.name}！-${d}` : `Holy water hits ${e.name}! -${d}`, 'mc'); snd('spell'); if (e.hp <= 0) killEnemy(e); }
         else addMsg(lang === 'zh' ? '没有目标' : 'No target', 'mi'); break;
       }
       case 'recall': { const rm = G.dungeon.rooms[0]; p.x = rm.cx; p.y = rm.cy; addMsg(lang === 'zh' ? '传送回起点！' : 'Recalled to start!', 'mi'); break; }

@@ -210,7 +210,8 @@ export function render(): void {
   G.vy = clamp(G.player.y - Math.floor(vr / 2), 0, Math.max(0, MH - vr));
 
   const area = getCurrentArea();
-  const fovRad = 10 + (G.player.talents?.talents?.['r_night_vision'] ? 2 : 0); // approximate for falloff calc
+  const torch = G.player.buffs.reduce((s, b) => b.type === 'torch' ? s + b.value : s, 0);
+  const fovRad = 10 + torch + (G.player.talents?.talents?.['r_night_vision'] ? 2 : 0); // approximate for falloff calc (torch enlarges the bright halo)
 
   c.fillStyle = '#000';
   c.fillRect(0, 0, cvs.width, cvs.height);
