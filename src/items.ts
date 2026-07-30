@@ -109,8 +109,13 @@ export function genFood(f: number): Item {
 }
 
 export function genConsumable(f: number): Item {
-  const mi = Math.min(ALL_CONSUMABLES.length - 1, Math.floor(f / 2) + 2);
-  const b = ALL_CONSUMABLES[rng(0, mi)];
+  // Bear Trap is a niche placeable — rare standalone roll (~7%, was a uniform
+  // 15-25% share of consumables); otherwise pick from the rest by floor tier.
+  const bt = ALL_CONSUMABLES.find(c => c.ef === 'bear_trap');
+  const useTrap = f >= 3 && !!bt && Math.random() < 0.07;
+  const pool = useTrap ? [bt!] : ALL_CONSUMABLES.filter(c => c.ef !== 'bear_trap');
+  const mi = Math.min(pool.length - 1, Math.floor(f / 2) + 2);
+  const b = pool[rng(0, mi)];
   const fs = 1 + f * .12;
   const v = Math.floor(b.v * fs);
   // Dynamic-value items show their scaled damage; everything else uses the
@@ -493,6 +498,25 @@ function itemScore(it: Item): number {
   return it.val || 0;
 }
 
+// Would picking up `item` auto-equip it (fill an empty slot or beat a worn piece)?
+// Used so better-than-worn gear equips even when the gear pool is full, instead of
+// being sold as overflow (the old "sometimes sells" bug).
+function isEquipUpgrade(item: Item): boolean {
+  if (!G) return false;
+  const p = G.player;
+  if (item.type === 'weapon' || item.type === 'armor') {
+    const cur = p.eq[item.type];
+    return !cur || isBetter(item, cur);
+  }
+  if (item.type === 'accessory') {
+    const a1 = p.eq.accessory, a2 = p.eq.accessory2;
+    if (!a1 || !a2) return true;                       // empty slot → equip
+    const weaker = itemScore(a1) <= itemScore(a2) ? a1 : a2;
+    return isBetter(item, weaker);
+  }
+  return false;
+}
+
 function handleAutoEquip(item: Item): void {
   if (!G) return;
   const p = G.player;
@@ -549,6 +573,15 @@ export function addItemWithOverflow(item: Item): void {
       flt(p.x, p.y, `+${actual}`, '#80ed99');
     }
     addMsg(lang === 'zh' ? `食用${item.name}！饱食度+${item.val || 30}${healMsg}` : `Ate ${item.name}! +${item.val || 30} hunger${healMsg}`, 'mh'); snd('heal'); return;
+  }
+
+  // A better-than-worn piece always equips (replaces the worse worn slot) and is
+  // never sold as overflow — even when the gear pool is full. Push it temporarily
+  // so the existing handleAutoEquip can swap it in (old gear → returnOldGearToInvOrGold).
+  if (isEquipUpgrade(item)) {
+    p.inv.push(item);
+    handleAutoEquip(item);
+    return;
   }
 
   // Determine which pool this item belongs to and its cap.

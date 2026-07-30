@@ -12,7 +12,7 @@ export const FINAL = 40;    // final floor number
 // keeps only the best few pieces and the rest auto-converts to gold;
 // consumables (scroll+item+potion) get a much larger cap so the player can
 // stockpile them. Food is eaten immediately on pickup and never stored.
-export const GEAR_INV_MAX = 3;        // weapons + armors + accessories combined
+export const GEAR_INV_MAX = 6;        // weapons + armors + accessories combined
 export const BASE_CONS_INV_MAX = 16;  // scrolls + consumables + potions combined
 
 // Dynamic max inventory — reads meta upgrades
@@ -31,9 +31,13 @@ export function getMaxConsInv(): number {
   } catch { return BASE_CONS_INV_MAX; }
 }
 
-// Fixed gear-pool cap (does not grow with meta — keeps gear deliberately scarce).
+// Gear-pool cap — grows with the Pack Mule (inv_size) meta upgrade (+1/rank),
+// so players can hold more spares to compare/equip manually.
 export function getGearInvMax(): number {
-  return GEAR_INV_MAX;
+  try {
+    const meta = JSON.parse(localStorage.getItem('dh_meta') || '{}');
+    return GEAR_INV_MAX + (meta.upgrades?.['inv_size'] || 0);
+  } catch { return GEAR_INV_MAX; }
 }
 
 // Tile types
