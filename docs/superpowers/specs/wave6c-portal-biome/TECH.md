@@ -22,7 +22,7 @@
 
 ## 目标与范围(6c)
 
-- 新 `TL.PORTAL` tile:罕见出现在 Crypts/Depths/Fortress(各 `count:[0,1]`),踩上 → 进秘境。
+- 新 `TL.PORTAL` tile:罕见出现在 Depths/Fortress(各 `count:[0,1]`,specialTiles 数组化与既有 LAVA/ALARM 共存),踩上 → 进秘境。
 - 独立「荧光菌穴(Fungal Hollow)」秘境 **1 层**:新 area(主题色 + signature tile)+ 4-5 专属敌(`mf=0`)+ 1 迷你 boss + 奖励房(保底圣物 + 金币)+ 返回门。
 - 机制:`enterBranch()` / `exitBranch()`,`GameState.branchReturn` 记原楼层+位置,返回时回原位。
 - 主线零改动(FINAL/boss/成就/楼层编号不变)。
@@ -36,7 +36,7 @@
 ### 1. 新 tile `TL.PORTAL`
 - `config.ts`:`PORTAL = 16`(MOSS/CURSE/ALARM=13/14/15 之后)。
 - `render.ts` tile switch + minimap:`PORTAL` char `◯`、fg `#b266ff`、bg `#1a0a2a`。
-- `data.ts` specialTiles:Crypts/Depths/Fortress 各加 `specialTiles: { type: TL.PORTAL, ch:'◯', fg:'#b266ff', bg:'#1a0a2a', count:[0,1] }`(count 0-1 = 罕见,可能不出)。
+- `data.ts` specialTiles:Depths/Fortress 各加 PORTAL(`specialTiles` 改数组,与既有 LAVA/ALARM 共存,PORTAL `count:[0,1]` 罕见)。实现时 `AreaDef.specialTiles` 类型扩为 `AreaSpecialTile | AreaSpecialTile[]`,`dungeon.ts` 归一化处理。
 
 ### 2. 秘境 area + 内容(`data.ts`)
 - 新 `AreaDef` `id:'fungal'`(floorStart/floorEnd 不进 1-40 主线,用哨兵如 floorStart:1000 仅作 genDungeon override 标识;或 enterBranch 直接传 area 对象,见 §4):
