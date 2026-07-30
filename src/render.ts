@@ -73,6 +73,14 @@ export function drawPlayerLayer(c: CanvasRenderingContext2D): void {
   const pGlow = getGlow('player-glow', TS * 2, 2, TS * 1.5,
     [[0, 'rgba(255,215,0,0.12)'], [0.5, 'rgba(255,215,0,0.05)'], [1, 'rgba(255,215,0,0)']]);
   c.drawImage(pGlow, px - TS * 0.5, py - TS * 0.5);
+  // Torch: enlarged warm halo while a torch buff is active (visible light boost).
+  const torch = G.player.buffs.reduce((s, b) => b.type === 'torch' ? s + b.value : s, 0);
+  if (torch > 0) {
+    const tsize = TS * (3 + torch * 0.25);
+    const tg = getGlow('torch-halo:' + torch, tsize, 2, tsize * 0.7,
+      [[0, 'rgba(255,160,60,0.20)'], [0.5, 'rgba(255,120,40,0.09)'], [1, 'rgba(255,100,30,0)']]);
+    c.drawImage(tg, px + TS / 2 - tsize / 2, py + TS / 2 - tsize / 2);
+  }
   c.textAlign = 'center'; c.textBaseline = 'middle';
   drawPlayerSprite(c, px, py, G.player.ci);
 }

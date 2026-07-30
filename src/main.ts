@@ -115,7 +115,8 @@ function showCharSelect(): void {
   const classHtml = CLASSES.map((c, i) => {
     const cn = lang === 'zh' ? c.name.zh : c.name.en;
     const cd = lang === 'zh' ? c.desc.zh : c.desc.en;
-    return `<div class="class-opt" data-idx="${i}" style="padding:8px 15px;margin:4px 0;cursor:pointer;border:1px solid ${i === 0 ? '#e63946' : '#333'};border-radius:3px;color:${i === 0 ? '#ddd' : '#888'}"><b>${cn}</b> <span style="color:#666;font-size:.9em">${cd}</span></div>`;
+    const sk = c.skill, skName = lang === 'zh' ? sk.name.zh : sk.name.en, skDesc = lang === 'zh' ? sk.desc.zh : sk.desc.en;
+    return `<div class="class-opt" data-idx="${i}" style="padding:8px 15px;margin:4px 0;cursor:pointer;border:1px solid ${i === 0 ? '#e63946' : '#333'};border-radius:3px;color:${i === 0 ? '#ddd' : '#888'}"><b>${cn}</b> <span style="color:#666;font-size:.9em">${cd}</span><br><span style="color:#9b5de5;font-size:.8em">⚡ ${skName} — ${skDesc}</span></div>`;
   }).join('');
   // Mode selector (Wave 6d): 0 = Normal (F40 Creator = victory), 1 = Endless
   // (F40 kill does NOT win; F41+ continues indefinitely with score by depth).

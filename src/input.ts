@@ -129,7 +129,7 @@ export function initInput(): void {
       case 'q': quickQuaff(); break;
       case 'r': quickRead(); break;
       case '?': openHelp(); break;
-      case 'k': openSkillPanel(); break;
+      case 'k': tryCastSkill(); break;
       case 't': openAchievements(); break;
       case 'n': openTalentPanel(); break;
       case 'l': (window as any).__toggleLang(); break;
@@ -417,6 +417,15 @@ function renderHelp(): void {
 
 // --- Skill panel ---
 
+function tryCastSkill(): void {
+  if (!G) return;
+  const p = G.player, cls = (window as any).__CLASSES[p.ci];
+  if (cls) {
+    const sk = cls.skill;
+    if (p.skillCd === 0 && p.mp >= sk.cost) { executeSkill(sk); return; }
+  }
+  openSkillPanel(); // on cooldown / low MP → open panel so the player sees why
+}
 function openSkillPanel(): void {
   setSkillOpen(true);
   showOverlay('skill-overlay');

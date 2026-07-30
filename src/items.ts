@@ -233,7 +233,9 @@ export function useItem(idx: number): void {
         fxBurst(p.x, p.y, '#ff4500', 24, 1.6); fxFlash(p.x, p.y, '#ff4500', 1.8);
         for (const e of es) { const d = Math.floor((item.val || 0) * p.spellPower); e.hp -= d; flt(e.x, e.y, `-${d}`, '#ff4500'); if (e.hp <= 0) { k++; killEnemy(e); } }
         G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
-        addMsg(lang === 'zh' ? `💣 炸弹！命中${es.length}个，击杀${k}个！` : `💣 Bomb! Hit ${es.length}, killed ${k}!`, 'mc'); shake(); checkLevelUp(); break;
+        let tb = 0;
+        if (G.traps) { const before = G.traps.length; G.traps = G.traps.filter(t => t.triggered || dst(p.x, p.y, t.x, t.y) > 3); tb = before - G.traps.length; }
+        addMsg(lang === 'zh' ? `💣 炸弹！命中${es.length}个，击杀${k}个${tb ? `，炸毁${tb}个陷阱` : ''}！` : `💣 Bomb! Hit ${es.length}, killed ${k}${tb ? `, ${tb} traps destroyed` : ''}!`, 'mc'); shake(); checkLevelUp(); break;
       }
       case 'throw_knife': {
         const e = _findNearestEntity();
