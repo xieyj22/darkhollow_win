@@ -158,7 +158,7 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
       if (def.isBoss) {
         G.player.bossesKilledThisRun++;
         checkAch('boss_kill');
-        if (G.floor === FINAL) { playerVictory(); return true; }
+        if (G.floor === FINAL && !G.branchMode) { playerVictory(); return true; }
       }
 
       // Talent trigger: on kill
@@ -427,7 +427,7 @@ export function killEnemy(e: Enemy): void {
   if (e.isBoss) {
     G.player.bossesKilledThisRun++;
     checkAch('boss_kill');
-    if (G.floor === FINAL) { playerVictory(); return; }
+    if (G.floor === FINAL && !G.branchMode) { playerVictory(); return; }
   }
 
   // Talent trigger: on kill

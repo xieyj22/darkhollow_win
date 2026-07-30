@@ -176,8 +176,16 @@ export function exitBranch(): void {
   // Regenerate the main floor (brief intent: no snapshot/restore). skipFade so
   // setup is synchronous and the position override below isn't clobbered.
   enterFloor(ret.floor, true);
-  G.player.x = ret.x;
-  G.player.y = ret.y;
+  // ret.x/ret.y was a floor tile in the OLD layout; the freshly-generated one
+  // may have a wall/void there (~40%). Fall back to the new start-room center
+  // so the player never lands inside a wall (preserves the no-snapshot intent).
+  const walkable = (tx: number, ty: number) => {
+    const t = G!.dungeon.map[ty]?.[tx];
+    return t !== undefined && t !== TL.WALL && t !== TL.VOID;
+  };
+  const sr = G.dungeon.rooms[0];
+  G.player.x = walkable(ret.x, ret.y) ? ret.x : sr.cx;
+  G.player.y = walkable(ret.x, ret.y) ? ret.y : sr.cy;
   updatePlayerFOV(G.player, G.dungeon.map, G.traps);
   addMsg(lang === 'zh' ? '✨ 你回到了第' + ret.floor + '层。' : '✨ You return to floor ' + ret.floor + '.', 'mi');
   if ((window as any).__render) (window as any).__render();
