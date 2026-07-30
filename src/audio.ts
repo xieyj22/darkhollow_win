@@ -222,6 +222,7 @@ function buildLayer(theme: BgmTheme, time: number): Layer {
     const af = ac.createBiquadFilter(); af.type = 'lowpass'; af.frequency.value = theme.filter * 1.5;
     o.connect(g); g.connect(af); af.connect(bgmOut!);
     o.start(t0); o.stop(t0 + 0.7);
+    o.onended = () => { try { g.disconnect(); af.disconnect(); } catch {} };
   }, tempo * 1000);
 
   return { gain, nodes, timer };

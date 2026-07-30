@@ -77,7 +77,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   // it self-guarding regardless.
   if (floor > FINAL && floor % 5 === 0 && G) {
     const base = pick(BOSSES);
-    const fs = 1 + (floor - 1) * .12;
+    const fs = 1 + (floor - 1) * .1; // boss scale (.1), not enemy scale (.12)
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
     ens.push({
       name: lang === 'zh' ? base.n.zh : base.n.en, ch: base.ch, c: base.c,
@@ -317,7 +317,7 @@ function processAlly(ally: Enemy): void {
     nearest.hp -= dmg;
     addMsg(t('allyHit') + nearest.name + ' -' + dmg, 'mc');
     flt(nearest.x, nearest.y, `-${dmg}`, '#06d6a0');
-    if (nearest.hp <= 0) { G.player.exp += bonusExp(nearest.exp); G.player.kills++; addMsg(t('allyKill') + nearest.name + '!', 'mc'); G.enemies = G.enemies.filter(e => e !== nearest); checkLevelUp(); }
+    if (nearest.hp <= 0) { killEnemy(nearest); G.enemies = G.enemies.filter(e => e !== nearest); addMsg(t('allyKill') + nearest.name + '!', 'mc'); }
   } else if (nearest && nd < 8) moveTo(ally, nearest.x, nearest.y);
   else moveTo(ally, G.player.x, G.player.y);
 }
