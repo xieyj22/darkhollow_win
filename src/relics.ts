@@ -6,6 +6,7 @@
 import type { Player, Enemy } from './types.js';
 import { G, lang } from './state.js';
 import { RELICS } from './data.js';
+import { unlockLore } from './meta.js';
 import { addMsg } from './messages.js';
 import { flt } from './effects.js';
 import { fxFlash, fxBurst } from './fx.js';
@@ -156,6 +157,7 @@ export function grantRelic(id: string, x: number, y: number): void {
   const def = RELICS.find(r => r.id === id);
   if (!def) return;
   p.relics.push(id);
+  unlockLore('relic:' + id);
   _recalc?.();
   const name = lang === 'zh' ? def.n.zh : def.n.en;
   addMsg(lang === 'zh' ? `🏺 获得圣物：${name}！` : `🏺 Relic acquired: ${name}!`, 'mach');

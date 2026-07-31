@@ -13,6 +13,7 @@ import { t } from './i18n.js';
 import { addMsg } from './messages.js';
 import { rng, pick } from './utils.js';
 import { AREAS } from './data.js';
+import { unlockLore } from './meta.js';
 import { bridge } from './bridge.js';
 
 export function initGame(ri: number, ci: number, endless = false): void {
@@ -27,6 +28,7 @@ export function initGame(ri: number, ci: number, endless = false): void {
   };
   setGameState(gameState);
   enterFloor(1);
+  unlockLore('world:descent');
   addMsg(t('loreIntro'), 'mst');
   addMsg(t('loreTip1'), 'mi');
   addMsg(t('loreTip2'), 'mi');
@@ -110,6 +112,7 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
 
     // Area-specific lore
     const area = AREAS.find(a => floor >= a.floorStart && floor <= a.floorEnd);
+    if (area && !G!.branchMode) unlockLore('area:' + area.id);
     if (area && area.lore.length > 0) {
       const desc = pick(area.lore);
       addMsg(lang === 'zh' ? desc.zh : desc.en, 'mst');

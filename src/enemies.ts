@@ -3,7 +3,7 @@ import type { Enemy, Room, Element } from './types.js';
 import { G, lang } from './state.js';
 import { MW, MH, TL, FINAL } from './config.js';
 import { rng, pick, dst } from './utils.js';
-import { bonusExp } from './meta.js';
+import { bonusExp, unlockLore } from './meta.js';
 import { flt, shake } from './effects.js';
 import { ENEMIES, BOSSES, ELITE_PREFIX, AREAS } from './data.js';
 import { addMsg } from './messages.js';
@@ -110,6 +110,7 @@ export function spawnWarden(floor: number): void {
     ai: 'chase', stunned: 0, feared: 0, isAlly: false, isElite: true, isWarden: true,
     el: 'shadow', res: { shadow: 0.5, holy: -0.5 }, skillCd: 0, tags: ['spirit'],
   });
+  unlockLore('warden:encounter');
   addMsg(lang === 'zh' ? '👁 守渊人正在追猎你……' : '👁 The Warden is hunting you...', 'me');
   flt(G.player.x, G.player.y, '⚠WARDEN', '#9a2be2'); snd('boss'); shake();
 }
