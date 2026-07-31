@@ -4,6 +4,7 @@ import { TS } from './config.js';
 import { AREAS } from './data.js';
 import { drawFx, clearFx } from './fx.js';
 import { applyShakeFrame, resetShake } from './effects.js';
+import { bridge } from './bridge.js';
 
 // Late-bound player-layer drawer (set from render.ts via main.ts wiring).
 let _drawPlayerLayer: ((c: CanvasRenderingContext2D) => void) | null = null;
@@ -57,7 +58,7 @@ function getAreaId(floor: number): string {
 
 function spawnParticle(floor: number): Particle {
   const theme = AREA_THEMES[getAreaId(floor)] || AREA_THEMES['caverns'];
-  const cvs = (window as any).__canvas as HTMLCanvasElement;
+  const cvs = bridge.canvas as HTMLCanvasElement;
   const w = cvs?.width || 800;
   const h = cvs?.height || 600;
   return {
@@ -74,8 +75,8 @@ function spawnParticle(floor: number): Particle {
 }
 
 export function captureSnapshot(): void {
-  const cvs = (window as any).__canvas as HTMLCanvasElement;
-  const c = (window as any).__ctx as CanvasRenderingContext2D;
+  const cvs = bridge.canvas as HTMLCanvasElement;
+  const c = bridge.ctx as CanvasRenderingContext2D;
   if (!cvs || !c) return;
   // Lazily create offscreen canvas matching main canvas size
   if (!offscreenCvs || offscreenCvs.width !== cvs.width || offscreenCvs.height !== cvs.height) {
@@ -92,8 +93,8 @@ export function captureSnapshot(): void {
 function tick(): void {
   if (!G) { animFrame = requestAnimationFrame(tick); return; }
 
-  const cvs = (window as any).__canvas as HTMLCanvasElement;
-  const c = (window as any).__ctx as CanvasRenderingContext2D;
+  const cvs = bridge.canvas as HTMLCanvasElement;
+  const c = bridge.ctx as CanvasRenderingContext2D;
   if (!cvs || !c) { animFrame = requestAnimationFrame(tick); return; }
 
   // Restore base render via fast drawImage (much faster than putImageData)

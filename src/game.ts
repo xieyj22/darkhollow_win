@@ -13,6 +13,7 @@ import { t } from './i18n.js';
 import { addMsg } from './messages.js';
 import { rng, pick } from './utils.js';
 import { AREAS } from './data.js';
+import { bridge } from './bridge.js';
 
 export function initGame(ri: number, ci: number, endless = false): void {
   const gameState: GameState = {
@@ -119,8 +120,8 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     setTimeout(() => {
       setup();
       // Need to import render/updateUI — use late binding
-      if ((window as any).__render) (window as any).__render();
-      if ((window as any).__updateUI) (window as any).__updateUI();
+      if (bridge.render) bridge.render();
+      if (bridge.updateUI) bridge.updateUI();
       cvs.style.opacity = '1';
     }, 200);
   } else {
@@ -165,8 +166,8 @@ export function enterBranch(): void {
   addMsg(lang === 'zh' ? '🌀 你被吸入荧光菌穴……' : '🌀 You are pulled into the Fungal Hollow...', 'md');
   updatePlayerFOV(G.player, G.dungeon.map, G.traps);
   setBgmScene('explore', fungal.id);
-  if ((window as any).__render) (window as any).__render();
-  if ((window as any).__updateUI) (window as any).__updateUI();
+  if (bridge.render) bridge.render();
+  if (bridge.updateUI) bridge.updateUI();
 }
 
 export function exitBranch(): void {
@@ -189,6 +190,6 @@ export function exitBranch(): void {
   G.player.y = walkable(ret.x, ret.y) ? ret.y : sr.cy;
   updatePlayerFOV(G.player, G.dungeon.map, G.traps);
   addMsg(lang === 'zh' ? '✨ 你回到了第' + ret.floor + '层。' : '✨ You return to floor ' + ret.floor + '.', 'mi');
-  if ((window as any).__render) (window as any).__render();
-  if ((window as any).__updateUI) (window as any).__updateUI();
+  if (bridge.render) bridge.render();
+  if (bridge.updateUI) bridge.updateUI();
 }

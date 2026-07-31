@@ -28,6 +28,7 @@ import {
 import { MW, MH } from './config.js';
 import { renderMinimap } from './render.js';
 import { showOverlay, hideOverlay, toggleLegend, toggleKeys } from './main.js';
+import { bridge } from './bridge.js';
 
 type OptOrigin = 'title' | 'game' | 'pause';
 const TABS = ['audio', 'display', 'access', 'game'] as const;
@@ -95,7 +96,7 @@ export function openOptions(from: OptOrigin = 'game'): void {
 export function closeOptions(): void {
   hideOverlay('options-overlay');
   // Opened from the pause menu → return to it so ESC/B flows back to Resume/Quit.
-  if (optionsOrigin === 'pause') (window as any).__openPause?.();
+  if (optionsOrigin === 'pause') bridge.openPause?.();
 }
 
 export function applyOptionsUI(): void {
@@ -166,7 +167,7 @@ function renderAudio(body: HTMLElement): void {
     row(t('volMusic'), volSliderHtml('music', getMusicVol())) +
     row(t('volSfx'), volSliderHtml('sfx', getSfxVol()));
   const muteInput = body.querySelector<HTMLInputElement>('.toggle input');
-  if (muteInput) bindToggle(muteInput, v => { setMutedState(v); (window as any).__muted = v; (window as any).__updateSoundBtn?.(); });
+  if (muteInput) bindToggle(muteInput, v => { setMutedState(v); bridge.muted = v; bridge.updateSoundBtn?.(); });
   body.querySelectorAll<HTMLInputElement>('[data-vol]').forEach(sl => {
     sl.oninput = () => {
       const v = parseInt(sl.value) / 100;
@@ -216,7 +217,7 @@ function renderDisplay(body: HTMLElement): void {
   bindSeg(body, id => {
     if (id === '0.85' || id === '1' || id === '1.15') { setTextScale(parseFloat(id)); applyTextScale(); }
     else if (id === '2' || id === '3' || id === '4' || id === '5') { setMinimapScale(parseInt(id)); applyMinimap(); }
-    else if (id === 'en' || id === 'zh') { setLang(id); (window as any).__updateLangUI?.(); }
+    else if (id === 'en' || id === 'zh') { setLang(id); bridge.updateLangUI?.(); }
     renderOptions();
   });
   const safe = body.querySelector<HTMLInputElement>('[data-safe]');

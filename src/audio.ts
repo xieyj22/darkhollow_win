@@ -4,6 +4,8 @@
 // detuned drones + a pad chord + a slow arpeggio, crossfaded between scenes.
 // All volume prefs persist to localStorage.
 
+import { bridge } from './bridge.js';
+
 // ===== Persisted volume prefs =====
 function loadVol(key: string, dflt: number): number {
   const v = parseFloat(localStorage.getItem(key) ?? '');
@@ -32,7 +34,7 @@ export function initAudio(): void {
     sfxGain.connect(masterGain);
     masterGain.connect(ac.destination);
     applyVolumes();
-    (window as any).__audioCtx = ac;
+    bridge.audioCtx = ac;
   } catch { /* audio unavailable */ }
 }
 

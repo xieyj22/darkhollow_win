@@ -8,6 +8,7 @@ import { startParticles } from './particles.js';
 import { MH, MW } from './config.js';
 import { updatePlayerFOV } from './dungeon.js';
 import { snd } from './audio.js';
+import { bridge } from './bridge.js';
 
 function serializeEnemies(enemies: Enemy[]): any[] {
   return enemies.map(e => ({
@@ -139,7 +140,7 @@ export function loadGame(): void {
     addMsg(lang === 'zh' ? '存档已加载！' : 'Game loaded!', 'mi');
     updateUI(); render();
     startParticles(); // Continue must (re)start the rAF loop that draws the player layer
-    (window as any).__initAudio();
+    bridge.initAudio?.();
   } catch (e: any) {
     alert('Load failed: ' + e.message);
   }

@@ -28,6 +28,7 @@ import { paintIcon } from './sprites.js';
 import { renderForge, renderTitleStats, getMeta } from './meta.js';
 import { startParticles, stopParticles, setDrawPlayerLayerFn, setDrawEnemyLayerFn } from './particles.js';
 import { openOptions, closeOptions, renderOptions, applyOptionsUI, applyTextScale, applyColorblind, applyBarCues } from './options.js';
+import { bridge } from './bridge.js';
 
 // ===== Wire up late-bound dependencies =====
 setCombatGenItem(genItem);
@@ -42,25 +43,25 @@ setKillEnemyFn(killEnemy);
 setDrawPlayerLayerFn(drawPlayerLayer);
 setDrawEnemyLayerFn(drawEnemyLayer);
 
-// Expose to window for cross-module access
-(window as any).__initAudio = initAudio;
-(window as any).__muted = muted;
-(window as any).__CLASSES = CLASSES;
-(window as any).__ACH_DEFS = ACH_DEFS;
-(window as any).__TALENT_TREES = TALENT_TREES;
-(window as any).__recalc = recalc;
-(window as any).__renderHotbar = renderHotbar;
-(window as any).__updateUI = updateUI;
-(window as any).__render = render;
-(window as any).__markMinimapDirty = markMinimapDirty;
-(window as any).__toggleLang = toggleLang;
-(window as any).__toggleSound = toggleSound;
-(window as any).__updateSoundBtn = updateSoundBtn;
-(window as any).__updateLangUI = updateLangUI;
-(window as any).__openPause = openPause;
-(window as any).__closePause = closePause;
-(window as any).__closeOptions = closeOptions;
-(window as any).__renderOptions = renderOptions;
+// Expose to typed bridge registry for cross-module access
+bridge.initAudio = initAudio;
+bridge.muted = muted;
+bridge.classes = CLASSES;
+bridge.achDefs = ACH_DEFS;
+bridge.talentTrees = TALENT_TREES;
+bridge.recalc = recalc;
+bridge.renderHotbar = renderHotbar;
+bridge.updateUI = updateUI;
+bridge.render = render;
+bridge.markMinimapDirty = markMinimapDirty;
+bridge.toggleLang = toggleLang;
+bridge.toggleSound = toggleSound;
+bridge.updateSoundBtn = updateSoundBtn;
+bridge.updateLangUI = updateLangUI;
+bridge.openPause = openPause;
+bridge.closePause = closePause;
+bridge.closeOptions = closeOptions;
+bridge.renderOptions = renderOptions;
 
 // ===== Title Screen Particles =====
 let titleAnim: number | null = null;
@@ -228,7 +229,7 @@ function updateLangUI(): void {
 function toggleLang(): void {
   const newLang = lang === 'en' ? 'zh' : 'en';
   setLang(newLang);
-  (window as any).__muted = muted;
+  bridge.muted = muted;
   updateLangUI();
   if (G) addMsg(t('langChanged'), 'mi');
 }
@@ -238,7 +239,7 @@ function toggleSound(): void {
   const newMuted = !isMuted();
   setMutedState(newMuted);            // audio.ts owns the persisted mute state
   setMuted(newMuted);                 // mirror into state.muted for UI reads
-  (window as any).__muted = newMuted;
+  bridge.muted = newMuted;
   updateSoundBtn();
   addMsg(newMuted ? t('muted') : t('unmuted'), 'mi');
 }
@@ -260,7 +261,7 @@ function applyAudioUI(): void {
   set('vol-sfx', getSfxVol());
   const m = isMuted();
   setMuted(m);                        // mirror so updateSoundBtn reads correctly
-  (window as any).__muted = m;
+  bridge.muted = m;
   updateSoundBtn();
 }
 
@@ -397,7 +398,7 @@ function initTooltip(): void {
     if (!G) return;
     const g = G; // narrow type for closure
     const rect = (e.target as HTMLElement).getBoundingClientRect();
-    const cvs = (window as any).__canvas as HTMLCanvasElement;
+    const cvs = bridge.canvas as HTMLCanvasElement;
     const effectiveTS = cvs ? rect.width / (cvs.width / TS) : TS;
     const mx = Math.floor((e.clientX - rect.left) / effectiveTS) + g.vx;
     const my = Math.floor((e.clientY - rect.top) / effectiveTS) + g.vy;
@@ -516,7 +517,7 @@ function bindButtons(): void {
   on('btn-new', startNewGame);
   on('btn-cont', loadGame);
   on('btn-forge', () => { showOverlay('forge-overlay'); renderForge(); });
-  on('btn-help', () => { setHelpOpen(true); showOverlay('help-overlay'); (window as any).__renderHelp?.(); });
+  on('btn-help', () => { setHelpOpen(true); showOverlay('help-overlay'); bridge.renderHelp?.(); });
   on('lang-btn', toggleLang);
 
   on('btn-close-inv', () => { setInvOpen(false); hideOverlay('inventory-overlay'); });

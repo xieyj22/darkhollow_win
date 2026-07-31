@@ -6,6 +6,7 @@ import { rng, pick, dst } from './utils.js';
 import { snd } from './audio.js';
 import { flt, shake } from './effects.js';
 import { t } from './i18n.js';
+import { bridge } from './bridge.js';
 import { addMsg } from './messages.js';
 import { genItem, genWeapon, genArmor, genAcc, addItemWithOverflow, itemToGold } from './items.js';
 import { recalc, playerDeath } from './combat.js';
@@ -98,7 +99,7 @@ function merchantSell(): void {
   if (!G) return;
   closeEvent();
   // Open inventory in sell mode (input.ts exposes this).
-  (window as any).__openSellInv?.();
+  bridge.openSellInv?.();
 }
 
 function chestOpen(): void {

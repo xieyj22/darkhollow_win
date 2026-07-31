@@ -8,6 +8,7 @@ import { AREAS, EQUIPMENT_SETS } from './data.js';
 import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite } from './sprites.js';
 import type { Enemy } from './types.js';
 import { captureSnapshot } from './particles.js';
+import { bridge } from './bridge.js';
 
 // Themed monospace font matching CSS --font-mono
 const FONT = "'JetBrains Mono', Consolas, 'Courier New', monospace";
@@ -94,7 +95,7 @@ const EL_IND_COLOR: Record<string, string> = { fire: '#ff7a45', ice: '#7ec8e3', 
 
 export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
   if (!G) return;
-  const cvs = (window as any).__canvas as HTMLCanvasElement;
+  const cvs = bridge.canvas as HTMLCanvasElement;
   c.font = `bold ${TS - 4}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
   for (const e of G.enemies) {
     if (!G.player.visible?.[e.y]?.[e.x]) continue;
@@ -178,9 +179,9 @@ export function resizeCanvas(): void {
   if (!c || !mc) return;
   const area = document.getElementById('map-area');
   if (!area) return;
-  (window as any).__canvas = c;
-  (window as any).__ctx = c.getContext('2d');
-  (window as any).__miniCtx = mc.getContext('2d');
+  bridge.canvas = c;
+  bridge.ctx = c.getContext('2d') ?? undefined;
+  bridge.miniCtx = mc.getContext('2d') ?? undefined;
   // Also set state.ts refs so effects.ts (flt/shake) can access canvas
   setCanvas(c);
   setMiniCanvas(mc);
@@ -211,8 +212,8 @@ function getCurrentArea() {
 
 export function render(): void {
   if (!G) return;
-  const cvs = (window as any).__canvas as HTMLCanvasElement;
-  const c = (window as any).__ctx as CanvasRenderingContext2D;
+  const cvs = bridge.canvas as HTMLCanvasElement;
+  const c = bridge.ctx as CanvasRenderingContext2D;
   if (!cvs || !c) return;
 
   const vc = Math.floor(cvs.width / TS), vr = Math.floor(cvs.height / TS);
@@ -408,8 +409,8 @@ export function renderMinimap(): void {
   mic.fillStyle = '#ffd700'; mic.fillRect(G.player.x * s - 1, G.player.y * s - 1, s + 1, s + 1);
   mic.fillStyle = '#fff'; mic.fillRect(G.player.x * s, G.player.y * s, s > 2 ? 2 : 1, s > 2 ? 2 : 1);
   // Viewport rectangle outline
-  const vc = Math.floor(((window as any).__canvas as HTMLCanvasElement)?.width / TS) || 30;
-  const vr = Math.floor(((window as any).__canvas as HTMLCanvasElement)?.height / TS) || 20;
+  const vc = Math.floor((bridge.canvas as HTMLCanvasElement)?.width / TS) || 30;
+  const vr = Math.floor((bridge.canvas as HTMLCanvasElement)?.height / TS) || 20;
   mic.strokeStyle = 'rgba(255,255,255,0.2)';
   mic.lineWidth = 1;
   mic.strokeRect(G.vx * s + 0.5, G.vy * s + 0.5, vc * s, vr * s);
@@ -511,7 +512,7 @@ export function updateUI(): void {
 
   renderObjective();
   // renderHotbar is imported from items — call via late binding
-  if ((window as any).__renderHotbar) (window as any).__renderHotbar();
+  if (bridge.renderHotbar) bridge.renderHotbar();
   updateSoundBtn();
 }
 
@@ -551,7 +552,7 @@ function renderObjective(): void {
 function updateSoundBtn(): void {
   const on = document.getElementById('btn-sound');
   const off = document.getElementById('btn-mute');
-  const muted = (window as any).__muted;
+  const muted = bridge.muted;
   if (on && off) {
     if (muted) { on.style.display = 'none'; off.style.display = 'block'; off.classList.add('active'); }
     else { on.style.display = 'block'; on.classList.add('active'); off.style.display = 'none'; }

@@ -11,6 +11,7 @@ import { t, RARITY_C } from './i18n.js';
 import { RELICS } from './data.js';
 import { paintIcon } from './sprites.js';
 import { showOverlay, hideOverlay } from './main.js';
+import { bridge } from './bridge.js';
 
 export function initInput(): void {
   document.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -37,12 +38,12 @@ export function initInput(): void {
     // every other key is swallowed so it never reaches the global "ESC opens pause" below.
     const optOv = document.getElementById('options-overlay');
     if (optOv && optOv.classList.contains('active')) {
-      if (e.key === 'Escape') { (window as any).__closeOptions?.(); e.preventDefault(); }
+      if (e.key === 'Escape') { bridge.closeOptions?.(); e.preventDefault(); }
       return;
     }
     // Pause menu — ESC / B closes it; swallow all other keys while open.
     if (menuOpen) {
-      if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') { (window as any).__closePause?.(); e.preventDefault(); return; }
+      if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') { bridge.closePause?.(); e.preventDefault(); return; }
       e.preventDefault(); return;
     }
 
@@ -67,9 +68,9 @@ export function initInput(): void {
           else useItem(n - 1);
         }
         // Re-render inventory
-        if ((window as any).__renderInv) (window as any).__renderInv();
-        (window as any).__updateUI();
-        (window as any).__render();
+        if (bridge.renderInv) bridge.renderInv();
+        bridge.updateUI?.();
+        bridge.render?.();
       }
       e.preventDefault(); return;
     }
@@ -82,7 +83,7 @@ export function initInput(): void {
       if (e.key === 'k' || e.key === 'K' || e.key === 'Enter') {
         // Try to execute skill if usable
         if (G) {
-          const p = G.player, cls = (window as any).__CLASSES[p.ci];
+          const p = G.player, cls = bridge.classes[p.ci];
           if (cls) {
             const sk = cls.skill;
             const cdLeft = Math.max(0, p.skillCd);
@@ -109,7 +110,7 @@ export function initInput(): void {
 
     // ESC opens the in-game pause menu when no other overlay is open. (Options/pause are
     // intercepted earlier, so reaching here means nothing else is open — safe to toggle pause.)
-    if (e.key === 'Escape') { (window as any).__openPause?.(); e.preventDefault(); return; }
+    if (e.key === 'Escape') { bridge.openPause?.(); e.preventDefault(); return; }
 
     if (!G) return;
 
@@ -132,8 +133,8 @@ export function initInput(): void {
       case 'k': tryCastSkill(); break;
       case 't': openAchievements(); break;
       case 'n': openTalentPanel(); break;
-      case 'l': (window as any).__toggleLang(); break;
-      case 'm': (window as any).__toggleSound(); break;
+      case 'l': bridge.toggleLang?.(); break;
+      case 'm': bridge.toggleSound?.(); break;
       default: {
         const n = parseInt(e.key);
         if (n >= 1 && n <= 9) useQuickSlot(n - 1);
@@ -158,8 +159,8 @@ function closeActiveOverlay(): boolean {
   const forge = document.getElementById('forge-overlay');
   if (forge && getComputedStyle(forge).display !== 'none') { hideOverlay('forge-overlay'); return true; }
   const optOv = document.getElementById('options-overlay');
-  if (optOv && optOv.classList.contains('active')) { (window as any).__closeOptions?.(); return true; }
-  if (menuOpen) { (window as any).__closePause?.(); return true; }
+  if (optOv && optOv.classList.contains('active')) { bridge.closeOptions?.(); return true; }
+  if (menuOpen) { bridge.closePause?.(); return true; }
   return false;
 }
 
@@ -199,7 +200,7 @@ function pollGamepad(): void {
     if (edge(3)) { if (!overlay) openInventory(); }                 // Y
     if (edge(4)) { if (!overlay) quickQuaff(); }                    // LB
     if (edge(5)) { if (!overlay) descendStairs(); }                 // RB
-    if (edge(9)) { menuOpen ? (window as any).__closePause?.() : (window as any).__openPause?.(); }   // Start = pause
+    if (edge(9)) { menuOpen ? bridge.closePause?.() : bridge.openPause?.(); }   // Start = pause
   } else if (overlay) {
     if (edge(0) || edge(1)) closeActiveOverlay();
   }
@@ -286,17 +287,17 @@ function renderInv(): void {
       if (sellMode) {
         const gv = Math.floor(itemToGold(it) * 1.5);
         const b = mkInvBtn(lang === 'zh' ? `卖出+${gv}💰` : `Sell+${gv}`, '#ffd700');
-        b.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) sellItem(ci); renderInv(); (window as any).__updateUI(); (window as any).__render(); };
+        b.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) sellItem(ci); renderInv(); bridge.updateUI?.(); bridge.render?.(); };
         acts.appendChild(b);
       } else {
         // Drop (converts to gold) — point 9
         const db = mkInvBtn(lang === 'zh' ? '丢' : 'Drop', '#e63946');
-        db.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) dropItem(ci); renderInv(); (window as any).__updateUI(); (window as any).__render(); };
+        db.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) dropItem(ci); renderInv(); bridge.updateUI?.(); bridge.render?.(); };
         acts.appendChild(db);
         // Assign to quick slot — point 9
         if (usable(it.type)) {
           const ub = mkInvBtn(lang === 'zh' ? '用' : 'Use', '#06d6a0');
-          ub.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) useItem(ci); renderInv(); (window as any).__updateUI(); (window as any).__render(); };
+          ub.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) useItem(ci); renderInv(); bridge.updateUI?.(); bridge.render?.(); };
           acts.appendChild(ub);
           const ab = mkInvBtn(lang === 'zh' ? '装' : 'Slot', '#4895ef');
           ab.onclick = (ev) => { ev.stopPropagation(); assignTarget = (assignTarget === it ? null : it); renderInv(); };
@@ -307,7 +308,7 @@ function renderInv(): void {
               sb.style.minWidth = '20px'; sb.style.padding = '2px 0';
               const occ = p.quickSlots && p.quickSlots[s];
               if (occ) sb.style.opacity = '0.5';
-              sb.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) assignToQuickSlot(ci, s); assignTarget = null; renderInv(); (window as any).__renderHotbar?.(); (window as any).__render(); };
+              sb.onclick = (ev) => { ev.stopPropagation(); const ci = p.inv.indexOf(it); if (ci >= 0) assignToQuickSlot(ci, s); assignTarget = null; renderInv(); bridge.renderHotbar?.(); bridge.render?.(); };
               acts.appendChild(sb);
             }
           }
@@ -322,7 +323,7 @@ function renderInv(): void {
           if (currentIdx === -1) return;
           if (it.type === 'weapon' || it.type === 'armor' || it.type === 'accessory') equipItem(currentIdx);
           else useItem(currentIdx);
-          renderInv(); (window as any).__updateUI(); (window as any).__render();
+          renderInv(); bridge.updateUI?.(); bridge.render?.();
         };
       }
       sec.appendChild(row);
@@ -422,7 +423,7 @@ function renderHelp(): void {
 
 function tryCastSkill(): void {
   if (!G) return;
-  const p = G.player, cls = (window as any).__CLASSES[p.ci];
+  const p = G.player, cls = bridge.classes[p.ci];
   if (cls) {
     const sk = cls.skill;
     if (p.skillCd === 0 && p.mp >= sk.cost) { executeSkill(sk); return; }
@@ -453,7 +454,7 @@ function renderSkillPanel(): void {
 }
 function await_getClasses() {
   // classes are in data.ts — use window binding set by main.ts
-  return (window as any).__CLASSES;
+  return bridge.classes;
 }
 
 // --- Achievements ---
@@ -471,7 +472,7 @@ function renderAch(): void {
   if (!G) return;
   const div = document.getElementById('ach-content')!;
   div.innerHTML = '';
-  const defs = (window as any).__ACH_DEFS;
+  const defs = bridge.achDefs;
   for (const a of defs) {
     // An achievement counts as unlocked if earned this run OR persisted to the
     // meta save in a previous run — otherwise prior unlocks show as locked here.
@@ -497,7 +498,7 @@ function closeTalentPanel(): void {
 function renderTalentPanel(): void {
   if (!G) return;
   const p = G.player;
-  const trees = (window as any).__TALENT_TREES;
+  const trees = bridge.talentTrees;
   if (!trees) return;
   const tree = trees.find((t: any) => t.classIdx === p.ci);
   if (!tree) return;
@@ -552,10 +553,10 @@ function renderTalentPanel(): void {
           p.talents.talents[node.id] = currentRank + 1;
           p.talents.points--;
           // Trigger recalc to apply passive stat bonuses
-          (window as any).__recalc();
+          bridge.recalc?.();
           renderTalentPanel();
-          (window as any).__updateUI();
-          (window as any).__render();
+          bridge.updateUI?.();
+          bridge.render?.();
         };
         cell.onclick = activate;
         // Keyboard activation so the grid is reachable without a mouse
@@ -569,10 +570,10 @@ function renderTalentPanel(): void {
   }
 }
 
-// Expose functions for internal use
-(window as any).__renderInv = renderInv;
-(window as any).__renderHelp = renderHelp;
-(window as any).__openSellInv = openInventorySell;
+// Expose functions for internal use via typed bridge registry
+bridge.renderInv = renderInv;
+bridge.renderHelp = renderHelp;
+bridge.openSellInv = openInventorySell;
 // NOTE: __updateUI and __render are owned by main.ts (which binds the real
 // functions). Do not reassign them here — an earlier version bound them to
 // self-recursive arrows that would stack-overflow if ever called.
