@@ -176,11 +176,10 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
         if (onPlayerDeath()) return false;
         // Relic revive (Phoenix Heart)
         if (relicOnDeath()) return false;
-        // NOTE: in the !isP branch def is the *player*, which has no `name` field,
-        // so def.name is undefined here — a pre-existing latent bug (death message
-        // shows "slain by undefined"; likely should be atk.name). Cast preserves the
-        // exact runtime behavior without silently changing it. See task-4 report.
-        playerDeath(def.name as string);
+        // In the !isP branch `atk` is the attacking enemy and `def` is the player
+        // (which has no `name`), so the killer's name is atk.name — not def.name
+        // (which previously printed "slain by undefined").
+        playerDeath(atk.name || 'Enemy');
       } else {
         // Player survived via cheat death / damage prevention
         // Enemy still gets counter-attack trigger
