@@ -95,42 +95,42 @@ export const ELITE_PREFIX: ElitePrefix[] = [
 
 export const ENEMIES: EnemyDef[] = [
   // === Original enemies ===
-  { n: { en: 'Rat', zh: '老鼠' }, ch: 'r', c: '#a0522d', hp: 8, atk: 2, def: 0, exp: 5, g: [1, 3], ai: 'wander', mf: 1 },
-  { n: { en: 'Bat', zh: '蝙蝠' }, ch: 'b', c: '#696969', hp: 6, atk: 3, def: 0, exp: 5, g: [1, 2], ai: 'erratic', mf: 1 },
+  { n: { en: 'Rat', zh: '老鼠' }, ch: 'r', c: '#a0522d', hp: 8, atk: 2, def: 0, exp: 5, g: [1, 3], ai: 'wander', mf: 1, tags: ['rodent'] },
+  { n: { en: 'Bat', zh: '蝙蝠' }, ch: 'b', c: '#696969', hp: 6, atk: 3, def: 0, exp: 5, g: [1, 2], ai: 'erratic', mf: 1, tags: ['bat'] },
   { n: { en: 'Goblin', zh: '哥布林' }, ch: 'g', c: '#228b22', hp: 12, atk: 4, def: 1, exp: 8, g: [2, 6], ai: 'chase', mf: 1 },
-  { n: { en: 'Slime', zh: '史莱姆' }, ch: 's', c: '#32cd32', hp: 15, atk: 2, def: 3, exp: 6, g: [1, 4], ai: 'wander', mf: 1 },
+  { n: { en: 'Slime', zh: '史莱姆' }, ch: 's', c: '#32cd32', hp: 15, atk: 2, def: 3, exp: 6, g: [1, 4], ai: 'wander', mf: 1, tags: ['slime'] },
   // === New: early-mid fill (mf 2-14) ===
-  { n: { en: 'Mushroom', zh: '毒蘑菇' }, ch: 'm', c: '#8b4513', hp: 8, atk: 3, def: 2, exp: 6, g: [1, 3], ai: 'wander', mf: 2 },
-  { n: { en: 'Cave Fish', zh: '洞穴鱼' }, ch: 'f', c: '#4682b4', hp: 10, atk: 4, def: 1, exp: 7, g: [2, 5], ai: 'erratic', mf: 3 },
+  { n: { en: 'Mushroom', zh: '毒蘑菇' }, ch: 'm', c: '#8b4513', hp: 8, atk: 3, def: 2, exp: 6, g: [1, 3], ai: 'wander', mf: 2, tags: ['fungi'] },
+  { n: { en: 'Cave Fish', zh: '洞穴鱼' }, ch: 'f', c: '#4682b4', hp: 10, atk: 4, def: 1, exp: 7, g: [2, 5], ai: 'erratic', mf: 3, tags: ['aquatic'] },
   { n: { en: 'Kobold', zh: '狗头人' }, ch: 'k', c: '#cd853f', hp: 16, atk: 5, def: 2, exp: 10, g: [3, 8], ai: 'erratic', mf: 3 },
   // === Original enemies continued ===
   { n: { en: 'Skeleton', zh: '骷髅' }, ch: '☠', c: '#dcdcdc', hp: 18, atk: 6, def: 2, exp: 12, g: [3, 8], ai: 'chase', mf: 2, tags: ['undead'] },
-  { n: { en: 'Spider', zh: '蜘蛛' }, ch: 'ψ', c: '#4b0082', hp: 14, atk: 8, def: 1, exp: 10, g: [2, 5], ai: 'ambush', mf: 2 },
-  { n: { en: 'Orc', zh: '兽人' }, ch: 'o', c: '#8b0000', hp: 25, atk: 7, def: 3, exp: 15, g: [5, 12], ai: 'chase', mf: 3 },
+  { n: { en: 'Spider', zh: '蜘蛛' }, ch: 'ψ', c: '#4b0082', hp: 14, atk: 8, def: 1, exp: 10, g: [2, 5], ai: 'ambush', mf: 2, tags: ['insect'] },
+  { n: { en: 'Orc', zh: '兽人' }, ch: 'o', c: '#8b0000', hp: 25, atk: 7, def: 3, exp: 15, g: [5, 12], ai: 'chase', mf: 3, tags: ['brute'] },
   // === New: mid fill ===
-  { n: { en: 'Wolf', zh: '灰狼' }, ch: 'ω', c: '#7a8890', hp: 18, atk: 7, def: 2, exp: 12, g: [3, 8], ai: 'chase', mf: 4 },
-  { n: { en: 'Cultist', zh: '邪教徒' }, ch: '☼', c: '#5c2d91', hp: 20, atk: 9, def: 2, exp: 18, g: [6, 15], ai: 'ranged', mf: 5, el: 'shadow' },
+  { n: { en: 'Wolf', zh: '灰狼' }, ch: 'ω', c: '#7a8890', hp: 18, atk: 7, def: 2, exp: 12, g: [3, 8], ai: 'chase', mf: 4, tags: ['hound'] },
+  { n: { en: 'Cultist', zh: '邪教徒' }, ch: '☼', c: '#5c2d91', hp: 20, atk: 9, def: 2, exp: 18, g: [6, 15], ai: 'ranged', mf: 5, el: 'shadow', tags: ['cultist'] },
   // === Original continued ===
-  { n: { en: 'Wraith', zh: '幽灵' }, ch: 'Ω', c: '#9370db', hp: 20, atk: 10, def: 3, exp: 20, g: [5, 15], ai: 'phase', mf: 4, tags: ['undead'] },
-  { n: { en: 'Ogre', zh: '食人魔' }, ch: 'Θ', c: '#daa520', hp: 40, atk: 12, def: 4, exp: 25, g: [8, 20], ai: 'chase', mf: 5 },
-  { n: { en: 'Dark Mage', zh: '暗黑法师' }, ch: '☾', c: '#800080', hp: 22, atk: 14, def: 2, exp: 22, g: [10, 25], ai: 'ranged', mf: 4 },
+  { n: { en: 'Wraith', zh: '幽灵' }, ch: 'Ω', c: '#9370db', hp: 20, atk: 10, def: 3, exp: 20, g: [5, 15], ai: 'phase', mf: 4, tags: ['spirit', 'undead'] },
+  { n: { en: 'Ogre', zh: '食人魔' }, ch: 'Θ', c: '#daa520', hp: 40, atk: 12, def: 4, exp: 25, g: [8, 20], ai: 'chase', mf: 5, tags: ['brute'] },
+  { n: { en: 'Dark Mage', zh: '暗黑法师' }, ch: '☾', c: '#800080', hp: 22, atk: 14, def: 2, exp: 22, g: [10, 25], ai: 'ranged', mf: 4, tags: ['mage'] },
   // === New: mid-upper ===
-  { n: { en: 'Harpy', zh: '鹰身女妖' }, ch: '♀', c: '#c4a040', hp: 22, atk: 10, def: 3, exp: 20, g: [5, 14], ai: 'erratic', mf: 6 },
+  { n: { en: 'Harpy', zh: '鹰身女妖' }, ch: '♀', c: '#c4a040', hp: 22, atk: 10, def: 3, exp: 20, g: [5, 14], ai: 'erratic', mf: 6, tags: ['beast'] },
   { n: { en: 'Mimic', zh: '宝箱怪' }, ch: '=', c: '#ffd700', hp: 30, atk: 12, def: 4, exp: 28, g: [10, 25], ai: 'ambush', mf: 7 },
-  { n: { en: 'Wyvern', zh: '双足飞龙' }, ch: 'Δ', c: '#2e8b57', hp: 45, atk: 14, def: 5, exp: 35, g: [12, 28], ai: 'ranged', mf: 8, el: 'fire' },
-  { n: { en: 'Dark Knight', zh: '暗黑骑士' }, ch: '♞', c: '#3a6060', hp: 55, atk: 16, def: 8, exp: 42, g: [15, 35], ai: 'chase', mf: 9, el: 'shadow' },
+  { n: { en: 'Wyvern', zh: '双足飞龙' }, ch: 'Δ', c: '#2e8b57', hp: 45, atk: 14, def: 5, exp: 35, g: [12, 28], ai: 'ranged', mf: 8, el: 'fire', tags: ['dragon'] },
+  { n: { en: 'Dark Knight', zh: '暗黑骑士' }, ch: '♞', c: '#3a6060', hp: 55, atk: 16, def: 8, exp: 42, g: [15, 35], ai: 'chase', mf: 9, el: 'shadow', tags: ['knight'] },
   // === Original continued ===
-  { n: { en: 'Troll', zh: '巨魔' }, ch: 'Π', c: '#556b2f', hp: 50, atk: 14, def: 6, exp: 35, g: [12, 30], ai: 'chase', mf: 7 },
+  { n: { en: 'Troll', zh: '巨魔' }, ch: 'Π', c: '#556b2f', hp: 50, atk: 14, def: 6, exp: 35, g: [12, 30], ai: 'chase', mf: 7, tags: ['brute'] },
   { n: { en: 'Vampire', zh: '吸血鬼' }, ch: '♠', c: '#b91c3c', hp: 35, atk: 16, def: 5, exp: 40, g: [15, 35], ai: 'lifesteal', mf: 7, tags: ['undead'] },
-  { n: { en: 'Golem', zh: '魔像' }, ch: '◘', c: '#808080', hp: 60, atk: 12, def: 10, exp: 38, g: [10, 25], ai: 'chase', mf: 8 },
-  { n: { en: 'Lich', zh: '巫妖' }, ch: 'Ψ', c: '#9400d3', hp: 45, atk: 20, def: 8, exp: 55, g: [20, 50], ai: 'ranged', mf: 10, tags: ['undead'] },
+  { n: { en: 'Golem', zh: '魔像' }, ch: '◘', c: '#808080', hp: 60, atk: 12, def: 10, exp: 38, g: [10, 25], ai: 'chase', mf: 8, tags: ['construct'] },
+  { n: { en: 'Lich', zh: '巫妖' }, ch: 'Ψ', c: '#9400d3', hp: 45, atk: 20, def: 8, exp: 55, g: [20, 50], ai: 'ranged', mf: 10, tags: ['mage', 'undead'] },
   { n: { en: 'Demon', zh: '恶魔' }, ch: 'φ', c: '#ff4500', hp: 55, atk: 22, def: 7, exp: 60, g: [25, 60], ai: 'chase', mf: 10, tags: ['demon'] },
-  { n: { en: 'Necromancer', zh: '死灵法师' }, ch: '☽', c: '#6a0dad', hp: 35, atk: 18, def: 4, exp: 45, g: [15, 40], ai: 'summon', mf: 10, el: 'shadow' },
-  { n: { en: 'Dragon Whelp', zh: '幼龙' }, ch: 'δ', c: '#ff6347', hp: 65, atk: 18, def: 10, exp: 50, g: [30, 70], ai: 'ranged', mf: 11 },
+  { n: { en: 'Necromancer', zh: '死灵法师' }, ch: '☽', c: '#6a0dad', hp: 35, atk: 18, def: 4, exp: 45, g: [15, 40], ai: 'summon', mf: 10, el: 'shadow', tags: ['mage'] },
+  { n: { en: 'Dragon Whelp', zh: '幼龙' }, ch: 'δ', c: '#ff6347', hp: 65, atk: 18, def: 10, exp: 50, g: [30, 70], ai: 'ranged', mf: 11, tags: ['dragon'] },
   { n: { en: 'Ancient Dragon', zh: '远古巨龙' }, ch: 'Λ', c: '#ff0000', hp: 80, atk: 25, def: 12, exp: 80, g: [40, 100], ai: 'ranged', mf: 14, tags: ['dragon'] },
-  { n: { en: 'Death Knight', zh: '死亡骑士' }, ch: 'Ξ', c: '#191970', hp: 70, atk: 28, def: 14, exp: 75, g: [35, 80], ai: 'chase', mf: 14, tags: ['undead'] },
+  { n: { en: 'Death Knight', zh: '死亡骑士' }, ch: 'Ξ', c: '#191970', hp: 70, atk: 28, def: 14, exp: 75, g: [35, 80], ai: 'chase', mf: 14, tags: ['knight', 'undead'] },
   // === New: Dark Fortress (mf 16-19) — 填 F12-25 断层 ===
-  { n: { en: 'Castellan', zh: '铁卫统领' }, ch: '♝', c: '#4a5a6a', hp: 95, atk: 26, def: 16, exp: 70, g: [25, 55], ai: 'chase', mf: 16, tags: ['construct'] },
+  { n: { en: 'Castellan', zh: '铁卫统领' }, ch: '♝', c: '#4a5a6a', hp: 95, atk: 26, def: 16, exp: 70, g: [25, 55], ai: 'chase', mf: 16, tags: ['knight'] },
   { n: { en: 'Gargoyle', zh: '石化魔像' }, ch: 'Γ', c: '#708090', hp: 85, atk: 30, def: 12, exp: 75, g: [20, 50], ai: 'ambush', mf: 17, tags: ['construct'] },
   { n: { en: 'Inquisitor', zh: '圣裁官' }, ch: '✠', c: '#d4af37', hp: 75, atk: 32, def: 8, exp: 80, g: [30, 60], ai: 'ranged', mf: 18, el: 'holy', tags: ['cultist'] },
   { n: { en: 'Siege Golem', zh: '破城巨像' }, ch: '◍', c: '#696969', hp: 125, atk: 34, def: 15, exp: 85, g: [35, 70], ai: 'chase', mf: 19, tags: ['construct'] },
@@ -138,53 +138,52 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Pyro Drake', zh: '烈焰飞龙' }, ch: '¤', c: '#ff6347', hp: 115, atk: 34, def: 12, exp: 95, g: [40, 80], ai: 'ranged', mf: 21, el: 'fire', tags: ['dragon'] },
   { n: { en: 'Drake Zealot', zh: '龙血信徒' }, ch: '☧', c: '#8b0000', hp: 95, atk: 30, def: 10, exp: 90, g: [30, 65], ai: 'summon', mf: 22, tags: ['cultist'] },
   { n: { en: 'Magma Behemoth', zh: '熔岩巨兽' }, ch: '●', c: '#ff4500', hp: 135, atk: 32, def: 16, exp: 100, g: [40, 85], ai: 'chase', mf: 23, el: 'fire', tags: ['elemental'] },
-  { n: { en: 'Drakeborn Knight', zh: '龙裔骑士' }, ch: '†', c: '#b22222', hp: 115, atk: 38, def: 14, exp: 110, g: [45, 90], ai: 'chase', mf: 24, tags: ['dragon'] },
+  { n: { en: 'Drakeborn Knight', zh: '龙裔骑士' }, ch: '†', c: '#b22222', hp: 115, atk: 38, def: 14, exp: 110, g: [45, 90], ai: 'chase', mf: 24, tags: ['knight'] },
   { n: { en: 'Storm Wraith', zh: '雷霆怨灵' }, ch: '⚡', c: '#4682b4', hp: 100, atk: 36, def: 10, exp: 100, g: [40, 80], ai: 'ranged', mf: 25, el: 'lightning', tags: ['spirit'] },
   // === New: The Abyss (mf 26-30) ===
-  { n: { en: 'Abyssal Jellyfish', zh: '深海水母' }, ch: '∞', c: '#00ced1', hp: 70, atk: 20, def: 6, exp: 55, g: [20, 50], ai: 'wander', mf: 26, el: 'ice' },
-  { n: { en: 'Deep One', zh: '深潜者' }, ch: 'Σ', c: '#006400', hp: 85, atk: 24, def: 10, exp: 70, g: [25, 60], ai: 'chase', mf: 26 },
-  { n: { en: 'Void Leech', zh: '虚空水蛭' }, ch: 'λ', c: '#483d8b', hp: 60, atk: 22, def: 5, exp: 50, g: [15, 45], ai: 'lifesteal', mf: 27, el: 'shadow' },
-  { n: { en: 'Coral Golem', zh: '珊瑚魔像' }, ch: 'Φ', c: '#ff7f50', hp: 110, atk: 18, def: 18, exp: 75, g: [30, 65], ai: 'chase', mf: 28 },
-  { n: { en: 'Siren', zh: '塞壬' }, ch: '♪', c: '#ff69b4', hp: 65, atk: 28, def: 6, exp: 65, g: [25, 55], ai: 'ranged', mf: 29, el: 'ice' },
-  { n: { en: 'Kraken Spawn', zh: '克拉肯幼体' }, ch: 'κ', c: '#1a237e', hp: 120, atk: 30, def: 12, exp: 90, g: [40, 80], ai: 'chase', mf: 30, el: 'ice' },
+  { n: { en: 'Abyssal Jellyfish', zh: '深海水母' }, ch: '∞', c: '#00ced1', hp: 70, atk: 20, def: 6, exp: 55, g: [20, 50], ai: 'wander', mf: 26, el: 'ice', tags: ['aquatic'] },
+  { n: { en: 'Deep One', zh: '深潜者' }, ch: 'Σ', c: '#006400', hp: 85, atk: 24, def: 10, exp: 70, g: [25, 60], ai: 'chase', mf: 26, tags: ['aquatic'] },
+  { n: { en: 'Void Leech', zh: '虚空水蛭' }, ch: 'λ', c: '#483d8b', hp: 60, atk: 22, def: 5, exp: 50, g: [15, 45], ai: 'lifesteal', mf: 27, el: 'shadow', tags: ['aberration'] },
+  { n: { en: 'Coral Golem', zh: '珊瑚魔像' }, ch: 'Φ', c: '#ff7f50', hp: 110, atk: 18, def: 18, exp: 75, g: [30, 65], ai: 'chase', mf: 28, tags: ['construct'] },
+  { n: { en: 'Siren', zh: '塞壬' }, ch: '♪', c: '#ff69b4', hp: 65, atk: 28, def: 6, exp: 65, g: [25, 55], ai: 'ranged', mf: 29, el: 'ice', tags: ['aquatic'] },
+  { n: { en: 'Kraken Spawn', zh: '克拉肯幼体' }, ch: 'κ', c: '#1a237e', hp: 120, atk: 30, def: 12, exp: 90, g: [40, 80], ai: 'chase', mf: 30, el: 'ice', tags: ['aquatic'] },
   // === New: Void Realm (mf 31-35) ===
-  { n: { en: 'Void Wraith', zh: '虚空幽灵' }, ch: 'ξ', c: '#8a2be2', hp: 100, atk: 32, def: 8, exp: 80, g: [30, 70], ai: 'phase', mf: 31, el: 'shadow' },
-  { n: { en: 'Chaos Elemental', zh: '混沌元素' }, ch: 'χ', c: '#ff1493', hp: 90, atk: 35, def: 6, exp: 85, g: [35, 75], ai: 'erratic', mf: 32 },
-  { n: { en: 'Rift Stalker', zh: '裂隙猎手' }, ch: 'τ', c: '#800080', hp: 110, atk: 30, def: 14, exp: 90, g: [40, 80], ai: 'teleport', mf: 33, el: 'shadow' },
-  { n: { en: 'Void Mage', zh: '虚空法师' }, ch: 'υ', c: '#7b2fbe', hp: 80, atk: 40, def: 8, exp: 100, g: [45, 90], ai: 'ranged', mf: 34, el: 'shadow' },
-  { n: { en: 'Reality Shard', zh: '现实碎片' }, ch: '◊', c: '#e0e0ff', hp: 130, atk: 28, def: 20, exp: 95, g: [35, 75], ai: 'wander', mf: 35 },
+  { n: { en: 'Void Wraith', zh: '虚空幽灵' }, ch: 'ξ', c: '#8a2be2', hp: 100, atk: 32, def: 8, exp: 80, g: [30, 70], ai: 'phase', mf: 31, el: 'shadow', tags: ['spirit'] },
+  { n: { en: 'Chaos Elemental', zh: '混沌元素' }, ch: 'χ', c: '#ff1493', hp: 90, atk: 35, def: 6, exp: 85, g: [35, 75], ai: 'erratic', mf: 32, tags: ['elemental'] },
+  { n: { en: 'Rift Stalker', zh: '裂隙猎手' }, ch: 'τ', c: '#800080', hp: 110, atk: 30, def: 14, exp: 90, g: [40, 80], ai: 'teleport', mf: 33, el: 'shadow', tags: ['aberration'] },
+  { n: { en: 'Void Mage', zh: '虚空法师' }, ch: 'υ', c: '#7b2fbe', hp: 80, atk: 40, def: 8, exp: 100, g: [45, 90], ai: 'ranged', mf: 34, el: 'shadow', tags: ['mage'] },
+  { n: { en: 'Reality Shard', zh: '现实碎片' }, ch: '◊', c: '#e0e0ff', hp: 130, atk: 28, def: 20, exp: 95, g: [35, 75], ai: 'wander', mf: 35, tags: ['aberration'] },
   // === New: The Final Sanctum (mf 36-40) ===
-  { n: { en: 'Seraphim', zh: '炽天使' }, ch: '☀', c: '#ffd700', hp: 140, atk: 38, def: 16, exp: 110, g: [50, 100], ai: 'chase', mf: 36, el: 'holy' },
-  { n: { en: 'Fallen Seraph', zh: '堕落炽天使' }, ch: '✝', c: '#8b0000', hp: 150, atk: 42, def: 14, exp: 120, g: [55, 110], ai: 'chase', mf: 37, el: 'shadow', tags: ['undead', 'demon'] },
-  { n: { en: 'Divine Golem', zh: '神圣魔像' }, ch: '⊕', c: '#c0c0c0', hp: 200, atk: 30, def: 25, exp: 130, g: [40, 90], ai: 'chase', mf: 38, el: 'holy' },
-  { n: { en: 'Cosmic Horror', zh: '宇宙恐怖' }, ch: '∇', c: '#1a0033', hp: 160, atk: 48, def: 12, exp: 150, g: [60, 120], ai: 'erratic', mf: 39, el: 'shadow', tags: ['demon'] },
-  { n: { en: 'Archon', zh: '执政官' }, ch: '♔', c: '#ffffff', hp: 180, atk: 45, def: 18, exp: 160, g: [70, 140], ai: 'ranged', mf: 40, el: 'holy' },
+  { n: { en: 'Seraphim', zh: '炽天使' }, ch: '☀', c: '#ffd700', hp: 140, atk: 38, def: 16, exp: 110, g: [50, 100], ai: 'chase', mf: 36, el: 'holy', tags: ['seraph'] },
+  { n: { en: 'Fallen Seraph', zh: '堕落炽天使' }, ch: '✝', c: '#8b0000', hp: 150, atk: 42, def: 14, exp: 120, g: [55, 110], ai: 'chase', mf: 37, el: 'shadow', tags: ['seraph', 'undead', 'demon'] },
+  { n: { en: 'Divine Golem', zh: '神圣魔像' }, ch: '⊕', c: '#c0c0c0', hp: 200, atk: 30, def: 25, exp: 130, g: [40, 90], ai: 'chase', mf: 38, el: 'holy', tags: ['construct'] },
+  { n: { en: 'Cosmic Horror', zh: '宇宙恐怖' }, ch: '∇', c: '#1a0033', hp: 160, atk: 48, def: 12, exp: 150, g: [60, 120], ai: 'erratic', mf: 39, el: 'shadow', tags: ['aberration', 'demon'] },
+  { n: { en: 'Archon', zh: '执政官' }, ch: '♔', c: '#ffffff', hp: 180, atk: 45, def: 18, exp: 160, g: [70, 140], ai: 'ranged', mf: 40, el: 'holy', tags: ['seraph'] },
   // === Wave 6b: 主题敌人填中段辨识度 ===
-  { n: { en: 'Cave Beetle', zh: '洞穴甲虫' }, ch: '⬟', c: '#7a5230', hp: 14, atk: 5, def: 4, exp: 8, g: [2, 6], ai: 'ambush', mf: 2 },
-  { n: { en: 'Dire Bat', zh: '巨蝠' }, ch: '⬣', c: '#4a4a4a', hp: 12, atk: 6, def: 1, exp: 9, g: [3, 7], ai: 'erratic', mf: 3 },
+  { n: { en: 'Cave Beetle', zh: '洞穴甲虫' }, ch: '⬟', c: '#7a5230', hp: 14, atk: 5, def: 4, exp: 8, g: [2, 6], ai: 'ambush', mf: 2, tags: ['insect'] },
+  { n: { en: 'Dire Bat', zh: '巨蝠' }, ch: '⬣', c: '#4a4a4a', hp: 12, atk: 6, def: 1, exp: 9, g: [3, 7], ai: 'erratic', mf: 3, tags: ['bat'] },
   { n: { en: 'Bone Pile', zh: '骸骨堆' }, ch: '≡', c: '#dcdcdc', hp: 45, atk: 8, def: 10, exp: 25, g: [8, 18], ai: 'ambush', mf: 7, tags: ['undead'] },
   { n: { en: 'Crypt Warden', zh: '墓穴守卫' }, ch: '☩', c: '#8a8a8a', hp: 55, atk: 16, def: 8, exp: 40, g: [14, 30], ai: 'chase', mf: 9, tags: ['undead'] },
   { n: { en: 'Fire Imp', zh: '火焰小妖' }, ch: 'æ', c: '#ff7847', hp: 50, atk: 16, def: 5, exp: 38, g: [12, 26], ai: 'erratic', mf: 12, el: 'fire', tags: ['demon'] },
-  { n: { en: 'Magma Hound', zh: '熔岩犬' }, ch: 'Ð', c: '#b22222', hp: 70, atk: 18, def: 8, exp: 45, g: [15, 30], ai: 'chase', mf: 13, el: 'fire', tags: ['beast'] },
+  { n: { en: 'Magma Hound', zh: '熔岩犬' }, ch: 'Ð', c: '#b22222', hp: 70, atk: 18, def: 8, exp: 45, g: [15, 30], ai: 'chase', mf: 13, el: 'fire', tags: ['hound'] },
   { n: { en: 'Cinder Wraith', zh: '余烬怨灵' }, ch: '§', c: '#ff6347', hp: 60, atk: 22, def: 6, exp: 50, g: [18, 35], ai: 'phase', mf: 15, el: 'fire', tags: ['spirit'] },
-  { n: { en: 'Dread Legionnaire', zh: '恐惧军团兵' }, ch: '☨', c: '#5a5a6a', hp: 110, atk: 30, def: 14, exp: 85, g: [30, 60], ai: 'chase', mf: 18, el: 'shadow', tags: ['construct'] },
+  { n: { en: 'Dread Legionnaire', zh: '恐惧军团兵' }, ch: '☨', c: '#5a5a6a', hp: 110, atk: 30, def: 14, exp: 85, g: [30, 60], ai: 'chase', mf: 18, el: 'shadow', tags: ['knight'] },
   // === Wave 6c: Fungal Hollow branch enemies (mf 0 = branch-only, excluded
   // from main-floor spawns by the mf>=1 filter in spawnEnemies). Stats tuned to
   // ~F8-15 tier; spawnBranchEnemies applies a 0.7x side-content multiplier.
-  // Each carries a tag from pickEnemyTemplate's checked set so sprite routing is
-  // language-independent (runtime Enemy.name is localized; name regexes are
-  // case-sensitive lowercase and only reliably match the zh name). Templates:
-  // Brute→GOLEM, Spore Mother→WRAITH, Myconid→CULTIST, Knight→SKELETON, Slime→ELEMENTAL.
-  { n: { en: 'Mushroom Brute', zh: '菇蛮' }, ch: '♭', c: '#6a4a3a', hp: 70, atk: 16, def: 8, exp: 40, g: [12, 28], ai: 'chase', mf: 0, tags: ['construct'] },
-  { n: { en: 'Spore Mother', zh: '孢子之母' }, ch: '☂', c: '#5a8a5a', hp: 55, atk: 18, def: 5, exp: 45, g: [15, 30], ai: 'ranged', mf: 0, el: 'shadow', tags: ['spirit'] },
-  { n: { en: 'Myconid', zh: '蕈人' }, ch: '♟', c: '#7a4a8a', hp: 50, atk: 15, def: 6, exp: 35, g: [10, 22], ai: 'chase', mf: 0, tags: ['cultist'] },
-  { n: { en: 'Fungal Knight', zh: '菌骑' }, ch: '✟', c: '#8a7a6a', hp: 65, atk: 20, def: 10, exp: 50, g: [15, 35], ai: 'chase', mf: 0, el: 'shadow', tags: ['undead'] },
-  { n: { en: 'Glow Slime', zh: '荧光史莱姆' }, ch: '◉', c: '#5fdf8a', hp: 60, atk: 12, def: 9, exp: 32, g: [8, 20], ai: 'wander', mf: 0, tags: ['elemental'] },
+  // Each carries a sprite-routing tag from pickEnemyTemplate's checked set
+  // (language-independent). Playtest #10 reroutes these to the FUNGI/SLIME
+  // templates: Brute→FUNGI, Spore Mother→FUNGI, Myconid→FUNGI, Fungal Knight→FUNGI, Glow Slime→SLIME.
+  { n: { en: 'Mushroom Brute', zh: '菇蛮' }, ch: '♭', c: '#6a4a3a', hp: 70, atk: 16, def: 8, exp: 40, g: [12, 28], ai: 'chase', mf: 0, tags: ['fungi'] },
+  { n: { en: 'Spore Mother', zh: '孢子之母' }, ch: '☂', c: '#5a8a5a', hp: 55, atk: 18, def: 5, exp: 45, g: [15, 30], ai: 'ranged', mf: 0, el: 'shadow', tags: ['fungi'] },
+  { n: { en: 'Myconid', zh: '蕈人' }, ch: '♟', c: '#7a4a8a', hp: 50, atk: 15, def: 6, exp: 35, g: [10, 22], ai: 'chase', mf: 0, tags: ['fungi'] },
+  { n: { en: 'Fungal Knight', zh: '菌骑' }, ch: '✟', c: '#8a7a6a', hp: 65, atk: 20, def: 10, exp: 50, g: [15, 35], ai: 'chase', mf: 0, el: 'shadow', tags: ['fungi', 'undead'] },
+  { n: { en: 'Glow Slime', zh: '荧光史莱姆' }, ch: '◉', c: '#5fdf8a', hp: 60, atk: 12, def: 9, exp: 32, g: [8, 20], ai: 'wander', mf: 0, tags: ['slime'] },
   // === Wave 6d: Endless mode (F41+) — mf 40+ exclusive strong foes ===
-  { n: { en: 'Void Titan', zh: '虚空泰坦' }, ch: '⊛', c: '#3a1a5a', hp: 220, atk: 48, def: 16, exp: 200, g: [60, 120], ai: 'chase', mf: 42, el: 'shadow', tags: ['construct'] },
-  { n: { en: 'Doom Seraph', zh: '末日炽天使' }, ch: '♰', c: '#b0b0ff', hp: 260, atk: 54, def: 14, exp: 240, g: [80, 140], ai: 'ranged', mf: 45, el: 'holy', tags: ['demon'] },
-  { n: { en: 'Entropy Beast', zh: '熵兽' }, ch: '✺', c: '#ff1493', hp: 300, atk: 58, def: 18, exp: 280, g: [90, 160], ai: 'erratic', mf: 48, el: 'shadow', tags: ['elemental'] },
-  { n: { en: 'Abyssal Tyrant', zh: '深渊暴君' }, ch: '⛉', c: '#1a0033', hp: 380, atk: 64, def: 22, exp: 350, g: [120, 200], ai: 'chase', mf: 50, el: 'shadow', tags: ['demon'] },
+  { n: { en: 'Void Titan', zh: '虚空泰坦' }, ch: '⊛', c: '#3a1a5a', hp: 220, atk: 48, def: 16, exp: 200, g: [60, 120], ai: 'chase', mf: 42, el: 'shadow', tags: ['aberration'] },
+  { n: { en: 'Doom Seraph', zh: '末日炽天使' }, ch: '♰', c: '#b0b0ff', hp: 260, atk: 54, def: 14, exp: 240, g: [80, 140], ai: 'ranged', mf: 45, el: 'holy', tags: ['seraph', 'demon'] },
+  { n: { en: 'Entropy Beast', zh: '熵兽' }, ch: '✺', c: '#ff1493', hp: 300, atk: 58, def: 18, exp: 280, g: [90, 160], ai: 'erratic', mf: 48, el: 'shadow', tags: ['aberration'] },
+  { n: { en: 'Abyssal Tyrant', zh: '深渊暴君' }, ch: '⛐', c: '#1a0033', hp: 380, atk: 64, def: 22, exp: 350, g: [120, 200], ai: 'chase', mf: 50, el: 'shadow', tags: ['demon'] },
 ];
 
 export const BOSSES: BossDef[] = [
