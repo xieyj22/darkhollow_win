@@ -1026,21 +1026,40 @@ export function drawBossSprite(c: CanvasRenderingContext2D, x: number, y: number
 
 function pickEnemyTemplate(e: Enemy): { tpl: Template; key: string } {
   const tags = e.tags || [];
-  if (tags.includes('dragon'))    return { tpl: TEMPLATES.DRAGON,    key: 'DRAGON' };
-  if (tags.includes('construct')) return { tpl: TEMPLATES.GOLEM,     key: 'GOLEM' };
-  if (tags.includes('spirit'))    return { tpl: TEMPLATES.WRAITH,    key: 'WRAITH' };
-  if (tags.includes('elemental')) return { tpl: TEMPLATES.ELEMENTAL, key: 'ELEMENTAL' };
-  if (tags.includes('cultist'))   return { tpl: TEMPLATES.CULTIST,   key: 'CULTIST' };
-  if (tags.includes('undead'))    return { tpl: TEMPLATES.SKELETON,  key: 'SKELETON' };
-  if (tags.includes('demon'))     return { tpl: TEMPLATES.DEMON,     key: 'DEMON' };
+  const has = (t: string) => tags.includes(t);
+  // Priority: most specific first. undead/demon are KEPT on enemies for holy_water
+  // gameplay (holy weakness), so the specific templates (seraph/knight/mage/fungi/
+  // ...) must be checked BEFORE undead/demon so they win the sprite route.
+  if (has('dragon'))     return { tpl: TEMPLATES.DRAGON,     key: 'DRAGON' };
+  if (has('seraph'))     return { tpl: TEMPLATES.SERAPH,     key: 'SERAPH' };
+  if (has('aberration')) return { tpl: TEMPLATES.ABERRATION, key: 'ABERRATION' };
+  if (has('spirit'))     return { tpl: TEMPLATES.WRAITH,     key: 'WRAITH' };
+  if (has('fungi'))      return { tpl: TEMPLATES.FUNGI,      key: 'FUNGI' };
+  if (has('bat'))        return { tpl: TEMPLATES.BAT,        key: 'BAT' };
+  if (has('hound'))      return { tpl: TEMPLATES.HOUND,      key: 'HOUND' };
+  if (has('insect'))     return { tpl: TEMPLATES.INSECT,     key: 'INSECT' };
+  if (has('rodent'))     return { tpl: TEMPLATES.RODENT,     key: 'RODENT' };
+  if (has('aquatic'))    return { tpl: TEMPLATES.AQUATIC,    key: 'AQUATIC' };
+  if (has('knight'))     return { tpl: TEMPLATES.KNIGHT,     key: 'KNIGHT' };
+  if (has('mage'))       return { tpl: TEMPLATES.CASTER,     key: 'CASTER' };
+  if (has('brute'))      return { tpl: TEMPLATES.BRUTE,      key: 'BRUTE' };
+  if (has('construct'))  return { tpl: TEMPLATES.GOLEM,      key: 'GOLEM' };
+  if (has('elemental'))  return { tpl: TEMPLATES.ELEMENTAL,  key: 'ELEMENTAL' };
+  if (has('cultist'))    return { tpl: TEMPLATES.CULTIST,    key: 'CULTIST' };
+  if (has('demon'))      return { tpl: TEMPLATES.DEMON,      key: 'DEMON' };
+  if (has('undead'))     return { tpl: TEMPLATES.SKELETON,   key: 'SKELETON' };
+  if (has('slime'))      return { tpl: TEMPLATES.SLIME,      key: 'SLIME' };
+  if (has('beast'))      return { tpl: TEMPLATES.BEAST,      key: 'BEAST' };
+  // Name-regex fallback — i-flagged so English capitalized names (Wolf/Spider/...)
+  // also match (the original was case-sensitive and mis-routed to GOBLIN in en).
   const n = e.name;
-  if (/slime|ooze|blob|gel|史莱|黏|胶|果冻/.test(n)) return { tpl: TEMPLATES.SLIME, key: 'SLIME' };
-  if (/dragon|drake|wyrm|wyvern|龙|蛟/.test(n))     return { tpl: TEMPLATES.DRAGON, key: 'DRAGON' };
-  if (/golem|gargoyle|construct|魔像|巨像/.test(n)) return { tpl: TEMPLATES.GOLEM,  key: 'GOLEM' };
-  if (/wraith|ghost|spirit|specter|怨灵|幽/.test(n))return { tpl: TEMPLATES.WRAITH, key: 'WRAITH' };
-  if (/elemental|behemoth|熔岩|元素/.test(n))       return { tpl: TEMPLATES.ELEMENTAL, key: 'ELEMENTAL' };
-  if (/cultist|zealot|inquisitor|信徒|裁官/.test(n))return { tpl: TEMPLATES.CULTIST, key: 'CULTIST' };
-  if (/bat|raven|bird|spider|rat|wolf|hound|beast|beetle|serpent|snak|蝙蝠|蜘|鼠|狼|蛛|蛇|甲虫/.test(n)) return { tpl: TEMPLATES.BEAST, key: 'BEAST' };
+  if (/slime|ooze|blob|gel|史莱|黏|胶|果冻/i.test(n)) return { tpl: TEMPLATES.SLIME, key: 'SLIME' };
+  if (/dragon|drake|wyrm|wyvern|龙|蛟/i.test(n))     return { tpl: TEMPLATES.DRAGON, key: 'DRAGON' };
+  if (/golem|gargoyle|construct|魔像|巨像/i.test(n)) return { tpl: TEMPLATES.GOLEM,  key: 'GOLEM' };
+  if (/wraith|ghost|spirit|specter|怨灵|幽/i.test(n))return { tpl: TEMPLATES.WRAITH, key: 'WRAITH' };
+  if (/elemental|behemoth|熔岩|元素/i.test(n))       return { tpl: TEMPLATES.ELEMENTAL, key: 'ELEMENTAL' };
+  if (/cultist|zealot|inquisitor|信徒|裁官/i.test(n))return { tpl: TEMPLATES.CULTIST, key: 'CULTIST' };
+  if (/bat|raven|bird|spider|rat|wolf|hound|beast|beetle|serpent|snak|蝙蝠|蜘|鼠|狼|蛛|蛇|甲虫/i.test(n)) return { tpl: TEMPLATES.BEAST, key: 'BEAST' };
   return { tpl: TEMPLATES.GOBLIN, key: 'GOBLIN' };
 }
 
