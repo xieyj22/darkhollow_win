@@ -31,12 +31,19 @@ vi.mock('../meta.js', () => ({
   renderEchoBreakdown: () => {},
   creditSoulEchoes: () => {},
   recordRun: () => {},
+  unlockLore: vi.fn(),
+}));
+vi.mock('../warden.js', () => ({
+  pickWardenRelic: (owned: string[]) => owned.length === 0 ? 'warden_cloak' : null,
+  nextWardenMemory: (u: string[]) => u.includes('warden:memory3') ? null : 'warden:memory1',
+  wardenMemoryText: () => ({ en: 'mem', zh: '记忆' }),
 }));
 vi.mock('../relics.js', () => ({
   getRelicExpMult: () => 1.5,
   getRelicGoldMult: () => 2,
   relicOnKill: () => {},
   grantRandomRelic: () => {},
+  grantRelic: vi.fn(),
   relicOnHitEnemy: (_d: number) => _d,
   relicOnDamaged: () => {},
   relicOnDeath: () => false,
@@ -109,5 +116,35 @@ describe('grantKillRewards', () => {
     expect(G.player.bossesKilledThisRun).toBe(0);
     grantKillRewards(fixtureEnemy({ isBoss: true }));
     expect(G.player.bossesKilledThisRun).toBe(1);
+  });
+});
+
+import { unlockLore } from '../meta.js';
+import { grantRelic } from '../relics.js';
+
+describe('grantKillRewards — warden + boss lore', () => {
+  beforeEach(() => {
+    (globalThis as any).G = fixtureG();
+    (globalThis as any).G.player.relics = [];
+    vi.clearAllMocks();
+  });
+
+  it('warden kill grants the specific warden relic (not random) + unlocks memory1', () => {
+    const G = (globalThis as any).G;
+    grantKillRewards(fixtureEnemy({ isWarden: true, isElite: true, exp: 10 }));
+    expect(grantRelic).toHaveBeenCalledWith('warden_cloak', expect.any(Number), expect.any(Number));
+    expect(unlockLore).toHaveBeenCalledWith('warden:memory1');
+  });
+
+  it('non-warden elite kill does NOT call the warden relic path', () => {
+    grantKillRewards(fixtureEnemy({ isElite: true, exp: 10 }));
+    expect(grantRelic).not.toHaveBeenCalled();
+    expect(unlockLore).not.toHaveBeenCalledWith(expect.stringMatching(/^warden:memory/));
+  });
+
+  it('boss kill unlocks boss:<floor> lore', () => {
+    (globalThis as any).G.floor = 5;
+    grantKillRewards(fixtureEnemy({ isBoss: true }));
+    expect(unlockLore).toHaveBeenCalledWith('boss:5');
   });
 });

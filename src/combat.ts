@@ -6,18 +6,19 @@ import { rng, dst } from './utils.js';
 import { snd, setBgmScene } from './audio.js';
 import { flt, shake } from './effects.js';
 import { fxFlash, fxBurst } from './fx.js';
-import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic, relicOnKill, relicOnDodge, relicOnCrit } from './relics.js';
+import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic, grantRelic, relicOnKill, relicOnDodge, relicOnCrit } from './relics.js';
 import { unlockAchievement } from './steam.js';
 import { t } from './i18n.js';
 import { ACH_DEFS, EQUIPMENT_SETS } from './data.js';
 import { addMsg } from './messages.js';
 import { processBossPhase } from './enemies.js';
+import { pickWardenRelic, nextWardenMemory, wardenMemoryText } from './warden.js';
 import {
   applyTalentBonuses, onPlayerHitEnemy, onPlayerKill, onPlayerDodged,
   onPlayerDamaged, onPlayerDeath, onEnemyHitPlayer, checkDoubleStrike,
   getCritMultiplier, getManaShieldReduction,
 } from './talents.js';
-import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun } from './meta.js';
+import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore } from './meta.js';
 
 // Late-bound dependency to break circular import with items.ts
 let _genItem: ((floor: number) => any) | null = null;
@@ -427,6 +428,7 @@ export function grantKillRewards(e: Enemy): void {
   addMsg(lang === 'zh' ? `${e.name}被击败！+${bonusExp(e.exp)}经验` : `${e.name} defeated! +${bonusExp(e.exp)} XP`, 'mc');
   if (e.isBoss) {
     G.player.bossesKilledThisRun++;
+    unlockLore('boss:' + G.floor);
     checkAch('boss_kill');
     if (G.floor === FINAL && !G.branchMode && !G.endless) { playerVictory(); return; }
     if (G.floor === FINAL && G.endless)
@@ -434,7 +436,21 @@ export function grantKillRewards(e: Enemy): void {
   }
   onPlayerKill(e);
   relicOnKill(e); // relic trigger: soul_harvester
-  if (e.isBoss || (e.isElite && Math.random() < 0.4)) grantRandomRelic(e.x, e.y, G.floor);
+  // Warden kill (Wave 8): specific relic (next unowned "前任遗物") + next memory,
+  // INSTEAD of the generic elite-40% random drop.
+  if (e.isWarden) {
+    const rid = pickWardenRelic(G.player.relics || []);
+    if (rid) grantRelic(rid, e.x, e.y);
+    const mem = nextWardenMemory(getMeta().unlockedLore || []);
+    if (mem) {
+      unlockLore(mem);
+      const mt = wardenMemoryText(mem);
+      if (mt) addMsg(lang === 'zh' ? mt.zh : mt.en, 'md');
+    }
+    addMsg(lang === 'zh' ? '🕯 你击退了守渊人！' : '🕯 You have repelled the Warden!', 'ml');
+  } else if (e.isBoss || (e.isElite && Math.random() < 0.4)) {
+    grantRandomRelic(e.x, e.y, G.floor);
+  }
   checkLevelUp(); checkAchs();
 }
 
