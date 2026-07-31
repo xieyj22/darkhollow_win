@@ -146,7 +146,7 @@ export function processEnemies(): void {
       tryMove(e, dx, dy); continue;
     }
     // Melee attack still works even when invisible (enemy is adjacent)
-    if (d <= 1.5) { attack(e, G.player as any, false); if (G.gameOver) return; continue; }
+    if (d <= 1.5) { attack(e, G.player, false); if (G.gameOver) return; continue; }
 
     // When player is invisible, enemies can only detect at very close range
     if (playerInvis) { randMove(e); continue; }
@@ -163,7 +163,7 @@ export function processEnemies(): void {
           if (nx >= 0 && nx < MW && ny >= 0 && ny < MH && G.dungeon.map[ny][nx] !== TL.VOID && !G.enemies.some(o => o !== e && o.x === nx && o.y === ny) && !(nx === G.player.x && ny === G.player.y)) { const ox = e.x, oy = e.y; e.x = nx; e.y = ny; setEnemyTween(e, ox, oy, nx, ny); }
         } else randMove(e); break;
       case 'ranged':
-        if (d < 2) { attack(e, G.player as any, false); if (G.gameOver) return; }
+        if (d < 2) { attack(e, G.player, false); if (G.gameOver) return; }
         else if (d < 7 && G.player.visible?.[e.y]?.[e.x]) {
           // Check ward
           if (G.player.warded) {

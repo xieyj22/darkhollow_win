@@ -242,6 +242,19 @@ export interface Enemy {
   phasesTriggered?: Set<number>;
 }
 
+// Shared shape for attack()'s attacker/defender — both Player and Enemy satisfy
+// it. Optional fields cover one-side-specific properties: only Enemy has
+// name/goldDrop/c/ai, so they're optional here (Player has raceName/clsName + gold).
+export interface Combatant {
+  x: number; y: number;
+  hp: number; maxHp: number; atk: number; def: number;
+  exp: number;
+  name?: string; goldDrop?: number;
+  el?: Element; res?: Partial<Record<Element, number>>;
+  ai?: string; c?: string;
+  isBoss?: boolean; isElite?: boolean; isAlly?: boolean;
+}
+
 // --- Traps (runtime) ---
 
 export interface Trap {

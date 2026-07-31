@@ -1,5 +1,5 @@
 // Combat system — attack, level up, death, victory
-import type { Enemy, Element, Item } from './types.js';
+import type { Enemy, Combatant, Element, Item } from './types.js';
 import { G, lang } from './state.js';
 import { FINAL } from './config.js';
 import { rng, dst } from './utils.js';
@@ -55,7 +55,7 @@ const FX_EL_COLOR: Record<string, string> = {
   fire: '#ff7a45', ice: '#7ec8e3', lightning: '#fff2a8', shadow: '#b583f6', holy: '#ffd700', none: '#ffffff',
 };
 
-export function attack(atk: { atk: number; name?: string; ai?: string; hp?: number; maxHp?: number; def?: number; el?: Element; res?: Partial<Record<Element, number>> }, def: { hp: number; maxHp: number; def: number; name: string; x: number; y: number; exp: number; goldDrop: number; isBoss?: boolean; isAlly?: boolean; el?: Element; res?: Partial<Record<Element, number>> }, isP: boolean): boolean {
+export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
   if (!G) return false;
   let dmg = Math.max(1, atk.atk - def.def + rng(-2, 2));
 
@@ -112,14 +112,14 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
       flt(def.x, def.y, `-${dmg} CRIT!${elSym}`, '#ffd700', 'crit'); snd('crit'); shake(2, def.x - G.player.x, def.y - G.player.y);
     } else {
       addMsg(lang === 'zh' ? `你击中${def.name}，造成${dmg}伤害${elSym}。` : `You hit ${def.name} for ${dmg}${elSym}.`, 'mc');
-      fxFlash(def.x, def.y, atkEl !== 'none' ? FX_EL_COLOR[atkEl] : ((def as any).c || '#ff6b6b'));
+      fxFlash(def.x, def.y, atkEl !== 'none' ? FX_EL_COLOR[atkEl] : (def.c || '#ff6b6b'));
       flt(def.x, def.y, `-${dmg}${elSym}`, '#ff6b6b'); snd('hit'); shake(1, def.x - G.player.x, def.y - G.player.y);
     }
   } else {
     // Enemy attacks player
     addMsg(lang === 'zh' ? `${atk.name || 'Enemy'}击中你，造成${dmg}伤害${elSym}！` : `${atk.name || 'Enemy'} hits you for ${dmg}${elSym}!`, 'mc');
     fxFlash(G.player.x, G.player.y, '#e63946');
-    flt(G.player.x, G.player.y, `-${dmg}${elSym}`, '#e63946'); snd('hit'); shake(1.4, G.player.x - (atk as any).x, G.player.y - (atk as any).y);
+    flt(G.player.x, G.player.y, `-${dmg}${elSym}`, '#e63946'); snd('hit'); shake(1.4, G.player.x - atk.x, G.player.y - atk.y);
   }
 
   def.hp -= dmg;
@@ -138,43 +138,16 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
 
   if (def.hp <= 0) {
     if (isP) {
-      fxBurst(def.x, def.y, (def as any).c || (atkEl !== 'none' ? FX_EL_COLOR[atkEl] : '#ff6b6b'), def.isBoss ? 26 : 12, def.isBoss ? 1.6 : 1);
-      addMsg(lang === 'zh' ? `${def.name}被击败！+${bonusExp(def.exp)}经验` : `${def.name} defeated! +${bonusExp(def.exp)} XP`, 'mc');
-      G.player.exp += Math.floor(bonusExp(def.exp) * getRelicExpMult());
-      G.player.gold += Math.floor(bonusGold(def.goldDrop) * getRelicGoldMult());
-      G.player.kills++;
-      addMsg(lang === 'zh' ? `获得${bonusGold(def.goldDrop)}金币。` : `Found ${bonusGold(def.goldDrop)} gold.`, 'mp');
+      fxBurst(def.x, def.y, def.c || (atkEl !== 'none' ? FX_EL_COLOR[atkEl] : '#ff6b6b'), def.isBoss ? 26 : 12, def.isBoss ? 1.6 : 1);
+      grantKillRewards(def as Enemy);
+      // Boss-victory guard: grantKillRewards just called playerVictory(); preserve
+      // the old early `return true` which fired before loot drop / double-strike.
+      if (G.won) return true;
+      // Melee-only gold flavor message (the skill/scroll/ally killEnemy path never
+      // printed this — kept here at the call site, NOT in shared grantKillRewards).
+      addMsg(lang === 'zh' ? `获得${bonusGold((def as Enemy).goldDrop)}金币。` : `Found ${bonusGold((def as Enemy).goldDrop)} gold.`, 'mp');
       snd('pickup');
-
-      G.player.streak++;
-      if (G.player.streak > G.player.bestStreak) G.player.bestStreak = G.player.streak;
-      if (G.player.streak >= 3) {
-        const bonus = bonusExp(Math.floor(def.exp * .2 * G.player.streak));
-        G.player.exp += bonus;
-        addMsg(`🔥 ${G.player.streak}x${t('streakMsg')} +${bonus}XP`, 'ml');
-        checkAch('streak5');
-      }
-
-      if (def.isBoss) {
-        G.player.bossesKilledThisRun++;
-        checkAch('boss_kill');
-        if (G.floor === FINAL && !G.branchMode && !G.endless) { playerVictory(); return true; }
-        // Endless: the Creator dies but the abyss keeps going — no victory.
-        if (G.floor === FINAL && G.endless) {
-          addMsg(lang === 'zh' ? '👑 你击败了创世者,但深渊仍在下探……' : '👑 You slay the Creator, yet the abyss yawns deeper...', 'md');
-        }
-      }
-
-      // Talent trigger: on kill
-      onPlayerKill(def as Enemy);
-      relicOnKill(def as Enemy); // relic trigger: soul_harvester
-
-      // Relic drop — bosses always, elites often
-      if ((def as Enemy).isBoss || ((def as Enemy).isElite && Math.random() < 0.4)) {
-        grantRandomRelic(def.x, def.y, G.floor);
-      }
-
-      // Loot drop — uses late-bound genItem
+      // Loot drop — melee-only (skill/scroll/ally kills via killEnemy drop no loot)
       if (Math.random() < .3 && _genItem) {
         const loot = _genItem(G.floor);
         loot.x = def.x; loot.y = def.y;
@@ -182,8 +155,6 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
         addMsg(lang === 'zh' ? `${def.name}掉落了${loot.name}！` : `${def.name} dropped ${loot.name}!`, 'mp');
         if (loot.rarity >= 4) checkAch('legendary');
       }
-
-      checkLevelUp(); checkAchs();
 
       // Talent trigger: double strike (15% chance to attack again)
       if (checkDoubleStrike() && (def as Enemy).hp <= 0) {
@@ -204,7 +175,11 @@ export function attack(atk: { atk: number; name?: string; ai?: string; hp?: numb
         if (onPlayerDeath()) return false;
         // Relic revive (Phoenix Heart)
         if (relicOnDeath()) return false;
-        playerDeath(def.name);
+        // NOTE: in the !isP branch def is the *player*, which has no `name` field,
+        // so def.name is undefined here — a pre-existing latent bug (death message
+        // shows "slain by undefined"; likely should be atk.name). Cast preserves the
+        // exact runtime behavior without silently changing it. See task-4 report.
+        playerDeath(def.name as string);
       } else {
         // Player survived via cheat death / damage prevention
         // Enemy still gets counter-attack trigger
@@ -433,13 +408,11 @@ export function checkAch(id: string): void {
   flt(G.player.x, G.player.y, '🏆', '#ffd700');
 }
 
-export function killEnemy(e: Enemy): void {
+// Single kill-reward pipeline shared by attack() (melee) and killEnemy()
+// (skill/scroll/trap/thorns/ally). Note: loot drop is melee-only and stays in
+// attack(); double-strike stays in killEnemy(); fxBurst stays at both sites.
+export function grantKillRewards(e: Enemy): void {
   if (!G) return;
-  fxBurst(e.x, e.y, e.c || '#ff6b6b', e.isBoss ? 26 : 12, e.isBoss ? 1.6 : 1);
-  // Relic drop — bosses always, elites often (covers skill/scroll/trap/thorns kills
-  // which route through killEnemy rather than the melee attack() path).
-  if (e.isBoss || (e.isElite && Math.random() < 0.4)) grantRandomRelic(e.x, e.y, G.floor);
-  G.enemies = G.enemies.filter(en => en !== e);
   G.player.exp += Math.floor(bonusExp(e.exp) * getRelicExpMult());
   G.player.gold += Math.floor(bonusGold(e.goldDrop) * getRelicGoldMult());
   G.player.kills++;
@@ -451,25 +424,28 @@ export function killEnemy(e: Enemy): void {
     addMsg(`🔥 ${G.player.streak}x${t('streakMsg')} +${bonus}XP`, 'ml');
     checkAch('streak5');
   }
-  addMsg(lang === 'zh' ? `${e.name}被击败！+${e.exp}XP` : `${e.name} defeated! +${e.exp}XP`, 'mc');
-
-  // Boss kill — keep in sync with attack() so skill/scroll/AOE kills also count
+  addMsg(lang === 'zh' ? `${e.name}被击败！+${bonusExp(e.exp)}经验` : `${e.name} defeated! +${bonusExp(e.exp)} XP`, 'mc');
   if (e.isBoss) {
     G.player.bossesKilledThisRun++;
     checkAch('boss_kill');
     if (G.floor === FINAL && !G.branchMode && !G.endless) { playerVictory(); return; }
-    // Endless: the Creator dies but the abyss keeps going — no victory.
-    if (G.floor === FINAL && G.endless) {
+    if (G.floor === FINAL && G.endless)
       addMsg(lang === 'zh' ? '👑 你击败了创世者,但深渊仍在下探……' : '👑 You slay the Creator, yet the abyss yawns deeper...', 'md');
-    }
   }
-
-  // Talent trigger: on kill
   onPlayerKill(e);
   relicOnKill(e); // relic trigger: soul_harvester
-
+  if (e.isBoss || (e.isElite && Math.random() < 0.4)) grantRandomRelic(e.x, e.y, G.floor);
   checkLevelUp(); checkAchs();
+}
 
+export function killEnemy(e: Enemy): void {
+  if (!G) return;
+  fxBurst(e.x, e.y, e.c || '#ff6b6b', e.isBoss ? 26 : 12, e.isBoss ? 1.6 : 1);
+  G.enemies = G.enemies.filter(en => en !== e);
+  grantKillRewards(e);
+  // Boss-victory guard: grantKillRewards just called playerVictory(); preserve the
+  // old early `return` which fired before the double-strike check below.
+  if (G.won) return;
   // Talent trigger: double strike
   if (checkDoubleStrike()) {
     const nextTarget = G!.enemies.find(en => !en.isAlly && dst(en.x, en.y, G!.player.x, G!.player.y) <= 1.5);
