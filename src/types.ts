@@ -420,6 +420,8 @@ export interface Player {
   bossesKilledThisRun: number;
   // Relics owned this run (run-scoped; reset on new run)
   relics: string[];
+  // Corruption 0..100 (Playtest #9; run-scoped). 100 → warden-death.
+  corruption: number;
 }
 
 // --- Dungeon ---

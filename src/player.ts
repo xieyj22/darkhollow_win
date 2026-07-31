@@ -53,6 +53,7 @@ export function createPlayer(ri: number, ci: number): Player {
     combatReviveUsed: false,
     bossesKilledThisRun: 0,
     relics: [],
+    corruption: 0,
   };
   // Apply meta upgrades (permanent bonuses from The Forge)
   applyMetaUpgrades(player);
