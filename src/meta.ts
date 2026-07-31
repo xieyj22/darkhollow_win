@@ -37,6 +37,7 @@ export function getMeta(): MetaSave {
       if (m.stats.bestEndlessFloor === undefined) m.stats.bestEndlessFloor = 0;
       if (!m.runHistory) m.runHistory = [];
       if (!m.endlessLeaderboard) m.endlessLeaderboard = [];
+      if (!m.unlockedLore) m.unlockedLore = [];
       return m;
     }
   } catch { /* fall through */ }
@@ -198,6 +199,15 @@ export function persistAchievement(id: string): void {
   const meta = getMeta();
   if (!meta.achievements.includes(id)) {
     meta.achievements.push(id);
+    saveMeta(meta);
+  }
+}
+
+// Unlock a Lore Codex entry (Wave 8). Idempotent + persisted to dh_meta.
+export function unlockLore(id: string): void {
+  const meta = getMeta();
+  if (!meta.unlockedLore.includes(id)) {
+    meta.unlockedLore.push(id);
     saveMeta(meta);
   }
 }
