@@ -23,6 +23,7 @@ export function initGame(ri: number, ci: number, endless = false): void {
     msgs: [], gameOver: false, won: false, vx: 0, vy: 0,
     branchMode: false, branchReturn: null,
     endless,
+    wardenCd: 0,
   };
   setGameState(gameState);
   enterFloor(1);

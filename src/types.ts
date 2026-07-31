@@ -235,6 +235,7 @@ export interface Enemy {
   isAlly: boolean;
   isBoss?: boolean;
   isElite?: boolean;
+  isWarden?: boolean;
   el: Element;
   res: Partial<Record<Element, number>>;
   skillCd: number;
@@ -469,6 +470,9 @@ export interface GameState {
   // trigger victory — play continues F41+ with scaling + a scaled boss every 5
   // floors; death records deepest floor as the endless score.
   endless?: boolean;
+  // Warden (Wave 8): floors remaining until the stalking nemesis next spawns.
+  // Decrements in enterFloor; at <=0 spawnWarden fires and this resets.
+  wardenCd: number;
 }
 
 // --- Achievements ---
@@ -505,6 +509,7 @@ export interface SaveData {
   msgs: GameMessage[];
   qs: number[];
   endless?: boolean;
+  wardenCd?: number;
 }
 
 // --- Meta Progression ---
@@ -537,6 +542,7 @@ export interface MetaSave {
   stats: MetaStats;
   runHistory: RunRecord[];
   endlessLeaderboard: EndlessRecord[];
+  unlockedLore: string[];
 }
 
 export interface MetaStats {
