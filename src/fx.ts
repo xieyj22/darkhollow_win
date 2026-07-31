@@ -5,7 +5,7 @@
 import { G, reducedMotion } from './state.js';
 import { TS } from './config.js';
 
-type FxKind = 'flash' | 'beam' | 'bolt' | 'dash';
+type FxKind = 'flash' | 'beam' | 'bolt' | 'dash' | 'aura';
 
 interface Fx {
   kind: FxKind;
@@ -75,6 +75,14 @@ function getFxGlow(color: string, kind: 'flash' | 'bolt'): HTMLCanvasElement {
 export function fxFlash(x: number, y: number, color: string, scale = 1): void {
   if (reducedMotion) return;
   fxs.push({ kind: 'flash', x, y, tx: x, ty: y, life: 0, maxLife: 9, color, size: TS * 0.75 * scale });
+  trim(fxs, MAX_FX);
+}
+
+// Expanding stroked ring on a tile — sustained self-buff / aura. Visually distinct
+// from fxFlash's filled radial glow: reads as "buff applied to self".
+export function fxAura(x: number, y: number, color: string, scale = 1): void {
+  if (reducedMotion) return;
+  fxs.push({ kind: 'aura', x, y, tx: x, ty: y, life: 0, maxLife: 12, color, size: TS * 0.6 * scale });
   trim(fxs, MAX_FX);
 }
 
@@ -153,7 +161,16 @@ export function drawFx(c: CanvasRenderingContext2D): void {
       if (t >= 1) continue;
       const [r, g, b] = rgb(f.color);
       const a = 1 - t;
-      if (f.kind === 'flash') {
+      if (f.kind === 'aura') {
+        const cx = pxX(f.x), cy = pxY(f.y);
+        const rad = Math.max(1, f.size * (0.4 + t * 1.8));
+        c.globalAlpha = a;
+        c.strokeStyle = `rgba(${r},${g},${b},${a})`;
+        c.lineWidth = 2 + (1 - t) * 1.5;
+        c.shadowColor = f.color; c.shadowBlur = 10;
+        c.beginPath(); c.arc(cx, cy, rad, 0, Math.PI * 2); c.stroke();
+        c.shadowBlur = 0;
+      } else if (f.kind === 'flash') {
         const cx = pxX(f.x), cy = pxY(f.y);
         const rad = Math.max(0.5, f.size * (0.5 + t * 1.5));
         const spr = getFxGlow(f.color, 'flash');
