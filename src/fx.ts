@@ -42,6 +42,35 @@ function rgb(hex: string): [number, number, number] {
   return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 }
 
+// Cached radial glow sprites for flash/bolt — avoids createRadialGradient every
+// frame. Per-kind base stop alphas are baked in; the per-frame fade (`a`) is
+// applied via globalAlpha at draw time, which is mathematically identical to the
+// old per-frame `rgba(...,X*a)` stops with globalAlpha=1.
+const fxGlowCache = new Map<string, HTMLCanvasElement>();
+const FX_GLOW_R = 32; // reference radius; drawImage scales to the live radius
+const FX_GLOW_STOPS: Record<string, [number, number]> = {
+  flash: [0.85, 0.55], // [white-center alpha, color-ring alpha]
+  bolt: [1.0, 0.8],
+};
+function getFxGlow(color: string, kind: 'flash' | 'bolt'): HTMLCanvasElement {
+  const key = kind + ':' + color;
+  const cached = fxGlowCache.get(key);
+  if (cached) return cached;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = FX_GLOW_R * 2;
+  const g = cv.getContext('2d')!;
+  const grad = g.createRadialGradient(FX_GLOW_R, FX_GLOW_R, 0, FX_GLOW_R, FX_GLOW_R, FX_GLOW_R);
+  const [r, gg, b] = rgb(color);
+  const [ca, ra] = FX_GLOW_STOPS[kind];
+  grad.addColorStop(0, `rgba(255,255,255,${ca})`);
+  grad.addColorStop(0.4, `rgba(${r},${gg},${b},${ra})`);
+  grad.addColorStop(1, `rgba(${r},${gg},${b},0)`);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, cv.width, cv.height);
+  fxGlowCache.set(key, cv);
+  return cv;
+}
+
 // Expanding flash at a tile — hit confirmation / impact glow.
 export function fxFlash(x: number, y: number, color: string, scale = 1): void {
   if (reducedMotion) return;
@@ -98,7 +127,7 @@ export function drawFx(c: CanvasRenderingContext2D): void {
   c.globalCompositeOperation = 'lighter'; // additive — glows stack brightly
 
   if (sparks.length) {
-    const alive: Spark[] = [];
+    let w = 0;
     for (const s of sparks) {
       s.life++;
       s.x += s.vx; s.y += s.vy;
@@ -111,14 +140,13 @@ export function drawFx(c: CanvasRenderingContext2D): void {
       c.beginPath();
       c.arc(s.x, s.y, s.size * (1 - t * 0.4), 0, Math.PI * 2);
       c.fill();
-      alive.push(s);
+      sparks[w++] = s;
     }
-    sparks.length = 0;
-    for (const s of alive) sparks.push(s);
+    sparks.length = w;
   }
 
   if (fxs.length) {
-    const alive: Fx[] = [];
+    let w = 0;
     for (const f of fxs) {
       f.life++;
       const t = f.life / f.maxLife;
@@ -128,13 +156,9 @@ export function drawFx(c: CanvasRenderingContext2D): void {
       if (f.kind === 'flash') {
         const cx = pxX(f.x), cy = pxY(f.y);
         const rad = Math.max(0.5, f.size * (0.5 + t * 1.5));
-        const grad = c.createRadialGradient(cx, cy, 0, cx, cy, rad);
-        grad.addColorStop(0, `rgba(255,255,255,${0.85 * a})`);
-        grad.addColorStop(0.4, `rgba(${r},${g},${b},${0.55 * a})`);
-        grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
-        c.globalAlpha = 1;
-        c.fillStyle = grad;
-        c.beginPath(); c.arc(cx, cy, rad, 0, Math.PI * 2); c.fill();
+        const spr = getFxGlow(f.color, 'flash');
+        c.globalAlpha = a;
+        c.drawImage(spr, cx - rad, cy - rad, rad * 2, rad * 2);
       } else if (f.kind === 'beam') {
         const x1 = pxX(f.x), y1 = pxY(f.y), x2 = pxX(f.tx), y2 = pxY(f.ty);
         c.globalAlpha = a;
@@ -166,18 +190,14 @@ export function drawFx(c: CanvasRenderingContext2D): void {
         const bx = pxX(f.x) + (pxX(f.tx) - pxX(f.x)) * tt;
         const by = pxY(f.y) + (pxY(f.ty) - pxY(f.y)) * tt;
         const rad = Math.max(1, f.size);
-        const grad = c.createRadialGradient(bx, by, 0, bx, by, rad * 2.6);
-        grad.addColorStop(0, `rgba(255,255,255,${a})`);
-        grad.addColorStop(0.4, `rgba(${r},${g},${b},${0.8 * a})`);
-        grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
-        c.globalAlpha = 1;
-        c.fillStyle = grad;
-        c.beginPath(); c.arc(bx, by, rad * 2.6, 0, Math.PI * 2); c.fill();
+        const R = rad * 2.6;
+        const spr = getFxGlow(f.color, 'bolt');
+        c.globalAlpha = a;
+        c.drawImage(spr, bx - R, by - R, R * 2, R * 2);
       }
-      alive.push(f);
+      fxs[w++] = f;
     }
-    fxs.length = 0;
-    for (const f of alive) fxs.push(f);
+    fxs.length = w;
   }
 
   c.globalAlpha = 1;

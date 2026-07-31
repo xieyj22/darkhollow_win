@@ -123,7 +123,7 @@ function tick(): void {
   // Update & draw particles
   const w = cvs.width;
   const h = cvs.height;
-  const alive: Particle[] = [];
+  let wi = 0;
   for (const p of particles) {
     p.life++;
     p.x += p.vx * speedMul;
@@ -148,11 +148,11 @@ function tick(): void {
     }
 
     if (p.life < p.maxLife && p.x > -10 && p.x < w + 10 && p.y > -10 && p.y < h + 10) {
-      alive.push(p);
+      particles[wi++] = p;
     }
   }
   c.globalAlpha = 1;
-  particles = alive;
+  particles.length = wi;
 
   // Combat FX (hit-flash, bursts, projectiles) on top of the snapshot, then the
   // per-frame screen-shake transform. Both are no-ops when nothing is active.
