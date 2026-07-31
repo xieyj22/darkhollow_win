@@ -48,7 +48,7 @@ function rgb(hex: string): [number, number, number] {
 // old per-frame `rgba(...,X*a)` stops with globalAlpha=1.
 const fxGlowCache = new Map<string, HTMLCanvasElement>();
 const FX_GLOW_R = 32; // reference radius; drawImage scales to the live radius
-const FX_GLOW_STOPS: Record<string, [number, number]> = {
+const FX_GLOW_STOPS: Record<'flash' | 'bolt', [number, number]> = {
   flash: [0.85, 0.55], // [white-center alpha, color-ring alpha]
   bolt: [1.0, 0.8],
 };

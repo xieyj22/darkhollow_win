@@ -30,4 +30,13 @@ describe('computeFOV (characterization)', () => {
       for (let x = 0; x < MW; x++)
         expect(explored[y][x]).toBe(v[y][x]);
   });
+
+  it('wall-terminator cell is visible AND explored (P6 marks it before the break)', () => {
+    const map = openMap();
+    map[py][px + 1] = TL.WALL; // wall due-east of the player
+    const explored = Array.from({ length: MH }, () => Array<boolean>(MW).fill(false));
+    const v = computeFOV(map, px, py, rad, explored);
+    expect(v[py][px + 1]).toBe(true);        // wall cell is visible (east ray reaches it)
+    expect(explored[py][px + 1]).toBe(true); // ... and explored (marked before the WALL break)
+  });
 });
