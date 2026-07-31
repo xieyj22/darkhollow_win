@@ -21,6 +21,7 @@ export function initMeta(): MetaSave {
     version: 1, soulEchoes: 0, totalSpent: 0,
     upgrades: {}, achievements: [], stats: defaultStats(),
     runHistory: [], endlessLeaderboard: [],
+    unlockedLore: [],
   };
 }
 

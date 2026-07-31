@@ -69,6 +69,7 @@ export function loadGame(): void {
       // Endless flag persists across save/load so reloading an endless run
       // keeps the F40-victory gate closed. Old saves without it default to Normal.
       endless: s.endless === true,
+      wardenCd: Math.max(2, s.wardenCd ?? 0),
     };
 
     // Fix Set deserialization — achievements may be an array after JSON parse
