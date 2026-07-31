@@ -122,9 +122,10 @@ const FOV_DIRS: { dx: number; dy: number }[] = (() => {
   return arr;
 })();
 
-export function computeFOV(map: number[][], px: number, py: number, rad: number): boolean[][] {
+export function computeFOV(map: number[][], px: number, py: number, rad: number, explored?: boolean[][]): boolean[][] {
   const v: boolean[][] = Array.from({ length: MH }, () => Array(MW).fill(false));
   v[py][px] = true;
+  if (explored) explored[py][px] = true;
   for (let i = 0; i < FOV_DIRS.length; i++) {
     const { dx, dy } = FOV_DIRS[i];
     let x = px + .5, y = py + .5;
@@ -133,10 +134,21 @@ export function computeFOV(map: number[][], px: number, py: number, rad: number)
       const ix = Math.floor(x), iy = Math.floor(y);
       if (ix < 0 || ix >= MW || iy < 0 || iy >= MH) break;
       v[iy][ix] = true;
+      if (explored) explored[iy][ix] = true;
       if (map[iy][ix] === TL.WALL) break;
     }
   }
   return v;
+}
+
+/** Count true cells in an explored grid (used to detect new exploration for minimap-dirty). */
+function countExplored(grid: boolean[][]): number {
+  let n = 0;
+  for (let y = 0; y < MH; y++) {
+    const row = grid[y];
+    for (let x = 0; x < MW; x++) if (row[x]) n++;
+  }
+  return n;
 }
 
 /** Unified FOV update: computes visibility, marks explored, reveals hidden traps. */
@@ -145,11 +157,14 @@ export function updatePlayerFOV(player: Player, map: number[][], traps?: Trap[])
   for (const b of player.buffs) { if (b.type === 'torch') rad += b.value; }
   rad += getMetaFovBonus();
   if (player.talents?.talents?.['r_night_vision']) rad += 2;
-  player.visible = computeFOV(map, player.x, player.y, rad);
-  let exploredNew = false;
-  for (let y = 0; y < MH; y++)
-    for (let x = 0; x < MW; x++)
-      if (player.visible[y][x] && !player.explored[y][x]) { player.explored[y][x] = true; exploredNew = true; }
+  // P6: computeFOV marks explored inline as it lights each cell, so the
+  // previous second full-map pass (visible→explored over ~3150 cells) is
+  // gone. Minimap-dirty is still driven by comparing the explored count
+  // before vs after, since the explicit scan that used to set exploredNew
+  // no longer exists.
+  const before = countExplored(player.explored);
+  player.visible = computeFOV(map, player.x, player.y, rad, player.explored);
+  const exploredNew = countExplored(player.explored) > before;
   if (exploredNew && (window as any).__markMinimapDirty) (window as any).__markMinimapDirty();
   if (traps) for (const trap of traps) if (player.visible[trap.y]?.[trap.x] && trap.hidden) trap.hidden = false;
 }
