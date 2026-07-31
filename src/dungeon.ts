@@ -109,11 +109,24 @@ function carve(map: number[][], x1: number, y1: number, x2: number, y2: number):
   while (y !== y2) { if (map[y][x] === TL.WALL) map[y][x] = TL.CORR; y += y < y2 ? 1 : -1; }
 }
 
+// P5: precompute the 360 ray directions once at module load instead of
+// recomputing cos/sin on every step of every frame. The angles are identical
+// to the previous `for (let a = 0; a < 360; a++)` loop, so the visible set
+// produced by computeFOV is unchanged.
+const FOV_DIRS: { dx: number; dy: number }[] = (() => {
+  const arr: { dx: number; dy: number }[] = [];
+  for (let a = 0; a < 360; a++) {
+    const r = a * Math.PI / 180;
+    arr.push({ dx: Math.cos(r), dy: Math.sin(r) });
+  }
+  return arr;
+})();
+
 export function computeFOV(map: number[][], px: number, py: number, rad: number): boolean[][] {
   const v: boolean[][] = Array.from({ length: MH }, () => Array(MW).fill(false));
   v[py][px] = true;
-  for (let a = 0; a < 360; a += 1) {
-    const r = a * Math.PI / 180, dx = Math.cos(r), dy = Math.sin(r);
+  for (let i = 0; i < FOV_DIRS.length; i++) {
+    const { dx, dy } = FOV_DIRS[i];
     let x = px + .5, y = py + .5;
     for (let d = 0; d < rad; d++) {
       x += dx; y += dy;
