@@ -139,14 +139,15 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
   if (def.hp <= 0) {
     if (isP) {
       fxBurst(def.x, def.y, def.c || (atkEl !== 'none' ? FX_EL_COLOR[atkEl] : '#ff6b6b'), def.isBoss ? 26 : 12, def.isBoss ? 1.6 : 1);
+      // Melee-only gold flavor message + pickup cue — fired BEFORE grantKillRewards
+      // so they still play on an F40 Creator-kill victory (OLD had these at L146-147,
+      // before the boss/victory block). killEnemy never printed these.
+      addMsg(lang === 'zh' ? `获得${bonusGold((def as Enemy).goldDrop)}金币。` : `Found ${bonusGold((def as Enemy).goldDrop)} gold.`, 'mp');
+      snd('pickup');
       grantKillRewards(def as Enemy);
       // Boss-victory guard: grantKillRewards just called playerVictory(); preserve
       // the old early `return true` which fired before loot drop / double-strike.
       if (G.won) return true;
-      // Melee-only gold flavor message (the skill/scroll/ally killEnemy path never
-      // printed this — kept here at the call site, NOT in shared grantKillRewards).
-      addMsg(lang === 'zh' ? `获得${bonusGold((def as Enemy).goldDrop)}金币。` : `Found ${bonusGold((def as Enemy).goldDrop)} gold.`, 'mp');
-      snd('pickup');
       // Loot drop — melee-only (skill/scroll/ally kills via killEnemy drop no loot)
       if (Math.random() < .3 && _genItem) {
         const loot = _genItem(G.floor);
