@@ -26,6 +26,7 @@ import { saveGame, loadGame } from './save.js';
 import { setRecalcFn, setKillEnemyFn } from './relics.js';
 import { paintIcon } from './sprites.js';
 import { renderForge, renderTitleStats, getMeta } from './meta.js';
+import { LORE_ENTRIES, LORE_CATS } from './lore.js';
 import { startParticles, stopParticles, setDrawPlayerLayerFn, setDrawEnemyLayerFn } from './particles.js';
 import { openOptions, closeOptions, renderOptions, applyOptionsUI, applyTextScale, applyColorblind, applyBarCues } from './options.js';
 import { bridge } from './bridge.js';
@@ -195,6 +196,7 @@ function updateLangUI(): void {
   $('btn-new')!.textContent = t('btnNew'); $('btn-cont')!.textContent = t('btnCont'); $('btn-help')!.textContent = t('btnHelp');
   $('btn-forge')!.textContent = t('forgeBtn');
   $('btn-records')!.textContent = lang === 'zh' ? '📋 记录' : '📋 Records';
+  $('btn-codex')!.textContent = lang === 'zh' ? '📜 典籍' : '📜 Codex';
   $('lang-btn')!.textContent = lang === 'en' ? '中文' : 'EN';
   $('sb-hero')!.textContent = '⚔ ' + t('hero'); $('sb-nl')!.textContent = t('name'); $('sb-rl')!.textContent = t('race');
   $('sb-cl')!.textContent = t('cls'); $('sb-lv')!.textContent = t('level');
@@ -507,6 +509,25 @@ function renderRecords(): void {
   (document.getElementById('records-title')!).textContent = zh ? '📋 游戏记录' : '📋 Records';
 }
 
+// ===== Lore Codex (Wave 8) — clones the records-overlay pattern =====
+function renderCodex(): void {
+  const zh = lang === 'zh';
+  const unlocked = new Set(getMeta().unlockedLore);
+  const sections = LORE_CATS.map(cat => {
+    const rows = LORE_ENTRIES.filter(e => e.cat === cat.id).map(e => {
+      const has = unlocked.has(e.id);
+      const name = has ? (zh ? e.n.zh : e.n.en) : '🔒 ???';
+      const body = has ? (zh ? e.body.zh : e.body.en) : (zh ? '尚未发现。继续下探以解锁。' : 'Not yet discovered. Descend further to uncover.');
+      return `<div style="padding:8px 10px;margin:4px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)"><div style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</div><div style="color:${has ? '#999' : '#444'};font-size:.9em;margin-top:3px">${body}</div></div>`;
+    }).join('');
+    return rows
+      ? `<div style="color:#8888aa;margin:14px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${cat.label[zh ? 'zh' : 'en']}</div>${rows}`
+      : '';
+  }).join('');
+  (document.getElementById('codex-content')!).innerHTML = sections || `<div style="color:#555;padding:12px">${zh ? '尚无条目。' : 'No entries yet.'}</div>`;
+  (document.getElementById('codex-title')!).textContent = zh ? '📜 典籍' : '📜 Codex';
+}
+
 // ===== Bind HTML buttons =====
 function bindButtons(): void {
   const on = (id: string, fn: () => void) => {
@@ -528,6 +549,8 @@ function bindButtons(): void {
   on('btn-close-forge', () => { hideOverlay('forge-overlay'); });
   on('btn-records', () => { showOverlay('records-overlay'); renderRecords(); });
   on('btn-close-records', () => { hideOverlay('records-overlay'); });
+  on('btn-codex', () => { showOverlay('codex-overlay'); renderCodex(); });
+  on('btn-close-codex', () => { hideOverlay('codex-overlay'); });
   on('btn-back-title', () => {
     if (G && !G.gameOver) {
       // Confirm before leaving an active game
