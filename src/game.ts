@@ -3,7 +3,7 @@ import type { GameState, Item } from './types.js';
 import { G, setGameState, lang } from './state.js';
 import { MH, MW, FINAL, TL } from './config.js';
 import { genDungeon, updatePlayerFOV } from './dungeon.js';
-import { spawnEnemies, spawnBranchEnemies } from './enemies.js';
+import { spawnEnemies, spawnBranchEnemies, spawnWarden } from './enemies.js';
 import { genItem, genFood } from './items.js';
 import { createPlayer } from './player.js';
 import { updateUI, render, resizeCanvas } from './render.js';
@@ -23,7 +23,7 @@ export function initGame(ri: number, ci: number, endless = false): void {
     msgs: [], gameOver: false, won: false, vx: 0, vy: 0,
     branchMode: false, branchReturn: null,
     endless,
-    wardenCd: 0,
+    wardenCd: rng(4, 6),
   };
   setGameState(gameState);
   enterFloor(1);
@@ -56,6 +56,12 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     G!.player.slowed = 0;
     G!.player.explored = Array.from({ length: MH }, () => Array(MW).fill(false));
     G!.enemies = spawnEnemies(floor, G!.dungeon.rooms);
+    // Warden stalking timer (Wave 8): ticks once per main-line floor entry; at 0
+    // the nemesis spawns and the timer resets. Not inside portal branches.
+    if (!G!.branchMode) {
+      G!.wardenCd--;
+      if (G!.wardenCd <= 0) { spawnWarden(floor); G!.wardenCd = rng(6, 9); }
+    }
     G!.items = [];
 
     // Scatter items

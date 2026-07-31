@@ -38,6 +38,7 @@ function buildSave(): string {
     player: playerData, floor: g.floor, dungeon: g.dungeon,
     enemies: serializeEnemies(g.enemies), items: g.items, traps: g.traps,
     msgs: g.msgs.slice(-20), qs, endless: g.endless === true,
+    wardenCd: g.wardenCd ?? 0,
   });
 }
 

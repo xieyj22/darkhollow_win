@@ -1,9 +1,25 @@
-import { describe, it, expect, vi } from 'vitest';
-// warden.ts imports rng from utils only for goldDrop, which we don't assert here.
-vi.mock('../utils.js', () => ({ rng: () => 0 }));
-vi.mock('../state.js', () => ({ lang: 'en' }));
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+// All module mocks consolidated at the top (vitest hoists these anyway; merging
+// duplicate vi.mock calls for the same module here avoids linter/tsc noise and
+// lets us fix two partial-factory gaps: state.js needs `G`, utils.js needs
+// `pick`/`dst`, since spawnWarden lives in enemies.ts not warden.ts).
+// warden.ts imports rng from utils only for goldDrop, which we don't assert.
+vi.mock('../utils.js', () => ({ rng: () => 0, pick: (arr: any[]) => arr[0], dst: () => 0 }));
+// enemies.ts reads G (mutated per-test via globalThis.G) + lang.
+vi.mock('../state.js', () => ({ lang: 'en', get G() { return (globalThis as any).G; } }));
+vi.mock('../config.js', () => ({ MW: 80, MH: 40, TL: { WALL: 1, VOID: 0 }, FINAL: 40 }));
+vi.mock('../audio.js', () => ({ snd: () => {} }));
+vi.mock('../effects.js', () => ({ flt: () => {}, shake: () => {} }));
+vi.mock('../fx.js', () => ({ fxFlash: () => {}, fxBurst: () => {} }));
+vi.mock('../messages.js', () => ({ addMsg: () => {} }));
+vi.mock('../render.js', () => ({ setEnemyTween: () => {} }));
+vi.mock('../combat.js', () => ({ attack: () => false, killEnemy: () => {}, checkLevelUp: () => {} }));
+vi.mock('../talents.js', () => ({ onPlayerDamaged: () => {}, onEnemyHitPlayer: () => {}, onPlayerDodged: () => {}, onPlayerDeath: () => false, getManaShieldReduction: () => 0 }));
+vi.mock('../meta.js', () => ({ bonusExp: () => 0 }));
+vi.mock('../data.js', () => ({ ENEMIES: [], BOSSES: [], ELITE_PREFIX: [], AREAS: [] }));
 
 import { wardenStats, pickWardenRelic, nextWardenMemory, WARDEN_RELIC_IDS, WARDEN_MEMORIES } from '../warden.js';
+import { spawnWarden } from '../enemies.js';
 
 describe('wardenStats', () => {
   it('floor 1 (fs=1): deterministic baseline', () => {
@@ -49,5 +65,31 @@ describe('WARDEN_MEMORIES', () => {
   it('has exactly 3 bilingual entries', () => {
     expect(WARDEN_MEMORIES).toHaveLength(3);
     for (const m of WARDEN_MEMORIES) { expect(typeof m.en).toBe('string'); expect(typeof m.zh).toBe('string'); }
+  });
+});
+
+describe('spawnWarden', () => {
+  beforeEach(() => {
+    (globalThis as any).G = {
+      player: { x: 5, y: 5 },
+      enemies: [],
+      dungeon: { rooms: [{ x: 0, y: 0, w: 5, h: 5, cx: 2, cy: 2 }, { x: 10, y: 10, w: 6, h: 6, cx: 13, cy: 13 }] },
+    };
+  });
+  it('pushes one isWarden + isElite enemy with wardenStats hp', () => {
+    spawnWarden(10);
+    const G = (globalThis as any).G;
+    expect(G.enemies).toHaveLength(1);
+    const w = G.enemies[0];
+    expect(w.isWarden).toBe(true);
+    expect(w.isElite).toBe(true);
+    expect(w.ai).toBe('chase');
+    expect(w.tags).toContain('spirit');
+    expect(w.maxHp).toBe(wardenStats(10).hp);
+  });
+  it('no-ops when there is no non-start room', () => {
+    (globalThis as any).G.dungeon.rooms = [{ x: 0, y: 0, w: 5, h: 5, cx: 2, cy: 2 }];
+    spawnWarden(5);
+    expect((globalThis as any).G.enemies).toHaveLength(0);
   });
 });

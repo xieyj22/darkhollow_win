@@ -4,7 +4,7 @@ import { G, lang } from './state.js';
 import { MW, MH, TL, FINAL } from './config.js';
 import { rng, pick, dst } from './utils.js';
 import { bonusExp } from './meta.js';
-import { flt } from './effects.js';
+import { flt, shake } from './effects.js';
 import { ENEMIES, BOSSES, ELITE_PREFIX, AREAS } from './data.js';
 import { addMsg } from './messages.js';
 import { attack, killEnemy, checkLevelUp } from './combat.js';
@@ -12,6 +12,7 @@ import { onPlayerDamaged, onEnemyHitPlayer, onPlayerDodged, onPlayerDeath, getMa
 import { relicOnDodge } from './relics.js';
 import { setEnemyTween } from './render.js';
 import { makeEnemy } from './enemy-factory.js';
+import { wardenStats } from './warden.js';
 
 export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const ens: Enemy[] = [];
@@ -89,6 +90,28 @@ export function spawnBranchEnemies(rooms: Room[], entryFloor: number): Enemy[] {
     ens.push(makeEnemy(mb, br.cx, br.cy, fs, { isBoss: true }, lang === 'zh' ? mb.n.zh : mb.n.en));
   }
   return ens;
+}
+
+// The Warden (Wave 8): a stalking nemesis that spawns on a random cd. Strong
+// chase elite; killing it (combat.grantKillRewards) drops a specific relic +
+// unlocks a memory. It is a normal floor enemy, so descending (enterFloor)
+// naturally despawns it — "fight or flight". tag 'spirit' -> WRAITH sprite.
+export function spawnWarden(floor: number): void {
+  if (!G) return;
+  const rooms = G.dungeon.rooms.slice(1); // never in the start room
+  if (!rooms.length) return;
+  const rm = pick(rooms);
+  const s = wardenStats(floor);
+  G.enemies.push({
+    name: lang === 'zh' ? '守渊人' : 'The Warden', ch: 'Ѡ', c: '#9a2be2',
+    x: rng(rm.x + 1, rm.x + rm.w - 2), y: rng(rm.y + 1, rm.y + rm.h - 2),
+    hp: s.hp, maxHp: s.maxHp, atk: s.atk, def: s.def, exp: s.exp,
+    goldDrop: rng(30, 60) + floor * 3,
+    ai: 'chase', stunned: 0, feared: 0, isAlly: false, isElite: true, isWarden: true,
+    el: 'shadow', res: { shadow: 0.5, holy: -0.5 }, skillCd: 0, tags: ['spirit'],
+  });
+  addMsg(lang === 'zh' ? '👁 守渊人正在追猎你……' : '👁 The Warden is hunting you...', 'me');
+  flt(G.player.x, G.player.y, '⚠WARDEN', '#9a2be2'); snd('boss'); shake();
 }
 
 // Boss phase check — call after boss takes damage
