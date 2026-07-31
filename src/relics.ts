@@ -31,6 +31,7 @@ export function applyRelicBonuses(p: Player): void {
       case 'giants_belt': p.maxHp += 40; break;
       case 'worn_amulet': p.maxHp += 10; break;
       case 'arcane_focus': p.spellPower += 0.25; break;
+      case 'warden_cloak': p.dodgeChance += 0.10; break;
     }
   }
 }
@@ -131,11 +132,20 @@ export function relicOnCrit(_defender: Enemy, dmg: number): void {
     const heal = Math.floor(dmg * 0.15);
     if (heal > 0) { p.hp = Math.min(p.maxHp, p.hp + heal); flt(p.x, p.y, `+${heal}`, '#ff6b6b'); }
   }
+  if (hasRelic('fallen_blade')) {
+    const heal = Math.floor(dmg * 0.18);
+    if (heal > 0) { p.hp = Math.min(p.maxHp, p.hp + heal); flt(p.x, p.y, `+${heal}`, '#b91c3c'); }
+  }
 }
 
 // ===== Economy multipliers =====
 export function getRelicGoldMult(): number { return hasRelic('greed_idol') ? 1.3 : 1; }
-export function getRelicExpMult(): number { return hasRelic('scholar_lens') ? 1.25 : 1; }
+export function getRelicExpMult(): number {
+  let m = 1;
+  if (hasRelic('scholar_lens')) m += 0.25;
+  if (hasRelic('memory_shard')) m += 0.30;
+  return m;
+}
 
 // ===== Grant =====
 export function grantRelic(id: string, x: number, y: number): void {

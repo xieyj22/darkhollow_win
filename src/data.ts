@@ -652,4 +652,9 @@ export const RELICS: RelicDef[] = [
   { id: 'wind_step', n: { en: 'Wind Step', zh: '御风步' }, d: { en: 'Dodging heals 8% HP', zh: '闪避回复8%HP' }, ch: '🌬', c: '#7ec8e3', rarity: 2, effect: 'dodge_hp', value: 8 },
   { id: 'executioner_pact', n: { en: 'Executioner Pact', zh: '处刑契约' }, d: { en: 'Crits heal 15% of damage', zh: '暴击吸取15%伤害' }, ch: '⚔', c: '#b91c3c', rarity: 3, effect: 'crit_lifesteal', value: 15 },
   { id: 'worn_amulet', n: { en: 'Worn Amulet', zh: '磨损护符' }, d: { en: '+10 max HP', zh: '+10 最大生命' }, ch: '📿', c: '#8b7355', rarity: 0, effect: 'hp', value: 10 },
+  // Wave 8 — "前任遗物": dropped by The Warden. Each maps to ONE existing hook
+  // (one new case per handler) to stay low-risk and testable.
+  { id: 'warden_cloak', n: { en: 'Warden Cloak', zh: '守渊人斗篷' }, d: { en: '+10% dodge chance', zh: '+10% 闪避率' }, ch: '🧥', c: '#9a2be2', rarity: 3, effect: 'dodge', value: 10 },
+  { id: 'fallen_blade', n: { en: 'Fallen Blade', zh: '前任之刃' }, d: { en: 'Crits heal 18% of damage', zh: '暴击吸取18%伤害' }, ch: '🗡', c: '#b91c3c', rarity: 3, effect: 'crit_lifesteal', value: 18 },
+  { id: 'memory_shard', n: { en: 'Memory Shard', zh: '记忆碎片' }, d: { en: '+30% XP', zh: '经验+30%' }, ch: '🔮', c: '#4895ef', rarity: 3, effect: 'exp_pct', value: 30 },
 ];
