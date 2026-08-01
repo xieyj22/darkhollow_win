@@ -12,7 +12,7 @@ import { initAudio, getAudioContext, snd, setBgmScene, setMasterVol, setMusicVol
 import { flt, shake } from './effects.js';
 import { genDungeon, computeFOV } from './dungeon.js';
 import { addMsg } from './messages.js';
-import { attack, checkLevelUp, recalc, playerDeath, playerVictory, checkAch, checkAchs, setGenItemFn as setCombatGenItem, killEnemy } from './combat.js';
+import { attack, checkLevelUp, recalc, playerDeath, playerVictory, checkAch, checkAchs, setGenItemFn as setCombatGenItem, killEnemy, resolveEnding } from './combat.js';
 import { genItem, genWeapon, genArmor, genAcc, genPotion, genScroll, genFood, genConsumable, useItem, equipItem, quickQuaff, quickRead, renderHotbar, useQuickSlot, addItemWithOverflow, setEndTurnFn as setItemsEndTurn, setFindNearestEnemyFn } from './items.js';
 import { spawnEnemies, processEnemies, checkPlayerTraps } from './enemies.js';
 import { findNearestEnemy, executeSkill, setEndTurnFn as setSkillsEndTurn } from './skills.js';
@@ -551,6 +551,8 @@ function bindButtons(): void {
   on('btn-close-records', () => { hideOverlay('records-overlay'); });
   on('btn-codex', () => { showOverlay('codex-overlay'); renderCodex(); });
   on('btn-close-codex', () => { hideOverlay('codex-overlay'); });
+  on('btn-ending-slay', () => resolveEnding('slay'));
+  on('btn-ending-refuse', () => resolveEnding('refuse'));
   on('btn-back-title', () => {
     if (G && !G.gameOver) {
       // Confirm before leaving an active game
