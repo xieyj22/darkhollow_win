@@ -5,7 +5,7 @@ import { quickQuaff, quickRead, useQuickSlot, useItem, equipItem, sellItem } fro
 import { executeSkill } from './skills.js';
 import { saveGame } from './save.js';
 import { closeEvent } from './events.js';
-import { hideOverlay } from './main.js';
+import { hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
 import { openInventory, closeInventory, openHelp, closeHelp, tryCastSkill, openSkillPanel, closeSkillPanel, openAchievements, closeAchievements, openTalentPanel, closeTalentPanel, sellMode } from './panels.js';
 

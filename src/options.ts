@@ -27,7 +27,7 @@ import {
 } from './audio.js';
 import { MW, MH } from './config.js';
 import { renderMinimap } from './render.js';
-import { showOverlay, hideOverlay, toggleLegend, toggleKeys } from './main.js';
+import { showOverlay, hideOverlay, toggleLegend, toggleKeys } from './ui-panels.js';
 import { bridge } from './bridge.js';
 
 type OptOrigin = 'title' | 'game' | 'pause';

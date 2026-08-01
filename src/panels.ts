@@ -8,7 +8,7 @@ import { getMeta } from './meta.js';
 import { t, RARITY_C } from './i18n.js';
 import { RELICS } from './data.js';
 import { paintIcon } from './sprites.js';
-import { showOverlay, hideOverlay } from './main.js';
+import { showOverlay, hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
 
 // --- Inventory UI ---
