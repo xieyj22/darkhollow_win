@@ -9,7 +9,7 @@ import { fxBeam, fxBolt, fxBurst, fxFlash, fxAura } from './fx.js';
 import { t, rareName, itemName, RARITY_C } from './i18n.js';
 import { ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS } from './data.js';
 import { addMsg } from './messages.js';
-import { recalc, checkLevelUp, killEnemy } from './combat.js';
+import { recalc, checkLevelUp, killEnemy, applyCorruption } from './combat.js';
 
 // --- Item generation ---
 
@@ -258,6 +258,7 @@ export function useItem(idx: number): void {
       case 'ward': p.warded = true; fxFlash(p.x, p.y, '#4895ef', 1.2); addMsg(lang === 'zh' ? '🛡 护身石激活！下次受伤无效！' : '🛡 Ward activated! Next hit blocked!', 'mi'); break;
       case 'haste': p.freeTurn = true; fxFlash(p.x, p.y, '#ffd700', 1.2); addMsg(lang === 'zh' ? '⚡ 加速！获得额外行动！' : '⚡ Haste! Extra action!', 'mi'); break;
       case 'antidote': p.poisonTurns = 0; p.poisonDmg = 0; p.buffs.push({ name: lang === 'zh' ? '抗毒' : 'Antidote', type: 'antidote', value: 0, turns: 15 }); addMsg(lang === 'zh' ? '✨ 解毒！中毒已治愈！' : '✨ Poison cured!', 'mi'); fxBurst(p.x, p.y, '#80ed99', 14); snd('heal'); break;
+      case 'purify': applyCorruption(-(item.val || 20)); fxAura(p.x, p.y, '#7ec8e3'); addMsg(lang === 'zh' ? `💧 净心！腐化-${item.val || 20}` : `💧 Purified! -${item.val || 20} corruption`, 'mi'); snd('heal'); break;
       case 'holy_water': {
         const e = _findNearestEntity();
         if (e) { fxBolt(p.x, p.y, e.x, e.y, '#ffd700'); const isHolyWeak = (e.tags?.includes('undead') || e.tags?.includes('demon') || e.el === 'shadow'); const mult = isHolyWeak ? 2 : 1; const d = Math.floor((item.val || 0) * mult); e.hp -= d; flt(e.x, e.y, `-${d}✨`, '#ffd700'); addMsg(lang === 'zh' ? `圣水命中${e.name}！-${d}` : `Holy water hits ${e.name}! -${d}`, 'mc'); snd('spell'); if (e.hp <= 0) killEnemy(e); }

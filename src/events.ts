@@ -122,6 +122,7 @@ function fountainDrink(): void {
   G.player.hp = Math.min(G.player.maxHp, G.player.hp + h);
   G.player.mp = Math.min(G.player.maxMp, G.player.mp + Math.floor(G.player.maxMp * .3));
   addMsg(t('fountainHeal'), 'mh'); snd('heal');
+  applyCorruption(-15); // fountain cleanses corruption (Playtest #9)
   flt(G.player.x, G.player.y, `+${h}`, '#80ed99');
   closeEvent(); updateUI(); render();
 }
@@ -132,6 +133,7 @@ function shrinePray(): void {
   if (b === 1) { G.player.baseAtk += 2; addMsg(lang === 'zh' ? '神殿祝福！+2攻击' : 'Shrine blessing! +2 ATK', 'ml'); }
   else if (b === 2) { G.player.baseDef += 2; addMsg(lang === 'zh' ? '神殿祝福！+2防御' : 'Shrine blessing! +2 DEF', 'ml'); }
   else { G.player.maxHp += 10; G.player.baseMaxHp += 10; G.player.hp += 10; addMsg(lang === 'zh' ? '神殿祝福！+10HP' : 'Shrine blessing! +10 HP', 'ml'); }
+  applyCorruption(-20); // shrine cleanses corruption (Playtest #9)
   recalc(); snd('levelup'); flt(G.player.x, G.player.y, '✨', '#ffd700');
   closeEvent(); updateUI(); render();
 }

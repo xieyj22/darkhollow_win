@@ -71,6 +71,7 @@ export const SCROLLS: ScrollDef[] = [
 export const CONSUMABLES: ConsumableDef[] = [
   { n: { en: 'Bomb', zh: '炸弹' }, ef: 'bomb', v: 30, c: '#ff4500', ch: '*', r: 1, desc: { en: 'AoE fire dmg to nearby foes', zh: '对附近敌人造成范围火焰伤害' } },
   { n: { en: 'Throwing Knife', zh: '飞刀' }, ef: 'throw_knife', v: 20, c: '#c0c0c0', ch: '†', r: 0, desc: { en: 'Throw at nearest enemy', zh: '投向最近的敌人' } },
+  { n: { en: 'Purified Water', zh: '净水' }, ef: 'purify', v: 20, c: '#7ec8e3', ch: '💧', r: 1, desc: { en: 'Cleanses 20 corruption', zh: '净化 20 腐化' } },
   { n: { en: 'Torch', zh: '火把' }, ef: 'torch', v: 5, c: '#f4845f', ch: '☀', r: 0, desc: { en: '+5 FOV for 30 turns', zh: '视野+5持续30回合' }, dur: 30 },
   { n: { en: 'Bear Trap', zh: '捕兽夹' }, ef: 'bear_trap', v: 20, c: '#a0522d', ch: '▲', r: 0, desc: { en: 'Place trap on ground', zh: '在地面放置陷阱' } },
   { n: { en: 'Smoke Bomb', zh: '烟雾弹' }, ef: 'smoke_bomb', v: 0, c: '#888', ch: '○', r: 1, desc: { en: 'Fear nearby enemies', zh: '恐惧附近的敌人' } },
