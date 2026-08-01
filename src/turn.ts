@@ -44,7 +44,7 @@ export function endTurn(): void {
       flt(G.player.x, G.player.y, `-${dmg}`, '#f4845f');
       if (G.player.hp <= 0) {
         if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
-        else { playerDeath(lang === 'zh' ? '饥饿' : 'starvation'); updateUI(); render(); return; }
+        else { playerDeath(t('tn.starve')); updateUI(); render(); return; }
       }
     }
   }
@@ -52,7 +52,7 @@ export function endTurn(): void {
   // Slow effect — player loses this turn (enemies don't act either)
   if (G.player.slowed > 0) {
     G.player.slowed--;
-    addMsg(lang === 'zh' ? '🐌 你被减速了，无法行动！' : '🐌 Slowed! You lose a turn!', 'mi');
+    addMsg(t('tn.slowed'), 'mi');
     updatePlayerFOV(G.player, G.dungeon.map, G.traps); updateUI(); render();
     return;
   }
@@ -65,7 +65,7 @@ export function endTurn(): void {
     flt(G.player.x, G.player.y, `-${actualPoisonDmg}`, '#32cd32');
     if (G.player.hp <= 0) {
       if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
-      else { playerDeath(lang === 'zh' ? '中毒' : 'poison'); updateUI(); render(); return; }
+      else { playerDeath(t('tn.poison')); updateUI(); render(); return; }
     }
   }
 
@@ -76,7 +76,7 @@ export function endTurn(): void {
     flt(G.player.x, G.player.y, `-${cm.perTurnHp}`, '#9a2be2');
     if (G.player.hp <= 0) {
       if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
-      else { playerDeath(lang === 'zh' ? '腐化' : 'corruption'); updateUI(); render(); return; }
+      else { playerDeath(t('tn.corruption')); updateUI(); render(); return; }
     }
   }
 

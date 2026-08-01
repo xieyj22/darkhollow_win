@@ -4,6 +4,7 @@
 import type { Enemy, Element, I18nText } from './types.js';
 import { lang } from './state.js';
 import { rng } from './utils.js';
+import { tx } from './i18n.js';
 
 // Fields makeEnemy actually reads. Both EnemyDef and BossDef satisfy this
 // structurally (BossDef simply omits the optional ai/res/tags/mf).
@@ -37,7 +38,7 @@ export function makeEnemy(
   const expM = m?.expM ?? 1, goldM = m?.goldM ?? 1;
   const hp = Math.floor(base.hp * fs * hpM);
   return {
-    name: nameOverride ?? (lang === 'zh' ? base.n.zh : base.n.en),
+    name: nameOverride ?? tx(base.n),
     ch: base.ch, c: base.c, x, y,
     hp, maxHp: hp,
     atk: Math.floor(base.atk * fs * atkM),

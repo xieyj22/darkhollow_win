@@ -9,7 +9,7 @@ import { createPlayer } from './player.js';
 import { updateUI, render, resizeCanvas } from './render.js';
 import { snd, setBgmScene } from './audio.js';
 import { autoSave } from './save.js';
-import { t } from './i18n.js';
+import { t, tMsg, tx } from './i18n.js';
 import { addMsg } from './messages.js';
 import { rng, pick } from './utils.js';
 import { AREAS } from './data.js';
@@ -87,20 +87,20 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
 
     // Map entities: chests, wandering merchants, treasure merchants (point 1/3/11).
     // These appear as icons on the map; stepping on them triggers the event.
-    const placeEntity = (npc: Item['npc'], ch: string, c: string, nameZh: string, nameEn: string, rarity: number) => {
+    const placeEntity = (npc: Item['npc'], ch: string, c: string, nameKey: string, rarity: number) => {
       const rooms = G!.dungeon.rooms.slice(1); // never in the start room
       if (!rooms.length) return;
       const rm = pick(rooms);
       const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
       if (G!.dungeon.map[y][x] === TL.STAIR) return; // don't bury under stairs
-      G!.items.push({ type: 'consumable', name: lang === 'zh' ? nameZh : nameEn, ch, c, desc: '', x, y, rarity, npc } as Item);
+      G!.items.push({ type: 'consumable', name: t(nameKey), ch, c, desc: '', x, y, rarity, npc } as Item);
     };
-    if (Math.random() < 0.5) placeEntity('chest', '▣', '#daa520', '宝箱', 'Chest', 2);
-    if (Math.random() < 0.35) placeEntity('merchant', '§', '#9b5de5', '流浪商人', 'Merchant', 1);
-    if (floor % 5 === 0) placeEntity('treasure_merchant', '¤', '#ffd700', '宝藏商人', 'Treasure Merchant', 4);
+    if (Math.random() < 0.5) placeEntity('chest', '▣', '#daa520', 'gm.chest', 2);
+    if (Math.random() < 0.35) placeEntity('merchant', '§', '#9b5de5', 'gm.merchant', 1);
+    if (floor % 5 === 0) placeEntity('treasure_merchant', '¤', '#ffd700', 'gm.treasureMerchant', 4);
 
     if (floor > 1) {
-      addMsg(lang === 'zh' ? `你下到了第${floor}层……` : `You descend to floor ${floor}...`, 'mi');
+      addMsg(tMsg('gm.descend', String(floor)), 'mi');
       snd('stairs');
     }
 
@@ -115,7 +115,7 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     if (area && !G!.branchMode) unlockLore('area:' + area.id);
     if (area && area.lore.length > 0) {
       const desc = pick(area.lore);
-      addMsg(lang === 'zh' ? desc.zh : desc.en, 'mst');
+      addMsg(tx(desc), 'mst');
     }
 
     updatePlayerFOV(G!.player, G!.dungeon.map, G!.traps);
@@ -173,7 +173,7 @@ export function enterBranch(): void {
   G.items.push(rit);
   G.items.push({ type: 'gold', name: 'Gold', value: 200 + entry * 15, ch: '$', c: '#ffd700', x: last.cx, y: last.cy, id: true, rarity: 0, desc: '' });
   G.dungeon.map[last.cy][last.cx] = TL.PORTAL;
-  addMsg(lang === 'zh' ? '🌀 你被吸入荧光菌穴……' : '🌀 You are pulled into the Fungal Hollow...', 'md');
+  addMsg(t('gm.fungalHollow'), 'md');
   updatePlayerFOV(G.player, G.dungeon.map, G.traps);
   setBgmScene('explore', fungal.id);
   if (bridge.render) bridge.render();
@@ -199,7 +199,7 @@ export function exitBranch(): void {
   G.player.x = walkable(ret.x, ret.y) ? ret.x : sr.cx;
   G.player.y = walkable(ret.x, ret.y) ? ret.y : sr.cy;
   updatePlayerFOV(G.player, G.dungeon.map, G.traps);
-  addMsg(lang === 'zh' ? '✨ 你回到了第' + ret.floor + '层。' : '✨ You return to floor ' + ret.floor + '.', 'mi');
+  addMsg(tMsg('gm.return', String(ret.floor)), 'mi');
   if (bridge.render) bridge.render();
   if (bridge.updateUI) bridge.updateUI();
 }

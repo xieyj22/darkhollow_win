@@ -16,7 +16,11 @@ vi.mock('../effects.js', () => ({ flt: () => {}, shake: () => {} }));
 vi.mock('../fx.js', () => ({ fxFlash: () => {}, fxBurst: () => {} }));
 vi.mock('../messages.js', () => ({ addMsg: () => {} }));
 vi.mock('../enemies.js', () => ({ processBossPhase: () => {} }));
-vi.mock('../i18n.js', () => ({ t: (k: string) => k }));
+vi.mock('../i18n.js', () => ({
+  t: (k: string) => k,
+  tMsg: (k: string, ...a: string[]) => a.reduce((s: string, x) => s.replace('{}', x), k),
+  tx: (f: { en?: string }) => (f && f.en) || '',
+}));
 vi.mock('../data.js', () => ({ ACH_DEFS: [], EQUIPMENT_SETS: [] }));
 
 // Amplify the multipliers so reward math is easy to assert. Stub the rest of

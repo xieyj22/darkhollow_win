@@ -6,7 +6,7 @@ import '@fontsource/jetbrains-mono/700.css';
 import { G, setGameState, setLang, lang, setMuted, muted, setUiZoom, uiZoom, setMinimapScale, minimapScale, setLegendVisible, legendVisible, setKeysVisible, keysVisible, setInvOpen, setHelpOpen, setSkillOpen, setAchOpen, setTalentOpen, setSafeZone, safeZone, setReducedMotion, reducedMotion, setMenuOpen } from './state.js';
 import { MH, MW, FOV, MAX_INV, FINAL, TL, TS } from './config.js';
 import { rng, pick, clamp, dst, darken } from './utils.js';
-import { L, t, tMsg, rareName, itemName, RARITY_C } from './i18n.js';
+import { L, t, tMsg, rareName, itemName, tx, RARITY_C } from './i18n.js';
 import { RACES, CLASSES, WEAPONS, ARMORS, ACCESSORIES, POTIONS, SCROLLS, CONSUMABLES, TRAPS, ELITE_PREFIX, ENEMIES, BOSSES, ACH_DEFS, TALENT_TREES } from './data.js';
 import { initAudio, getAudioContext, snd, setBgmScene, setMasterVol, setMusicVol, setSfxVol, getMasterVol, getMusicVol, getSfxVol, isMuted, setMutedState } from './audio.js';
 import { flt, shake } from './effects.js';
@@ -112,14 +112,14 @@ function showCharSelect(): void {
   ov.id = 'char-sel';
   ov.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,15,.95);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column';
   const raceHtml = RACES.map((r, i) => {
-    const rn = lang === 'zh' ? r.name.zh : r.name.en;
-    const rd = lang === 'zh' ? r.desc.zh : r.desc.en;
+    const rn = tx(r.name);
+    const rd = tx(r.desc);
     return `<div class="race-opt" data-idx="${i}" style="padding:8px 15px;margin:4px 0;cursor:pointer;border:1px solid ${i === 0 ? '#e63946' : '#333'};border-radius:3px;color:${i === 0 ? '#ddd' : '#888'}"><b>${rn}</b> <span style="color:#666;font-size:.9em">${rd}</span></div>`;
   }).join('');
   const classHtml = CLASSES.map((c, i) => {
-    const cn = lang === 'zh' ? c.name.zh : c.name.en;
-    const cd = lang === 'zh' ? c.desc.zh : c.desc.en;
-    const sk = c.skill, skName = lang === 'zh' ? sk.name.zh : sk.name.en, skDesc = lang === 'zh' ? sk.desc.zh : sk.desc.en;
+    const cn = tx(c.name);
+    const cd = tx(c.desc);
+    const sk = c.skill, skName = tx(sk.name), skDesc = tx(sk.desc);
     return `<div class="class-opt" data-idx="${i}" style="padding:8px 15px;margin:4px 0;cursor:pointer;border:1px solid ${i === 0 ? '#e63946' : '#333'};border-radius:3px;color:${i === 0 ? '#ddd' : '#888'}"><b>${cn}</b> <span style="color:#666;font-size:.9em">${cd}</span><br><span style="color:#9b5de5;font-size:.8em">⚡ ${skName} — ${skDesc}</span></div>`;
   }).join('');
   // Mode selector (Wave 6d): 0 = Normal (F40 Creator = victory), 1 = Endless
@@ -127,8 +127,8 @@ function showCharSelect(): void {
   // Defaults to Normal; declared inside showCharSelect so it resets each open.
   let selMode = 0;
   const modeOpts = [
-    { n: lang === 'zh' ? '普通模式' : 'Normal', d: lang === 'zh' ? '第40层击败创世者即胜利' : 'Beat the Creator at F40 to win' },
-    { n: lang === 'zh' ? '无尽模式' : 'Endless', d: lang === 'zh' ? 'F41+ 无限下探,以楼层为分数' : 'F41+ infinite descent, score by depth' },
+    { n: t('mn.modeNormal'), d: t('mn.modeNormalDesc') },
+    { n: t('mn.modeEndless'), d: t('mn.modeEndlessDesc') },
   ];
   const modeHtml = modeOpts.map((m, i) =>
     `<div class="mode-opt" data-idx="${i}" style="padding:8px 15px;margin:4px 0;cursor:pointer;border:1px solid ${i === 0 ? '#e63946' : '#333'};border-radius:3px;color:${i === 0 ? '#ddd' : '#888'}"><b>${m.n}</b> <span style="color:#666;font-size:.9em">${m.d}</span></div>`
@@ -137,10 +137,10 @@ function showCharSelect(): void {
   <div style="display:flex;gap:30px;margin-bottom:20px;flex-wrap:wrap;justify-content:center">
   <div><h3 style="color:#8888aa;margin-bottom:10px">${t('race')}</h3>${raceHtml}</div>
   <div><h3 style="color:#8888aa;margin-bottom:10px">${t('cls')}</h3>${classHtml}</div>
-  <div><h3 style="color:#8888aa;margin-bottom:10px">${lang === 'zh' ? '模式' : 'Mode'}</h3>${modeHtml}</div></div>
+  <div><h3 style="color:#8888aa;margin-bottom:10px">${t('mn.mode')}</h3>${modeHtml}</div></div>
   <div style="display:flex;gap:10px;align-items:center">
   <button class="menu-btn" id="start-btn" style="margin-top:10px">${t('begin')}</button>
-  <button class="menu-btn" id="char-back-btn" style="margin-top:10px;border-color:#888;color:#888">${lang === 'zh' ? '← 返回' : '← Back'}</button>
+  <button class="menu-btn" id="char-back-btn" style="margin-top:10px;border-color:#888;color:#888">${t('mn.back')}</button>
   </div>`;
   document.body.appendChild(ov);
   ov.querySelectorAll('.race-opt').forEach((el: any) => {
@@ -217,8 +217,7 @@ function bindButtons(): void {
   on('btn-back-title', () => {
     if (G && !G.gameOver) {
       // Confirm before leaving an active game
-      const zh = lang === 'zh';
-      if (confirm(zh ? '确定要返回标题画面吗？当前进度将丢失。' : 'Return to title? Current progress will be lost.')) {
+      if (confirm(t('mn.confirmReturnTitle'))) {
         returnToTitle();
       }
     } else {

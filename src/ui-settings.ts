@@ -14,13 +14,13 @@ import { bridge } from './bridge.js';
 
 export function updateLangUI(): void {
   const $ = (id: string) => document.getElementById(id);
-  $('title-h1')!.textContent = lang === 'zh' ? '暗 渊 深 处' : 'DEPTHS OF DARKHOLLOW';
+  $('title-h1')!.textContent = t('us.titleH1Spaced');
   $('title-h2')!.textContent = t('titleH2');
   $('btn-new')!.textContent = t('btnNew'); $('btn-cont')!.textContent = t('btnCont'); $('btn-help')!.textContent = t('btnHelp');
   $('btn-forge')!.textContent = t('forgeBtn');
-  $('btn-records')!.textContent = lang === 'zh' ? '📋 记录' : '📋 Records';
-  $('btn-codex')!.textContent = lang === 'zh' ? '📜 典籍' : '📜 Codex';
-  $('lang-btn')!.textContent = lang === 'en' ? '中文' : 'EN';
+  $('btn-records')!.textContent = t('us.recordsBtn');
+  $('btn-codex')!.textContent = t('us.codexBtn');
+  $('lang-btn')!.textContent = t('us.langSwitchTo');
   $('sb-hero')!.textContent = '⚔ ' + t('hero'); $('sb-nl')!.textContent = t('name'); $('sb-rl')!.textContent = t('race');
   $('sb-cl')!.textContent = t('cls'); $('sb-lv')!.textContent = t('level');
   $('sb-gl')!.textContent = t('gold'); $('sb-fl')!.textContent = t('floor'); $('sb-tl')!.textContent = t('turns');
@@ -30,15 +30,13 @@ export function updateLangUI(): void {
   $('inv-title')!.textContent = t('inventory'); $('help-title')!.textContent = t('howToPlay');
   $('sk-title')!.textContent = t('skills'); $('ach-title')!.textContent = t('achievements');
   $('forge-title')!.textContent = t('forgeTitle'); $('forge-se-label')!.textContent = t('soulEchoes');
-  $('btn-back-title')!.textContent = '← ' + (lang === 'zh' ? '标题画面' : 'Title');
+  $('btn-back-title')!.textContent = '← ' + t('us.backToTitle');
   $('death-h1')!.textContent = t('deathH1'); $('vic-sub')!.textContent = t('victorySub');
   $('btn-try-again')!.textContent = t('tryAgain'); $('btn-death-title')!.textContent = t('titleScreen');
   $('btn-play-again')!.textContent = t('playAgain'); $('btn-vic-title')!.textContent = t('titleScreen');
-  $('title-hint')!.innerHTML = lang === 'zh'
-    ? '<span>WASD/方向键</span> 移动 · <span>1-9</span> 快捷道具 · <span>B</span> 背包 · <span>G</span> 拾取 · <span>&gt;</span> 下楼 · <span>K</span> 技能 · <span>F</span> 等待 · <span>Ctrl+S</span> 保存'
-    : '<span>WASD/Arrows</span> move · <span>1-9</span> quick items · <span>B</span> inventory · <span>G</span> pickup · <span>&gt;</span> descend · <span>K</span> skill · <span>F</span> wait · <span>Ctrl+S</span> save';
+  $('title-hint')!.innerHTML = t('us.titleHint');
   $('sb-legend')!.innerHTML = '🗺 ' + t('legendToggle') + ' <span id="legend-arrow">' + (legendVisible ? '▲' : '▼') + '</span>';
-  $('obj-label')!.textContent = lang === 'zh' ? '游戏目标' : 'Objective';
+  $('obj-label')!.textContent = t('us.objective');
   $('keys-toggle')!.textContent = t('keysToggle');
   $('pause-title')!.textContent = t('pauseTitle');
   $('btn-pause-resume')!.textContent = t('pauseResume');

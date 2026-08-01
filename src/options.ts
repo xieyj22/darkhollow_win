@@ -199,7 +199,7 @@ function renderDisplay(body: HTMLElement): void {
     row(t('optSafeZone'), `<input type="range" class="vol-slider" data-safe min="0" max="64" value="${safeZone}"><span class="opt-val" data-safelabel>${safeZone}</span>`) +
     row(t('optLanguage'), segHtml([
       { id: 'en', label: 'EN', active: lang === 'en' },
-      { id: 'zh', label: '中文', active: lang === 'zh' },
+      { id: 'zh', label: '中文', active: lang === 'zh' }, // lang-state check (not i18n text) — highlights the active language button
     ]));
 
   const fsInput = body.querySelector<HTMLInputElement>('.toggle input');

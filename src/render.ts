@@ -3,7 +3,7 @@ import { G, canvas, ctx, miniCtx, minimapScale, lang, reducedMotion } from './st
 import { setCanvas, setMiniCanvas } from './state.js';
 import { TS, MW, MH, TL, FINAL } from './config.js';
 import { clamp, dst, darken, darkenTinted } from './utils.js';
-import { RARITY_C, rareName } from './i18n.js';
+import { RARITY_C, rareName, t, tMsg, tx } from './i18n.js';
 import { corruptionTier, TIER_LABEL, TIER_COLOR } from './corruption.js';
 import { AREAS, EQUIPMENT_SETS } from './data.js';
 import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite } from './sprites.js';
@@ -422,7 +422,7 @@ export function updateUI(): void {
   const p = G.player;
   const $ = (id: string) => document.getElementById(id);
 
-  $('s-name')!.textContent = lang === 'zh' ? '冒险者' : 'Adventurer';
+  $('s-name')!.textContent = t('rd.adventurer');
   $('s-race')!.textContent = p.raceName; $('s-class')!.textContent = p.clsName;
   $('s-level')!.textContent = String(p.level); $('s-atk')!.textContent = String(p.atk);
   $('s-def')!.textContent = String(p.def); $('s-gold')!.textContent = String(p.gold);
@@ -443,16 +443,16 @@ export function updateUI(): void {
   const hFill = $('hunger-fill')!;
   hFill.style.width = `${(p.hunger / p.maxHunger) * 100}%`;
   hFill.className = 'fill bt' + (p.hunger <= 20 ? ' low' : '');
-  $('hunger-text')!.textContent = `${lang === 'zh' ? '饥饿' : 'Hunger'} ${p.hunger}`;
+  $('hunger-text')!.textContent = `${t('rd.hunger')} ${p.hunger}`;
 
   // Corruption meter (Playtest #9) — width = corruption%, color + label by tier
   const ct = corruptionTier(p.corruption);
   $('corruption-fill')!.style.width = `${p.corruption}%`;
   $('corruption-fill')!.style.background = TIER_COLOR[ct];
-  $('corruption-text')!.textContent = `${lang === 'zh' ? TIER_LABEL[ct].zh : TIER_LABEL[ct].en} ${p.corruption}`;
+  $('corruption-text')!.textContent = `${tx(TIER_LABEL[ct])} ${p.corruption}`;
 
   const eqN = (id: string, v: any) => {
-    const el = $(id)!; el.textContent = v ? v.name : (lang === 'zh' ? '无' : 'None');
+    const el = $(id)!; el.textContent = v ? v.name : t('rd.none');
     (el as HTMLElement).style.color = v ? RARITY_C[v.rarity] : '#555';
   };
   eqN('eq-weapon', p.eq.weapon); eqN('eq-armor', p.eq.armor); eqN('eq-accessory', p.eq.accessory); eqN('eq-accessory2', p.eq.accessory2);
@@ -466,12 +466,12 @@ export function updateUI(): void {
   }
   if (p.poisonTurns > 0) {
     const s = document.createElement('div'); s.className = 'buff neg';
-    s.textContent = lang === 'zh' ? `中毒(${p.poisonTurns}t) -${p.poisonDmg}/t` : `Poison(${p.poisonTurns}t) -${p.poisonDmg}/t`;
+    s.textContent = tMsg('rd.poison', String(p.poisonTurns), String(p.poisonDmg));
     bd.appendChild(s);
   }
   if (p.slowed > 0) {
     const s = document.createElement('div'); s.className = 'buff neg';
-    s.textContent = `🐌 ${lang === 'zh' ? '减速' : 'Slowed'}(${p.slowed}t)`;
+    s.textContent = `🐌 ${t('rd.slowed')}(${p.slowed}t)`;
     bd.appendChild(s);
   }
 
@@ -485,28 +485,28 @@ export function updateUI(): void {
     for (const bonus of setDef.bonuses) {
       if (count >= bonus.required) {
         const s = document.createElement('div'); s.className = 'buff';
-        const bName = lang === 'zh' ? setDef.n.zh : setDef.n.en;
-        const bDesc = lang === 'zh' ? bonus.desc.zh : bonus.desc.en;
+        const bName = tx(setDef.n);
+        const bDesc = tx(bonus.desc);
         s.textContent = `${bName}(${count}): ${bDesc}`; bd.appendChild(s);
       }
     }
   }
 
   if (!p.buffs.length && p.poisonTurns <= 0 && p.slowed <= 0 && setIds.every(id => (p.setBonusActive[id] || 0) < 2)) {
-    bd.innerHTML = '<div style="color:#555">' + (lang === 'zh' ? '无' : 'None') + '</div>';
+    bd.innerHTML = '<div style="color:#555">' + t('rd.none') + '</div>';
   }
 
   // Floor label with area name. Inside a branch, show the biome name instead of
   // the floor number (G.floor = main entry floor there, which would be misleading).
   let ft: string;
   if (G.branchMode) {
-    ft = lang === 'zh' ? '🍄 荧光菌穴(秘境)' : '🍄 Fungal Hollow (Branch)';
+    ft = t('rd.fungalBranch');
   } else if (G.endless) {
-    ft = lang === 'zh' ? `♾ 无尽 ${G.floor} 层` : `♾ Endless ${G.floor}F`;
+    ft = tMsg('rd.endlessFloor', String(G.floor));
     if (G.floor % 5 === 0) ft += ' ⚠ BOSS';
   } else {
     const area = getAreaForFloor(G.floor);
-    const areaName = lang === 'zh' ? area.n.zh : area.n.en;
+    const areaName = tx(area.n);
     ft = `${areaName} ${G.floor}F`;
     if (G.floor % 5 === 0) ft += ' ⚠ BOSS';
     if (G.floor === FINAL) ft += ' ★ FINAL';
@@ -514,7 +514,7 @@ export function updateUI(): void {
   $('floor-label')!.textContent = ft;
 
   const sd = $('streak-display')!;
-  if (p.streak >= 3) { sd.style.display = 'block'; sd.textContent = `🔥 ${p.streak}x ${lang === 'zh' ? '连杀' : 'STREAK'}`; }
+  if (p.streak >= 3) { sd.style.display = 'block'; sd.textContent = `🔥 ${p.streak}x ${t('rd.streak')}`; }
   else { sd.style.display = 'none'; }
 
   renderObjective();
@@ -525,7 +525,6 @@ export function updateUI(): void {
 
 function renderObjective(): void {
   if (!G) return;
-  const zh = lang === 'zh';
   const fl = G.floor;
   const totalBosses = 8;
   const nextBoss = Math.ceil(fl / 5) * 5;
@@ -534,25 +533,25 @@ function renderObjective(): void {
   const sum = document.getElementById('objective-summary');
   if (G.endless) {
     if (sum) sum.innerHTML =
-      `<div class="obj-row"><span class="ol">${zh ? '无尽' : 'Endless'}</span><span class="ov">${zh ? '第' + fl + '层' : 'F' + fl}</span></div>` +
+      `<div class="obj-row"><span class="ol">${t('rd.objEndless')}</span><span class="ov">${tMsg('rd.objFloorPrefix', String(fl))}</span></div>` +
       `<div class="obj-bar"><div class="fill" style="width:100%"></div></div>`;
   } else {
     if (sum) sum.innerHTML =
-      `<div class="obj-row"><span class="ol">${zh ? '层' : 'F'}</span><span class="ov">${fl}/${FINAL}</span></div>` +
+      `<div class="obj-row"><span class="ol">${t('rd.objFloorLabel')}</span><span class="ov">${fl}/${FINAL}</span></div>` +
       `<div class="obj-bar"><div class="fill" style="width:${(fl / FINAL) * 100}%"></div></div>`;
   }
   // 详情 panel(默认折叠)
   const panel = document.getElementById('objective-panel')!;
   if (G.endless) {
     panel.innerHTML =
-      `<div class="obj-row"><span class="ol">${zh ? '目标' : 'Goal'}</span><span class="ov">${zh ? '无尽下探(无终点)' : 'Endless descent (no end)'}</span></div>` +
-      `<div class="obj-row"><span class="ol">${zh ? '下个Boss' : 'Next Boss'}</span><span class="ov${fl === nextBoss && fl % 5 === 0 ? ' boss' : ''}">${zh ? '第' : 'F'} ${nextBoss}${fl === nextBoss && fl % 5 === 0 ? (zh ? ' ⚠ 当前层！' : ' ⚠ HERE!') : ''}</span></div>` +
-      `<div class="obj-row"><span class="ol">${zh ? 'Boss击杀' : 'Bosses'}</span><span class="ov">${bossesKilled}</span></div>`;
+      `<div class="obj-row"><span class="ol">${t('rd.objGoal')}</span><span class="ov">${t('rd.objEndlessDesc')}</span></div>` +
+      `<div class="obj-row"><span class="ol">${t('rd.objNextBoss')}</span><span class="ov${fl === nextBoss && fl % 5 === 0 ? ' boss' : ''}">${t('rd.objFloorPrefixShort')} ${nextBoss}${fl === nextBoss && fl % 5 === 0 ? t('rd.objHere') : ''}</span></div>` +
+      `<div class="obj-row"><span class="ol">${t('rd.objBosses')}</span><span class="ov">${bossesKilled}</span></div>`;
   } else {
     panel.innerHTML =
-      `<div class="obj-row"><span class="ol">${zh ? '目标' : 'Goal'}</span><span class="ov">${zh ? '击败创世者(第40层)' : 'Beat The Creator (F40)'}</span></div>` +
-      `<div class="obj-row"><span class="ol">${zh ? '下个Boss' : 'Next Boss'}</span><span class="ov${fl === nextBoss && fl % 5 === 0 ? ' boss' : ''}">${zh ? '第' : 'F'} ${nextBoss}${fl === nextBoss && fl % 5 === 0 ? (zh ? ' ⚠ 当前层！' : ' ⚠ HERE!') : ''}</span></div>` +
-      `<div class="obj-row"><span class="ol">${zh ? 'Boss击杀' : 'Bosses'}</span><span class="ov${bossesKilled >= totalBosses ? ' done' : ''}">${bossesKilled}/${totalBosses}</span></div>`;
+      `<div class="obj-row"><span class="ol">${t('rd.objGoal')}</span><span class="ov">${t('rd.objBeatCreator')}</span></div>` +
+      `<div class="obj-row"><span class="ol">${t('rd.objNextBoss')}</span><span class="ov${fl === nextBoss && fl % 5 === 0 ? ' boss' : ''}">${t('rd.objFloorPrefixShort')} ${nextBoss}${fl === nextBoss && fl % 5 === 0 ? t('rd.objHere') : ''}</span></div>` +
+      `<div class="obj-row"><span class="ol">${t('rd.objBosses')}</span><span class="ov${bossesKilled >= totalBosses ? ' done' : ''}">${bossesKilled}/${totalBosses}</span></div>`;
   }
 }
 

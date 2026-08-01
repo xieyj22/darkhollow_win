@@ -3,6 +3,7 @@ import type { MetaSave, MetaStats, SoulEchoBreakdown, Player, RunRecord } from '
 import { lang } from './state.js';
 import { META_UPGRADES, ACH_DEFS, RELICS } from './data.js';
 import { snd } from './audio.js';
+import { t, tx } from './i18n.js';
 
 const META_KEY = 'dh_meta';
 
@@ -261,7 +262,6 @@ let forgeActiveTab = 'stats';
 
 export function renderForge(): void {
   const meta = getMeta();
-  const zh = lang === 'zh';
   const countEl = document.getElementById('forge-se-count');
   if (countEl) countEl.textContent = String(meta.soulEchoes);
 
@@ -269,10 +269,10 @@ export function renderForge(): void {
   const tabsEl = document.getElementById('forge-tabs');
   if (tabsEl) {
     const categories = [
-      { id: 'stats', icon: '⚔', label: zh ? '属性' : 'Stats' },
-      { id: 'survival', icon: '❤', label: zh ? '生存' : 'Survival' },
-      { id: 'talent', icon: '🌟', label: zh ? '天赋' : 'Talent' },
-      { id: 'utility', icon: '🔧', label: zh ? '实用' : 'Utility' },
+      { id: 'stats', icon: '⚔', label: t('mt.catStats') },
+      { id: 'survival', icon: '❤', label: t('mt.catSurvival') },
+      { id: 'talent', icon: '🌟', label: t('mt.catTalent') },
+      { id: 'utility', icon: '🔧', label: t('mt.catUtility') },
     ];
     tabsEl.innerHTML = categories.map(c =>
       `<button class="forge-tab${c.id === forgeActiveTab ? ' active' : ''}" data-tab="${c.id}">${c.icon} ${c.label}</button>`
@@ -294,7 +294,6 @@ function renderForgeContent(): void {
   const content = document.getElementById('forge-content');
   if (!content) return;
   const meta = getMeta();
-  const zh = lang === 'zh';
   const upgrades = META_UPGRADES.filter(u => u.category === forgeActiveTab);
 
   let html = '';
@@ -308,17 +307,17 @@ function renderForgeContent(): void {
     html += `<div class="forge-upgrade${maxed ? ' maxed' : ''}">
       <div class="fu-icon">${def.icon}</div>
       <div class="fu-info">
-        <div class="fu-name">${zh ? def.n.zh : def.n.en}</div>
-        <div class="fu-desc">${zh ? def.d.zh : def.d.en}</div>
+        <div class="fu-name">${tx(def.n)}</div>
+        <div class="fu-desc">${tx(def.d)}</div>
       </div>
       <div class="fu-dots">${dots}</div>
-      <div class="fu-cost">${maxed ? (zh ? '已满' : 'MAX') : cost + ' 💀'}</div>
+      <div class="fu-cost">${maxed ? t('mt.maxed') : cost + ' 💀'}</div>
       <button class="fu-buy${canBuy ? '' : ' disabled'}" data-uid="${def.id}" ${canBuy ? '' : 'disabled'}>
-        ${maxed ? '✓' : (zh ? '购买' : 'BUY')}
+        ${maxed ? '✓' : t('mt.buy')}
       </button>
     </div>`;
   }
-  if (!upgrades.length) html = `<div style="color:#666;text-align:center;padding:20px">${zh ? '该分类暂无升级' : 'No upgrades in this category'}</div>`;
+  if (!upgrades.length) html = `<div style="color:#666;text-align:center;padding:20px">${t('mt.noUpgrades')}</div>`;
   content.innerHTML = html;
 
   // Bind buy buttons
@@ -339,15 +338,14 @@ export function renderTitleStats(): void {
   const el = document.getElementById('title-stats');
   if (!el) return;
   const meta = getMeta();
-  const zh = lang === 'zh';
   const s = meta.stats;
   el.innerHTML =
-    `<span class="ts-item">💀 ${zh ? '灵魂回响' : 'Soul Echoes'}: <b>${meta.soulEchoes}</b></span>` +
-    `<span class="ts-item">⚔ ${zh ? '总场次' : 'Runs'}: ${s.totalRuns}</span>` +
-    `<span class="ts-item">🏔 ${zh ? '最佳' : 'Best'}: F${s.bestFloor}</span>` +
-    `<span class="ts-item">🏆 ${zh ? '胜利' : 'Wins'}: ${s.wins}</span>` +
-    `<span class="ts-item">💀 ${zh ? '总击杀' : 'Kills'}: ${s.totalKills}</span>` +
-    `<span class="ts-item">📋 ${zh ? '成就' : 'Achv'}: ${meta.achievements.length}/${ACH_DEFS.length}</span>`;
+    `<span class="ts-item">💀 ${t('mt.soulEchoes')}: <b>${meta.soulEchoes}</b></span>` +
+    `<span class="ts-item">⚔ ${t('mt.runs')}: ${s.totalRuns}</span>` +
+    `<span class="ts-item">🏔 ${t('mt.best')}: F${s.bestFloor}</span>` +
+    `<span class="ts-item">🏆 ${t('mt.wins')}: ${s.wins}</span>` +
+    `<span class="ts-item">💀 ${t('mt.totalKills')}: ${s.totalKills}</span>` +
+    `<span class="ts-item">📋 ${t('mt.achv')}: ${meta.achievements.length}/${ACH_DEFS.length}</span>`;
 }
 
 // ===== Echo Breakdown Display =====
@@ -355,16 +353,15 @@ export function renderTitleStats(): void {
 export function renderEchoBreakdown(containerId: string, echoes: SoulEchoBreakdown): void {
   const el = document.getElementById(containerId);
   if (!el) return;
-  const zh = lang === 'zh';
   el.innerHTML =
     `<div class="echo-breakdown">` +
-    `<h3>💀 ${zh ? '灵魂回响' : 'Soul Echoes'}: +${echoes.total}</h3>` +
-    `<div class="eb-row"><span>${zh ? '击杀' : 'Kills'}</span><span>+${echoes.kills}</span></div>` +
-    `<div class="eb-row"><span>${zh ? '楼层' : 'Floor'}</span><span>+${echoes.floor}</span></div>` +
-    `<div class="eb-row"><span>${zh ? 'Boss' : 'Bosses'}</span><span>+${echoes.bosses}</span></div>` +
-    `<div class="eb-row"><span>${zh ? '金币' : 'Gold'}</span><span>+${echoes.gold}</span></div>` +
-    `<div class="eb-row"><span>${zh ? '连杀' : 'Streak'}</span><span>+${echoes.streak}</span></div>` +
-    (echoes.victory > 0 ? `<div class="eb-row"><span>${zh ? '胜利' : 'Victory'}</span><span>+${echoes.victory}</span></div>` : '') +
-    `<div class="eb-row total"><span>${zh ? '合计' : 'Total'}</span><span>+${echoes.total}</span></div>` +
+    `<h3>💀 ${t('mt.soulEchoes')}: +${echoes.total}</h3>` +
+    `<div class="eb-row"><span>${t('mt.kills')}</span><span>+${echoes.kills}</span></div>` +
+    `<div class="eb-row"><span>${t('mt.floor')}</span><span>+${echoes.floor}</span></div>` +
+    `<div class="eb-row"><span>${t('mt.bosses')}</span><span>+${echoes.bosses}</span></div>` +
+    `<div class="eb-row"><span>${t('mt.gold')}</span><span>+${echoes.gold}</span></div>` +
+    `<div class="eb-row"><span>${t('mt.streak')}</span><span>+${echoes.streak}</span></div>` +
+    (echoes.victory > 0 ? `<div class="eb-row"><span>${t('mt.victory')}</span><span>+${echoes.victory}</span></div>` : '') +
+    `<div class="eb-row total"><span>${t('mt.total')}</span><span>+${echoes.total}</span></div>` +
     `</div>`;
 }

@@ -28,11 +28,11 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
     const se = el.filter(e => e.mf <= floor && e.mf >= Math.max(1, floor - 4) && e.mf >= 1);
     const base = se.length > 0 ? pick(se) : pick(el);
     const fs = 1 + (floor - 1) * .12 + (area ? area.enemyScaleBonus : 0);
-    let nm = lang === 'zh' ? base.n.zh : base.n.en;
+    let nm = tx(base.n);
     let hpM = 1, atkM = 1, defAdd = 0, expM = 1, goldM = 1, isElite = false;
     if (floor >= 3 && Math.random() < Math.min(.25, .05 + floor * .01)) {
       const pf = pick(ELITE_PREFIX);
-      nm = (lang === 'zh' ? pf.n.zh : pf.n.en) + nm;
+      nm = tx(pf.n) + nm;
       hpM = pf.hpM; atkM = pf.atkM; defAdd = pf.defM || 0; expM = pf.expM; goldM = pf.goldM; isElite = true;
     }
     return makeEnemy(base, x, y, fs, { hpM, atkM, defAdd, expM, goldM, isElite }, nm);
@@ -51,7 +51,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   if (bd) {
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
     const bs = 1 + (floor - 1) * .1;
-    ens.push(makeEnemy(bd, br.cx, br.cy, bs, { isBoss: true }, lang === 'zh' ? bd.n.zh : bd.n.en));
+    ens.push(makeEnemy(bd, br.cx, br.cy, bs, { isBoss: true }, tx(bd.n)));
   }
   // Endless scaled boss: every 5 floors past FINAL, reuse a random main-line
   // BossDef with floor scaling so F45/F50/... always have a boss. Only fires
@@ -61,7 +61,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
     const base = pick(BOSSES);
     const fs = 1 + (floor - 1) * .1; // boss scale (.1), not enemy scale (.12)
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
-    ens.push(makeEnemy(base, br.cx, br.cy, fs, { isBoss: true }, lang === 'zh' ? base.n.zh : base.n.en));
+    ens.push(makeEnemy(base, br.cx, br.cy, fs, { isBoss: true }, tx(base.n)));
   }
   return ens;
 }
@@ -87,7 +87,7 @@ export function spawnBranchEnemies(rooms: Room[], entryFloor: number): Enemy[] {
   const mb = BOSSES.find(b => b.fl === 0);
   if (mb) {
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
-    ens.push(makeEnemy(mb, br.cx, br.cy, fs, { isBoss: true }, lang === 'zh' ? mb.n.zh : mb.n.en));
+    ens.push(makeEnemy(mb, br.cx, br.cy, fs, { isBoss: true }, tx(mb.n)));
   }
   return ens;
 }
@@ -104,11 +104,11 @@ export function spawnWarden(floor: number): void {
   const s = wardenStats(floor);
   // Phase 3: a recorded former descender (100-corr death) names this Warden "formerly <name>".
   const wardens = getMeta().wardens;
-  let wName = lang === 'zh' ? '守渊人' : 'The Warden';
+  let wName = t('em.warden');
   let legacyWarden = false;
   if (wardens.length) {
     const leg = wardens[Math.floor(Math.random() * wardens.length)];
-    wName = lang === 'zh' ? `守渊人 · 前${leg.name}` : `The Warden — formerly ${leg.name}`;
+    wName = tMsg('em.wardenFormerly', String(leg.name));
     legacyWarden = true;
   }
   G.enemies.push({
@@ -120,7 +120,7 @@ export function spawnWarden(floor: number): void {
     el: 'shadow', res: { shadow: 0.5, holy: -0.5 }, skillCd: 0, tags: ['spirit'],
   });
   unlockLore('warden:encounter');
-  addMsg(lang === 'zh' ? '👁 守渊人正在追猎你……' : '👁 The Warden is hunting you...', 'me');
+  addMsg(t('em.wardenHunting'), 'me');
   flt(G.player.x, G.player.y, '⚠WARDEN', '#9a2be2'); snd('boss'); shake();
 }
 
@@ -148,7 +148,7 @@ export function processBossPhase(boss: Enemy): void {
       if (phase.newEl) boss.el = phase.newEl;
       if (phase.atkM) {
         boss.atk = Math.floor(origAtk * phase.atkM);
-        addMsg(lang === 'zh' ? `⚠ ${boss.name}进入新阶段！攻击力大增！` : `⚠ ${boss.name} enters a new phase! ATK surges!`, 'me');
+        addMsg(tMsg('em.bossPhase', String(boss.name)), 'me');
         flt(boss.x, boss.y, '⚡ PHASE!', '#ff4500');
       }
     }
@@ -201,12 +201,12 @@ export function processEnemies(): void {
           // Check ward
           if (G.player.warded) {
             G.player.warded = false;
-            addMsg(lang === 'zh' ? '🛡 护身石抵挡了远程攻击！' : '🛡 Ward blocks the blast!', 'mi');
+            addMsg(t('em.wardBlocks'), 'mi');
             flt(G.player.x, G.player.y, 'WARD!', '#4895ef'); snd('heal'); break;
           }
           // Check dodge — also trigger onPlayerDodged for talent effects (shadow dance)
           if (Math.random() < G.player.dodgeChance) {
-            addMsg(lang === 'zh' ? `你闪避了${e.name}的远程攻击！` : `You dodge ${e.name}'s blast!`, 'mi');
+            addMsg(tMsg('em.dodgeRanged', String(e.name)), 'mi');
             onPlayerDodged();
             relicOnDodge(); // relic trigger: wind_step
             break;
@@ -217,7 +217,7 @@ export function processEnemies(): void {
           const msr = getManaShieldReduction();
           if (msr > 0) dmg = Math.max(1, Math.floor(dmg * (1 - msr)));
           G.player.hp -= dmg;
-          addMsg(lang === 'zh' ? `${e.name}远程攻击-${dmg}！` : `${e.name} blasts you for ${dmg}!`, 'mc');
+          addMsg(tMsg('em.rangedHit', String(e.name), String(dmg)), 'mc');
           flt(G.player.x, G.player.y, `-${dmg}`, '#9b5de5'); snd('hit');
           // Trigger talent effects: onPlayerDamaged and onEnemyHitPlayer
           onPlayerDamaged(dmg);
@@ -251,7 +251,7 @@ export function processEnemies(): void {
                 !G.enemies.some(o => o.x === sx && o.y === sy)) {
               const sn: Enemy = makeEnemy(base, sx, sy, fs, { hpM: .5, atkM: .7, defM: .5, expM: .3, goldM: .3 });
               G.enemies.push(sn);
-              addMsg(lang === 'zh' ? `${e.name}召唤了${sn.name}！` : `${e.name} summons a ${sn.name}!`, 'me');
+              addMsg(tMsg('em.summoned', String(e.name), String(sn.name)), 'me');
               flt(sx, sy, '⚡SUMMON', '#9b5de5');
             }
           }
@@ -271,7 +271,7 @@ export function processEnemies(): void {
                 !G.enemies.some(o => o !== e && o.x === tx && o.y === ty) &&
                 !(tx === G.player.x && ty === G.player.y)) {
               e.x = tx; e.y = ty;
-              addMsg(lang === 'zh' ? `${e.name}瞬移了！` : `${e.name} teleports!`, 'me');
+              addMsg(tMsg('em.teleports', String(e.name)), 'me');
               flt(tx, ty, '⚡BLINK', '#8a2be2');
               break;
             }
@@ -343,7 +343,7 @@ function bossSummonAdd(boss: Enemy): void {
     if (sx === G.player.x && sy === G.player.y) continue;
     const sn: Enemy = makeEnemy(base, sx, sy, fs, { hpM: .6, atkM: .8, defM: .6, expM: .4, goldM: .4 });
     G.enemies.push(sn);
-    addMsg(lang === 'zh' ? `${boss.name}召唤了${sn.name}！` : `${boss.name} summons a ${sn.name}!`, 'me');
+    addMsg(tMsg('em.summoned', String(boss.name), String(sn.name)), 'me');
     flt(sx, sy, '⚡SUMMON', '#ff4500');
     return;
   }
@@ -376,7 +376,7 @@ function randMove(e: Enemy): boolean {
 }
 
 // Late-bound imports
-import { t } from './i18n.js';
+import { t, tMsg, tx } from './i18n.js';
 import { playerDeath } from './combat.js';
 import { snd } from './audio.js';
 
@@ -389,7 +389,7 @@ export function checkPlayerTraps(): void {
     if (enemy) {
       trap.triggered = true; enemy.hp -= trap.dmg;
       flt(enemy.x, enemy.y, `-${trap.dmg}`, '#a0522d');
-      addMsg(lang === 'zh' ? `捕兽夹咬住了${enemy.name}！-${trap.dmg}` : `Bear trap snaps ${enemy.name}! -${trap.dmg}`, 'mc'); snd('hit');
+      addMsg(tMsg('em.bearTrap', String(enemy.name), String(trap.dmg)), 'mc'); snd('hit');
       if (enemy.hp <= 0) { killEnemy(enemy); G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly); }
     }
   }

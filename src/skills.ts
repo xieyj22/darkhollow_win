@@ -12,6 +12,7 @@ import { CLASSES } from './data.js';
 import { bonusGold, bonusExp } from './meta.js';
 import { getSkillModifiers, onPlayerKill, getSpellPenMult } from './talents.js';
 import { grantRandomRelic, relicOnKill } from './relics.js';
+import { t, tMsg, tx } from './i18n.js';
 
 let _endTurn: (() => void) | null = null;
 export function setEndTurnFn(fn: () => void): void { _endTurn = fn; }
@@ -29,7 +30,7 @@ function processAoeKills(killedEnemies: Enemy[]): void {
     if (p.streak >= 3) {
       const bonus = bonusExp(Math.floor(e.exp * .2 * p.streak));
       p.exp += bonus;
-      addMsg(`🔥 ${p.streak}x${lang === 'zh' ? '连杀！' : ' kill streak! '}+${bonus}XP`, 'ml');
+      addMsg(`🔥 ${p.streak}x${t('sk.killStreak')}+${bonus}XP`, 'ml');
       checkAch('streak5');
     }
     // Boss kill — keep in sync with attack() / killEnemy()
@@ -59,7 +60,7 @@ export function findNearestEnemy(): Enemy | null {
 export function executeSkill(sk: { cost: number; effect: string; cd: number }): void {
   if (!G) return;
   const p = G.player;
-  if (p.mp < sk.cost || p.skillCd > 0) { addMsg(lang === 'zh' ? '技能冷却中或魔力不足！' : 'Skill on cooldown or not enough MP!', 'mi'); return; }
+  if (p.mp < sk.cost || p.skillCd > 0) { addMsg(t('sk.cdNoMp'), 'mi'); return; }
   p.mp -= sk.cost; p.skillCd = sk.cd; snd('spell');
   applyCorruption(1); // drawing on the seal's power corrupts (Playtest #9)
 
@@ -83,20 +84,20 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
         G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
         for (const e of killed) { p.exp += bonusExp(e.exp); p.gold += bonusGold(e.goldDrop); p.kills++; }
         processAoeKills(killed);
-        addMsg(lang === 'zh' ? `🌀 旋风斩！命中${enemies.length}个敌人！` : `🌀 Whirlwind! Hit ${enemies.length}!`, 'msk');
+        addMsg(tMsg('sk.whirlwind', String(enemies.length)), 'msk');
         if (killed.length > 0) checkLevelUp();
       } else {
         const e = findNearestEnemy();
         if (e) {
           let dmg = Math.floor(p.atk * 1.5 * mods.dmgMult);
           e.hp -= dmg; e.stunned = 2;
-          addMsg(lang === 'zh' ? `盾击！对${e.name}造成${dmg}伤害并眩晕！` : `Shield Bash! ${dmg} dmg to ${e.name}, stunned!`, 'msk');
+          addMsg(tx({ en: `Shield Bash! ${dmg} dmg to ${e.name}, stunned!`, zh: `盾击！对${e.name}造成${dmg}伤害并眩晕！` }), 'msk');
           fxBolt(p.x, p.y, e.x, e.y, '#4895ef'); fxFlash(e.x, e.y, '#4895ef'); flt(e.x, e.y, `-${dmg} ⚡`, '#4895ef');
           if (e.hp <= 0) killEnemy(e);
           if (mods.alsoFear) {
             const nearby = G.enemies.filter(en => !en.isAlly && dst(p.x, p.y, en.x, en.y) <= 5);
             nearby.forEach(en => en.feared = rng(3, 5));
-            if (nearby.length) addMsg(lang === 'zh' ? `📢 战吼！${nearby.length}个敌人被恐惧！` : `📢 War Cry! ${nearby.length} enemies feared!`, 'mi');
+            if (nearby.length) addMsg(tMsg('sk.warCry', String(nearby.length)), 'mi');
           }
         }
       }
@@ -110,7 +111,7 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
         // Death mark: force crit
         if (mods.forceCrit) {
           dmg = Math.floor(dmg * 2);
-          addMsg(lang === 'zh' ? `☠ 死亡标记暴击！` : `☠ Death Mark CRIT!`, 'mc');
+          addMsg(t('sk.deathMarkCrit'), 'mc');
         }
         // AOE: fan of knives
         if (mods.aoe) {
@@ -124,11 +125,11 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
           G.enemies = G.enemies.filter(en => en.hp > 0 || en.isAlly);
           for (const en of killed) { p.exp += bonusExp(en.exp); p.gold += bonusGold(en.goldDrop); p.kills++; }
           processAoeKills(killed);
-          addMsg(lang === 'zh' ? `🔪 飞刀扇！命中${enemies.length}个！` : `🔪 Fan of Knives! Hit ${enemies.length}!`, 'msk');
+          addMsg(tMsg('sk.fanOfKnives', String(enemies.length)), 'msk');
           if (killed.length > 0) checkLevelUp();
         } else {
           e.hp -= dmg;
-          addMsg(lang === 'zh' ? `暗影突袭！对${e.name}造成${dmg}伤害！` : `Shadow Strike! ${dmg} to ${e.name}!`, 'msk');
+          addMsg(tx({ en: `Shadow Strike! ${dmg} to ${e.name}!`, zh: `暗影突袭！对${e.name}造成${dmg}伤害！` }), 'msk');
           fxBolt(p.x, p.y, e.x, e.y, '#9b5de5'); fxFlash(e.x, e.y, '#9b5de5'); flt(e.x, e.y, `-${dmg} 💀`, '#9b5de5'); shake(1.5);
           if (e.hp <= 0) killEnemy(e);
         }
@@ -160,13 +161,13 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
           const chainDmg = Math.floor((p.atk + p.level * 2) * p.spellPower * mods.dmgMult * 0.6);
           ct.hp -= chainDmg; fxBeam(p.x, p.y, ct.x, ct.y, '#ffd700'); fxFlash(ct.x, ct.y, '#fff2a8'); flt(ct.x, ct.y, `-${chainDmg}⚡`, '#ffd700');
           if (ct.hp <= 0) killed.push(ct);
-          addMsg(lang === 'zh' ? `⚡ 连锁闪电命中${ct.name}！-${chainDmg}` : `⚡ Chain hits ${ct.name}! -${chainDmg}`, 'mc');
+          addMsg(tMsg('sk.chainHit', String(ct.name), String(chainDmg)), 'mc');
         }
       }
       G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
       for (const e of killed) { p.exp += bonusExp(e.exp); p.gold += bonusGold(e.goldDrop); p.kills++; }
       processAoeKills(killed);
-      addMsg(lang === 'zh' ? `奥术爆破！命中${enemies.length}个敌人！` : `Arcane Blast! Hit ${enemies.length}!`, 'msk'); shake(2); checkLevelUp();
+      addMsg(tMsg('sk.arcaneBlast', String(enemies.length)), 'msk'); shake(2); checkLevelUp();
       break;
     }
     case 'heal': {
@@ -175,7 +176,7 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
       const healMult = 1 + (p.healBonus || 0);
       const heal = Math.floor(baseHeal * healMult * mods.dmgMult);
       p.hp = Math.min(p.maxHp, p.hp + heal); p.poisonTurns = 0;
-      addMsg(lang === 'zh' ? `圣光术！恢复${heal}HP，中毒已清除！` : `Holy Light! +${heal} HP, poison cleared!`, 'mh');
+      addMsg(tMsg('sk.holyLight', String(heal)), 'mh');
       fxFlash(p.x, p.y, '#80ed99', 1.5); flt(p.x, p.y, `+${heal} ❤️`, '#80ed99'); snd('heal');
 
       // Consecrate: also deal holy damage to nearby enemies
@@ -190,7 +191,7 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
         G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
         for (const e of holyKilled) { p.exp += bonusExp(e.exp); p.gold += bonusGold(e.goldDrop); p.kills++; }
         processAoeKills(holyKilled);
-        if (enemies.length) addMsg(lang === 'zh' ? `✨ 净化！${enemies.length}个敌人受到神圣伤害！` : `✨ Consecrate! ${enemies.length} enemies take holy dmg!`, 'mc');
+        if (enemies.length) addMsg(tMsg('sk.consecrate', String(enemies.length)), 'mc');
         if (holyKilled.length > 0) checkLevelUp();
       }
 
@@ -199,7 +200,7 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
         const e = findNearestEnemy();
         if (e) {
           e.stunned = 2;
-          addMsg(lang === 'zh' ? `⚡ 审判！${e.name}被眩晕2回合！` : `⚡ Judgment! ${e.name} stunned for 2 turns!`, 'mc');
+          addMsg(tMsg('sk.judgment', String(e.name)), 'mc');
           fxBeam(p.x, p.y, e.x, e.y, '#ffd700'); fxFlash(e.x, e.y, '#ffd700'); flt(e.x, e.y, '⚡STUN', '#ffd700');
         }
       }
@@ -212,7 +213,7 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
           a.hp = Math.min(a.maxHp, a.hp + allyHeal);
           fxFlash(a.x, a.y, '#80ed99'); flt(a.x, a.y, `+${allyHeal}`, '#80ed99');
         }
-        if (allies.length) addMsg(lang === 'zh' ? `💫 神圣新星！治疗了${allies.length}个友方！` : `💫 Holy Nova! Healed ${allies.length} allies!`, 'mh');
+        if (allies.length) addMsg(tMsg('sk.holyNova', String(allies.length)), 'mh');
       }
       break;
     }
@@ -221,7 +222,7 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
   if (mods.alsoBlind) {
     const blindTargets = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 4);
     for (const e of blindTargets) e.stunned = Math.max(e.stunned, 2);
-    if (blindTargets.length) addMsg(lang === 'zh' ? `💨 烟幕！${blindTargets.length}个敌人被致盲！` : `💨 Smoke Screen! ${blindTargets.length} enemies blinded!`, 'mi');
+    if (blindTargets.length) addMsg(tMsg('sk.smokeScreen', String(blindTargets.length)), 'mi');
   }
   if (_endTurn) _endTurn();
 }

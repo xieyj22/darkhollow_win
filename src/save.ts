@@ -140,7 +140,7 @@ export function loadGame(): void {
     // Rebuild FOV (unified with game.ts and turn.ts via updatePlayerFOV)
     updatePlayerFOV(gameState.player, gameState.dungeon.map, gameState.traps);
 
-    addMsg(lang === 'zh' ? '存档已加载！' : 'Game loaded!', 'mi');
+    addMsg(t('sv.loaded'), 'mi');
     updateUI(); render();
     startParticles(); // Continue must (re)start the rAF loop that draws the player layer
     bridge.initAudio?.();

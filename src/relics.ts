@@ -11,6 +11,7 @@ import { addMsg } from './messages.js';
 import { flt } from './effects.js';
 import { fxFlash, fxBurst } from './fx.js';
 import { snd } from './audio.js';
+import { t, tMsg, tx } from './i18n.js';
 
 // Late-bound combat fns to avoid a circular import with combat.ts
 let _recalc: (() => void) | null = null;
@@ -95,7 +96,7 @@ export function relicOnDeath(): boolean {
     p.mp = Math.floor(p.maxMp * 0.5);
     p.hasRevived = true;
     p.buffs = []; p.poisonTurns = 0;
-    addMsg(lang === 'zh' ? '🔥 凤凰之心！你从灰烬中复活！' : '🔥 Phoenix Heart! You rise from the ashes!', 'ml');
+    addMsg(t('rl.phoenix'), 'ml');
     flt(p.x, p.y, '🔥REVIVE', '#ff6b35');
     fxFlash(p.x, p.y, '#ff6b35', 2); fxBurst(p.x, p.y, '#ff6b35', 24, 1.5);
     snd('victory');
@@ -159,9 +160,9 @@ export function grantRelic(id: string, x: number, y: number): void {
   p.relics.push(id);
   unlockLore('relic:' + id);
   _recalc?.();
-  const name = lang === 'zh' ? def.n.zh : def.n.en;
-  addMsg(lang === 'zh' ? `🏺 获得圣物：${name}！` : `🏺 Relic acquired: ${name}!`, 'mach');
-  flt(x, y, '🏺' + (lang === 'zh' ? '圣物' : 'RELIC'), '#ffd700');
+  const name = tx(def.n);
+  addMsg(tMsg('rl.acquired', name), 'mach');
+  flt(x, y, '🏺' + t('rl.relicTag'), '#ffd700');
   fxFlash(x, y, def.c, 1.8); fxBurst(x, y, def.c, 18, 1.3);
   snd('ach');
 }

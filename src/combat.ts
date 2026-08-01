@@ -8,7 +8,7 @@ import { flt, shake } from './effects.js';
 import { fxFlash, fxBurst } from './fx.js';
 import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic, grantRelic, relicOnKill, relicOnDodge, relicOnCrit } from './relics.js';
 import { unlockAchievement } from './steam.js';
-import { t } from './i18n.js';
+import { t, tMsg, tx } from './i18n.js';
 import { ACH_DEFS, EQUIPMENT_SETS } from './data.js';
 import { addMsg } from './messages.js';
 import { processBossPhase } from './enemies.js';
@@ -65,7 +65,7 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
   // Dodge / ward — player dodging enemy attack
   if (!isP && G.player.warded) {
     G.player.warded = false;
-    addMsg(lang === 'zh' ? '🛡 护身石抵挡了攻击！' : '🛡 Ward blocks the attack!', 'mi');
+    addMsg(t('cb.wardBlocks'), 'mi');
     flt(G.player.x, G.player.y, 'WARD!', '#4895ef'); snd('heal'); return false;
   }
   if (!isP && Math.random() < G.player.dodgeChance) {
@@ -110,17 +110,17 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
       const critMult = getCritMultiplier();
       dmg = Math.floor(dmg * critMult);
       relicOnCrit(def as Enemy, dmg); // relic trigger: executioner_pact
-      addMsg(lang === 'zh' ? `暴击！对${def.name}造成${dmg}伤害${elSym}！` : `CRIT! You deal ${dmg}${elSym} to ${def.name}!`, 'mc');
+      addMsg(tx({ en: `CRIT! You deal ${dmg}${elSym} to ${def.name}!`, zh: `暴击！对${def.name}造成${dmg}伤害${elSym}！` }), 'mc');
       fxFlash(def.x, def.y, atkEl !== 'none' ? FX_EL_COLOR[atkEl] : '#ffd700', 1.6);
       flt(def.x, def.y, `-${dmg} CRIT!${elSym}`, '#ffd700', 'crit'); snd('crit'); shake(2, def.x - G.player.x, def.y - G.player.y);
     } else {
-      addMsg(lang === 'zh' ? `你击中${def.name}，造成${dmg}伤害${elSym}。` : `You hit ${def.name} for ${dmg}${elSym}.`, 'mc');
+      addMsg(tMsg('cb.hitEnemy', String(def.name), String(dmg), elSym), 'mc');
       fxFlash(def.x, def.y, atkEl !== 'none' ? FX_EL_COLOR[atkEl] : (def.c || '#ff6b6b'));
       flt(def.x, def.y, `-${dmg}${elSym}`, '#ff6b6b'); snd('hit'); shake(1, def.x - G.player.x, def.y - G.player.y);
     }
   } else {
     // Enemy attacks player
-    addMsg(lang === 'zh' ? `${atk.name || 'Enemy'}击中你，造成${dmg}伤害${elSym}！` : `${atk.name || 'Enemy'} hits you for ${dmg}${elSym}!`, 'mc');
+    addMsg(tMsg('cb.enemyHitsYou', atk.name || 'Enemy', String(dmg), elSym), 'mc');
     fxFlash(G.player.x, G.player.y, '#e63946');
     flt(G.player.x, G.player.y, `-${dmg}${elSym}`, '#e63946'); snd('hit'); shake(1.4, G.player.x - atk.x, G.player.y - atk.y);
   }
@@ -137,7 +137,7 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
   if (atk.ai === 'lifesteal' && dmg > 0 && atk.hp !== undefined && atk.maxHp !== undefined) {
     const h = Math.floor(dmg / 3);
     (atk as Enemy).hp = Math.min(atk.maxHp, atk.hp + h);
-    addMsg(lang === 'zh' ? `${atk.name}吸取了${h}生命！` : `${atk.name} drains ${h} life!`, 'mc');
+    addMsg(tMsg('cb.lifesteal', String(atk.name), String(h)), 'mc');
   }
 
   // Boss phase check
@@ -151,7 +151,7 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
       // Melee-only gold flavor message + pickup cue — fired BEFORE grantKillRewards
       // so they still play on an F40 Creator-kill victory (OLD had these at L146-147,
       // before the boss/victory block). killEnemy never printed these.
-      addMsg(lang === 'zh' ? `获得${bonusGold((def as Enemy).goldDrop)}金币。` : `Found ${bonusGold((def as Enemy).goldDrop)} gold.`, 'mp');
+      addMsg(tMsg('cb.foundGold', String(bonusGold((def as Enemy).goldDrop))), 'mp');
       snd('pickup');
       grantKillRewards(def as Enemy);
       // Boss-victory guard: grantKillRewards just called playerVictory(); preserve
@@ -162,7 +162,7 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
         const loot = _genItem(G.floor);
         loot.x = def.x; loot.y = def.y;
         G.items.push(loot);
-        addMsg(lang === 'zh' ? `${def.name}掉落了${loot.name}！` : `${def.name} dropped ${loot.name}!`, 'mp');
+        addMsg(tMsg('cb.enemyDropped', String(def.name), String(loot.name)), 'mp');
         if (loot.rarity >= 4) checkAch('legendary');
       }
 
@@ -171,7 +171,7 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
         // Find another adjacent enemy to hit
         const nextTarget = G!.enemies.find(e => !e.isAlly && dst(e.x, e.y, G!.player.x, G!.player.y) <= 1.5);
         if (nextTarget) {
-          addMsg(lang === 'zh' ? '⚔ 双重打击！' : '⚔ Double Strike!', 'mc');
+          addMsg(t('cb.doubleStrike'), 'mc');
           attack(G.player, nextTarget, true);
         }
       }
@@ -222,7 +222,7 @@ export function checkLevelUp(): void {
     // Grant talent point on level up (starting from level 2)
     p.talents.points++;
     recalc();
-    addMsg(lang === 'zh' ? `升级！你现在是${p.level}级！` : `LEVEL UP! Level ${p.level}!`, 'ml');
+    addMsg(tMsg('cb.levelUp', String(p.level)), 'ml');
     addMsg(`+${hg}HP +${mg}MP +${ag}ATK +${dg}DEF`, 'ml');
     flt(p.x, p.y, 'LEVEL UP!', '#ffd700'); snd('levelup'); checkAchs();
   }
@@ -341,8 +341,8 @@ export function applyCorruption(n: number): void {
   const r = addCorruption(p, n);
   if (r.maxed) { wardenDeath(); return; }
   if (r.crossed && r.after !== 'clean') {
-    const label = lang === 'zh' ? TIER_LABEL[r.after].zh : TIER_LABEL[r.after].en;
-    addMsg(`🟪 ${label}${lang === 'zh' ? '…' : '...'}`, 'md');
+    const label = tx(TIER_LABEL[r.after]);
+    addMsg(`🟪 ${label}${t('cb.ellipsis')}`, 'md');
     flt(p.x, p.y, label.toUpperCase(), TIER_COLOR[r.after]);
     shake(1.5);
     recalc(); // apply the new tier's mods immediately
@@ -354,16 +354,16 @@ export function applyCorruption(n: number): void {
 function wardenDeath(): void {
   if (!G) return;
   const p = G.player;
-  const nm = lang === 'zh' ? p.raceName + p.clsName : p.raceName + ' ' + p.clsName;
+  const nm = tMsg('cb.className', p.raceName, p.clsName);
   recordWardenLegacy(nm, p.ci, p.ri, G.floor);
-  addMsg(lang === 'zh' ? '你不复是你……你加入了守渊人的行列,将在未来阻挡后来的下探者。' : 'You are no longer you... you join the Wardens, and will hunt future Descenders.', 'md');
-  playerDeath(lang === 'zh' ? '化作守渊人' : 'became the Warden');
+  addMsg(t('cb.wardenJoin'), 'md');
+  playerDeath(t('cb.becameWarden'));
 }
 
 export function playerDeath(killer: string): void {
   if (!G) return;
   G.gameOver = true;
-  addMsg(lang === 'zh' ? `你被${killer}杀死了……` : `You were slain by ${killer}...`, 'md');
+  addMsg(tMsg('cb.slainBy', killer), 'md');
   snd('death'); setBgmScene('death');
 
   // Capture the previous endless best BEFORE updateRunStats so we can flag a new
@@ -390,21 +390,20 @@ export function playerDeath(killer: string): void {
     if (G.floor >= 100) checkAch('endless100');
   }
 
-  const zh = lang === 'zh';
   document.getElementById('death-screen')!.style.display = 'flex';
   if (G.endless) {
     const isRecord = G.floor > prevEndlessBest;
     document.getElementById('death-stats')!.innerHTML =
-      `<span style="color:#9b5de5">♾ ${zh ? '无尽模式' : 'Endless Mode'}</span><br>` +
-      `${zh ? '下探至第' : 'Descended to Floor'} ${G.floor}${zh ? '层' : ''}<br>` +
-      (isRecord ? `<span style="color:#ffd700">★ ${zh ? '新纪录！' : 'NEW RECORD!'} ★</span><br>` : (prevEndlessBest > 0 ? `${zh ? '最佳' : 'Best'}: F${prevEndlessBest}<br>` : '')) +
-      `${zh ? '等级' : 'Level'} ${G.player.level} · ${G.player.kills} ${zh ? '击杀' : 'kills'} · ${G.player.gold} ${zh ? '金币' : 'gold'}<br>` +
-      `${zh ? '存活' : 'Survived'} ${G.player.turns} ${zh ? '回合' : 'turns'}`;
+      `<span style="color:#9b5de5">♾ ${t('cb.endlessMode')}</span><br>` +
+      `${t('cb.descendedToFloor')} ${G.floor}${t('cb.floorUnit')}<br>` +
+      (isRecord ? `<span style="color:#ffd700">★ ${t('cb.newRecord')} ★</span><br>` : (prevEndlessBest > 0 ? `${t('cb.best')}: F${prevEndlessBest}<br>` : '')) +
+      `${t('cb.levelLabel')} ${G.player.level} · ${G.player.kills} ${t('cb.killsLabel')} · ${G.player.gold} ${t('cb.goldLabel')}<br>` +
+      `${t('cb.survivedLabel')} ${G.player.turns} ${t('cb.turnsLabel')}`;
   } else {
     document.getElementById('death-stats')!.innerHTML =
-      `${zh ? '到达第' : 'Reached Floor'} ${G.floor} · ${zh ? '等级' : 'Level'} ${G.player.level}<br>` +
-      `${G.player.kills} ${zh ? '敌人击杀' : 'enemies slain'} · ${G.player.gold} ${zh ? '金币' : 'gold'}<br>` +
-      `${zh ? '存活' : 'Survived'} ${G.player.turns} ${zh ? '回合' : 'turns'}`;
+      `${t('cb.reachedFloor')} ${G.floor} · ${t('cb.levelLabel')} ${G.player.level}<br>` +
+      `${G.player.kills} ${t('cb.enemiesSlain')} · ${G.player.gold} ${t('cb.goldLabel')}<br>` +
+      `${t('cb.survivedLabel')} ${G.player.turns} ${t('cb.turnsLabel')}`;
   }
   renderEchoBreakdown('death-echoes', echoes);
   localStorage.removeItem('dh_save');
@@ -439,12 +438,11 @@ let _pendingEchoes: SoulEchoBreakdown | null = null;
 // Phase 2: Creator choice. Refuse is disabled at corruption >= 50 (the abyss's
 // will overrides the player's — only the pure may show mercy).
 function presentCreatorChoice(p: Player): void {
-  const zh = lang === 'zh';
   const refuse = canRefuse(p.corruption);
-  document.getElementById('ending-title')!.textContent = zh ? '创世者倒下了' : 'The Creator Falls';
+  document.getElementById('ending-title')!.textContent = t('cb.creatorFalls');
   document.getElementById('ending-desc')!.textContent = refuse
-    ? (zh ? 'Ta 渴望解脱。你将……' : 'They beg for release. Will you…')
-    : (zh ? '深渊在你血脉中嘶吼,你已无法抗拒击碎封印的冲动。' : 'The abyss howls in your blood — you can no longer resist the urge to shatter the seal.');
+    ? t('cb.creatorDescRefuse')
+    : t('cb.creatorDescNoRefuse');
   const rb = document.getElementById('btn-ending-refuse') as HTMLButtonElement;
   rb.disabled = !refuse;
   rb.style.opacity = refuse ? '1' : '0.4';
@@ -459,17 +457,16 @@ export function resolveEnding(choice: 'slay' | 'refuse'): void {
   const id = endingForChoice(choice, p.corruption);
   const e = ENDINGS[id];
   checkAch(e.ach); // records the ending achievement (+ Steam)
-  const zh = lang === 'zh';
   document.getElementById('vic-ending')!.innerHTML =
-    `<h2 style="color:${id === 'guardian' ? '#06d6a0' : id === 'doombringer' ? '#e63946' : '#ffd700'}">${zh ? e.title.zh : e.title.en}</h2>` +
-    `<p style="color:#ccc;font-size:.95em">${zh ? e.body.zh : e.body.en}</p>`;
+    `<h2 style="color:${id === 'guardian' ? '#06d6a0' : id === 'doombringer' ? '#e63946' : '#ffd700'}">${tx(e.title)}</h2>` +
+    `<p style="color:#ccc;font-size:.95em">${tx(e.body)}</p>`;
   document.getElementById('victory-screen')!.style.display = 'flex';
   document.getElementById('vic-stats')!.innerHTML =
-    `<span style="color:#ffd700">🏆 ${zh ? '暗渊英雄' : 'HERO OF DARKHOLLOW'} 🏆</span><br><br>` +
-    `${zh ? '等级' : 'Level'} ${p.level} ${p.raceName} ${p.clsName}<br>` +
-    `${zh ? '到达第' : 'Floor'} ${G.floor}<br>${p.kills} ${zh ? '击杀' : 'kills'}<br>` +
-    `${p.gold} ${zh ? '金币' : 'gold'}<br>${p.turns} ${zh ? '回合' : 'turns'}<br>` +
-    `${zh ? '腐化' : 'Corruption'} ${p.corruption}`;
+    `<span style="color:#ffd700">🏆 ${t('cb.heroOfDarkhollow')} 🏆</span><br><br>` +
+    `${t('cb.levelLabel')} ${p.level} ${p.raceName} ${p.clsName}<br>` +
+    `${t('cb.floorLabel')} ${G.floor}<br>${p.kills} ${t('cb.killsLabel')}<br>` +
+    `${p.gold} ${t('cb.goldLabel')}<br>${p.turns} ${t('cb.turnsLabel')}<br>` +
+    `${t('cb.corruptionLabel')} ${p.corruption}`;
   if (_pendingEchoes) renderEchoBreakdown('vic-echoes', _pendingEchoes);
   _pendingEchoes = null;
   localStorage.removeItem('dh_save');
@@ -484,7 +481,7 @@ export function checkAch(id: string): void {
   unlockAchievement(id);
   const def = ACH_DEFS.find(a => a.id === id);
   if (!def) return;
-  addMsg('🏆 ' + (lang === 'zh' ? def.n.zh : def.n.en) + ' — ' + (lang === 'zh' ? def.d.zh : def.d.en), 'mach');
+  addMsg('🏆 ' + tx(def.n) + ' — ' + tx(def.d), 'mach');
   snd('ach');
   flt(G.player.x, G.player.y, '🏆', '#ffd700');
 }
@@ -505,14 +502,14 @@ export function grantKillRewards(e: Enemy): void {
     addMsg(`🔥 ${G.player.streak}x${t('streakMsg')} +${bonus}XP`, 'ml');
     checkAch('streak5');
   }
-  addMsg(lang === 'zh' ? `${e.name}被击败！+${bonusExp(e.exp)}经验` : `${e.name} defeated! +${bonusExp(e.exp)} XP`, 'mc');
+  addMsg(tMsg('cb.enemyDefeated', e.name, String(bonusExp(e.exp))), 'mc');
   if (e.isBoss) {
     G.player.bossesKilledThisRun++;
     unlockLore('boss:' + G.floor);
     checkAch('boss_kill');
     if (G.floor === FINAL && !G.branchMode && !G.endless) { playerVictory(); return; }
     if (G.floor === FINAL && G.endless)
-      addMsg(lang === 'zh' ? '👑 你击败了创世者,但深渊仍在下探……' : '👑 You slay the Creator, yet the abyss yawns deeper...', 'md');
+      addMsg(t('cb.slayCreator'), 'md');
   }
   onPlayerKill(e);
   relicOnKill(e); // relic trigger: soul_harvester
@@ -525,9 +522,9 @@ export function grantKillRewards(e: Enemy): void {
     if (mem) {
       unlockLore(mem);
       const mt = wardenMemoryText(mem);
-      if (mt) addMsg(lang === 'zh' ? mt.zh : mt.en, 'md');
+      if (mt) addMsg(tx(mt), 'md');
     }
-    addMsg(lang === 'zh' ? '🕯 你击退了守渊人！' : '🕯 You have repelled the Warden!', 'ml');
+    addMsg(t('cb.repelledWarden'), 'ml');
     if (e.legacyWarden) checkAch('warden_self_slay'); // Phase 3: slew a Warden that was once you
   } else if (e.isBoss || (e.isElite && Math.random() < 0.4)) {
     grantRandomRelic(e.x, e.y, G.floor);
@@ -547,7 +544,7 @@ export function killEnemy(e: Enemy): void {
   if (checkDoubleStrike()) {
     const nextTarget = G!.enemies.find(en => !en.isAlly && dst(en.x, en.y, G!.player.x, G!.player.y) <= 1.5);
     if (nextTarget) {
-      addMsg(lang === 'zh' ? '⚔ 双重打击！' : '⚔ Double Strike!', 'mc');
+      addMsg(t('cb.doubleStrike'), 'mc');
       attack(G.player, nextTarget, true);
     }
   }

@@ -8,7 +8,7 @@ import { dst } from './utils.js';
 import { snd } from './audio.js';
 import { flt } from './effects.js';
 import { setPlayerTween } from './render.js';
-import { t } from './i18n.js';
+import { t, tMsg, tx } from './i18n.js';
 import { attack, applyCorruption } from './combat.js';
 import { addItemWithOverflow } from './items.js';
 import { checkTraps, checkTiles, triggerNpc } from './events.js';
@@ -25,8 +25,8 @@ export function createPlayer(ri: number, ci: number): Player {
     atk: cls.atk + race.atkM, def: cls.def + race.defM,
     baseAtk: cls.atk + race.atkM, baseDef: cls.def + race.defM, baseMaxHp: hp,
     level: 1, exp: 0, expNext: 20, gold: 0, turns: 0,
-    raceName: lang === 'zh' ? race.name.zh : race.name.en,
-    clsName: lang === 'zh' ? cls.name.zh : cls.name.en,
+    raceName: tx(race.name),
+    clsName: tx(cls.name),
     ri, ci,
     inv: [], eq: { weapon: null, armor: null, accessory: null, accessory2: null },
     buffs: [], visible: null,
@@ -90,7 +90,7 @@ export function movePlayer(dx: number, dy: number): void {
     } else {
       G.items = G.items.filter(i => i.x !== nx || i.y !== ny);
       for (const it of itemsHere) {
-        if (it.type === 'gold') { const g = bonusGold(it.value || 0); G.player.gold += g; addMsg(lang === 'zh' ? `拾取${g}金币。` : `Picked up ${g} gold.`, 'mp'); snd('pickup'); }
+        if (it.type === 'gold') { const g = bonusGold(it.value || 0); G.player.gold += g; addMsg(tMsg('pl.pickupGold', String(g)), 'mp'); snd('pickup'); }
         else addItemWithOverflow(it);
       }
     }
@@ -120,7 +120,7 @@ export function pickupItem(): void {
 
 export function descendStairs(): void {
   if (!G || G.gameOver) return;
-  if (G.branchMode) { addMsg(lang === 'zh' ? '秘境中没有向下的楼梯(找传送门返回)。' : 'No stairs down in the hollow (find a portal to return).', 'mi'); return; }
+  if (G.branchMode) { addMsg(t('pl.noStairsHollow'), 'mi'); return; }
   if (G.dungeon.map[G.player.y][G.player.x] !== TL.STAIR) { addMsg(t('noStairs'), 'mi'); return; }
   G.player.deepestFloor = Math.max(G.player.deepestFloor, G.floor + 1);
   enterFloor(G.floor + 1);

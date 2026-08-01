@@ -6,6 +6,7 @@ import { addMsg } from './messages.js';
 import { TALENT_TREES } from './data.js';
 import { rng, dst } from './utils.js';
 import { bonusGold, bonusExp } from './meta.js';
+import { t, tMsg, tx } from './i18n.js';
 
 // Helper: get rank of a talent (0 if not learned)
 function tr(p: Player, id: string): number {
@@ -73,7 +74,7 @@ export function onPlayerHitEnemy(defender: Enemy, dmg: number): number {
   // r_assassinate: instakill foes <10% HP
   if (tr(p, 'r_assassinate') > 0 && defender.hp / defender.maxHp < 0.1) {
     defender.hp = 0;
-    addMsg(lang === 'zh' ? `💀 暗杀！${defender.name}被一击必杀！` : `💀 Assassinate! ${defender.name} is instantly killed!`, 'mc');
+    addMsg(tMsg('ta.assassinate', String(defender.name)), 'mc');
     flt(defender.x, defender.y, '💀INSTAKILL', '#ff0000');
     return modifiedDmg;
   }
@@ -85,7 +86,7 @@ export function onPlayerHitEnemy(defender: Enemy, dmg: number): number {
     const poisonDmg = Math.max(1, Math.floor(p.atk * 0.3));
     defender.hp -= poisonDmg;
     flt(defender.x, defender.y, `-${poisonDmg}🐍`, '#32cd32');
-    addMsg(lang === 'zh' ? `🐍 毒刃效果！额外${poisonDmg}毒素伤害！` : `🐍 Poison Blade! +${poisonDmg} poison dmg!`, 'mc');
+    addMsg(tMsg('ta.poisonBlade', String(poisonDmg)), 'mc');
     if (defender.hp <= 0) return modifiedDmg;
   }
 
@@ -94,7 +95,7 @@ export function onPlayerHitEnemy(defender: Enemy, dmg: number): number {
     const holyDmg = Math.max(1, Math.floor(p.level * 1.5));
     defender.hp -= holyDmg;
     flt(defender.x, defender.y, `-${holyDmg}✨`, '#ffd700');
-    addMsg(lang === 'zh' ? `⚡ 天使之怒！${holyDmg}神圣伤害！` : `⚡ Angelic Wrath! ${holyDmg} holy dmg!`, 'mc');
+    addMsg(tMsg('ta.angelicWrath', String(holyDmg)), 'mc');
     if (defender.hp <= 0) return modifiedDmg;
   }
 
@@ -102,7 +103,7 @@ export function onPlayerHitEnemy(defender: Enemy, dmg: number): number {
   if (tr(p, 'r_phantom_blade') > 0 && Math.random() < 0.3) {
     defender.hp -= modifiedDmg;
     flt(defender.x, defender.y, `-${modifiedDmg}👻`, '#8a2be2');
-    addMsg(lang === 'zh' ? `👻 幻影刃！额外${modifiedDmg}伤害！` : `👻 Phantom Blade! +${modifiedDmg} phantom dmg!`, 'mc');
+    addMsg(tMsg('ta.phantomBlade', String(modifiedDmg)), 'mc');
     if (defender.hp <= 0) return modifiedDmg;
   }
 
@@ -129,8 +130,8 @@ export function onPlayerKill(enemy: Enemy): void {
 
   // r_shadow_step: dodge next attack after kill
   if (tr(p, 'r_shadow_step') > 0) {
-    p.buffs.push({ name: lang === 'zh' ? '暗影步' : 'Shadow Step', type: 'dodge_next', value: 1, turns: 3 });
-    addMsg(lang === 'zh' ? '👤 暗影步！下次攻击将被闪避！' : '👤 Shadow Step! Next attack will be dodged!', 'mi');
+    p.buffs.push({ name: t('ta.shadowStepName'), type: 'dodge_next', value: 1, turns: 3 });
+    addMsg(t('ta.shadowStepMsg'), 'mi');
   }
 
   // m_mana_surge: kill restores 10% MP
@@ -149,8 +150,8 @@ export function onPlayerDodged(): void {
   // r_shadow_dance: +30% ATK buff for 3 turns after dodge
   if (tr(p, 'r_shadow_dance') > 0) {
     const buffVal = Math.floor(p.baseAtk * 0.3);
-    p.buffs.push({ name: lang === 'zh' ? '暗影之舞' : 'Shadow Dance', type: 'str_buff', value: buffVal, turns: 3 });
-    addMsg(lang === 'zh' ? `💃 暗影之舞！+${buffVal}攻击力3回合！` : `💃 Shadow Dance! +${buffVal} ATK for 3 turns!`, 'mi');
+    p.buffs.push({ name: t('ta.shadowDanceName'), type: 'str_buff', value: buffVal, turns: 3 });
+    addMsg(tMsg('ta.shadowDanceMsg', String(buffVal)), 'mi');
   }
 }
 
@@ -165,7 +166,7 @@ export function onPlayerDamaged(dmg: number): boolean {
     if (bossNearby) {
       p.hp = 1;
       p.bossCheatDeathUsed = true;
-      addMsg(lang === 'zh' ? '💎 不屈！你勉强抵挡了致命一击！' : '💎 Unbreakable! You survive the lethal blow!', 'ml');
+      addMsg(t('ta.unbreakable'), 'ml');
       flt(p.x, p.y, '💎CHEAT DEATH', '#4895ef');
       return true;
     }
@@ -174,8 +175,8 @@ export function onPlayerDamaged(dmg: number): boolean {
   // r_vanish: invisible 3t when HP<25%
   if (tr(p, 'r_vanish') > 0 && p.hp > 0 && p.hp / p.maxHp < 0.25) {
     if (!p.buffs.some(b => b.type === 'invis')) {
-      p.buffs.push({ name: lang === 'zh' ? '消失' : 'Vanish', type: 'invis', value: 1, turns: 3 });
-      addMsg(lang === 'zh' ? '🚫 HP过低！自动隐身3回合！' : '🚫 Low HP! Auto-vanish for 3 turns!', 'mi');
+      p.buffs.push({ name: t('ta.vanishName'), type: 'invis', value: 1, turns: 3 });
+      addMsg(t('ta.vanishMsg'), 'mi');
     }
   }
 
@@ -183,7 +184,7 @@ export function onPlayerDamaged(dmg: number): boolean {
   if (tr(p, 'p_lay_on_hands') > 0 && p.hp > 0 && p.hp / p.maxHp < 0.2) {
     const heal = Math.floor(p.maxHp * 0.2);
     p.hp = Math.min(p.maxHp, p.hp + heal);
-    addMsg(lang === 'zh' ? `🤲 圣疗！自动回复${heal}HP！` : `🤲 Lay on Hands! Auto-heal ${heal} HP!`, 'mh');
+    addMsg(tMsg('ta.layOnHands', String(heal)), 'mh');
     flt(p.x, p.y, `+${heal}`, '#80ed99');
   }
 
@@ -202,7 +203,7 @@ export function onPlayerDeath(): boolean {
     p.hasRevived = true;
     p.buffs = [];
     p.poisonTurns = 0;
-    addMsg(lang === 'zh' ? '🌟 复活！你从死亡中完全恢复！' : '🌟 Resurrection! Fully restored from death!', 'ml');
+    addMsg(t('ta.resurrection'), 'ml');
     flt(p.x, p.y, '🌟REVIVE', '#ffd700');
     return true;
   }
@@ -214,7 +215,7 @@ export function onPlayerDeath(): boolean {
     p.hasRevived = true;
     p.buffs = [];
     p.poisonTurns = 0;
-    addMsg(lang === 'zh' ? '👼 神圣干预！你复活至50%生命！' : '👼 Divine Intervention! Revived to 50% HP!', 'ml');
+    addMsg(t('ta.intervention'), 'ml');
     flt(p.x, p.y, '👼INTERVENE', '#ffd700');
     return true;
   }
@@ -225,7 +226,7 @@ export function onPlayerDeath(): boolean {
     p.combatReviveUsed = true;
     p.buffs = [];
     p.poisonTurns = 0;
-    addMsg(lang === 'zh' ? '✨ 不死！你从死亡中复活至30%HP！' : '✨ Undying! Revived to 30% HP!', 'ml');
+    addMsg(t('ta.undying'), 'ml');
     flt(p.x, p.y, '✨REVIVE', '#ffd700');
     return true;
   }
@@ -243,11 +244,13 @@ export function onEnemyHitPlayer(attacker: Enemy): void {
     const counterDmg = Math.max(1, p.atk - attacker.def);
     attacker.hp -= counterDmg;
     flt(attacker.x, attacker.y, `-${counterDmg}↩`, '#ffd700');
-    addMsg(lang === 'zh' ? `↩ 反击！对${attacker.name}造成${counterDmg}伤害！` : `↩ Counter! ${counterDmg} to ${attacker.name}!`, 'mc');
+    // tx() inline literal: zh/en interpoland orders differ ([name,dmg] vs [dmg,name]),
+    // so a single tMsg() args list cannot preserve both — keep both templates verbatim.
+    addMsg(tx({ en: `↩ Counter! ${counterDmg} to ${attacker.name}!`, zh: `↩ 反击！对${attacker.name}造成${counterDmg}伤害！` }), 'mc');
     if (attacker.hp <= 0) {
       G.player.exp += bonusExp(attacker.exp); G.player.gold += bonusGold(attacker.goldDrop); G.player.kills++;
       G.enemies = G.enemies.filter(e => e !== attacker);
-      addMsg(lang === 'zh' ? `${attacker.name}被反击击败！` : `${attacker.name} killed by counter!`, 'mc');
+      addMsg(tMsg('ta.counterKilled', String(attacker.name)), 'mc');
     }
   }
 }
