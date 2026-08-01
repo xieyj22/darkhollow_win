@@ -22,6 +22,7 @@ export function initMeta(): MetaSave {
     upgrades: {}, achievements: [], stats: defaultStats(),
     runHistory: [], endlessLeaderboard: [],
     unlockedLore: [],
+    wardens: [],
   };
 }
 
@@ -38,6 +39,7 @@ export function getMeta(): MetaSave {
       if (!m.runHistory) m.runHistory = [];
       if (!m.endlessLeaderboard) m.endlessLeaderboard = [];
       if (!m.unlockedLore) m.unlockedLore = [];
+      if (!m.wardens) m.wardens = [];
       return m;
     }
   } catch { /* fall through */ }
@@ -210,6 +212,15 @@ export function unlockLore(id: string): void {
     meta.unlockedLore.push(id);
     saveMeta(meta);
   }
+}
+
+// Record a descender who died at 100 corruption — they become a Warden that
+// hunts future runs (Playtest #9 Phase 3). Cap 10, newest first.
+export function recordWardenLegacy(name: string, cls: number, race: number, floor: number): void {
+  const m = getMeta();
+  m.wardens.unshift({ name, cls, race, floor, ts: Date.now() });
+  if (m.wardens.length > 10) m.wardens.length = 10;
+  saveMeta(m);
 }
 
 // ===== Run Stats Update =====

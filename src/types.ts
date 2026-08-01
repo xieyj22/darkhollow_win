@@ -236,6 +236,8 @@ export interface Enemy {
   isBoss?: boolean;
   isElite?: boolean;
   isWarden?: boolean;
+  // Phase 3: this Warden is a recorded former descender (runtime; floor enemies don't persist).
+  legacyWarden?: boolean;
   el: Element;
   res: Partial<Record<Element, number>>;
   skillCd: number;
@@ -535,6 +537,10 @@ export interface EndlessRecord {
   ts: number;
 }
 
+// A descender who died at 100 corruption and became a Warden (Playtest #9 Phase 3).
+// Future runs' spawnWarden draws these to name the Warden "formerly <name>".
+export interface WardenLegacy { name: string; cls: number; race: number; floor: number; ts: number; }
+
 export interface MetaSave {
   version: number;
   soulEchoes: number;
@@ -545,6 +551,7 @@ export interface MetaSave {
   runHistory: RunRecord[];
   endlessLeaderboard: EndlessRecord[];
   unlockedLore: string[];
+  wardens: WardenLegacy[];
 }
 
 export interface MetaStats {
