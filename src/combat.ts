@@ -1,5 +1,5 @@
 // Combat system — attack, level up, death, victory
-import type { Enemy, Combatant, Element, Item } from './types.js';
+import type { Enemy, Combatant, Element, Item, SoulEchoBreakdown, Player } from './types.js';
 import { G, lang } from './state.js';
 import { FINAL } from './config.js';
 import { rng, dst } from './utils.js';
@@ -14,6 +14,7 @@ import { addMsg } from './messages.js';
 import { processBossPhase } from './enemies.js';
 import { pickWardenRelic, nextWardenMemory, wardenMemoryText } from './warden.js';
 import { corruptionMods, addCorruption, TIER_LABEL, TIER_COLOR } from './corruption.js';
+import { ENDINGS, endingForChoice, canRefuse } from './endings.js';
 import {
   applyTalentBonuses, onPlayerHitEnemy, onPlayerKill, onPlayerDodged,
   onPlayerDamaged, onPlayerDeath, onEnemyHitPlayer, checkDoubleStrike,
@@ -423,13 +424,51 @@ export function playerVictory(): void {
   });
   recordRun({ mode: 'normal', floor: G.floor, kills: p.kills, classIdx: p.ci, result: 'win', turns: p.turns, gold: p.gold, ts: Date.now() });
 
+  // Phase 2: present the Creator choice (Slay / Refuse) instead of straight to victory-screen.
+  _pendingEchoes = echoes;
+  presentCreatorChoice(p);
+}
+
+// Pending echoes stashed by playerVictory so resolveEnding can render the breakdown
+// after the player makes the Slay/Refuse choice.
+let _pendingEchoes: SoulEchoBreakdown | null = null;
+
+// Phase 2: Creator choice. Refuse is disabled at corruption >= 50 (the abyss's
+// will overrides the player's — only the pure may show mercy).
+function presentCreatorChoice(p: Player): void {
+  const zh = lang === 'zh';
+  const refuse = canRefuse(p.corruption);
+  document.getElementById('ending-title')!.textContent = zh ? '创世者倒下了' : 'The Creator Falls';
+  document.getElementById('ending-desc')!.textContent = refuse
+    ? (zh ? 'Ta 渴望解脱。你将……' : 'They beg for release. Will you…')
+    : (zh ? '深渊在你血脉中嘶吼,你已无法抗拒击碎封印的冲动。' : 'The abyss howls in your blood — you can no longer resist the urge to shatter the seal.');
+  const rb = document.getElementById('btn-ending-refuse') as HTMLButtonElement;
+  rb.disabled = !refuse;
+  rb.style.opacity = refuse ? '1' : '0.4';
+  document.getElementById('ending-choice')!.style.display = 'flex';
+}
+
+// Resolve the Slay/Refuse choice → ending (title/body) + record achievement + victory screen.
+export function resolveEnding(choice: 'slay' | 'refuse'): void {
+  if (!G) return;
+  const p = G.player;
+  document.getElementById('ending-choice')!.style.display = 'none';
+  const id = endingForChoice(choice, p.corruption);
+  const e = ENDINGS[id];
+  checkAch(e.ach); // records the ending achievement (+ Steam)
+  const zh = lang === 'zh';
+  document.getElementById('vic-ending')!.innerHTML =
+    `<h2 style="color:${id === 'guardian' ? '#06d6a0' : id === 'doombringer' ? '#e63946' : '#ffd700'}">${zh ? e.title.zh : e.title.en}</h2>` +
+    `<p style="color:#ccc;font-size:.95em">${zh ? e.body.zh : e.body.en}</p>`;
   document.getElementById('victory-screen')!.style.display = 'flex';
   document.getElementById('vic-stats')!.innerHTML =
-    `<span style="color:#ffd700">🏆 ${lang === 'zh' ? '暗渊英雄' : 'HERO OF DARKHOLLOW'} 🏆</span><br><br>` +
-    `${lang === 'zh' ? '等级' : 'Level'} ${G.player.level} ${G.player.raceName} ${G.player.clsName}<br>` +
-    `${lang === 'zh' ? '到达第' : 'Floor'} ${G.floor}<br>${G.player.kills} ${lang === 'zh' ? '击杀' : 'kills'}<br>` +
-    `${G.player.gold} ${lang === 'zh' ? '金币' : 'gold'}<br>${G.player.turns} ${lang === 'zh' ? '回合' : 'turns'}`;
-  renderEchoBreakdown('vic-echoes', echoes);
+    `<span style="color:#ffd700">🏆 ${zh ? '暗渊英雄' : 'HERO OF DARKHOLLOW'} 🏆</span><br><br>` +
+    `${zh ? '等级' : 'Level'} ${p.level} ${p.raceName} ${p.clsName}<br>` +
+    `${zh ? '到达第' : 'Floor'} ${G.floor}<br>${p.kills} ${zh ? '击杀' : 'kills'}<br>` +
+    `${p.gold} ${zh ? '金币' : 'gold'}<br>${p.turns} ${zh ? '回合' : 'turns'}<br>` +
+    `${zh ? '腐化' : 'Corruption'} ${p.corruption}`;
+  if (_pendingEchoes) renderEchoBreakdown('vic-echoes', _pendingEchoes);
+  _pendingEchoes = null;
   localStorage.removeItem('dh_save');
 }
 
