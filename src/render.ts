@@ -4,6 +4,7 @@ import { setCanvas, setMiniCanvas } from './state.js';
 import { TS, MW, MH, TL, FINAL } from './config.js';
 import { clamp, dst, darken, darkenTinted } from './utils.js';
 import { RARITY_C, rareName } from './i18n.js';
+import { corruptionTier, TIER_LABEL, TIER_COLOR } from './corruption.js';
 import { AREAS, EQUIPMENT_SETS } from './data.js';
 import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite } from './sprites.js';
 import type { Enemy } from './types.js';
@@ -443,6 +444,12 @@ export function updateUI(): void {
   hFill.style.width = `${(p.hunger / p.maxHunger) * 100}%`;
   hFill.className = 'fill bt' + (p.hunger <= 20 ? ' low' : '');
   $('hunger-text')!.textContent = `${lang === 'zh' ? '饥饿' : 'Hunger'} ${p.hunger}`;
+
+  // Corruption meter (Playtest #9) — width = corruption%, color + label by tier
+  const ct = corruptionTier(p.corruption);
+  $('corruption-fill')!.style.width = `${p.corruption}%`;
+  $('corruption-fill')!.style.background = TIER_COLOR[ct];
+  $('corruption-text')!.textContent = `${lang === 'zh' ? TIER_LABEL[ct].zh : TIER_LABEL[ct].en} ${p.corruption}`;
 
   const eqN = (id: string, v: any) => {
     const el = $(id)!; el.textContent = v ? v.name : (lang === 'zh' ? '无' : 'None');

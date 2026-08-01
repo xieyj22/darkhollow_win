@@ -106,6 +106,7 @@ export function loadGame(): void {
     if (gameState.player.combatReviveUsed === undefined) gameState.player.combatReviveUsed = false;
     if (gameState.player.bossesKilledThisRun === undefined) gameState.player.bossesKilledThisRun = 0;
     if (!gameState.player.relics) gameState.player.relics = [];
+    if (gameState.player.corruption === undefined) gameState.player.corruption = 0;
     if (gameState.player.hunger === undefined) gameState.player.hunger = 100;
     if (gameState.player.maxHunger === undefined) gameState.player.maxHunger = 100;
     if (gameState.player.poisonDmg === undefined) gameState.player.poisonDmg = 0;
