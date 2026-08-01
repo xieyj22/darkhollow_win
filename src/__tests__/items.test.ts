@@ -12,7 +12,7 @@ vi.mock('../effects.js', () => ({ flt: () => {} }));
 vi.mock('../fx.js', () => ({ fxBeam: () => {}, fxBolt: () => {}, fxBurst: () => {}, fxFlash: () => {}, fxAura: () => {} }));
 vi.mock('../messages.js', () => ({ addMsg: () => {} }));
 
-import { genItem, genWeapon, genArmor, genAcc, genPotion, genScroll, genFood, genConsumable, isGear, isConsumable } from '../items.js';
+import { genItem, genWeapon, genArmor, genAcc, genPotion, genScroll, genFood, genConsumable, isGear, isConsumable } from '../item-gen.js';
 
 describe('isGear / isConsumable', () => {
   it('classifies by type', () => {
