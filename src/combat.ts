@@ -13,6 +13,7 @@ import { ACH_DEFS, EQUIPMENT_SETS } from './data.js';
 import { addMsg } from './messages.js';
 import { processBossPhase } from './enemies.js';
 import { pickWardenRelic, nextWardenMemory, wardenMemoryText } from './warden.js';
+import { corruptionMods } from './corruption.js';
 import {
   applyTalentBonuses, onPlayerHitEnemy, onPlayerKill, onPlayerDodged,
   onPlayerDamaged, onPlayerDeath, onEnemyHitPlayer, checkDoubleStrike,
@@ -122,6 +123,9 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
     fxFlash(G.player.x, G.player.y, '#e63946');
     flt(G.player.x, G.player.y, `-${dmg}${elSym}`, '#e63946'); snd('hit'); shake(1.4, G.player.x - atk.x, G.player.y - atk.y);
   }
+
+  // Corruption: deeper tiers take extra damage (Playtest #9; def is the player here when !isP).
+  if (!isP) dmg = Math.floor(dmg * (1 + corruptionMods(G.player.corruption).dmgTakenPct / 100));
 
   def.hp -= dmg;
 
@@ -278,6 +282,13 @@ export function recalc(): void {
 
   // Relic bonuses
   applyRelicBonuses(p);
+
+  // Corruption tier mods (Playtest #9): deeper tiers trade survival for power.
+  const cm = corruptionMods(p.corruption);
+  p.spellPower += p.baseSpellPower * cm.spellPct / 100;
+  p.critChance += cm.critPct / 100;
+  p.atk += cm.atk;
+  p.healBonus += cm.healPct / 100;
 
   // Clamp derived combat stats to sane caps (avoid 100%+ invincibility)
   p.critChance = Math.min(0.85, p.critChance);

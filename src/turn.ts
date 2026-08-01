@@ -5,6 +5,7 @@ import { updatePlayerFOV } from './dungeon.js';
 import { t } from './i18n.js';
 import { addMsg } from './messages.js';
 import { recalc, checkAchs } from './combat.js';
+import { corruptionMods } from './corruption.js';
 import { processEnemies, checkPlayerTraps } from './enemies.js';
 import { maybeEvent } from './events.js';
 import { updateUI, render } from './render.js';
@@ -65,6 +66,17 @@ export function endTurn(): void {
     if (G.player.hp <= 0) {
       if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
       else { playerDeath(lang === 'zh' ? '中毒' : 'poison'); updateUI(); render(); return; }
+    }
+  }
+
+  // Corruption per-turn HP cost (mutated tier; Playtest #9)
+  const cm = corruptionMods(G.player.corruption);
+  if (cm.perTurnHp > 0) {
+    G.player.hp -= cm.perTurnHp;
+    flt(G.player.x, G.player.y, `-${cm.perTurnHp}`, '#9a2be2');
+    if (G.player.hp <= 0) {
+      if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
+      else { playerDeath(lang === 'zh' ? '腐化' : 'corruption'); updateUI(); render(); return; }
     }
   }
 
