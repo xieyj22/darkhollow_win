@@ -20,7 +20,7 @@ import {
   onPlayerDamaged, onPlayerDeath, onEnemyHitPlayer, checkDoubleStrike,
   getCritMultiplier, getManaShieldReduction,
 } from './talents.js';
-import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore } from './meta.js';
+import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy } from './meta.js';
 
 // Late-bound dependency to break circular import with items.ts
 let _genItem: ((floor: number) => any) | null = null;
@@ -353,7 +353,10 @@ export function applyCorruption(n: number): void {
 // Phase 3 will persist you as a legacy/warden entity.)
 function wardenDeath(): void {
   if (!G) return;
-  addMsg(lang === 'zh' ? '你不复是你。深渊记住了你 —— 你成了下一个守渊人。' : 'You are no longer you. The abyss remembers — you become the next Warden.', 'md');
+  const p = G.player;
+  const nm = lang === 'zh' ? p.raceName + p.clsName : p.raceName + ' ' + p.clsName;
+  recordWardenLegacy(nm, p.ci, p.ri, G.floor);
+  addMsg(lang === 'zh' ? '你不复是你……你加入了守渊人的行列,将在未来阻挡后来的下探者。' : 'You are no longer you... you join the Wardens, and will hunt future Descenders.', 'md');
   playerDeath(lang === 'zh' ? '化作守渊人' : 'became the Warden');
 }
 
