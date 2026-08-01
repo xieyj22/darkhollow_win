@@ -258,6 +258,8 @@ export const ACH_DEFS: AchievementDef[] = [
   { id: 'end_pyrrhic', icon: '🏆', n: { en: 'Pyrrhic Victor', zh: '悲壮英雄' }, d: { en: 'Slay the Creator (low corruption)', zh: '击杀创世者(低腐化)' } },
   { id: 'end_doom', icon: '💀', n: { en: 'Doombringer', zh: '末日使者' }, d: { en: 'Slay the Creator while deeply corrupted', zh: '高腐化下击杀创世者' } },
   { id: 'end_guardian', icon: '🛡', n: { en: 'The Guardian', zh: '守誓者' }, d: { en: 'Refuse to slay the Creator', zh: '拒绝击杀创世者' } },
+  // Playtest #9 Phase 3 — slew a Warden that was once you
+  { id: 'warden_self_slay', icon: '🗡', n: { en: 'Self-Slayer', zh: '弑前' }, d: { en: 'Slay a Warden that was once you', zh: '击杀一个曾是你的守渊人' } },
 ];
 
 // ===== New Weapons =====

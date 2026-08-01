@@ -528,6 +528,7 @@ export function grantKillRewards(e: Enemy): void {
       if (mt) addMsg(lang === 'zh' ? mt.zh : mt.en, 'md');
     }
     addMsg(lang === 'zh' ? '🕯 你击退了守渊人！' : '🕯 You have repelled the Warden!', 'ml');
+    if (e.legacyWarden) checkAch('warden_self_slay'); // Phase 3: slew a Warden that was once you
   } else if (e.isBoss || (e.isElite && Math.random() < 0.4)) {
     grantRandomRelic(e.x, e.y, G.floor);
   }

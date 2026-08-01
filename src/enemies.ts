@@ -3,7 +3,7 @@ import type { Enemy, Room, Element } from './types.js';
 import { G, lang } from './state.js';
 import { MW, MH, TL, FINAL } from './config.js';
 import { rng, pick, dst } from './utils.js';
-import { bonusExp, unlockLore } from './meta.js';
+import { bonusExp, unlockLore, getMeta } from './meta.js';
 import { flt, shake } from './effects.js';
 import { ENEMIES, BOSSES, ELITE_PREFIX, AREAS } from './data.js';
 import { addMsg } from './messages.js';
@@ -102,12 +102,21 @@ export function spawnWarden(floor: number): void {
   if (!rooms.length) return;
   const rm = pick(rooms);
   const s = wardenStats(floor);
+  // Phase 3: a recorded former descender (100-corr death) names this Warden "formerly <name>".
+  const wardens = getMeta().wardens;
+  let wName = lang === 'zh' ? '守渊人' : 'The Warden';
+  let legacyWarden = false;
+  if (wardens.length) {
+    const leg = wardens[Math.floor(Math.random() * wardens.length)];
+    wName = lang === 'zh' ? `守渊人 · 前${leg.name}` : `The Warden — formerly ${leg.name}`;
+    legacyWarden = true;
+  }
   G.enemies.push({
-    name: lang === 'zh' ? '守渊人' : 'The Warden', ch: 'Ѡ', c: '#9a2be2',
+    name: wName, ch: 'Ѡ', c: '#9a2be2',
     x: rng(rm.x + 1, rm.x + rm.w - 2), y: rng(rm.y + 1, rm.y + rm.h - 2),
     hp: s.hp, maxHp: s.maxHp, atk: s.atk, def: s.def, exp: s.exp,
     goldDrop: rng(30, 60) + floor * 3,
-    ai: 'chase', stunned: 0, feared: 0, isAlly: false, isElite: true, isWarden: true,
+    ai: 'chase', stunned: 0, feared: 0, isAlly: false, isElite: true, isWarden: true, legacyWarden,
     el: 'shadow', res: { shadow: 0.5, holy: -0.5 }, skillCd: 0, tags: ['spirit'],
   });
   unlockLore('warden:encounter');
