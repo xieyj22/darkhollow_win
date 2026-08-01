@@ -6,7 +6,7 @@ import { snd } from './audio.js';
 import { flt, shake } from './effects.js';
 import { fxFlash, fxBolt, fxBeam, fxBurst } from './fx.js';
 import { addMsg } from './messages.js';
-import { recalc, killEnemy, checkLevelUp, checkAch, checkAchs, playerVictory } from './combat.js';
+import { recalc, killEnemy, checkLevelUp, checkAch, checkAchs, playerVictory, applyCorruption } from './combat.js';
 import { FINAL } from './config.js';
 import { CLASSES } from './data.js';
 import { bonusGold, bonusExp } from './meta.js';
@@ -61,6 +61,7 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
   const p = G.player;
   if (p.mp < sk.cost || p.skillCd > 0) { addMsg(lang === 'zh' ? '技能冷却中或魔力不足！' : 'Skill on cooldown or not enough MP!', 'mi'); return; }
   p.mp -= sk.cost; p.skillCd = sk.cd; snd('spell');
+  applyCorruption(1); // drawing on the seal's power corrupts (Playtest #9)
 
   const mods = getSkillModifiers(p.ci);
 

@@ -9,7 +9,7 @@ import { t } from './i18n.js';
 import { bridge } from './bridge.js';
 import { addMsg } from './messages.js';
 import { genItem, genWeapon, genArmor, genAcc, addItemWithOverflow, itemToGold } from './items.js';
-import { recalc, playerDeath } from './combat.js';
+import { recalc, playerDeath, applyCorruption } from './combat.js';
 import { updateUI, render } from './render.js';
 import { enterBranch, exitBranch } from './game.js';
 
@@ -217,6 +217,7 @@ export function checkTiles(): void {
   // ABYSS_WATER — slows player (set slowed counter)
   if (tile === TL.ABYSS_WATER) {
     G.player.slowed = 3;
+    applyCorruption(1); // wading the abyss corrupts (Playtest #9)
     addMsg(lang === 'zh' ? '🌊 深海水流减缓了你的行动！' : '🌊 Abyssal currents slow you down!', 'mi');
   }
   // VOID_FLOOR — chance to teleport

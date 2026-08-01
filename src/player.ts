@@ -9,7 +9,7 @@ import { snd } from './audio.js';
 import { flt } from './effects.js';
 import { setPlayerTween } from './render.js';
 import { t } from './i18n.js';
-import { attack } from './combat.js';
+import { attack, applyCorruption } from './combat.js';
 import { addItemWithOverflow } from './items.js';
 import { checkTraps, checkTiles, triggerNpc } from './events.js';
 import { applyMetaUpgrades, bonusGold } from './meta.js';
@@ -124,6 +124,7 @@ export function descendStairs(): void {
   if (G.dungeon.map[G.player.y][G.player.x] !== TL.STAIR) { addMsg(t('noStairs'), 'mi'); return; }
   G.player.deepestFloor = Math.max(G.player.deepestFloor, G.floor + 1);
   enterFloor(G.floor + 1);
+  applyCorruption(1); // descending corrupts (Playtest #9)
   if (_endTurn) _endTurn();
 }
 

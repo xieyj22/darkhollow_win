@@ -13,7 +13,7 @@ import { ACH_DEFS, EQUIPMENT_SETS } from './data.js';
 import { addMsg } from './messages.js';
 import { processBossPhase } from './enemies.js';
 import { pickWardenRelic, nextWardenMemory, wardenMemoryText } from './warden.js';
-import { corruptionMods } from './corruption.js';
+import { corruptionMods, addCorruption, TIER_LABEL, TIER_COLOR } from './corruption.js';
 import {
   applyTalentBonuses, onPlayerHitEnemy, onPlayerKill, onPlayerDodged,
   onPlayerDamaged, onPlayerDeath, onEnemyHitPlayer, checkDoubleStrike,
@@ -128,6 +128,9 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
   if (!isP) dmg = Math.floor(dmg * (1 + corruptionMods(G.player.corruption).dmgTakenPct / 100));
 
   def.hp -= dmg;
+
+  // Corruption accrual: a shadow-element hit corrupts the player (Playtest #9)
+  if (!isP && atkEl === 'shadow') applyCorruption(1);
 
   // Lifesteal
   if (atk.ai === 'lifesteal' && dmg > 0 && atk.hp !== undefined && atk.maxHp !== undefined) {
@@ -327,6 +330,30 @@ export function getTalentBonus(p: any, effectId: string): number {
     p_holy_str: 2, p_divine_shield: 2, p_healing_light: 10, p_blessed_endurance: 15,
   };
   return (values[effectId] || 0) * rank;
+}
+
+// Apply a corruption delta to the player with cross-tier feedback + warden-death at 100.
+// Single entry point for all accrual/cleanse sites (Playtest #9).
+export function applyCorruption(n: number): void {
+  if (!G) return;
+  const p = G.player;
+  const r = addCorruption(p, n);
+  if (r.maxed) { wardenDeath(); return; }
+  if (r.crossed && r.after !== 'clean') {
+    const label = lang === 'zh' ? TIER_LABEL[r.after].zh : TIER_LABEL[r.after].en;
+    addMsg(`🟪 ${label}${lang === 'zh' ? '…' : '...'}`, 'md');
+    flt(p.x, p.y, label.toUpperCase(), TIER_COLOR[r.after]);
+    shake(1.5);
+    recalc(); // apply the new tier's mods immediately
+  }
+}
+
+// 100 corruption → run ends; you become the next Warden. (Phase 1: just ends run;
+// Phase 3 will persist you as a legacy/warden entity.)
+function wardenDeath(): void {
+  if (!G) return;
+  addMsg(lang === 'zh' ? '你不复是你。深渊记住了你 —— 你成了下一个守渊人。' : 'You are no longer you. The abyss remembers — you become the next Warden.', 'md');
+  playerDeath(lang === 'zh' ? '化作守渊人' : 'became the Warden');
 }
 
 export function playerDeath(killer: string): void {
