@@ -254,6 +254,10 @@ export const ACH_DEFS: AchievementDef[] = [
   { id: 'endless50', icon: '♾', n: { en: 'Abyss Delver', zh: '深渊掘进者' }, d: { en: 'Reach floor 50 in Endless', zh: '无尽模式到达50层' } },
   { id: 'endless75', icon: '♾', n: { en: 'Void Walker', zh: '虚空行者' }, d: { en: 'Reach floor 75 in Endless', zh: '无尽模式到达75层' } },
   { id: 'endless100', icon: '♾', n: { en: 'The Bottomless', zh: '无底之人' }, d: { en: 'Reach floor 100 in Endless', zh: '无尽模式到达100层' } },
+  // Playtest #9 Phase 2 — endings at the Creator
+  { id: 'end_pyrrhic', icon: '🏆', n: { en: 'Pyrrhic Victor', zh: '悲壮英雄' }, d: { en: 'Slay the Creator (low corruption)', zh: '击杀创世者(低腐化)' } },
+  { id: 'end_doom', icon: '💀', n: { en: 'Doombringer', zh: '末日使者' }, d: { en: 'Slay the Creator while deeply corrupted', zh: '高腐化下击杀创世者' } },
+  { id: 'end_guardian', icon: '🛡', n: { en: 'The Guardian', zh: '守誓者' }, d: { en: 'Refuse to slay the Creator', zh: '拒绝击杀创世者' } },
 ];
 
 // ===== New Weapons =====
