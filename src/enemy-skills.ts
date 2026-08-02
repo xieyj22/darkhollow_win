@@ -75,6 +75,7 @@ function castDamageAoe(caster: Enemy, sk: EnemySkill, col: string): void {
 }
 
 function castHeal(caster: Enemy, sk: EnemySkill): void {
+  // v1: no caster uses this effect yet (see spec §7 follow-ups); kept complete per spec §2.2 deliverable.
   if (!G) return;
   const amt = Math.floor(caster.maxHp * 0.25 * (sk.dmg ?? 1));
   const hurtAllies = G.enemies.filter(a => a.isAlly && a.hp < a.maxHp);
@@ -113,6 +114,7 @@ function castDebuff(caster: Enemy, sk: EnemySkill, kind: 'poison' | 'slow' | 'we
     p.buffs.push({ name: 'weakened', type: 'str_buff', value: -(sk.dmg ?? 6), turns });
     fxFlash(p.x, p.y, '#b583f6');
   } else { // stun
+    // v1: no caster uses the 'stun' kind yet (see spec §7 follow-ups); kept complete per spec §2.2 deliverable.
     p.stunned = Math.min(2, Math.max(p.stunned ?? 0, turns));
     fxFlash(p.x, p.y, '#fff2a8'); shake(1);
   }
@@ -120,6 +122,7 @@ function castDebuff(caster: Enemy, sk: EnemySkill, kind: 'poison' | 'slow' | 'we
 }
 
 function castBlink(caster: Enemy): void {
+  // v1: no caster uses this effect yet (see spec §7 follow-ups); kept complete per spec §2.2 deliverable.
   if (!G) return;
   for (let i = 0; i < 10; i++) {
     const tx = G.player.x + rng(-1, 1), ty = G.player.y + rng(-1, 1);
@@ -136,6 +139,7 @@ function castBlink(caster: Enemy): void {
 }
 
 function castSummon(caster: Enemy): void {
+  // v1: no caster uses this effect yet (see spec §7 follow-ups); kept complete per spec §2.2 deliverable.
   if (!G || G.enemies.length >= 30) return;
   const fl = G.floor;
   const pool = ENEMIES.filter(en => en.mf <= fl && en.mf >= Math.max(1, fl - 6) && !en.tags?.includes('boss'));

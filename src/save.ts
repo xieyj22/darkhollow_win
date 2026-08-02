@@ -115,7 +115,7 @@ export function loadGame(): void {
       if (e.el === undefined) (e as any).el = 'none';
       if (!e.res) (e as any).res = {};
       if (e.skillCd === undefined) (e as any).skillCd = 0;
-      if (e.aiCd === undefined) (e as any).aiCd = 0;
+      if (e.aiCd === undefined) (e as any).aiCd = (e as any).skillCd ?? 0;
       if (e.atkBuffTurns === undefined) (e as any).atkBuffTurns = 0;
       if (e.atkBuffVal === undefined) (e as any).atkBuffVal = 0;
       if (!e.tags) (e as any).tags = [];

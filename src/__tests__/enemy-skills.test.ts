@@ -33,6 +33,13 @@ vi.mock('../i18n.js', () => ({
 
 import { shouldCastSkill, executeEnemySkill } from '../enemy-skills.js';
 import type { Enemy, GameState } from '../types.js';
+import { MW, MH, TL } from '../config.js';
+import { ENEMIES } from '../data.js';
+import { makeEnemy } from '../enemy-factory.js';
+
+// Full-floor map fixture — every tile walkable (TL.FLOOR), so position-based
+// handlers (blink/summon) always find a legal target tile without fighting rng.
+const floorMap = (): number[][] => Array.from({ length: MH }, () => new Array(MW).fill(TL.FLOOR));
 
 // `G` is provided by the state.js mock as a getter over globalThis.G. Read it
 // via this helper so TS sees a non-null GameState (set in beforeEach) — the
@@ -121,5 +128,54 @@ describe('executeEnemySkill', () => {
     executeEnemySkill(e, { name: { en: 'Z', zh: 'Z' }, effect: 'debuff_poison', chance: 1, cd: 1, dmg: 5, aoe: 4 });
     expect(G().player.poisonTurns).toBe(4);
     expect(G().player.poisonDmg).toBe(5);
+  });
+
+  // Characterization tests for the four v1-data-less handlers (see spec §2.2/§7):
+  // they have no caster in data.ts yet, so these tests pin each handler's behavior
+  // directly via executeEnemySkill to guard the logic until casters are added.
+
+  it('heal: restores a hurt caster hp, capped at maxHp', () => {
+    const caster = mk({ hp: 18, maxHp: 20, x: 1, y: 0 });   // hurt → targets self
+    executeEnemySkill(caster, { name: { en: 'Z', zh: 'Z' }, effect: 'heal', chance: 1, cd: 1 });
+    expect(caster.hp).toBe(20);   // floor(20*0.25)=5 healed → 18+5=23, capped to maxHp 20
+  });
+
+  it('debuff_stun: sets player stunned to min(2, turns)', () => {
+    const e = mk({ x: 1, y: 0 });
+    executeEnemySkill(e, { name: { en: 'Z', zh: 'Z' }, effect: 'debuff_stun', chance: 1, cd: 1, aoe: 2 });
+    expect(G().player.stunned).toBe(2);   // min(2, max(0, turns=2))
+  });
+
+  it('blink: teleports caster adjacent to the player', () => {
+    G().dungeon = { map: floorMap(), rooms: [], stair: { x: 0, y: 0 }, traps: [] };
+    G().player.x = 5; G().player.y = 5;
+    G().enemies = [];
+    const caster = mk({ x: 0, y: 0 });
+    executeEnemySkill(caster, { name: { en: 'Z', zh: 'Z' }, effect: 'blink', chance: 1, cd: 1 });
+    // dst is Euclidean (diagonal neighbor = sqrt(2)); use Chebyshev for true adjacency.
+    const cheb = Math.max(Math.abs(caster.x - G().player.x), Math.abs(caster.y - G().player.y));
+    expect(cheb).toBe(1);                                  // now in the player's 8-neighborhood
+    expect(caster.x !== 0 || caster.y !== 0).toBe(true);   // moved off its origin tile
+  });
+
+  it('summon: pushes a makeEnemy result into G.enemies when the pool is non-empty', () => {
+    // enemy-factory/data are module-level mocks (singleton); inject one pool entry
+    // and a deterministic makeEnemy return so the handler's spawn+push logic runs.
+    G().dungeon = { map: floorMap(), rooms: [], stair: { x: 0, y: 0 }, traps: [] };
+    G().floor = 1;
+    G().player.x = 0; G().player.y = 0;
+    G().enemies = [];
+    const fake = mk({ name: 'Imp' });
+    vi.mocked(makeEnemy).mockReturnValue(fake);
+    (ENEMIES as Array<{ mf?: number; tags?: string[] }>).push({ mf: 1 });
+    try {
+      const caster = mk({ x: 5, y: 5 });
+      executeEnemySkill(caster, { name: { en: 'Z', zh: 'Z' }, effect: 'summon', chance: 1, cd: 1 });
+      expect(G().enemies.length).toBe(1);
+      expect(G().enemies[0]).toBe(fake);
+    } finally {
+      (ENEMIES as Array<unknown>).pop();
+      vi.mocked(makeEnemy).mockReset();
+    }
   });
 });
