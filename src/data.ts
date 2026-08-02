@@ -640,6 +640,12 @@ export const META_UPGRADES: MetaUpgradeDef[] = [
     d: { en: '-10 max HP per level, +1 talent point per level', zh: '每级-10最大生命,+1天赋点' },
     icon: '🩸', maxLevel: 2, costs: [30, 60], effect: 'blood_pact',
     valuePerLevel: 1, category: 'talent' },
+  // Endless-only meta upgrades (Task 4): apply only in endless runs via applyMetaUpgrades gate.
+  { id: 'deep_start', n: { en: 'Deep Start', zh: '深度起跳' }, d: { en: 'Endless starts +5 floors/rank', zh: '无尽开局楼层+5/级' }, icon: '↓', maxLevel: 5, costs: [200, 400, 700, 1100, 1600], effect: 'deep_start', valuePerLevel: 5, category: 'endless' },
+  { id: 'void_resist', n: { en: 'Void Resist', zh: '虚空抗性' }, d: { en: '+10% all resist/rank (endless)', zh: '全抗+10%/级(无尽)' }, icon: '◈', maxLevel: 5, costs: [150, 300, 500, 800, 1200], effect: 'void_resist', valuePerLevel: 10, category: 'endless' },
+  { id: 'endless_luck', n: { en: 'Endless Luck', zh: '无尽幸运' }, d: { en: '+20% endless drop rate/rank', zh: '无尽掉率+20%/级' }, icon: '★', maxLevel: 5, costs: [200, 400, 700, 1100, 1600], effect: 'endless_luck', valuePerLevel: 20, category: 'endless' },
+  { id: 'corruption_ward', n: { en: 'Corruption Ward', zh: '腐化守护' }, d: { en: '-15% corruption/rank', zh: '腐化-15%/级' }, icon: '🜔', maxLevel: 5, costs: [150, 300, 500, 800, 1200], effect: 'corruption_ward', valuePerLevel: 15, category: 'endless' },
+  { id: 'endless_might', n: { en: 'Endless Might', zh: '无尽之力' }, d: { en: '+5% atk/spell/rank (endless)', zh: '攻击法强+5%/级(无尽)' }, icon: '⚔', maxLevel: 5, costs: [300, 600, 1000, 1500, 2200], effect: 'endless_might', valuePerLevel: 5, category: 'endless' },
 ];
 
 // ===== Endless-exclusive gear (F41+) — Task 1 =====

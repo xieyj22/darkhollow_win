@@ -269,6 +269,8 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "enm.purged": { en: "Purged corruption for {} gold.", zh: "花费{}金币净化了腐化。" },
   "enm.healed": { en: "Restored to full HP for {} gold.", zh: "花费{}金币恢复满血。" },
   "enm.soldOut": { en: "The trader has nothing left to sell.", zh: "行商已售罄装备与圣物。" },
+  "mt.catEndless": { en: "Endless", zh: "无尽" },
+  "er.bonusEchoes": { en: "+{} bonus Soul Echoes (endless depth)!", zh: "+{} 灵魂回响（无尽深度奖励）！" },
   "gm.descend": { en: "You descend to floor {}...", zh: "你下到了第{}层……" },
   "gm.fungalHollow": { en: "🌀 You are pulled into the Fungal Hollow...", zh: "🌀 你被吸入荧光菌穴……" },
   "gm.return": { en: "✨ You return to floor {}.", zh: "✨ 你回到了第{}层。" },

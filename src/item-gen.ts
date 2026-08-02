@@ -124,9 +124,8 @@ export function genConsumable(f: number): Item {
 }
 
 // ===== Endless-exclusive gear (Task 1) =====
-// endlessLuckMult: luck multiplier for endless-gear drop chance. Stub returns 1
-// in Task 1; Task 4 wires it to the meta "endless_luck" upgrade rank.
-export function endlessLuckMult(): number { return 1; }
+// endlessLuckMult: endless-gear drop multiplier from endless_luck meta upgrade (Task 4).
+export { endlessLuckMult } from './meta.js';
 
 // genEndlessGear: pull from the ENDLESS_GEAR pool (rarity 5, themed) and scale
 // stats with floor. bonus = floor((floor-41)/5*2) → F41:0 / F60:7 / F100:23.

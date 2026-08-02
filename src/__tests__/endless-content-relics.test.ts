@@ -52,6 +52,8 @@ vi.mock('../meta.js', () => ({
   recordRun: () => {},
   recordWardenLegacy: () => {},
   unlockLore: vi.fn(),
+  endlessLuckMult: () => 1,
+  corruptionWardMult: () => 1,
 }));
 vi.mock('../warden.js', () => ({
   pickWardenRelic: () => null,

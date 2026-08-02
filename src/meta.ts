@@ -1,6 +1,6 @@
 // Meta progression system — Soul Echoes, The Forge, persistent achievements, run stats
 import type { MetaSave, MetaStats, SoulEchoBreakdown, Player, RunRecord } from './types.js';
-import { lang } from './state.js';
+import { G, lang } from './state.js';
 import { META_UPGRADES, ACH_DEFS, RELICS } from './data.js';
 import { snd } from './audio.js';
 import { t, tx } from './i18n.js';
@@ -160,6 +160,24 @@ export function applyMetaUpgrades(p: Player): void {
     p.hp -= delta;
     p.talents.points += lv;
   }
+  // Endless-only meta upgrades (Task 4): apply only during endless runs.
+  if (G && G.endless) {
+    const voidResist = u['void_resist'] || 0;
+    for (const el of ['fire', 'ice', 'lightning', 'shadow', 'holy'] as const) {
+      p.elRes[el] = (p.elRes[el] || 0) + voidResist * 0.10;
+    }
+    const might = u['endless_might'] || 0;
+    p.atk += Math.floor(p.baseAtk * might * 0.05);
+    p.spellPower += p.baseSpellPower * might * 0.05;
+  }
+}
+
+// Endless meta multipliers (Task 4): consumed by item-gen (drop rate) + combat (corruption).
+export function endlessLuckMult(): number {
+  return 1 + (getMeta().upgrades['endless_luck'] || 0) * 0.20;
+}
+export function corruptionWardMult(): number {
+  return 1 - (getMeta().upgrades['corruption_ward'] || 0) * 0.15;
 }
 
 // Get meta FOV bonus
@@ -273,6 +291,7 @@ export function renderForge(): void {
       { id: 'survival', icon: '❤', label: t('mt.catSurvival') },
       { id: 'talent', icon: '🌟', label: t('mt.catTalent') },
       { id: 'utility', icon: '🔧', label: t('mt.catUtility') },
+      { id: 'endless', icon: '♾', label: t('mt.catEndless') },
     ];
     tabsEl.innerHTML = categories.map(c =>
       `<button class="forge-tab${c.id === forgeActiveTab ? ' active' : ''}" data-tab="${c.id}">${c.icon} ${c.label}</button>`

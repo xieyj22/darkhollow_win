@@ -38,6 +38,8 @@ vi.mock('../meta.js', () => ({
   creditSoulEchoes: () => {},
   recordRun: () => {},
   unlockLore: vi.fn(),
+  endlessLuckMult: () => 1,
+  corruptionWardMult: () => 1,
 }));
 vi.mock('../warden.js', () => ({
   pickWardenRelic: () => null,

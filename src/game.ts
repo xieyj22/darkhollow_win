@@ -13,15 +13,21 @@ import { t, tMsg, tx } from './i18n.js';
 import { addMsg } from './messages.js';
 import { rng, pick } from './utils.js';
 import { AREAS } from './data.js';
-import { unlockLore } from './meta.js';
+import { unlockLore, getMeta } from './meta.js';
 import { applyCorruption } from './combat.js';
 import { hasRelic } from './relics.js';
 import { bridge } from './bridge.js';
 
 export function initGame(ri: number, ci: number, endless = false): void {
+  // Task 4: deep_start meta skips early endless floors (start at F41 + 5×rank).
+  let startFloor = 1;
+  if (endless) {
+    const ds = (getMeta().upgrades['deep_start'] || 0) * 5;
+    if (ds > 0) startFloor = 41 + ds;
+  }
   const gameState: GameState = {
     player: createPlayer(ri, ci),
-    floor: 1, dungeon: null as any,
+    floor: startFloor, dungeon: null as any,
     enemies: [], items: [], traps: [],
     msgs: [], gameOver: false, won: false, vx: 0, vy: 0,
     branchMode: false, branchReturn: null,
@@ -29,7 +35,7 @@ export function initGame(ri: number, ci: number, endless = false): void {
     wardenCd: rng(4, 6),
   };
   setGameState(gameState);
-  enterFloor(1);
+  enterFloor(startFloor);
   unlockLore('world:descent');
   addMsg(t('loreIntro'), 'mst');
   addMsg(t('loreTip1'), 'mi');

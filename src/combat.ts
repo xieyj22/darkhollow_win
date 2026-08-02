@@ -21,7 +21,7 @@ import {
   getCritMultiplier, getManaShieldReduction,
 } from './talents.js';
 import { genEndlessGear, endlessLuckMult } from './item-gen.js';
-import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy } from './meta.js';
+import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy, corruptionWardMult } from './meta.js';
 
 // Late-bound dependency to break circular import with items.ts
 let _genItem: ((floor: number) => any) | null = null;
@@ -371,6 +371,8 @@ export function applyCorruption(n: number): void {
   // applyCorruption(-resist) must not be doubled/halved by relic effects.
   // T4's corruption_ward stacks after this with the same n>0 gate.
   if (hasRelic('eternal_sand') && n > 0) n = Math.ceil(n / 2);
+  // Task 4: corruption_ward meta multiplies (same n>0 gate — never amplify cleanse).
+  if (n > 0) n = Math.ceil(n * corruptionWardMult());
   const r = addCorruption(p, n);
   if (r.maxed) { wardenDeath(); return; }
   if (r.crossed && r.after !== 'clean') {
@@ -406,6 +408,12 @@ export function playerDeath(killer: string): void {
   // Calculate soul echoes and update meta stats
   const p = G.player;
   const echoes = calculateSoulEchoes(p.kills, G.floor, p.bossesKilledThisRun, p.gold, p.bestStreak, false);
+  // Task 4: endless death bonus echoes = (floor - 40) × 10, added to total before single credit.
+  if (G.endless && G.floor > 40) {
+    const bonus = (G.floor - 40) * 10;
+    echoes.total += bonus;
+    addMsg(tMsg('er.bonusEchoes', String(bonus)), 'ml');
+  }
   creditSoulEchoes(echoes.total);
   updateRunStats({
     floor: G.floor, kills: p.kills, bossesKilled: p.bossesKilledThisRun,
