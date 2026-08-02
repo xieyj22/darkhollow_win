@@ -17,7 +17,7 @@ import { applyMetaUpgrades, bonusGold } from './meta.js';
 let _endTurn: (() => void) | null = null;
 export function setEndTurnFn(fn: () => void): void { _endTurn = fn; }
 
-export function createPlayer(ri: number, ci: number): Player {
+export function createPlayer(ri: number, ci: number, endless: boolean): Player {
   const race = RACES[ri], cls = CLASSES[ci];
   const hp = cls.hp + race.hpM, mp = cls.mp + race.mpM;
   const player: Player = {
@@ -55,8 +55,10 @@ export function createPlayer(ri: number, ci: number): Player {
     relics: [],
     corruption: 0,
   };
-  // Apply meta upgrades (permanent bonuses from The Forge)
-  applyMetaUpgrades(player);
+  // Apply meta upgrades (permanent bonuses from The Forge). `endless` is threaded
+  // through so the endless-only gate in applyMetaUpgrades doesn't depend on G
+  // (which isn't bound yet — createPlayer runs before setGameState in initGame).
+  applyMetaUpgrades(player, endless);
   return player;
 }
 

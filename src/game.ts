@@ -26,7 +26,7 @@ export function initGame(ri: number, ci: number, endless = false): void {
     if (ds > 0) startFloor = 41 + ds;
   }
   const gameState: GameState = {
-    player: createPlayer(ri, ci),
+    player: createPlayer(ri, ci, endless),
     floor: startFloor, dungeon: null as any,
     enemies: [], items: [], traps: [],
     msgs: [], gameOver: false, won: false, vx: 0, vy: 0,

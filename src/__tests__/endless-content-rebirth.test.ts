@@ -40,14 +40,12 @@ describe('rebirth meta (Task 4)', () => {
   it('applyMetaUpgrades: void_resist + endless_might apply ONLY in endless runs', () => {
     setMeta({ void_resist: 3, endless_might: 2 });
     const mkP = () => ({ elRes: {} as Record<string, number>, atk: 10, baseAtk: 10, spellPower: 1, baseSpellPower: 1 }) as any;
-    // normal mode: NOT applied
-    (globalThis as { G?: unknown }).G = { endless: false };
-    const p1 = mkP(); applyMetaUpgrades(p1);
+    // normal mode: NOT applied (endless is now an explicit param, not read from G)
+    const p1 = mkP(); applyMetaUpgrades(p1, false);
     expect(p1.elRes.fire).toBeUndefined();
     expect(p1.atk).toBe(10);
     // endless mode: applied
-    (globalThis as { G?: unknown }).G = { endless: true };
-    const p2 = mkP(); applyMetaUpgrades(p2);
+    const p2 = mkP(); applyMetaUpgrades(p2, true);
     expect(p2.elRes.fire).toBeCloseTo(0.3); // 3 ranks × 0.10
     expect(p2.atk).toBe(11); // 10 + floor(10 × 2 × 0.05) = 11
   });

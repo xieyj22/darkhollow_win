@@ -1,6 +1,6 @@
 // Meta progression system — Soul Echoes, The Forge, persistent achievements, run stats
 import type { MetaSave, MetaStats, SoulEchoBreakdown, Player, RunRecord } from './types.js';
-import { G, lang } from './state.js';
+import { lang } from './state.js';
 import { META_UPGRADES, ACH_DEFS, RELICS } from './data.js';
 import { snd } from './audio.js';
 import { t, tx } from './i18n.js';
@@ -123,7 +123,7 @@ export function getUpgradeCost(id: string): number {
 
 // ===== Apply Meta Upgrades to New Player =====
 
-export function applyMetaUpgrades(p: Player): void {
+export function applyMetaUpgrades(p: Player, endless: boolean): void {
   const meta = getMeta();
   const u = meta.upgrades;
 
@@ -161,7 +161,9 @@ export function applyMetaUpgrades(p: Player): void {
     p.talents.points += lv;
   }
   // Endless-only meta upgrades (Task 4): apply only during endless runs.
-  if (G && G.endless) {
+  // `endless` is passed explicitly by createPlayer (called from initGame BEFORE
+  // setGameState binds G), so we must NOT read G here — it would be stale/undefined.
+  if (endless) {
     const voidResist = u['void_resist'] || 0;
     for (const el of ['fire', 'ice', 'lightning', 'shadow', 'holy'] as const) {
       p.elRes[el] = (p.elRes[el] || 0) + voidResist * 0.10;
