@@ -33,6 +33,17 @@ export interface SkillDef {
   effect: string;
 }
 
+export interface EnemySkill {
+  name: I18nText;
+  effect: string;   // effect key → enemy-skills.ts handler
+  chance: number;   // 0..1 per eligible turn
+  cd: number;       // cooldown turns
+  dmg?: number;     // atk 倍率(dmg_*) 或强度(buff/debuff/poison 每回合)
+  range?: number;   // cast range (default per-effect)
+  aoe?: number;     // AOE radius OR status turns (buff/debuff_*)
+  el?: Element;     // skill element (default = enemy el)
+}
+
 export interface ClassDef {
   name: I18nText;
   hp: number;
@@ -173,12 +184,7 @@ export interface EnemyDef {
   el?: Element;
   res?: Partial<Record<Element, number>>;
   tags?: string[];
-  skill?: {
-    name: I18nText;
-    effect: string;
-    chance: number;
-    dmg?: number;
-  };
+  skill?: EnemySkill;
 }
 
 export interface BossDef {
@@ -241,6 +247,10 @@ export interface Enemy {
   el: Element;
   res: Partial<Record<Element, number>>;
   skillCd: number;
+  skill?: EnemySkill;
+  aiCd?: number;
+  atkBuffTurns?: number;
+  atkBuffVal?: number;
   tags?: string[];
   phasesTriggered?: Set<number>;
 }
@@ -424,6 +434,7 @@ export interface Player {
   relics: string[];
   // Corruption 0..100 (Playtest #9; run-scoped). 100 → warden-death.
   corruption: number;
+  stunned?: number;
 }
 
 // --- Dungeon ---

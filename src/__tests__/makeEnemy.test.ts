@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeEnemy } from '../enemy-factory.js';
 import type { EnemyDef } from '../types.js';
+import type { EnemyBase } from '../enemy-factory.js';
 
 const base: EnemyDef = {
   n: { zh: '哥布林', en: 'Goblin' }, ch: 'g', c: '#90ee90',
@@ -55,5 +56,27 @@ describe('makeEnemy', () => {
     expect(e.res).toEqual({ fire: 0.5 }); expect(e.res).not.toBe(base.res);
     expect(e.tags).toEqual(['goblin']); expect(e.tags).not.toBe(base.tags);
     e.tags!.push('mut'); expect(base.tags).toEqual(['goblin']);
+  });
+
+  const skillDef: EnemyBase = {
+    n: { en: 'T', zh: 'T' }, ch: 'x', c: '#fff', hp: 10, atk: 5, def: 1, exp: 5, g: [1, 2],
+    ai: 'chase',
+    skill: { name: { en: 'Zap', zh: '电击' }, effect: 'dmg_bolt', chance: 0.5, cd: 3, dmg: 1.8, range: 5 },
+  };
+
+  it('deep-copies skill from def to runtime (no shared reference)', () => {
+    const e = makeEnemy(skillDef, 0, 0, 1);
+    expect(e.skill).toBeDefined();
+    expect(e.skill!.effect).toBe('dmg_bolt');
+    expect(e.skill).not.toBe(skillDef.skill);            // outer not same ref
+    expect(e.skill!.name).not.toBe(skillDef.skill!.name); // inner I18nText not same ref
+  });
+
+  it('initializes aiCd / atkBuffTurns / atkBuffVal to 0', () => {
+    const e = makeEnemy({ ...skillDef, skill: undefined }, 0, 0, 1);
+    expect(e.aiCd).toBe(0);
+    expect(e.atkBuffTurns).toBe(0);
+    expect(e.atkBuffVal).toBe(0);
+    expect(e.skill).toBeUndefined();
   });
 });
