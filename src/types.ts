@@ -434,6 +434,10 @@ export interface Player {
   relics: string[];
   // Corruption 0..100 (Playtest #9; run-scoped). 100 → warden-death.
   corruption: number;
+  // Set-bonus grant: corruption cleansed per floor (void_gear 3-pc). Recalc
+  // resets this to 0 then re-applies the active set bonus; enterFloor consumes
+  // it once per floor via applyCorruption(-setCorruptionResist).
+  setCorruptionResist?: number;
   stunned?: number;
 }
 

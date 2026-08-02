@@ -20,6 +20,7 @@ import {
   onPlayerDamaged, onPlayerDeath, onEnemyHitPlayer, checkDoubleStrike,
   getCritMultiplier, getManaShieldReduction,
 } from './talents.js';
+import { genEndlessGear, endlessLuckMult } from './item-gen.js';
 import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy } from './meta.js';
 
 // Late-bound dependency to break circular import with items.ts
@@ -158,8 +159,12 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
       // the old early `return true` which fired before loot drop / double-strike.
       if (G.won) return true;
       // Loot drop — melee-only (skill/scroll/ally kills via killEnemy drop no loot)
-      if (Math.random() < .3 && _genItem) {
-        const loot = _genItem(G.floor);
+      // Endless F41+: bosses/elite always drop (guarantee); otherwise normal 30%.
+      // The endless-gear split is gated endless+F41+ so normal mode is unchanged.
+      const endlessBossGuarantee = G.endless && G.floor >= 41 && (def.isBoss || def.isElite);
+      if ((endlessBossGuarantee || Math.random() < .3) && _genItem) {
+        const loot = (G.endless && G.floor >= 41 && Math.random() < 0.5 * endlessLuckMult())
+          ? genEndlessGear(G.floor) : _genItem(G.floor);
         loot.x = def.x; loot.y = def.y;
         G.items.push(loot);
         addMsg(tMsg('cb.enemyDropped', String(def.name), String(loot.name)), 'mp');
@@ -233,6 +238,8 @@ export function recalc(): void {
   const p = G.player;
   p.atk = p.baseAtk; p.def = p.baseDef; p.maxHp = p.baseMaxHp;
   p.elRes = {}; p.elDmgBonus = {}; p.healBonus = (getMeta().upgrades['heal_bonus'] || 0) * 0.05;
+  // Reset set-grant stats so recalc can re-apply them from active set bonuses.
+  p.setCorruptionResist = 0;
   // Reset derived stats to base values (set by class in createPlayer)
   p.critChance = p.baseCritChance;
   p.dodgeChance = p.baseDodgeChance;
@@ -315,7 +322,10 @@ function applySetBonus(p: any, type: string, value: number): void {
     case 'el_res_holy': p.elRes['holy'] = (p.elRes['holy'] || 0) + value / 100; break;
     case 'el_dmg_fire': p.elDmgBonus['fire'] = (p.elDmgBonus['fire'] || 0) + value; break;
     case 'el_dmg_ice': p.elDmgBonus['ice'] = (p.elDmgBonus['ice'] || 0) + value; break;
+    case 'el_dmg_shadow': p.elDmgBonus['shadow'] = (p.elDmgBonus['shadow'] || 0) + value; break;
+    case 'el_dmg_holy': p.elDmgBonus['holy'] = (p.elDmgBonus['holy'] || 0) + value; break;
     case 'heal_bonus': p.healBonus += value / 100; break;
+    case 'corruption_resist': (p as Player).setCorruptionResist = ((p as Player).setCorruptionResist ?? 0) + value; break;
   }
 }
 

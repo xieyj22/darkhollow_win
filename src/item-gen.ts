@@ -4,7 +4,7 @@ import type { Item } from './types.js';
 import { lang } from './state.js';
 import { rng, pick } from './utils.js';
 import { itemName, t, tMsg, tx } from './i18n.js';
-import { ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS } from './data.js';
+import { ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, ENDLESS_GEAR } from './data.js';
 
 export function genItem(floor: number): Item {
   // Gear (weapon+armor+accessory) drop chance deliberately lowered so the
@@ -121,4 +121,36 @@ export function genConsumable(f: number): Item {
     b.ef === 'bear_trap' ? tMsg('ig.bearTrap', String(v)) :
     tx(b.desc);
   return { type: 'consumable', name: itemName(b), ef: b.ef, val: v, dur: b.dur || 0, rarity: b.r, ch: b.ch, c: b.c, desc, x: 0, y: 0 };
+}
+
+// ===== Endless-exclusive gear (Task 1) =====
+// endlessLuckMult: luck multiplier for endless-gear drop chance. Stub returns 1
+// in Task 1; Task 4 wires it to the meta "endless_luck" upgrade rank.
+export function endlessLuckMult(): number { return 1; }
+
+// genEndlessGear: pull from the ENDLESS_GEAR pool (rarity 5, themed) and scale
+// stats with floor. bonus = floor((floor-41)/5*2) → F41:0 / F60:7 / F100:23.
+// Weapons/armors get the scaling bonus; accessories use fixed base stats (their
+// value is the set routing, not raw power). Each piece carries its `set` tag so
+// the void_gear/abyss_gear/astral_gear set bonuses activate on equip.
+//
+// pick() is called per-branch (not on a union ternary) so TS narrows each piece
+// to its exact shape (weapons have a/el, armors d/el?, accessories a/d/h).
+export function genEndlessGear(floor: number, type?: 'weapon' | 'armor' | 'accessory'): Item {
+  const t = type ?? (['weapon', 'armor', 'accessory'] as const)[Math.floor(Math.random() * 3)];
+  // Brief documents F41:0 / F60:7 / F100:23 — that requires floor() to apply
+  // AFTER the *2 (continuous scaling), i.e. Math.floor((floor-41)/5*2), not
+  // Math.floor((floor-41)/5)*2 (which gives F60:6/F100:22). Implemented to
+  // match the brief's documented values.
+  const bonus = Math.floor((floor - 41) / 5 * 2);  // F41:0 / F60:7 / F100:23
+  if (t === 'weapon') {
+    const b = pick(ENDLESS_GEAR.weapons);
+    return { type: 'weapon', name: tx(b.n), atk: b.a + bonus, rarity: 5, ch: b.ch, c: '#9b5de5', desc: tMsg('el.atkPlus', String(b.a + bonus)), x: 0, y: 0, el: b.el, set: b.set };
+  }
+  if (t === 'armor') {
+    const b = pick(ENDLESS_GEAR.armors);
+    return { type: 'armor', name: tx(b.n), def: b.d + bonus, rarity: 5, ch: b.ch, c: '#7ec8e3', desc: tMsg('el.defPlus', String(b.d + bonus)), x: 0, y: 0, el: b.el, set: b.set };
+  }
+  const b = pick(ENDLESS_GEAR.accessories);
+  return { type: 'accessory', name: tx(b.n), atk: b.a, def: b.d, hp: b.h, rarity: 5, ch: b.ch, c: '#06d6a0', desc: tMsg('el.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
 }

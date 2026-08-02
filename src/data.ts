@@ -3,7 +3,7 @@ import type {
   RaceDef, ClassDef, WeaponDef, ArmorDef, AccessoryDef,
   PotionDef, ScrollDef, ConsumableDef, TrapDef, FoodDef,
   EnemyDef, BossDef, ElitePrefix, AchievementDef, Element,
-  EquipmentSetDef, AreaDef, TalentTree,
+  EquipmentSetDef, AreaDef, TalentTree, I18nText,
 } from './types.js';
 
 export const RACES: RaceDef[] = [
@@ -389,6 +389,18 @@ export const EQUIPMENT_SETS: EquipmentSetDef[] = [
       { required: 2, type: 'maxhp', value: 30, desc: { en: '+30 Max HP', zh: '+30最大HP' } },
     ],
   },
+  // === Wave 6d / Endless content (Task 1): F41+ exclusive themed sets ===
+  { id: 'void_gear', n: { en: 'Void', zh: '虚空' }, pieces: 3, bonuses: [
+    { required: 2, type: 'el_dmg_shadow', value: 15, desc: { en: '+15% Shadow Dmg', zh: '+15%暗影伤害' } },
+    { required: 3, type: 'corruption_resist', value: 3, desc: { en: '-3 Corruption/floor', zh: '每层-3腐化' } },
+  ] },
+  { id: 'abyss_gear', n: { en: 'Abyss', zh: '深渊' }, pieces: 3, bonuses: [
+    { required: 2, type: 'crit', value: 10, desc: { en: '+10% Crit', zh: '+10%暴击' } },
+    { required: 3, type: 'heal_bonus', value: 15, desc: { en: '+15% Healing', zh: '+15%治疗' } },
+  ] },
+  { id: 'astral_gear', n: { en: 'Astral', zh: '星辰' }, pieces: 2, bonuses: [
+    { required: 2, type: 'el_dmg_holy', value: 15, desc: { en: '+15% Holy Dmg', zh: '+15%神圣伤害' } },
+  ] },
 ];
 
 // ===== Area Definitions =====
@@ -629,6 +641,35 @@ export const META_UPGRADES: MetaUpgradeDef[] = [
     icon: '🩸', maxLevel: 2, costs: [30, 60], effect: 'blood_pact',
     valuePerLevel: 1, category: 'talent' },
 ];
+
+// ===== Endless-exclusive gear (F41+) — Task 1 =====
+// Standalone pool (NOT merged into ALL_*); consumed only by genEndlessGear in
+// item-gen.ts. Rarity 5, themed void/abyss/astral. ch chars are display glyphs
+// only — kept distinct from key ALL_* items where possible. 'set' routes each
+// piece into one of the three new EQUIPMENT_SETS (void_gear/abyss_gear/astral_gear).
+export interface EndlessWeaponPiece { n: I18nText; r: number; a: number; ch: string; el: Element; set: string; }
+export interface EndlessArmorPiece { n: I18nText; r: number; d: number; ch: string; el?: Element; set: string; }
+export interface EndlessAccPiece { n: I18nText; r: number; a: number; d: number; h: number; ch: string; set: string; }
+export const ENDLESS_GEAR: {
+  weapons: EndlessWeaponPiece[];
+  armors: EndlessArmorPiece[];
+  accessories: EndlessAccPiece[];
+} = {
+  weapons: [
+    { n: { en: 'Void Blade', zh: '虚空之刃' }, r: 5, a: 14, ch: '/', el: 'shadow', set: 'void_gear' },
+    { n: { en: 'Abyss Staff', zh: '深渊法杖' }, r: 5, a: 11, ch: '|', el: 'shadow', set: 'abyss_gear' },
+    { n: { en: 'Star Bow', zh: '星辰长弓' }, r: 5, a: 13, ch: ')', el: 'holy', set: 'astral_gear' },
+  ],
+  armors: [
+    { n: { en: 'Void Armor', zh: '虚空护甲' }, r: 5, d: 12, ch: '[', el: 'shadow', set: 'void_gear' },
+    { n: { en: 'Abyss Cape', zh: '深渊斗篷' }, r: 5, d: 8, ch: ']', set: 'abyss_gear' },
+    { n: { en: 'Astral Aegis', zh: '星辰护盾' }, r: 5, d: 11, ch: '}', el: 'holy', set: 'astral_gear' },
+  ],
+  accessories: [
+    { n: { en: 'Void Ring', zh: '虚空戒指' }, r: 5, a: 3, d: 2, h: 30, ch: '"', set: 'void_gear' },
+    { n: { en: 'Abyss Amulet', zh: '深渊护符' }, r: 5, a: 2, d: 3, h: 40, ch: '"', set: 'abyss_gear' },
+  ],
+};
 
 // ===== Relics (run-defining passive artifacts) =====
 import type { RelicDef } from './types.js';

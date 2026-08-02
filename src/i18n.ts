@@ -228,6 +228,10 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "ig.atkPlus": { en: "ATK +{}", zh: "攻击+{}" },
   "ig.defPlus": { en: "DEF +{}", zh: "防御+{}" },
   "ig.accStats": { en: "ATK+{} DEF+{} HP+{}", zh: "攻击+{} 防御+{} HP+{}" },
+  // Endless-gear (Task 1) — mirrors ig.atkPlus/defPlus/accStats for el.* keys
+  "el.atkPlus": { en: "ATK +{}", zh: "攻击+{}" },
+  "el.defPlus": { en: "DEF +{}", zh: "防御+{}" },
+  "el.accStats": { en: "ATK+{} DEF+{} HP+{}", zh: "攻击+{} 防御+{} HP+{}" },
   "ig.hpPlus": { en: "+{} HP", zh: "+{} HP" },
   "ig.mpPlus": { en: "+{} MP", zh: "+{} MP" },
   "ig.atkBuff": { en: "+{} ATK {}t", zh: "+{}攻击 {}回合" },

@@ -14,6 +14,7 @@ import { addMsg } from './messages.js';
 import { rng, pick } from './utils.js';
 import { AREAS } from './data.js';
 import { unlockLore } from './meta.js';
+import { applyCorruption } from './combat.js';
 import { bridge } from './bridge.js';
 
 export function initGame(ri: number, ci: number, endless = false): void {
@@ -116,6 +117,12 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     if (area && area.lore.length > 0) {
       const desc = pick(area.lore);
       addMsg(tx(desc), 'mst');
+    }
+
+    // Endless F41+: void_gear 3-pc set bonus cleanses corruption each floor.
+    // Gated endless-only so normal F1-40 enterFloor behavior is unchanged.
+    if (G!.endless && G!.player.setCorruptionResist && G!.player.setCorruptionResist > 0) {
+      applyCorruption(-G!.player.setCorruptionResist);
     }
 
     updatePlayerFOV(G!.player, G!.dungeon.map, G!.traps);
