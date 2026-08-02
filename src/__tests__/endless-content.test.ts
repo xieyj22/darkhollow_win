@@ -72,7 +72,7 @@ vi.mock('../talents.js', () => ({
 vi.mock('../steam.js', () => ({ unlockAchievement: () => {} }));
 
 import { genEndlessGear, endlessLuckMult } from '../item-gen.js';
-import { recalc } from '../combat.js';
+import { recalc, endlessLootIsExclusive } from '../combat.js';
 import { ENDLESS_GEAR, EQUIPMENT_SETS } from '../data.js';
 import type { Player, Item } from '../types.js';
 
@@ -234,5 +234,40 @@ describe('recalc + corruption_resist set bonus (void_gear)', () => {
     const p = (globalThis as any).G.player as Player;
     recalc();
     expect(p.setCorruptionResist).toBe(0);
+  });
+});
+
+// --- fix1 (I-1): boss/elite F41+ must drop ENDLESS-EXCLUSIVE gear, not just any loot ---
+// Spec §2.2: "boss/精英 F41+ 必掉一件专属装备". The loot decision is extracted into
+// the pure predicate endlessLootIsExclusive (caller passes the random roll) so we can
+// assert the decision deterministically without mocking the entire attack() flow.
+describe('endlessLootIsExclusive — boss/elite F41+ forces exclusive gear (fix1 / spec §2.2)', () => {
+  it('boss OR elite on F41+ endless → exclusive regardless of roll', () => {
+    expect(endlessLootIsExclusive(45, true, false, true, 0.99, 1)).toBe(true);  // boss
+    expect(endlessLootIsExclusive(45, false, true, true, 0.99, 1)).toBe(true);  // elite
+    expect(endlessLootIsExclusive(41, true, false, true, 1.0, 1)).toBe(true);   // F41 boundary, roll=1
+  });
+
+  it('normal foe on F41+ endless → exclusive only when roll < 0.5×luckMult', () => {
+    expect(endlessLootIsExclusive(45, false, false, true, 0.49, 1)).toBe(true);   // 0.49 < 0.5
+    expect(endlessLootIsExclusive(45, false, false, true, 0.50, 1)).toBe(false);  // 0.50 not < 0.5
+    expect(endlessLootIsExclusive(45, false, false, true, 0.99, 2)).toBe(true);   // luckMult 2 → threshold 1.0
+    expect(endlessLootIsExclusive(45, false, false, true, 0.99, 1)).toBe(false);  // 0.99 >= 0.5
+  });
+
+  it('below F41 or non-endless → never exclusive (normal mode untouched)', () => {
+    expect(endlessLootIsExclusive(40, true, false, true, 0.0, 1)).toBe(false);    // F40 endless boss
+    expect(endlessLootIsExclusive(45, true, false, false, 0.0, 1)).toBe(false);   // F45 non-endless boss
+    expect(endlessLootIsExclusive(1, false, false, false, 0.0, 1)).toBe(false);   // normal F1
+  });
+
+  it('a forced-exclusive drop produces a rarity-5 _gear item via genEndlessGear', () => {
+    // The decision is true for a boss → combat.ts calls genEndlessGear; assert the
+    // producer output shape (rarity 5, set matches /_gear$/) the wiring relies on.
+    const drop = endlessLootIsExclusive(45, true, false, true, 0.99, 1);
+    expect(drop).toBe(true);
+    const item = genEndlessGear(45);
+    expect(item.rarity).toBe(5);
+    expect(item.set).toMatch(/_gear$/);
   });
 });

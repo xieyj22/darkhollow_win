@@ -59,6 +59,23 @@ const FX_EL_COLOR: Record<string, string> = {
   fire: '#ff7a45', ice: '#7ec8e3', lightning: '#fff2a8', shadow: '#b583f6', holy: '#ffd700', none: '#ffffff',
 };
 
+/**
+ * Decide whether a melee-kill loot drop should come from the endless-exclusive
+ * pool (genEndlessGear) vs the normal _genItem bridge. Boss/elite kills on F41+
+ * endless ALWAYS yield exclusive gear (spec §2.2: "boss/精英 F41+ 必掉一件专属
+ * 装备"); other F41+ foes roll against 0.5×luckMult. The caller passes the random
+ * roll (0..1) so this is a pure, fully-testable predicate. Returns false for any
+ * non-endless / sub-F41 scenario so normal-mode (F1-40) drops are entirely unchanged.
+ */
+export function endlessLootIsExclusive(
+  floor: number, isBoss: boolean | undefined, isElite: boolean | undefined,
+  endless: boolean | undefined, roll: number, luckMult: number,
+): boolean {
+  if (!endless || floor < 41) return false;
+  if (isBoss || isElite) return true;
+  return roll < 0.5 * luckMult;
+}
+
 export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
   if (!G) return false;
   let dmg = Math.max(1, atk.atk - def.def + rng(-2, 2));
@@ -159,11 +176,12 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
       // the old early `return true` which fired before loot drop / double-strike.
       if (G.won) return true;
       // Loot drop — melee-only (skill/scroll/ally kills via killEnemy drop no loot)
-      // Endless F41+: bosses/elite always drop (guarantee); otherwise normal 30%.
-      // The endless-gear split is gated endless+F41+ so normal mode is unchanged.
+      // Endless F41+: bosses/elite always drop AND the drop is forced to exclusive
+      // endless gear (spec §2.2); other F41+ foes roll 0.5×luckMult for exclusive
+      // gear, else the normal _genItem bridge. Normal mode F1-40 unchanged.
       const endlessBossGuarantee = G.endless && G.floor >= 41 && (def.isBoss || def.isElite);
       if ((endlessBossGuarantee || Math.random() < .3) && _genItem) {
-        const loot = (G.endless && G.floor >= 41 && Math.random() < 0.5 * endlessLuckMult())
+        const loot = endlessLootIsExclusive(G.floor, def.isBoss, def.isElite, G.endless, Math.random(), endlessLuckMult())
           ? genEndlessGear(G.floor) : _genItem(G.floor);
         loot.x = def.x; loot.y = def.y;
         G.items.push(loot);
