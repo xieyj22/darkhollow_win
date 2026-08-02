@@ -6,7 +6,7 @@ import { rng, dst } from './utils.js';
 import { snd, setBgmScene } from './audio.js';
 import { flt, shake } from './effects.js';
 import { fxFlash, fxBurst } from './fx.js';
-import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic, grantRelic, relicOnKill, relicOnDodge, relicOnCrit } from './relics.js';
+import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic, grantRelic, relicOnKill, relicOnDodge, relicOnCrit, hasRelic } from './relics.js';
 import { unlockAchievement } from './steam.js';
 import { t, tMsg, tx } from './i18n.js';
 import { ACH_DEFS, EQUIPMENT_SETS } from './data.js';
@@ -366,6 +366,11 @@ export function getTalentBonus(p: any, effectId: string): number {
 export function applyCorruption(n: number): void {
   if (!G) return;
   const p = G.player;
+  // Endless (Task 2): eternal_sand halves corruption GAIN. Gate on n>0 so we
+  // never amplify negative (cleanse) deltas — e.g. void_gear's per-floor
+  // applyCorruption(-resist) must not be doubled/halved by relic effects.
+  // T4's corruption_ward stacks after this with the same n>0 gate.
+  if (hasRelic('eternal_sand') && n > 0) n = Math.ceil(n / 2);
   const r = addCorruption(p, n);
   if (r.maxed) { wardenDeath(); return; }
   if (r.crossed && r.after !== 'clean') {

@@ -6,7 +6,7 @@
 import type { Player, Enemy } from './types.js';
 import { G, lang } from './state.js';
 import { RELICS } from './data.js';
-import { unlockLore } from './meta.js';
+import { unlockLore, getMeta } from './meta.js';
 import { addMsg } from './messages.js';
 import { flt } from './effects.js';
 import { fxFlash, fxBurst } from './fx.js';
@@ -23,6 +23,10 @@ export function hasRelic(id: string): boolean {
   return !!G?.player.relics?.includes(id);
 }
 
+// Endless relic (chaos_egg) scales with soulEchoes — read live so recalc picks
+// up meta progression without a reload. Late read (not a snapshot) on purpose.
+function getMetaEchoes(): number { return getMeta().soulEchoes; }
+
 // ===== Static stat bonuses — called from recalc(), after talent bonuses =====
 export function applyRelicBonuses(p: Player): void {
   for (const id of (p.relics || [])) {
@@ -34,6 +38,9 @@ export function applyRelicBonuses(p: Player): void {
       case 'worn_amulet': p.maxHp += 10; break;
       case 'arcane_focus': p.spellPower += 0.25; break;
       case 'warden_cloak': p.dodgeChance += 0.10; break;
+      // Endless (Task 2): void_heart spellPower + chaos_egg atk scale off run/meta state.
+      case 'void_heart': p.spellPower += Math.floor(G!.floor * 0.01); break;
+      case 'chaos_egg': p.atk += Math.floor(getMetaEchoes() / 50); break;
     }
   }
 }
@@ -71,6 +78,11 @@ export function relicOnHitEnemy(defender: Enemy, dmg: number): number {
       p.hp = Math.min(p.maxHp, p.hp + heal);
       flt(p.x, p.y, `+${heal}`, '#b5179e');
     }
+  }
+
+  // abyss_eye (Endless Task 2): +30% dmg vs void-tagged foes (spirit/aberration/demon).
+  if (hasRelic('abyss_eye') && dmg > 0 && defender.tags?.some(t => ['spirit', 'aberration', 'demon'].includes(t))) {
+    dmg = Math.floor(dmg * 1.3);
   }
 
   return dmg;
@@ -173,7 +185,7 @@ export function grantRandomRelic(x: number, y: number, floor: number): void {
   const owned = new Set(G.player.relics || []);
   const pool = RELICS.filter(r => !owned.has(r.id));
   if (!pool.length) return; // all owned — nothing to grant
-  const maxR = floor >= 30 ? 4 : floor >= 15 ? 3 : 2;
+  const maxR = floor >= 41 ? 5 : floor >= 30 ? 4 : floor >= 15 ? 3 : 2;
   const avail = pool.filter(r => r.rarity <= maxR);
   const candidates = avail.length ? avail : pool;
   // Weight: lower rarity is more common (rarity r → ~100 / 2^r tickets)

@@ -6,6 +6,7 @@ import { addMsg } from './messages.js';
 import { TALENT_TREES } from './data.js';
 import { rng, dst } from './utils.js';
 import { bonusGold, bonusExp } from './meta.js';
+import { hasRelic } from './relics.js';
 import { t, tMsg, tx } from './i18n.js';
 
 // Helper: get rank of a talent (0 if not learned)
@@ -379,5 +380,8 @@ export function isCCImmune(): boolean {
 // Get crit damage multiplier (base 2.0 + bonuses)
 export function getCritMultiplier(): number {
   if (!G) return 2.0;
-  return 2.0 + (G.player.critDamageBonus || 0);
+  let m = 2.0 + (G.player.critDamageBonus || 0);
+  // Endless (Task 2): star_core adds +0.5% crit dmg per floor.
+  if (hasRelic('star_core')) m += G.floor * 0.005;
+  return m;
 }

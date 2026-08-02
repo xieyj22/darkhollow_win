@@ -15,6 +15,7 @@ import { rng, pick } from './utils.js';
 import { AREAS } from './data.js';
 import { unlockLore } from './meta.js';
 import { applyCorruption } from './combat.js';
+import { hasRelic } from './relics.js';
 import { bridge } from './bridge.js';
 
 export function initGame(ri: number, ci: number, endless = false): void {
@@ -123,6 +124,14 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     // Gated endless-only so normal F1-40 enterFloor behavior is unchanged.
     if (G!.endless && G!.player.setCorruptionResist && G!.player.setCorruptionResist > 0) {
       applyCorruption(-G!.player.setCorruptionResist);
+    }
+
+    // Endless F41+: null_crown relic grants a random buff each floor.
+    // Gated endless-only so normal mode is untouched.
+    if (G!.endless && G!.floor >= 41 && hasRelic('null_crown')) {
+      const kinds = [['str_buff', 5], ['def_buff', 5], ['shield', 5]] as const;
+      const k = kinds[Math.floor(Math.random() * kinds.length)];
+      G!.player.buffs.push({ name: 'null_crown', type: k[0], value: k[1], turns: 3 });
     }
 
     updatePlayerFOV(G!.player, G!.dungeon.map, G!.traps);

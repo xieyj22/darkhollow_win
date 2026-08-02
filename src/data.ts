@@ -704,4 +704,13 @@ export const RELICS: RelicDef[] = [
   { id: 'warden_cloak', n: { en: 'Warden Cloak', zh: '守渊人斗篷' }, d: { en: '+10% dodge chance', zh: '+10% 闪避率' }, ch: '🧥', c: '#9a2be2', rarity: 3, effect: 'dodge', value: 10 },
   { id: 'fallen_blade', n: { en: 'Fallen Blade', zh: '前任之刃' }, d: { en: 'Crits heal 18% of damage', zh: '暴击吸取18%伤害' }, ch: '🗡', c: '#b91c3c', rarity: 3, effect: 'crit_lifesteal', value: 18 },
   { id: 'memory_shard', n: { en: 'Memory Shard', zh: '记忆碎片' }, d: { en: '+30% XP', zh: '经验+30%' }, ch: '🔮', c: '#4895ef', rarity: 3, effect: 'exp_pct', value: 30 },
+  // Wave 6d / Endless content (Task 2): F41+ exclusive rarity-5 relics.
+  // Effects are wired in relics.ts (applyRelicBonuses/relicOnHitEnemy),
+  // combat.ts (applyCorruption), talents.ts (getCritMultiplier), game.ts (enterFloor).
+  { id: 'void_heart', n: { en: 'Void Heart', zh: '虚空之心' }, d: { en: '+spellPower by floor', zh: '法强随楼层增长' }, ch: '♥', c: '#9b5de5', rarity: 5, effect: 'spell_floor', value: 0 },
+  { id: 'abyss_eye', n: { en: 'Abyss Eye', zh: '深渊之眼' }, d: { en: '+30% dmg vs void foes', zh: '对虚空系敌人+30%伤害' }, ch: '◉', c: '#7b2fbe', rarity: 5, effect: 'dmg_void', value: 30 },
+  { id: 'eternal_sand', n: { en: 'Eternal Sand', zh: '永恒之沙' }, d: { en: '-50% corruption', zh: '腐化获取减半' }, ch: '⌛', c: '#e0c060', rarity: 5, effect: 'corruption_half', value: 0 },
+  { id: 'star_core', n: { en: 'Star Core', zh: '星辰之核' }, d: { en: '+crit dmg by floor', zh: '暴伤随楼层增长' }, ch: '✦', c: '#ffd700', rarity: 5, effect: 'crit_floor', value: 0 },
+  { id: 'chaos_egg', n: { en: 'Chaos Egg', zh: '混沌之卵' }, d: { en: '+atk by echoes', zh: '攻击随回响增长' }, ch: '◎', c: '#ff1493', rarity: 5, effect: 'atk_echoes', value: 0 },
+  { id: 'null_crown', n: { en: 'Null Crown', zh: '虚无之冕' }, d: { en: 'buff each floor', zh: '每层随机增益' }, ch: '♔', c: '#e0e0ff', rarity: 5, effect: 'buff_floor', value: 0 },
 ];
