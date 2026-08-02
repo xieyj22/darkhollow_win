@@ -10,6 +10,9 @@ import { bridge } from './bridge.js';
 import { addMsg } from './messages.js';
 import { genItem, genWeapon, genArmor, genAcc, addItemWithOverflow, itemToGold } from './items.js';
 import { recalc, playerDeath, applyCorruption } from './combat.js';
+import { genEndlessGear } from './item-gen.js';
+import { grantRelic, hasRelic } from './relics.js';
+import { RELICS } from './data.js';
 import { updateUI, render } from './render.js';
 import { enterBranch, exitBranch } from './game.js';
 
@@ -283,6 +286,7 @@ export function triggerNpc(entity: Item): void {
   if (entity.npc === 'chest') showEvent('chest');
   else if (entity.npc === 'merchant') showEvent('merchant');
   else if (entity.npc === 'treasure_merchant') openTreasureMerchant(entity);
+  else if (entity.npc === 'endless_merchant') openEndlessMerchant(entity);
 }
 
 // --- Treasure merchant (point 11): expensive shop-only powerful gear ---
@@ -353,4 +357,96 @@ function buyTreasure(entity: Item, idx: number): void {
   if (entity.stock.length === 0) { closeEvent(); addMsg(t('ev.treasureSoldOut'), 'mi'); }
   else { openTreasureMerchant(entity); }
   updateUI(); render();
+}
+
+// --- Endless merchant (F41+): endless gear + rarity5 relics + purge/heal services ---
+
+type EndlessStockEntry = {
+  kind: 'gear' | 'relic' | 'purge' | 'heal';
+  item?: Item;
+  relicId?: string;
+  price: number;
+  label: string;
+  desc: string;
+  ch: string;
+};
+
+export function rollEndlessStock(): EndlessStockEntry[] {
+  if (!G) return [];
+  const f = G.floor;
+  const stock: EndlessStockEntry[] = [];
+  for (let i = 0; i < 3; i++) {
+    const it = genEndlessGear(f);
+    stock.push({ kind: 'gear', item: it, price: f * 80, label: it.name, desc: it.desc, ch: it.ch });
+  }
+  const owned = new Set(G.player.relics || []);
+  const r5 = RELICS.filter(r => r.rarity === 5 && !owned.has(r.id));
+  if (r5.length) {
+    const r = pick(r5);
+    stock.push({ kind: 'relic', relicId: r.id, price: f * 200, label: tx(r.n), desc: tx(r.d), ch: r.ch });
+  }
+  stock.push({ kind: 'purge', price: f * 40, label: t('enm.purgeLabel'), desc: t('enm.purgeDesc'), ch: '🜔' });
+  stock.push({ kind: 'heal', price: f * 30, label: t('enm.healLabel'), desc: t('enm.healDesc'), ch: '❤' });
+  return stock;
+}
+
+export function openEndlessMerchant(entity: Item): void {
+  if (!G) return;
+  if (!entity.stock || (entity.stock as unknown as EndlessStockEntry[]).length === 0) {
+    entity.stock = rollEndlessStock() as unknown as Item[];
+  }
+  const entries = entity.stock as unknown as EndlessStockEntry[];
+  const popup = document.getElementById('event-popup')!;
+  document.getElementById('ev-title')!.textContent = t('enm.title');
+  document.getElementById('ev-desc')!.textContent = t('enm.desc');
+  const btns = document.getElementById('ev-buttons')!;
+  btns.innerHTML = '';
+  const actions: Array<() => void> = [];
+  entries.forEach((e, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'evb';
+    btn.innerHTML = `[${i + 1}] ${e.ch} ${e.label} <span class="ek">-${e.price}💰</span>`;
+    btn.title = e.desc;
+    actions.push(() => buyEndless(entity, i));
+    btns.appendChild(btn);
+  });
+  const leaveBtn = document.createElement('button');
+  leaveBtn.className = 'evb';
+  leaveBtn.textContent = `[${entries.length + 1}] ${t('merchantLeave')}`;
+  actions.push(closeEvent);
+  btns.appendChild(leaveBtn);
+  setEventOpen(true);
+  setEventActions(actions);
+  _bindEventBtns(actions);
+  popup.style.display = 'block';
+}
+
+function buyEndless(entity: Item, idx: number): void {
+  if (!G || !entity.stock) return;
+  const entries = entity.stock as unknown as EndlessStockEntry[];
+  const e = entries[idx];
+  if (!e) return;
+  if (G.player.gold < e.price) { addMsg(t('merchantNoGold'), 'mi'); return; }
+  G.player.gold -= e.price;
+  if (e.kind === 'gear' && e.item) {
+    addItemWithOverflow(e.item);
+    addMsg(tMsg('enm.boughtGear', String(e.item.name), String(e.price)), 'me');
+  } else if (e.kind === 'relic' && e.relicId) {
+    grantRelic(e.relicId, G.player.x, G.player.y);
+    addMsg(tMsg('enm.boughtRelic', String(e.label), String(e.price)), 'me');
+  } else if (e.kind === 'purge') {
+    applyCorruption(-20);
+    addMsg(tMsg('enm.purged', String(e.price)), 'mh');
+  } else if (e.kind === 'heal') {
+    G.player.hp = G.player.maxHp;
+    addMsg(tMsg('enm.healed', String(e.price)), 'mh');
+  }
+  snd('pickup');
+  // gear/relic are one-shot (splice); purge/heal repeatable (no splice).
+  if (e.kind === 'gear' || e.kind === 'relic') {
+    entries.splice(idx, 1);
+    if (entries.length === 0) { closeEvent(); addMsg(t('enm.soldOut'), 'mi'); updateUI(); render(); return; }
+  }
+  updateUI(); render();
+  openEndlessMerchant(entity);
 }

@@ -163,7 +163,7 @@ export interface Item {
   set?: string;
   // map entity marker — when set, this "item" is not picked up; stepping on it
   // triggers its associated event instead. Used for chests/merchants on the map.
-  npc?: 'merchant' | 'chest' | 'treasure_merchant' | 'fountain' | 'shrine';
+  npc?: 'merchant' | 'chest' | 'treasure_merchant' | 'endless_merchant' | 'fountain' | 'shrine';
   // merchant stock for treasure merchant (list of pre-rolled item refs to buy)
   stock?: Item[];
 }

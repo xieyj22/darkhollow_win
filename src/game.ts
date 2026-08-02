@@ -100,6 +100,8 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     if (Math.random() < 0.5) placeEntity('chest', '▣', '#daa520', 'gm.chest', 2);
     if (Math.random() < 0.35) placeEntity('merchant', '§', '#9b5de5', 'gm.merchant', 1);
     if (floor % 5 === 0) placeEntity('treasure_merchant', '¤', '#ffd700', 'gm.treasureMerchant', 4);
+    // Endless F41+: endless_merchant every 3 floors (sells endless gear/rarity5 relics/purge/heal).
+    if (G!.endless && floor >= 41 && floor % 3 === 0) placeEntity('endless_merchant', '∞', '#9b5de5', 'enm.entityName', 5);
 
     if (floor > 1) {
       addMsg(tMsg('gm.descend', String(floor)), 'mi');
