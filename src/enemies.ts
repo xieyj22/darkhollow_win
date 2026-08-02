@@ -13,6 +13,7 @@ import { relicOnDodge } from './relics.js';
 import { setEnemyTween } from './render.js';
 import { makeEnemy } from './enemy-factory.js';
 import { wardenStats } from './warden.js';
+import { shouldCastSkill, executeEnemySkill } from './enemy-skills.js';
 
 export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const ens: Enemy[] = [];
@@ -168,6 +169,12 @@ export function processEnemies(): void {
     if (e.isAlly) { processAlly(e); continue; }
     if (e.stunned > 0) { e.stunned--; continue; }
     if (e.skillCd > 0) e.skillCd--;
+    if (e.aiCd && e.aiCd > 0) e.aiCd--;
+    // atkBuff expiry (castBuff sets atkBuffTurns)
+    if (e.atkBuffTurns && e.atkBuffTurns > 0) {
+      e.atkBuffTurns--;
+      if (e.atkBuffTurns === 0 && e.atkBuffVal) { e.atk -= e.atkBuffVal; e.atkBuffVal = 0; }
+    }
     // Boss summon adds (point 4) — fires independently of the AI / CC state.
     if (e.isBoss) tryBossSummon(e);
     const d = dst(e.x, e.y, G.player.x, G.player.y);
@@ -183,6 +190,17 @@ export function processEnemies(): void {
 
     // When player is invisible, enemies can only detect at very close range
     if (playerInvis) { randMove(e); continue; }
+
+    // Enemy skill gate (data-driven casting) — fires before the ai switch.
+    if (e.skill && e.skillCd <= 0) {
+      const visible = !!G.player.visible?.[e.y]?.[e.x];
+      if (shouldCastSkill(e, d, visible, playerInvis)) {
+        executeEnemySkill(e, e.skill);
+        e.skillCd = e.skill.cd;
+        if (G.gameOver) return;
+        continue;  // casting consumes the turn; skip normal ai
+      }
+    }
 
     switch (e.ai) {
       case 'chase': if (d < 8 || G.player.visible?.[e.y]?.[e.x]) moveTo(e, G.player.x, G.player.y); else randMove(e); break;
@@ -236,8 +254,8 @@ export function processEnemies(): void {
       case 'summon':
         // Summon AI: chase like normal, but every 4 turns summon an ally-like enemy
         if (d < 8 || G.player.visible?.[e.y]?.[e.x]) moveTo(e, G.player.x, G.player.y); else randMove(e);
-        if (e.skillCd <= 0 && G.enemies.length < 30) {
-          e.skillCd = 4;
+        if ((e.aiCd ?? 0) <= 0 && G.enemies.length < 30) {
+          e.aiCd = 4;
           // Find eligible enemies for current floor
           const fl = G.floor;
           const summonPool = ENEMIES.filter(en => en.mf <= fl && en.mf >= Math.max(1, fl - 6) && en.ai !== 'summon');
@@ -259,8 +277,8 @@ export function processEnemies(): void {
         break;
       case 'teleport':
         // Teleport AI: every 3 turns, teleport near player then chase
-        if (e.skillCd <= 0 && d > 2) {
-          e.skillCd = 3;
+        if ((e.aiCd ?? 0) <= 0 && d > 2) {
+          e.aiCd = 3;
           // Try to teleport to a visible tile 4-6 tiles from player
           const attempts = 10;
           for (let i = 0; i < attempts; i++) {
@@ -311,13 +329,13 @@ function tryBossSummon(boss: Enemy): void {
   const fl = G.floor;
   const bd = BOSSES.find(b => b.fl === fl);
   if (!bd || !bd.summon) return;
-  if (boss.skillCd > 0) return;                 // on cooldown
+  if ((boss.aiCd ?? 0) > 0) return;                 // on cooldown
   const cfg = bd.summon;
   // Count nearby adds so the boss doesn't flood the floor.
   const nearbyAdds = G.enemies.filter(en => !en.isBoss && !en.isAlly && dst(en.x, en.y, boss.x, boss.y) <= 8).length;
   if (nearbyAdds >= cfg.maxAdds) return;
-  if (Math.random() > cfg.chance) { boss.skillCd = 1; return; } // small backoff, re-roll next turn
-  boss.skillCd = cfg.cd;
+  if (Math.random() > cfg.chance) { boss.aiCd = 1; return; } // small backoff, re-roll next turn
+  boss.aiCd = cfg.cd;
   bossSummonAdd(boss);
 }
 

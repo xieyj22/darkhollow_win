@@ -62,6 +62,12 @@ export function createPlayer(ri: number, ci: number): Player {
 
 export function movePlayer(dx: number, dy: number): void {
   if (!G || G.gameOver) return;
+  if (G.player.stunned && G.player.stunned > 0) {
+    G.player.stunned--;
+    addMsg(t('esk.playerStunned'), 'mi');
+    if (_endTurn) _endTurn();
+    return;
+  }
   const nx = G.player.x + dx, ny = G.player.y + dy;
   if (nx < 0 || nx >= MW || ny < 0 || ny >= MH) return;
   const tile = G.dungeon.map[ny][nx];
@@ -108,6 +114,12 @@ export function movePlayer(dx: number, dy: number): void {
 
 export function pickupItem(): void {
   if (!G || G.gameOver) return;
+  if (G.player.stunned && G.player.stunned > 0) {
+    G.player.stunned--;
+    addMsg(t('esk.playerStunned'), 'mi');
+    if (_endTurn) _endTurn();
+    return;
+  }
   const g = G;
   const itemsHere = g.items.filter(i => i.x === g.player.x && i.y === g.player.y && i.type !== 'gold');
   if (!itemsHere.length) { addMsg(t('nothingHere'), 'mi'); return; }
@@ -120,6 +132,12 @@ export function pickupItem(): void {
 
 export function descendStairs(): void {
   if (!G || G.gameOver) return;
+  if (G.player.stunned && G.player.stunned > 0) {
+    G.player.stunned--;
+    addMsg(t('esk.playerStunned'), 'mi');
+    if (_endTurn) _endTurn();
+    return;
+  }
   if (G.branchMode) { addMsg(t('pl.noStairsHollow'), 'mi'); return; }
   if (G.dungeon.map[G.player.y][G.player.x] !== TL.STAIR) { addMsg(t('noStairs'), 'mi'); return; }
   G.player.deepestFloor = Math.max(G.player.deepestFloor, G.floor + 1);
@@ -134,6 +152,12 @@ function enterFloor(floor: number) { if (_enterFloor) _enterFloor(floor); }
 
 export function doWait(): void {
   if (!G || G.gameOver) return;
+  if (G.player.stunned && G.player.stunned > 0) {
+    G.player.stunned--;
+    addMsg(t('esk.playerStunned'), 'mi');
+    if (_endTurn) _endTurn();
+    return;
+  }
   addMsg(t('wait'), 'mi');
   if (_endTurn) _endTurn();
 }

@@ -59,6 +59,12 @@ export function findNearestEnemy(): Enemy | null {
 
 export function executeSkill(sk: { cost: number; effect: string; cd: number }): void {
   if (!G) return;
+  if (G.player.stunned && G.player.stunned > 0) {
+    G.player.stunned--;
+    addMsg(t('esk.playerStunned'), 'mi');
+    if (_endTurn) _endTurn();
+    return;
+  }
   const p = G.player;
   if (p.mp < sk.cost || p.skillCd > 0) { addMsg(t('sk.cdNoMp'), 'mi'); return; }
   p.mp -= sk.cost; p.skillCd = sk.cd; snd('spell');

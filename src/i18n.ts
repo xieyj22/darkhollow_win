@@ -198,6 +198,7 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "esk.stun":   { en: "{} stuns you!", zh: "{}眩晕了你！" },
   "esk.blink":  { en: "{} blinks beside you!", zh: "{}瞬移到你身旁！" },
   "esk.summon": { en: "{} summons {}!", zh: "{}召唤了{}！" },
+  "esk.playerStunned": { en: "You are stunned!", zh: "你被眩晕，无法行动！" },
   "ev.buyMystery": { en: "Buy Mystery Item", zh: "购买神秘物品" },
   "ev.openBagSell": { en: "Open Bag to Sell", zh: "打开背包售卖" },
   "ev.mimic": { en: "Mimic", zh: "宝箱怪" },

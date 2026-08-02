@@ -25,6 +25,12 @@ export function setFindNearestEnemyFn(fn: () => any): void { _findNearestEnemy =
 
 export function useItem(idx: number): void {
   if (!G || G.gameOver || idx < 0 || idx >= G.player.inv.length) return;
+  if (G.player.stunned && G.player.stunned > 0) {
+    G.player.stunned--;
+    addMsg(t('esk.playerStunned'), 'mi');
+    endTurn();
+    return;
+  }
   const item = G.player.inv[idx];
   const p = G.player;
 
@@ -211,6 +217,12 @@ function returnOldGearToInvOrGold(old: Item): void {
 
 export function equipItem(idx: number): void {
   if (!G) return;
+  if (G.player.stunned && G.player.stunned > 0) {
+    G.player.stunned--;
+    addMsg(t('esk.playerStunned'), 'mi');
+    endTurn();
+    return;
+  }
   const p = G.player;
   const item = p.inv[idx];
   if (!item || (item.type !== 'weapon' && item.type !== 'armor' && item.type !== 'accessory')) return;
