@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { makeEnemy } from '../enemy-factory.js';
 import { ENEMIES, BOSSES } from '../data.js';
+import { tx } from '../i18n.js';
 
 // Exercises makeEnemy against the REAL game data (EnemyDef + BossDef), not a
 // synthetic fixture — proves the refactor works for every enemy/boss at runtime.
@@ -26,4 +27,24 @@ describe('makeEnemy over real game data', () => {
       expect(out.res).toEqual({});         // BossDef has no res -> {}
     });
   }
+
+  // Task 4: every EnemyDef that declares a `skill` must surface a deep-copied
+  // runtime skill on the built Enemy (not the def's shared reference). Covers
+  // all 25 casters that now carry skill data.
+  it('every enemy with a def.skill gets a deep-copied runtime skill', () => {
+    let checked = 0;
+    for (const def of ENEMIES) {
+      if (!def.skill) continue;
+      checked++;
+      const e = makeEnemy(def, 0, 0, 1);
+      expect(e.skill, `${tx(def.n)}: def.skill missing at runtime`).toBeDefined();
+      expect(e.skill).not.toBe(def.skill);
+      expect(e.skill!.name).not.toBe(def.skill!.name);
+      expect(e.skill!.effect).toBe(def.skill!.effect);
+      expect(e.skill!.cd).toBe(def.skill!.cd);
+    }
+    // Guard: if all 25 caster skills were silently dropped from data, this would
+    // loop zero times and pass vacuously — assert we actually exercised them.
+    expect(checked).toBe(25);
+  });
 });
