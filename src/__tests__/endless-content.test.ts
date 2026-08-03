@@ -169,8 +169,8 @@ function voidItem(type: 'weapon' | 'armor' | 'accessory'): Item {
   if (type === 'weapon')
     return { type: 'weapon', name: 'Void Blade', rarity: 5, ch: '/', c: '#9b5de5', desc: '', x: 0, y: 0, atk: 14, el: 'shadow', set: 'void_gear' };
   if (type === 'armor')
-    return { type: 'armor', name: 'Void Armor', rarity: 5, ch: '[', c: '#7ec8e3', desc: '', x: 0, y: 0, def: 12, el: 'shadow', set: 'void_gear' };
-  return { type: 'accessory', name: 'Void Ring', rarity: 5, ch: '"', c: '#06d6a0', desc: '', x: 0, y: 0, atk: 3, def: 2, hp: 30, set: 'void_gear' };
+    return { type: 'armor', name: 'Void Armor', rarity: 5, ch: '[', c: '#9b5de5', desc: '', x: 0, y: 0, def: 12, el: 'shadow', set: 'void_gear' };
+  return { type: 'accessory', name: 'Void Ring', rarity: 5, ch: '"', c: '#9b5de5', desc: '', x: 0, y: 0, atk: 3, def: 2, hp: 30, set: 'void_gear' };
 }
 
 function barePlayer(over: Partial<Player> = {}): Player {

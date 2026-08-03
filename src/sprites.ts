@@ -915,6 +915,20 @@ const PLAYER_PAL: Record<string, string> = {
   L: '#fff0a8', W: '#c8d8e8', C: '#8a8a96',
 };
 
+// Type-base color + rarity luminance boost. Preserves hue family so weapon/armor/
+// accessory stay recognizable; rarity stretches lightness. rarity 5 (endless) → void purple.
+// Deterministic: same (base, rarity) always yields the same swatch.
+export function rarityTint(base: string, rarity: number): string {
+  if (rarity >= 5) return '#9b5de5';
+  switch (rarity) {
+    case 0: return darken(base, 0.70);
+    case 1: return darken(base, 0.88);
+    case 2: return base;
+    case 3: return lighten(base, 0.18);
+    default: return lighten(base, 0.34);   // rarity 4
+  }
+}
+
 // Per-call palette where 'M'/'D'/'L' derive from the enemy/item color.
 function buildPalette(main: string): Record<string, string> {
   return {

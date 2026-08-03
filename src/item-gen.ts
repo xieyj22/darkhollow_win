@@ -5,6 +5,7 @@ import { lang } from './state.js';
 import { rng, pick } from './utils.js';
 import { itemName, t, tMsg, tx } from './i18n.js';
 import { ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, ENDLESS_GEAR } from './data.js';
+import { rarityTint } from './sprites.js';
 
 export function genItem(floor: number): Item {
   // Gear (weapon+armor+accessory) drop chance deliberately lowered so the
@@ -37,7 +38,7 @@ export function genWeapon(f: number): Item {
   const rarityMult = 1 + b.r * 0.4;
   const bn = f > 5 ? Math.floor(rng(0, Math.floor(f / 5)) * rarityMult) : 0;
   const a = b.a + bn;
-  return { type: 'weapon', id: b.id, name: itemName(b), atk: a, rarity: b.r, ch: b.ch, c: '#f4845f', desc: tMsg('ig.atkPlus', String(a)), x: 0, y: 0, el: b.el, set: b.set };
+  return { type: 'weapon', id: b.id, name: itemName(b), atk: a, rarity: b.r, ch: b.ch, c: rarityTint('#f4845f', b.r), desc: tMsg('ig.atkPlus', String(a)), x: 0, y: 0, el: b.el, set: b.set };
 }
 
 export function genArmor(f: number): Item {
@@ -47,14 +48,14 @@ export function genArmor(f: number): Item {
   const rarityMult = 1 + b.r * 0.4;
   const bn = f > 5 ? Math.floor(rng(0, Math.floor(f / 5)) * rarityMult) : 0;
   const d = b.d + bn;
-  return { type: 'armor', id: b.id, name: itemName(b), def: d, rarity: b.r, ch: b.ch, c: '#7ec8e3', desc: tMsg('ig.defPlus', String(d)), x: 0, y: 0, el: b.el, set: b.set };
+  return { type: 'armor', id: b.id, name: itemName(b), def: d, rarity: b.r, ch: b.ch, c: rarityTint('#7ec8e3', b.r), desc: tMsg('ig.defPlus', String(d)), x: 0, y: 0, el: b.el, set: b.set };
 }
 
 export function genAcc(f: number): Item {
   const mr = Math.min(4, Math.floor(f / 4));
   const el = ALL_ACCESSORIES.filter(a => a.r <= mr);
   const b = pick(el);
-  return { type: 'accessory', id: b.id, name: itemName(b), atk: b.a, def: b.d, hp: b.h, rarity: b.r, ch: b.ch, c: '#06d6a0', desc: tMsg('ig.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
+  return { type: 'accessory', id: b.id, name: itemName(b), atk: b.a, def: b.d, hp: b.h, rarity: b.r, ch: b.ch, c: rarityTint('#06d6a0', b.r), desc: tMsg('ig.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
 }
 
 export function genPotion(f: number): Item {
@@ -144,12 +145,12 @@ export function genEndlessGear(floor: number, type?: 'weapon' | 'armor' | 'acces
   const bonus = Math.floor((floor - 41) / 5 * 2);  // F41:0 / F60:7 / F100:23
   if (t === 'weapon') {
     const b = pick(ENDLESS_GEAR.weapons);
-    return { type: 'weapon', id: b.id, name: tx(b.n), atk: b.a + bonus, rarity: 5, ch: b.ch, c: '#9b5de5', desc: tMsg('el.atkPlus', String(b.a + bonus)), x: 0, y: 0, el: b.el, set: b.set };
+    return { type: 'weapon', id: b.id, name: tx(b.n), atk: b.a + bonus, rarity: 5, ch: b.ch, c: rarityTint('#f4845f', 5), desc: tMsg('el.atkPlus', String(b.a + bonus)), x: 0, y: 0, el: b.el, set: b.set };
   }
   if (t === 'armor') {
     const b = pick(ENDLESS_GEAR.armors);
-    return { type: 'armor', id: b.id, name: tx(b.n), def: b.d + bonus, rarity: 5, ch: b.ch, c: '#7ec8e3', desc: tMsg('el.defPlus', String(b.d + bonus)), x: 0, y: 0, el: b.el, set: b.set };
+    return { type: 'armor', id: b.id, name: tx(b.n), def: b.d + bonus, rarity: 5, ch: b.ch, c: rarityTint('#7ec8e3', 5), desc: tMsg('el.defPlus', String(b.d + bonus)), x: 0, y: 0, el: b.el, set: b.set };
   }
   const b = pick(ENDLESS_GEAR.accessories);
-  return { type: 'accessory', id: b.id, name: tx(b.n), atk: b.a, def: b.d, hp: b.h, rarity: 5, ch: b.ch, c: '#06d6a0', desc: tMsg('el.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
+  return { type: 'accessory', id: b.id, name: tx(b.n), atk: b.a, def: b.d, hp: b.h, rarity: 5, ch: b.ch, c: rarityTint('#06d6a0', 5), desc: tMsg('el.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
 }

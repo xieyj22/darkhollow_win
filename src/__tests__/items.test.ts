@@ -5,7 +5,13 @@
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('../state.js', () => ({ G: { floor: 5 }, lang: 'en' }));
-vi.mock('../utils.js', () => ({ rng: () => 0, pick: <T>(a: T[]) => a[0], dst: () => 1 }));
+vi.mock('../utils.js', async (importOriginal) => {
+  // Partial mock: keep real utils (incl. `darken`, now used transitively by
+  // sprites.rarityTint via item-gen) and only override the RNG-dependent fns
+  // these characterization tests need pinned.
+  const actual = await importOriginal<typeof import('../utils.js')>();
+  return { ...actual, rng: () => 0, pick: <T>(a: T[]) => a[0], dst: () => 1 };
+});
 vi.mock('../combat.js', () => ({ recalc: () => {}, checkLevelUp: () => {}, killEnemy: () => {}, applyCorruption: () => {}, playerDeath: () => {} }));
 vi.mock('../audio.js', () => ({ snd: () => {} }));
 vi.mock('../effects.js', () => ({ flt: () => {} }));
