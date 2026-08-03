@@ -23,6 +23,7 @@ export function initMeta(): MetaSave {
     upgrades: {}, achievements: [], stats: defaultStats(),
     runHistory: [], endlessLeaderboard: [],
     unlockedLore: [],
+    discoveredItems: [],
     wardens: [],
   };
 }
@@ -40,6 +41,7 @@ export function getMeta(): MetaSave {
       if (!m.runHistory) m.runHistory = [];
       if (!m.endlessLeaderboard) m.endlessLeaderboard = [];
       if (!m.unlockedLore) m.unlockedLore = [];
+      if (!m.discoveredItems) m.discoveredItems = [];
       if (!m.wardens) m.wardens = [];
       return m;
     }
@@ -233,6 +235,19 @@ export function unlockLore(id: string): void {
     meta.unlockedLore.push(id);
     saveMeta(meta);
   }
+}
+
+// Record a discovered item/relic for the Item Codex + first-pickup intro popup.
+// Returns true the first time a key is seen (caller uses this to decide whether
+// to show the intro card), false on repeats. Idempotent + persisted to dh_meta.
+export function discoverItem(key: string): boolean {
+  const meta = getMeta();
+  if (!meta.discoveredItems.includes(key)) {
+    meta.discoveredItems.push(key);
+    saveMeta(meta);
+    return true;
+  }
+  return false;
 }
 
 // Record a descender who died at 100 corruption — they become a Warden that

@@ -566,6 +566,7 @@ export interface MetaSave {
   runHistory: RunRecord[];
   endlessLeaderboard: EndlessRecord[];
   unlockedLore: string[];
+  discoveredItems: string[];
   wardens: WardenLegacy[];
 }
 
