@@ -5,7 +5,7 @@ import { flt } from './effects.js';
 import { addMsg } from './messages.js';
 import { TALENT_TREES } from './data.js';
 import { rng, dst } from './utils.js';
-import { bonusGold, bonusExp } from './meta.js';
+import { killEnemy } from './combat.js';
 import { hasRelic } from './relics.js';
 import { t, tMsg, tx } from './i18n.js';
 
@@ -249,9 +249,11 @@ export function onEnemyHitPlayer(attacker: Enemy): void {
     // so a single tMsg() args list cannot preserve both — keep both templates verbatim.
     addMsg(tx({ en: `↩ Counter! ${counterDmg} to ${attacker.name}!`, zh: `↩ 反击！对${attacker.name}造成${counterDmg}伤害！` }), 'mc');
     if (attacker.hp <= 0) {
-      G.player.exp += bonusExp(attacker.exp); G.player.gold += bonusGold(attacker.goldDrop); G.player.kills++;
-      G.enemies = G.enemies.filter(e => e !== attacker);
-      addMsg(tMsg('ta.counterKilled', String(attacker.name)), 'mc');
+      // Route through the single kill pipeline so relic gold/xp mults, boss
+      // victory (a counter that killed the F40 Creator used to soft-lock here),
+      // warden rewards, achievements and fx all fire — instead of hand-rolling
+      // exp/gold/kills, which skipped all of that.
+      killEnemy(attacker);
     }
   }
 }

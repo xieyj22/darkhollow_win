@@ -179,3 +179,23 @@ describe('executeEnemySkill', () => {
     }
   });
 });
+
+describe('executeEnemySkill — heal target faction (P1-6)', () => {
+  // A full-HP caster must heal a hurt ENEMY comrade (!isAlly), never the player's
+  // summon (isAlly===true). The old `a.isAlly` filter selected player summons,
+  // making enemy healers heal the player's side once any caster used the effect.
+  it('heals a hurt enemy comrade, not the player\'s summon', () => {
+    (globalThis as { G?: unknown }).G = {
+      player: { ...minimalPlayer, hp: 100, maxHp: 100 },
+      enemies: [],
+      gameOver: false,
+    };
+    const caster = mk({ hp: 20, maxHp: 20, x: 1, y: 0 });             // full HP → must pick a comrade
+    const summon = mk({ isAlly: true, name: 'Ally', hp: 5, maxHp: 10, x: 2, y: 0 });  // player's summon, hurt
+    const foe = mk({ isAlly: false, name: 'Foe', hp: 5, maxHp: 10, x: 3, y: 0 });     // enemy comrade, hurt
+    G().enemies = [caster, summon, foe];
+    executeEnemySkill(caster, { name: { en: 'Z', zh: 'Z' }, effect: 'heal', chance: 1, cd: 1 });
+    expect(foe.hp).toBeGreaterThan(5);     // enemy comrade healed (floor(20*0.25)=5 → 10)
+    expect(summon.hp).toBe(5);             // player's summon untouched
+  });
+});

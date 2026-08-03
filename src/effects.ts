@@ -80,7 +80,7 @@ export function resetShake(): void {
 
 // Smoke bomb visual: a burst of grey particles that expand and fade around a tile.
 export function burstSmoke(x: number, y: number): void {
-  if (!G || !canvas) return;
+  if (!G || !canvas || reducedMotion) return;
   const r = canvas.getBoundingClientRect();
   const cx = r.left + (x - G.vx) * TS + TS / 2;
   const cy = r.top + (y - G.vy) * TS + TS / 2;

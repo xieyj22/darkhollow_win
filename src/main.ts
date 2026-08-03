@@ -70,6 +70,7 @@ bridge.renderOptions = renderOptions;
 let titleAnim: number | null = null;
 
 function initTitleParticles(): void {
+  if (reducedMotion) return; // accessibility: skip the title particle storm
   const c = document.getElementById('title-particles') as HTMLCanvasElement;
   if (!c) return;
   const pc = c.getContext('2d')!;

@@ -370,9 +370,17 @@ export function applyCorruption(n: number): void {
   // never amplify negative (cleanse) deltas — e.g. void_gear's per-floor
   // applyCorruption(-resist) must not be doubled/halved by relic effects.
   // T4's corruption_ward stacks after this with the same n>0 gate.
-  if (hasRelic('eternal_sand') && n > 0) n = Math.ceil(n / 2);
+  // eternal_sand halves corruption GAIN. Math.ceil(n/2) is correct for n>=2 but
+  // rounds n=1 (every accrual site) back to 1 → the relic did nothing in practice.
+  // For n=1, roll a 50% chance to negate instead. n>0 gate keeps cleanse (-n) safe.
+  if (hasRelic('eternal_sand') && n > 0) {
+    n = n === 1 ? (Math.random() < 0.5 ? 0 : 1) : Math.ceil(n / 2);
+  }
   // Task 4: corruption_ward meta multiplies (same n>0 gate — never amplify cleanse).
-  if (n > 0) n = Math.ceil(n * corruptionWardMult());
+  // Probabilistic gate, not Math.ceil: ceil(1*mult) always rounds back to 1 for
+  // the n=1 sources, which made this meta upgrade a no-op. Each +1 now has
+  // (1-mult) chance to be negated entirely — expected reduction = n*(1-mult).
+  if (n > 0 && Math.random() < (1 - corruptionWardMult())) n -= 1;
   const r = addCorruption(p, n);
   if (r.maxed) { wardenDeath(); return; }
   if (r.crossed && r.after !== 'clean') {
@@ -396,7 +404,7 @@ function wardenDeath(): void {
 }
 
 export function playerDeath(killer: string): void {
-  if (!G) return;
+  if (!G || G.gameOver) return;
   G.gameOver = true;
   addMsg(tMsg('cb.slainBy', killer), 'md');
   snd('death'); setBgmScene('death');
@@ -466,6 +474,11 @@ export function playerVictory(): void {
     bestStreak: p.bestStreak, classIdx: p.ci,
   });
   recordRun({ mode: 'normal', floor: G.floor, kills: p.kills, classIdx: p.ci, result: 'win', turns: p.turns, gold: p.gold, ts: Date.now() });
+
+  // Run is over the moment the Creator falls — clear the save NOW (mirrors
+  // playerDeath). Deferring to resolveEnding left a window where force-quitting on
+  // the Slay/Refuse screen → Continue → re-kill the Creator → double echoes/history.
+  localStorage.removeItem('dh_save');
 
   // Phase 2: present the Creator choice (Slay / Refuse) instead of straight to victory-screen.
   _pendingEchoes = echoes;

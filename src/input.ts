@@ -170,7 +170,11 @@ function pollGamepad(): void {
   if (!gp) return;
   const btn = (i: number) => !!(gp!.buttons[i] && gp!.buttons[i].pressed);
   const edge = (i: number) => btn(i) && !gpPrevBtn[i];
-  const overlay = invOpen || skillOpen || talentOpen || achOpen || helpOpen || eventOpen || menuOpen;
+  const optOv = document.getElementById('options-overlay');
+  const forgeOv = document.getElementById('forge-overlay');
+  const overlay = invOpen || skillOpen || talentOpen || achOpen || helpOpen || eventOpen || menuOpen
+    || !!optOv?.classList.contains('active')
+    || (!!forgeOv && getComputedStyle(forgeOv).display !== 'none');
   if (G && !G.gameOver) {
     if (!overlay) {
       // D-pad

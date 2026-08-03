@@ -30,13 +30,16 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
     const base = se.length > 0 ? pick(se) : pick(el);
     const fs = 1 + (floor - 1) * .12 + (area ? area.enemyScaleBonus : 0);
     let nm = tx(base.n);
-    let hpM = 1, atkM = 1, defAdd = 0, expM = 1, goldM = 1, isElite = false;
+    let hpM = 1, atkM = 1, defM = 1, expM = 1, goldM = 1, isElite = false;
     if (floor >= 3 && Math.random() < Math.min(.25, .05 + floor * .01)) {
       const pf = pick(ELITE_PREFIX);
       nm = tx(pf.n) + nm;
-      hpM = pf.hpM; atkM = pf.atkM; defAdd = pf.defM || 0; expM = pf.expM; goldM = pf.goldM; isElite = true;
+      // ElitePrefix.defM is a MULTIPLICATIVE tier bonus (same shape as hpM/atkM);
+      // route it via defM, not defAdd. The old `defAdd = pf.defM` treated the 2x
+      // multiplier as a flat +2, capping "heavy armor" elites at ~60% of intended def.
+      hpM = pf.hpM; atkM = pf.atkM; defM = pf.defM || 1; expM = pf.expM; goldM = pf.goldM; isElite = true;
     }
-    return makeEnemy(base, x, y, fs, { hpM, atkM, defAdd, expM, goldM, isElite }, nm);
+    return makeEnemy(base, x, y, fs, { hpM, atkM, defM, expM, goldM, isElite }, nm);
   };
 
   // Guarantee at least one enemy in every non-start room, then scatter extras
@@ -58,7 +61,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   // BossDef with floor scaling so F45/F50/... always have a boss. Only fires
   // in endless runs (normal mode ends at FINAL), but the floor>FINAL gate makes
   // it self-guarding regardless.
-  if (floor > FINAL && floor % 5 === 0 && G) {
+  if (floor > FINAL && floor % 5 === 0 && G && G.endless) {
     const base = pick(BOSSES);
     const fs = 1 + (floor - 1) * .1; // boss scale (.1), not enemy scale (.12)
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];

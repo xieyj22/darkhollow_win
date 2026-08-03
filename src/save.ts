@@ -44,12 +44,12 @@ function buildSave(): string {
 
 // Silent autosave — no toast/sound, used by the turn loop on a cadence.
 export function autoSave(): void {
-  if (!G || G.gameOver) return;
+  if (!G || G.gameOver || G.branchMode) return;
   persistSave(buildSave());
 }
 
 export function saveGame(): void {
-  if (!G || G.gameOver) return;
+  if (!G || G.gameOver || G.branchMode) return;
   persistSave(buildSave());
   addMsg(t('saved'), 'mi'); snd('pickup');
 }

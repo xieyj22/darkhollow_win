@@ -78,7 +78,9 @@ function castHeal(caster: Enemy, sk: EnemySkill): void {
   // v1: no caster uses this effect yet (see spec §7 follow-ups); kept complete per spec §2.2 deliverable.
   if (!G) return;
   const amt = Math.floor(caster.maxHp * 0.25 * (sk.dmg ?? 1));
-  const hurtAllies = G.enemies.filter(a => a.isAlly && a.hp < a.maxHp);
+  // Heal ENEMY comrades (!isAlly), never the player's summons (isAlly===true).
+  // The old `a.isAlly` filter picked player summons, making enemy healers help the player.
+  const hurtAllies = G.enemies.filter(a => !a.isAlly && a !== caster && a.hp < a.maxHp);
   const target = (caster.hp < caster.maxHp) ? caster : (hurtAllies[0] ?? caster);
   const before = target.hp;
   target.hp = Math.min(target.maxHp, target.hp + amt);

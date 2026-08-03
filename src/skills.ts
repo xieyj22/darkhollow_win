@@ -6,42 +6,26 @@ import { snd } from './audio.js';
 import { flt, shake } from './effects.js';
 import { fxFlash, fxBolt, fxBeam, fxBurst } from './fx.js';
 import { addMsg } from './messages.js';
-import { recalc, killEnemy, checkLevelUp, checkAch, checkAchs, playerVictory, applyCorruption } from './combat.js';
+import { killEnemy, checkLevelUp, checkAchs, grantKillRewards, applyCorruption } from './combat.js';
 import { FINAL } from './config.js';
 import { CLASSES } from './data.js';
 import { bonusGold, bonusExp } from './meta.js';
-import { getSkillModifiers, onPlayerKill, getSpellPenMult } from './talents.js';
-import { grantRandomRelic, relicOnKill } from './relics.js';
+import { getSkillModifiers, getSpellPenMult } from './talents.js';
 import { t, tMsg, tx } from './i18n.js';
 
 let _endTurn: (() => void) | null = null;
 export function setEndTurnFn(fn: () => void): void { _endTurn = fn; }
 
-// Helper: process AOE kills with talent triggers, streak, and achievement checks
-function processAoeKills(killedEnemies: Enemy[]): void {
+// Process AOE kills: route each through the single reward pipeline so they get the
+// SAME treatment as melee (relic gold/xp mults, streak, warden rewards, boss lore
+// + full victory guard, onPlayerKill, relicOnKill) instead of a partial hand-rolled
+// copy that skipped most of it (and never fired playerVictory for an AOE Creator kill).
+export function processAoeKills(killedEnemies: Enemy[]): void {
   if (!G) return;
-  const p = G.player;
   for (const e of killedEnemies) {
     fxBurst(e.x, e.y, e.c || '#ff6b6b', e.isBoss ? 26 : 10, e.isBoss ? 1.6 : 0.9);
-    if (e.isBoss || (e.isElite && Math.random() < 0.4)) grantRandomRelic(e.x, e.y, G.floor);
-    // Streak
-    p.streak++;
-    if (p.streak > p.bestStreak) p.bestStreak = p.streak;
-    if (p.streak >= 3) {
-      const bonus = bonusExp(Math.floor(e.exp * .2 * p.streak));
-      p.exp += bonus;
-      addMsg(`🔥 ${p.streak}x${t('sk.killStreak')}+${bonus}XP`, 'ml');
-      checkAch('streak5');
-    }
-    // Boss kill — keep in sync with attack() / killEnemy()
-    if (e.isBoss) {
-      p.bossesKilledThisRun++;
-      checkAch('boss_kill');
-      if (G.floor === FINAL) { playerVictory(); break; }
-    }
-    // Talent on-kill triggers
-    onPlayerKill(e);
-    relicOnKill(e); // relic trigger: soul_harvester
+    grantKillRewards(e);
+    if (G.won) break; // grantKillRewards may have fired playerVictory (F40 Creator)
   }
   checkAchs();
 }
