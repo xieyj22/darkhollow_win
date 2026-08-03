@@ -58,6 +58,8 @@ export interface ClassDef {
 
 export interface WeaponDef {
   n: I18nText;
+  id?: string;
+  flavor?: I18nText;
   r: number;
   a: number;
   ch: string;
@@ -67,6 +69,8 @@ export interface WeaponDef {
 
 export interface ArmorDef {
   n: I18nText;
+  id?: string;
+  flavor?: I18nText;
   r: number;
   d: number;
   ch: string;
@@ -76,6 +80,8 @@ export interface ArmorDef {
 
 export interface AccessoryDef {
   n: I18nText;
+  id?: string;
+  flavor?: I18nText;
   r: number;
   a: number;
   d: number;
@@ -86,6 +92,8 @@ export interface AccessoryDef {
 
 export interface PotionDef {
   n: I18nText;
+  id?: string;
+  flavor?: I18nText;
   ef: string;
   v: number;
   c: string;
@@ -95,6 +103,8 @@ export interface PotionDef {
 
 export interface ScrollDef {
   n: I18nText;
+  id?: string;
+  flavor?: I18nText;
   ef: string;
   v: number;
   c: string;
@@ -104,6 +114,8 @@ export interface ScrollDef {
 
 export interface ConsumableDef {
   n: I18nText;
+  id?: string;
+  flavor?: I18nText;
   ef: string;
   v: number;
   c: string;
@@ -115,6 +127,8 @@ export interface ConsumableDef {
 
 export interface FoodDef {
   n: I18nText;
+  id?: string;
+  flavor?: I18nText;
   hungerRestore: number;
   hpHeal?: number;
   c: string;
@@ -156,8 +170,9 @@ export interface Item {
   dur?: number;
   // gold
   value?: number;
-  // runtime
-  id?: boolean;
+  // catalog id — matches the def.id the item was generated from; used as the
+  // Item Codex / first-pickup key (stable across languages, unlike `name`).
+  id?: string;
   // element & set
   el?: Element;
   set?: string;
@@ -514,6 +529,7 @@ export interface RelicDef {
   rarity: number;   // 0-4 (reuses RARITY_C palette)
   effect: string;   // effect key (interpreted in relics.ts)
   value: number;    // effect magnitude
+  flavor?: I18nText; // lore blurb for the intro card / codex (separate from effect `d`)
 }
 
 // --- Save Data ---
