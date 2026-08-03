@@ -1,11 +1,34 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-vi.mock('../data.js', () => ({ META_UPGRADES: [], ACH_DEFS: [], RELICS: [] }));
+vi.mock('../data.js', () => ({
+  META_UPGRADES: [], ACH_DEFS: [], RELICS: [],
+  ALL_WEAPONS: [], ALL_ARMORS: [], ALL_ACCESSORIES: [],
+  ALL_POTIONS: [], ALL_SCROLLS: [], ALL_CONSUMABLES: [],
+  FOODS: [],
+  ENDLESS_GEAR: { weapons: [], armors: [], accessories: [] },
+}));
 vi.mock('../audio.js', () => ({ snd: () => {} }));
-vi.mock('../state.js', () => ({ lang: 'en' }));
+
+// Mutable intro-state mock: introOpen must actually flip when setIntroOpen runs,
+// otherwise the queue-advance assertions can't hold. vi.hoisted keeps the shared
+// object alive before the (hoisted) vi.mock factory executes.
+const introState = vi.hoisted(() => ({ open: false, enabled: true }));
+vi.mock('../state.js', () => ({
+  lang: 'en',
+  get introOpen() { return introState.open; },
+  get introEnabled() { return introState.enabled; },
+  setIntroOpen: vi.fn((v: boolean) => { introState.open = v; }),
+}));
+vi.mock('../ui-panels.js', () => ({ showOverlay: vi.fn(), hideOverlay: vi.fn() }));
+vi.mock('../meta.js', async () => {
+  const actual = await vi.importActual<typeof import('../meta.js')>('../meta.js');
+  return { ...actual, discoverItem: vi.fn(actual.discoverItem) };
+});
 
 import { initMeta, getMeta, discoverItem } from '../meta.js';
+import { queueItemIntro, closeItemIntro } from '../item-intro.js';
+import { showOverlay, hideOverlay } from '../ui-panels.js';
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => { localStorage.clear(); introState.open = false; introState.enabled = true; });
 
 describe('discoverItem', () => {
   it('returns true on first discovery and persists', () => {
@@ -26,5 +49,36 @@ describe('discoverItem', () => {
   });
   it('initMeta seeds discoveredItems as []', () => {
     expect(initMeta().discoveredItems).toEqual([]);
+  });
+});
+
+describe('intro queue', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // showNext() writes to #item-intro-content/#item-intro-hint; provide them so
+    // getElementById doesn't return null under happy-dom (prod has them in index.html).
+    document.body.innerHTML = '<div id="item-intro-content"></div><div id="item-intro-hint"></div>';
+  });
+
+  it('first pickup of an item shows overlay; second does not', () => {
+    (discoverItem as any).mockReturnValue(true);
+    const item = { type: 'weapon', name: 'Iron Sword', id: 'iron_sword', rarity: 0, ch: ')', c: '#fff', desc: '', x: 0, y: 0 } as any;
+    queueItemIntro(item);
+    expect(showOverlay).toHaveBeenCalledWith('item-intro-overlay');
+    (discoverItem as any).mockReturnValue(false);
+    queueItemIntro(item);
+    expect(showOverlay).toHaveBeenCalledTimes(1); // not called again
+  });
+
+  it('multiple first pickups queue and closeItemIntro advances', () => {
+    (discoverItem as any).mockReturnValue(true);
+    const mk = (id: string) => ({ type: 'potion', name: id, id, rarity: 0, ch: '!', c: '#fff', desc: '', x: 0, y: 0 } as any);
+    queueItemIntro(mk('heal_potion'));
+    queueItemIntro(mk('mana_potion')); // queued while first is showing
+    expect(showOverlay).toHaveBeenCalledTimes(1);
+    closeItemIntro(); // closes #1 → should show #2
+    expect(showOverlay).toHaveBeenCalledTimes(2);
+    closeItemIntro(); // closes #2 → queue empty
+    expect(hideOverlay).toHaveBeenCalledWith('item-intro-overlay');
   });
 });
