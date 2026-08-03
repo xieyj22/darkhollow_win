@@ -37,7 +37,7 @@ export function genWeapon(f: number): Item {
   const rarityMult = 1 + b.r * 0.4;
   const bn = f > 5 ? Math.floor(rng(0, Math.floor(f / 5)) * rarityMult) : 0;
   const a = b.a + bn;
-  return { type: 'weapon', name: itemName(b), atk: a, rarity: b.r, ch: b.ch, c: '#f4845f', desc: tMsg('ig.atkPlus', String(a)), x: 0, y: 0, el: b.el, set: b.set };
+  return { type: 'weapon', id: b.id, name: itemName(b), atk: a, rarity: b.r, ch: b.ch, c: '#f4845f', desc: tMsg('ig.atkPlus', String(a)), x: 0, y: 0, el: b.el, set: b.set };
 }
 
 export function genArmor(f: number): Item {
@@ -47,14 +47,14 @@ export function genArmor(f: number): Item {
   const rarityMult = 1 + b.r * 0.4;
   const bn = f > 5 ? Math.floor(rng(0, Math.floor(f / 5)) * rarityMult) : 0;
   const d = b.d + bn;
-  return { type: 'armor', name: itemName(b), def: d, rarity: b.r, ch: b.ch, c: '#7ec8e3', desc: tMsg('ig.defPlus', String(d)), x: 0, y: 0, el: b.el, set: b.set };
+  return { type: 'armor', id: b.id, name: itemName(b), def: d, rarity: b.r, ch: b.ch, c: '#7ec8e3', desc: tMsg('ig.defPlus', String(d)), x: 0, y: 0, el: b.el, set: b.set };
 }
 
 export function genAcc(f: number): Item {
   const mr = Math.min(4, Math.floor(f / 4));
   const el = ALL_ACCESSORIES.filter(a => a.r <= mr);
   const b = pick(el);
-  return { type: 'accessory', name: itemName(b), atk: b.a, def: b.d, hp: b.h, rarity: b.r, ch: b.ch, c: '#06d6a0', desc: tMsg('ig.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
+  return { type: 'accessory', id: b.id, name: itemName(b), atk: b.a, def: b.d, hp: b.h, rarity: b.r, ch: b.ch, c: '#06d6a0', desc: tMsg('ig.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
 }
 
 export function genPotion(f: number): Item {
@@ -70,7 +70,7 @@ export function genPotion(f: number): Item {
     b.ef === 'poison' ? tMsg('ig.hpMinus', String(v)) :
     b.ef === 'el_res_fire' ? tMsg('ig.fireResist', String(b.dur)) :
     b.ef === 'el_res_ice' ? tMsg('ig.iceResist', String(b.dur)) : '???';
-  return { type: 'potion', name: itemName(b), ef: b.ef, val: v, dur: b.dur || 0, rarity: 0, ch: b.ch, c: b.c, desc, x: 0, y: 0 };
+  return { type: 'potion', id: b.id, name: itemName(b), ef: b.ef, val: v, dur: b.dur || 0, rarity: 0, ch: b.ch, c: b.c, desc, x: 0, y: 0 };
 }
 
 export function genScroll(f: number): Item {
@@ -87,7 +87,7 @@ export function genScroll(f: number): Item {
     b.ef === 'holy_blast' ? tMsg('ig.holyBlast', String(v)) :
     b.ef === 'summon_ally' ? t('ig.summonAlly') :
     t('ig.fearEnemies');
-  return { type: 'scroll', name: itemName(b), ef: b.ef, val: v, dur: b.dur || 0, rarity: 1, ch: b.ch, c: b.c, desc, x: 0, y: 0 };
+  return { type: 'scroll', id: b.id, name: itemName(b), ef: b.ef, val: v, dur: b.dur || 0, rarity: 1, ch: b.ch, c: b.c, desc, x: 0, y: 0 };
 }
 
 export function genFood(f: number): Item {
@@ -99,7 +99,7 @@ export function genFood(f: number): Item {
   const hpHeal = b.hpHeal || 0;
   const descParts = [tMsg('ig.hungerPlus', String(b.hungerRestore))];
   if (hpHeal > 0) descParts.push(tMsg('ig.hpFood', String(hpHeal)));
-  return { type: 'food', name, ef: 'food', val: b.hungerRestore, hp: hpHeal, rarity: b.r, ch: b.ch, c: b.c, desc: descParts.join(' '), x: 0, y: 0 };
+  return { type: 'food', id: b.id, name, ef: 'food', val: b.hungerRestore, hp: hpHeal, rarity: b.r, ch: b.ch, c: b.c, desc: descParts.join(' '), x: 0, y: 0 };
 }
 
 export function genConsumable(f: number): Item {
@@ -120,7 +120,7 @@ export function genConsumable(f: number): Item {
     b.ef === 'torch' ? tMsg('ig.torch', String(b.v), String(b.dur)) :
     b.ef === 'bear_trap' ? tMsg('ig.bearTrap', String(v)) :
     tx(b.desc);
-  return { type: 'consumable', name: itemName(b), ef: b.ef, val: v, dur: b.dur || 0, rarity: b.r, ch: b.ch, c: b.c, desc, x: 0, y: 0 };
+  return { type: 'consumable', id: b.id, name: itemName(b), ef: b.ef, val: v, dur: b.dur || 0, rarity: b.r, ch: b.ch, c: b.c, desc, x: 0, y: 0 };
 }
 
 // ===== Endless-exclusive gear (Task 1) =====
@@ -144,12 +144,12 @@ export function genEndlessGear(floor: number, type?: 'weapon' | 'armor' | 'acces
   const bonus = Math.floor((floor - 41) / 5 * 2);  // F41:0 / F60:7 / F100:23
   if (t === 'weapon') {
     const b = pick(ENDLESS_GEAR.weapons);
-    return { type: 'weapon', name: tx(b.n), atk: b.a + bonus, rarity: 5, ch: b.ch, c: '#9b5de5', desc: tMsg('el.atkPlus', String(b.a + bonus)), x: 0, y: 0, el: b.el, set: b.set };
+    return { type: 'weapon', id: b.id, name: tx(b.n), atk: b.a + bonus, rarity: 5, ch: b.ch, c: '#9b5de5', desc: tMsg('el.atkPlus', String(b.a + bonus)), x: 0, y: 0, el: b.el, set: b.set };
   }
   if (t === 'armor') {
     const b = pick(ENDLESS_GEAR.armors);
-    return { type: 'armor', name: tx(b.n), def: b.d + bonus, rarity: 5, ch: b.ch, c: '#7ec8e3', desc: tMsg('el.defPlus', String(b.d + bonus)), x: 0, y: 0, el: b.el, set: b.set };
+    return { type: 'armor', id: b.id, name: tx(b.n), def: b.d + bonus, rarity: 5, ch: b.ch, c: '#7ec8e3', desc: tMsg('el.defPlus', String(b.d + bonus)), x: 0, y: 0, el: b.el, set: b.set };
   }
   const b = pick(ENDLESS_GEAR.accessories);
-  return { type: 'accessory', name: tx(b.n), atk: b.a, def: b.d, hp: b.h, rarity: 5, ch: b.ch, c: '#06d6a0', desc: tMsg('el.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
+  return { type: 'accessory', id: b.id, name: tx(b.n), atk: b.a, def: b.d, hp: b.h, rarity: 5, ch: b.ch, c: '#06d6a0', desc: tMsg('el.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set };
 }
