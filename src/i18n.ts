@@ -129,6 +129,8 @@ export const L: Record<string, I18nText | I18nText[]> = {
   optBarCues: { en: 'Bar Shape Cues', zh: '状态条图标' },
   optLegend: { en: 'Show Legend', zh: '显示图例' },
   optKeys: { en: 'Show Key Hints', zh: '显示键位提示' },
+  "opt.introEnabled": { en: "First-Pickup Item Intro", zh: "首次拾取道具介绍" },
+  "opt.introEnabledDesc": { en: "Show a card the first time you pick up an item or relic", zh: "首次拾到道具/圣物时弹出介绍卡片" },
   cbOff: { en: 'Off', zh: '关闭' },
   cbProto: { en: 'Protanopia', zh: '红色盲' },
   cbDeutan: { en: 'Deuteranopia', zh: '绿色盲' },

@@ -30,6 +30,7 @@ export let achOpen = false;
 export let talentOpen = false;
 export let eventOpen = false;
 export let eventActions: Array<() => void> = [];
+export let introOpen = false;
 
 export function setInvOpen(v: boolean) { invOpen = v; }
 export function setHelpOpen(v: boolean) { helpOpen = v; }
@@ -37,6 +38,7 @@ export function setSkillOpen(v: boolean) { skillOpen = v; }
 export function setAchOpen(v: boolean) { achOpen = v; }
 export function setTalentOpen(v: boolean) { talentOpen = v; }
 export function setEventOpen(v: boolean) { eventOpen = v; }
+export function setIntroOpen(v: boolean) { introOpen = v; }
 export function setEventActions(a: Array<() => void>) { eventActions = a; }
 
 // Language
@@ -94,6 +96,11 @@ export function setColorblind(v: CBMode) { colorblind = v; localStorage.setItem(
 // Status-bar shape cues (accessibility) — icon redundancy for HP/MP/XP/Hunger. On by default.
 export let barCues: boolean = localStorage.getItem('dh_bar_cues') !== '0';
 export function setBarCues(v: boolean) { barCues = v; localStorage.setItem('dh_bar_cues', v ? '1' : '0'); }
+
+// First-pickup item intro popup (on by default). When off, pickups still record
+// to discoveredItems (codex unaffected) but don't queue the intro card.
+export let introEnabled: boolean = localStorage.getItem('dh_intro_enabled') !== '0';
+export function setIntroEnabled(v: boolean) { introEnabled = v; localStorage.setItem('dh_intro_enabled', v ? '1' : '0'); }
 
 // Pause menu open flag (not persisted — a transient UI state like invOpen/helpOpen)
 export let menuOpen = false;
