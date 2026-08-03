@@ -17,6 +17,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 vi.mock('../state.js', () => ({
   get G(): unknown { return (globalThis as { G?: unknown }).G; },
   lang: 'en',
+  // grantRelic → queueRelicIntro reads introEnabled; keep intro disabled so the
+  // quiet discoverItem branch runs (no overlay/DOM needed in this suite).
+  introEnabled: false,
 }));
 vi.mock('../utils.js', () => ({
   rng: () => 0,
@@ -52,6 +55,7 @@ vi.mock('../meta.js', () => ({
   recordRun: () => {},
   recordWardenLegacy: () => {},
   unlockLore: vi.fn(),
+  discoverItem: () => false,
   endlessLuckMult: () => 1,
   corruptionWardMult: () => 1,
 }));
@@ -59,6 +63,9 @@ vi.mock('../warden.js', () => ({
   pickWardenRelic: () => null,
   nextWardenMemory: () => null,
   wardenMemoryText: () => null,
+  // relics.ts now imports item-intro.ts → ui-panels.ts → lore.ts, which reads
+  // WARDEN_MEMORIES at module load; provide an empty array so the mock satisfies it.
+  WARDEN_MEMORIES: [],
 }));
 vi.mock('../steam.js', () => ({ unlockAchievement: () => {} }));
 // game.ts deps (only exercised by the null_crown test):

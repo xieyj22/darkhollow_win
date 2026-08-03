@@ -10,6 +10,8 @@ import { t, tMsg, rareName, itemName, RARITY_C } from './i18n.js';
 import { ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS } from './data.js';
 import { addMsg } from './messages.js';
 import { recalc, checkLevelUp, killEnemy, applyCorruption } from './combat.js';
+import { queueItemIntro } from './item-intro.js';
+import { discoverItem } from './meta.js';
 
 // Item generation lives in item-gen.ts (Polish-B Q6 split). isGear/isConsumable are
 // imported for local use (inventory caps); the whole family is re-exported so
@@ -477,6 +479,7 @@ export function addItemWithOverflow(item: Item): void {
       p.hp += actual; healMsg = ` +${actual}HP`;
       flt(p.x, p.y, `+${actual}`, '#80ed99');
     }
+    queueItemIntro(item);
     addMsg(tMsg('it.ateFood', item.name, String(item.val || 30), healMsg), 'mh'); snd('heal'); return;
   }
 
@@ -485,6 +488,7 @@ export function addItemWithOverflow(item: Item): void {
   // so the existing handleAutoEquip can swap it in (old gear → returnOldGearToInvOrGold).
   if (isEquipUpgrade(item)) {
     p.inv.push(item);
+    queueItemIntro(item);
     handleAutoEquip(item);
     return;
   }
@@ -501,6 +505,7 @@ export function addItemWithOverflow(item: Item): void {
 
   if (poolCount < cap) {
     p.inv.push(item); addMsg(t('pickedUp') + item.name, 'mp'); snd('pickup');
+    queueItemIntro(item);
     handleAutoEquip(item); return;
   }
 
@@ -521,9 +526,11 @@ export function addItemWithOverflow(item: Item): void {
     p.inv.splice(worstIdx, 1); p.gold += gv;
     addMsg(tMsg('it.overflowToGold', worstItem.name, rareName(worstItem.rarity), String(gv)), 'mp');
     p.inv.push(item); addMsg(t('pickedUp') + item.name, 'mp'); snd('pickup'); handleAutoEquip(item);
+    queueItemIntro(item);
   } else {
     // New item is the weakest: convert it straight to gold.
     const gv = itemToGold(item); p.gold += gv;
+    discoverItem(`${item.type}:${item.id || item.name}`); // record for codex, no popup (never held)
     addMsg(tMsg('it.overflowToGold', item.name, rareName(item.rarity), String(gv)), 'mp'); snd('pickup');
   }
 }

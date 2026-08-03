@@ -35,8 +35,10 @@ function keyFor(item: Item): string {
 }
 
 export function queueItemIntro(item: Item): void {
+  // Gold guard must run BEFORE the intro-disabled branch: otherwise a gold
+  // pickup with intro OFF would record `gold:<name>` into discoveredItems.
+  if (item.type === 'gold') return; // gold is never a catalog/discoverable item
   if (!introEnabled) { discoverItem(keyFor(item)); return; } // record for codex, no popup
-  if (item.type === 'gold') return;
   if (!discoverItem(keyFor(item))) return; // already discovered → no popup
   queue.push({ kind: 'item', item });
   if (!introOpen) showNext();

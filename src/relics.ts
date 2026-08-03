@@ -7,6 +7,7 @@ import type { Player, Enemy } from './types.js';
 import { G, lang } from './state.js';
 import { RELICS } from './data.js';
 import { unlockLore, getMeta } from './meta.js';
+import { queueRelicIntro } from './item-intro.js';
 import { addMsg } from './messages.js';
 import { flt } from './effects.js';
 import { fxFlash, fxBurst } from './fx.js';
@@ -171,6 +172,7 @@ export function grantRelic(id: string, x: number, y: number): void {
   if (!def) return;
   p.relics.push(id);
   unlockLore('relic:' + id);
+  queueRelicIntro(id);
   _recalc?.();
   const name = tx(def.n);
   addMsg(tMsg('rl.acquired', name), 'mach');

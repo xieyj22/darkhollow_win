@@ -82,3 +82,39 @@ describe('intro queue', () => {
     expect(hideOverlay).toHaveBeenCalledWith('item-intro-overlay');
   });
 });
+
+// Task 8: gold-guard ordering. The gold-type guard must run BEFORE the intro-disabled
+// branch; otherwise a gold pickup with intro OFF would record `gold:<name>` into
+// discoveredItems. (The brief's overflow-to-gold integration test used a broken spy
+// on a throwaway object and is deferred to manual verification in Task 11 — see report.)
+describe('queueItemIntro gold guard (Task 8 wiring)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    document.body.innerHTML = '<div id="item-intro-content"></div><div id="item-intro-hint"></div>';
+  });
+
+  it('gold items are never recorded, even when intro is disabled', () => {
+    introState.enabled = false;
+    const gold = { type: 'gold', name: 'Gold', rarity: 0, ch: '*', c: '#ffd700', desc: '', x: 0, y: 0 } as any;
+    queueItemIntro(gold);
+    expect(discoverItem).not.toHaveBeenCalled();
+    expect(showOverlay).not.toHaveBeenCalled();
+  });
+
+  it('gold items are never queued, even when intro is enabled and discoverItem would say yes', () => {
+    introState.enabled = true;
+    (discoverItem as any).mockReturnValue(true); // would queue a normal item
+    const gold = { type: 'gold', name: 'Gold', rarity: 0, ch: '*', c: '#ffd700', desc: '', x: 0, y: 0 } as any;
+    queueItemIntro(gold);
+    expect(discoverItem).not.toHaveBeenCalled();
+    expect(showOverlay).not.toHaveBeenCalled();
+  });
+
+  it('non-gold item with intro disabled records discovery (no popup)', () => {
+    introState.enabled = false;
+    const weapon = { type: 'weapon', name: 'Iron Sword', id: 'iron_sword', rarity: 0, ch: ')', c: '#fff', desc: '', x: 0, y: 0 } as any;
+    queueItemIntro(weapon);
+    expect(discoverItem).toHaveBeenCalledWith('weapon:iron_sword');
+    expect(showOverlay).not.toHaveBeenCalled();
+  });
+});
