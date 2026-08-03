@@ -18,6 +18,7 @@ import {
   textScale, setTextScale,
   colorblind, setColorblind,
   barCues, setBarCues,
+  introEnabled, setIntroEnabled,
 } from './state.js';
 import {
   isMuted, setMutedState,
@@ -270,9 +271,11 @@ function renderAccess(body: HTMLElement): void {
 
 function renderGame(body: HTMLElement): void {
   body.innerHTML =
+    row(t('opt.introEnabled'), toggleHtml(introEnabled)) +
     row(t('optLegend'), toggleHtml(legendVisible)) +
     row(t('optKeys'), toggleHtml(keysVisible));
   const toggles = body.querySelectorAll<HTMLInputElement>('.toggle input');
-  if (toggles[0]) bindToggle(toggles[0], v => { if (v !== legendVisible) toggleLegend(); });
-  if (toggles[1]) bindToggle(toggles[1], v => { if (v !== keysVisible) toggleKeys(); });
+  if (toggles[0]) bindToggle(toggles[0], v => { setIntroEnabled(v); });
+  if (toggles[1]) bindToggle(toggles[1], v => { if (v !== legendVisible) toggleLegend(); });
+  if (toggles[2]) bindToggle(toggles[2], v => { if (v !== keysVisible) toggleKeys(); });
 }
