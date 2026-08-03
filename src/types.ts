@@ -173,6 +173,10 @@ export interface Item {
   ef?: string;
   val?: number;
   dur?: number;
+  // catalog subtype (Task 4): armor plate/leather/cloak/robe/scale, accessory
+  // ring/amulet/brooch/crown, scroll fire/frost/arcane/holy, consumable
+  // bomb/trap/pouch/tool, food meat/bread/feast. Drives pickItemTemplate routing.
+  subType?: string;
   // gold
   value?: number;
   // catalog id — matches the def.id the item was generated from; used as the

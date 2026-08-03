@@ -634,6 +634,97 @@ export const TEMPLATES: Record<string, Template> = {
     "................",
     "................",
   ],
+  // Armor subtypes (Task 5): plate/leather/cloak/robe/scale — I_SHIELD stays fallback.
+  I_PLATE: [
+    "................",
+    ".....DDDDDD.....",
+    "....DMMMMMMD....",
+    "...DMMMMMMMMD...",
+    "...DMLMMMMMMD...",
+    "...DMMMMMMMMD...",
+    "...DMMKKKKMMD...",
+    "...DMMKLLKMMD...",
+    "...DMMKKKKMMD...",
+    "...DMMMMMMMMD...",
+    "...DMMWWWWMMD...",
+    "....DMMMMMMD....",
+    ".....DDDDDD.....",
+    "......DDDD......",
+    "................",
+    "................",
+  ],
+  I_LEATHER: [
+    "................",
+    "................",
+    "....DDDDDDDD....",
+    "...DMMMMMMMMD...",
+    "..DMMMMMMMMMMD..",
+    "..DMMNMMMMNMMD..",
+    "..DMMMMGGMMMMD..",
+    "..DMMMMGGMMMMD..",
+    "..DMMNMMMMNMMD..",
+    "..DMMMMMMMMMMD..",
+    "...DMMMMMMMMD...",
+    "....DDDDDDDD....",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  I_CLOAK: [
+    "................",
+    ".......KK.......",
+    "......KGGK......",
+    ".....KMMMMK.....",
+    "....KMMMMMMK....",
+    "....KMMLMMMK....",
+    "...KMMMMMMMMK...",
+    "...KMMLMMMMMK...",
+    "..KMMMMMMMMMMK..",
+    "..KMMLMMMMMMMK..",
+    "..KMMMMMMMMMMK..",
+    "..KMMMMMMMMMMK..",
+    "...KMMMMMMMMK...",
+    "....KKKKKKKK....",
+    "................",
+    "................",
+  ],
+  I_ROBE: [
+    "................",
+    ".......KK.......",
+    "......KMMK......",
+    ".....KMMLMK.....",
+    "....KMMMMMMK....",
+    "....KMMMMMMK....",
+    "....KMMMMMMK....",
+    "....KMMMMMMK....",
+    "....KMMMMMMK....",
+    "...KMMMMMMMMK...",
+    "...KMMMMMMMMK...",
+    "..KMMMMMMMMMMK..",
+    "..KKKKKKKKKKKK..",
+    "................",
+    "................",
+    "................",
+  ],
+  I_SCALE: [
+    "................",
+    "................",
+    "..DMDMDMDMDMDM..",
+    "..MMMMMMMMMMMM..",
+    "..DMDMDMDMDMDM..",
+    "..MMMMMMMMMMMM..",
+    ".DMDMDMDMDMDMDM.",
+    ".MMMMMMMMMMMMMM.",
+    ".DMDMDMDMDMDMDM.",
+    ".MMMMMMMMMMMMMM.",
+    "..DMDMDMDMDMDM..",
+    "..MMMMMMMMMMMM..",
+    "..DDDDDDDDDDDD..",
+    "................",
+    "................",
+    "................",
+  ],
   I_RING: [
     "................",
     "................",
@@ -646,6 +737,61 @@ export const TEMPLATES: Record<string, Template> = {
     "....D......D....",
     "....D......D....",
     ".....DDDDDD.....",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // Accessory subtypes (Task 5): amulet/brooch/crown — I_RING reused for ring.
+  I_AMULET: [
+    "................",
+    ".....KK..KK.....",
+    "....KMMMMMMK....",
+    ".....KMMMMK.....",
+    "......KMMK......",
+    "......DGGD......",
+    ".....DMMMMD.....",
+    ".....DWMMMD.....",
+    ".....DMMMMD.....",
+    "......DGGD......",
+    ".......KK.......",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  I_BROOCH: [
+    "................",
+    "................",
+    ".......N........",
+    "......NN........",
+    ".....N..........",
+    "..KKKKKKKKKKKK..",
+    "..KMMMGGMGMMMK..",
+    "..KMMMMMMMMMMK..",
+    "..KMMMGGMGMMMK..",
+    "..KKKKKKKKKKKK..",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  I_CROWN: [
+    "................",
+    ".......K........",
+    "......KMK.......",
+    ".....KMMMK......",
+    "...K.......K....",
+    "...KK.....KK....",
+    "....KKKKKKKK....",
+    "..KKKKKKKKKKKK..",
+    "..KWWGGGGGGWWK..",
+    "..KGGGGGGGGGGK..",
+    "..KKKKKKKKKKKK..",
     "................",
     "................",
     "................",
@@ -670,6 +816,79 @@ export const TEMPLATES: Record<string, Template> = {
     "................",
     "................",
   ],
+  // Scroll subtypes (Task 5): fire/frost/arcane/holy — shared body, elemental accent.
+  SC_FIRE: [
+    "................",
+    "................",
+    "......NNNN......",
+    ".....NMMMMN.....",
+    "....NMWWWWMN....",
+    "...NMWWWWWWMN...",
+    "...NMWWEEWWMN...",
+    "...NMWLEELWMN...",
+    "...NMWWEEWWMN...",
+    "...NMWWWWWWMN...",
+    "....NMWWWWMN....",
+    ".....NMMMMN.....",
+    "......NNNN......",
+    "................",
+    "................",
+    "................",
+  ],
+  SC_FROST: [
+    "................",
+    "................",
+    "......NNNN......",
+    ".....NMMMMN.....",
+    "....NMWWWWMN....",
+    "...NMWWWWWWMN...",
+    "...NMWCWWCWMN...",
+    "...NMWCCCCWMN...",
+    "...NMWCWWCWMN...",
+    "...NMWWWWWWMN...",
+    "....NMWWWWMN....",
+    ".....NMMMMN.....",
+    "......NNNN......",
+    "................",
+    "................",
+    "................",
+  ],
+  SC_ARCANE: [
+    "................",
+    "................",
+    "......NNNN......",
+    ".....NMMMMN.....",
+    "....NMWWWWMN....",
+    "...NMWWWWWWMN...",
+    "...NMWKWWKWMN...",
+    "...NMWWKKWWMN...",
+    "...NMWKWWKWMN...",
+    "...NMWWWWWWMN...",
+    "....NMWWWWMN....",
+    ".....NMMMMN.....",
+    "......NNNN......",
+    "................",
+    "................",
+    "................",
+  ],
+  SC_HOLY: [
+    "................",
+    "................",
+    "......NNNN......",
+    ".....NMMMMN.....",
+    "....NMWWWWMN....",
+    "...NMWWWWWWMN...",
+    "...NMWWGGWWMN...",
+    "...NMWGWWGWMN...",
+    "...NMWWGGWWMN...",
+    "...NMWWWWWWMN...",
+    "....NMWWWWMN....",
+    ".....NMMMMN.....",
+    "......NNNN......",
+    "................",
+    "................",
+    "................",
+  ],
   I_FOOD: [
     "................",
     "................",
@@ -684,6 +903,61 @@ export const TEMPLATES: Record<string, Template> = {
     "....NMMMMMMN....",
     ".....NMMMMN.....",
     "......NMMN......",
+    "................",
+    "................",
+    "................",
+  ],
+  // Food subtypes (Task 5): meat/bread/feast — I_FOOD stays fallback.
+  FD_MEAT: [
+    "................",
+    "................",
+    "......KK........",
+    ".....KWWK.......",
+    "......KK........",
+    ".....KKMK.......",
+    "....KKMMMMKK....",
+    "...KMMMMMMMMK...",
+    "...KMMMMMMMMK...",
+    "...KMMMLLMMMK...",
+    "...KMMMMMMMMK...",
+    "....KMMMMMMK....",
+    ".....KKKKKK.....",
+    "................",
+    "................",
+    "................",
+  ],
+  FD_BREAD: [
+    "................",
+    "................",
+    "................",
+    "......DDDD......",
+    ".....DMMMMD.....",
+    "....DMMMMMMD....",
+    "...DMMMMMMMMD...",
+    "..DMMNMMMNMMMD..",
+    "..DMMMMMMMMMMD..",
+    "..DMMNMMMNMMMD..",
+    "..DMMMMMMMMMMD..",
+    "...DMMMMMMMMD...",
+    "....DMMMMMMD....",
+    ".....DDDDDD.....",
+    "................",
+    "................",
+  ],
+  FD_FEAST: [
+    "................",
+    "................",
+    "................",
+    "..CCCCCCCCCCCC..",
+    ".CCCCCCCCCCCCCC.",
+    ".CCMMMMMMMMMMCC.",
+    ".CCMMNMMNMMMMCC.",
+    ".CCMMMMMMMMMMCC.",
+    ".CCMMGMMMGMMMCC.",
+    ".CCMMMMMMMMMMCC.",
+    ".CCCCCCCCCCCCCC.",
+    "..CCCCCCCCCCCC..",
+    "................",
     "................",
     "................",
     "................",
@@ -814,6 +1088,43 @@ export const TEMPLATES: Record<string, Template> = {
     ".....DDDDDD.....",
     "................",
     "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // Consumable subtypes (Task 5): trap/tool — C_BOMB and C_POUCH reused.
+  C_TRAP: [
+    "................",
+    "................",
+    "...K..K..K..K...",
+    "..KKKKKKKKKKKKK.",
+    "..K...........K.",
+    "..KKKKKKKKKKKKK.",
+    "...K..K..K..K...",
+    ".....NNNNNN.....",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  C_TOOL: [
+    "................",
+    ".......E........",
+    "......EWE.......",
+    ".......E........",
+    "......ENE.......",
+    ".......N........",
+    ".......N........",
+    ".......N........",
+    ".......N........",
+    ".......N........",
+    ".......N........",
+    ".......N........",
+    "......KNNK......",
     "................",
     "................",
     "................",
@@ -1108,23 +1419,43 @@ function pickWeaponTemplate(name: string): { tpl: Template; key: string } {
   return { tpl: TEMPLATES.W_SWORD, key: 'W_SWORD' };
 }
 
-// Pick an item template by type (+ name for weapons, + effect for potions/consumables).
+// Pick an item template by type (+ name for weapons, + subType/ef for variants).
 function pickItemTemplate(item: Item): { tpl: Template; key: string } {
   switch (item.type) {
     case 'weapon': return pickWeaponTemplate(item.name);
-    case 'armor': return { tpl: TEMPLATES.I_SHIELD, key: 'I_SHIELD' };
-    case 'accessory': return { tpl: TEMPLATES.I_RING, key: 'I_RING' };
+    case 'armor': {
+      // plate/leather/cloak/robe/scale → I_PLATE/I_LEATHER/...; default I_SHIELD.
+      const k = 'I_' + (item.subType || 'shield').toUpperCase();
+      return TEMPLATES[k] ? { tpl: TEMPLATES[k], key: k } : { tpl: TEMPLATES.I_SHIELD, key: 'I_SHIELD' };
+    }
+    case 'accessory': {
+      // ring/amulet/brooch/crown → I_RING/I_AMULET/I_BROOCH/I_CROWN.
+      const sub = item.subType || 'ring';
+      const k = 'I_' + sub.toUpperCase();
+      return TEMPLATES[k] ? { tpl: TEMPLATES[k], key: k } : { tpl: TEMPLATES.I_RING, key: 'I_RING' };
+    }
     case 'potion':
       if (item.ef === 'heal') return { tpl: TEMPLATES.P_HEALTH, key: 'P_HEALTH' };
       if (item.ef === 'mana') return { tpl: TEMPLATES.P_MANA, key: 'P_MANA' };
       if (item.ef === 'poison') return { tpl: TEMPLATES.P_POISON, key: 'P_POISON' };
       return { tpl: TEMPLATES.P_GENERIC, key: 'P_GENERIC' };
-    case 'scroll': return { tpl: TEMPLATES.I_SCROLL, key: 'I_SCROLL' };
-    case 'food': return { tpl: TEMPLATES.I_FOOD, key: 'I_FOOD' };
+    case 'scroll': {
+      // fire/frost/arcane/holy → SC_FIRE/SC_FROST/SC_ARCANE/SC_HOLY; default I_SCROLL.
+      const k = item.subType ? 'SC_' + item.subType.toUpperCase() : 'I_SCROLL';
+      return TEMPLATES[k] ? { tpl: TEMPLATES[k], key: k } : { tpl: TEMPLATES.I_SCROLL, key: 'I_SCROLL' };
+    }
+    case 'food': {
+      // meat/bread/feast → FD_MEAT/FD_BREAD/FD_FEAST; default I_FOOD.
+      const k = item.subType ? 'FD_' + item.subType.toUpperCase() : 'I_FOOD';
+      return TEMPLATES[k] ? { tpl: TEMPLATES[k], key: k } : { tpl: TEMPLATES.I_FOOD, key: 'I_FOOD' };
+    }
     case 'gold': return { tpl: TEMPLATES.I_GOLD, key: 'I_GOLD' };
-    case 'consumable':
-      if (item.ef === 'bomb') return { tpl: TEMPLATES.C_BOMB, key: 'C_BOMB' };
-      return { tpl: TEMPLATES.C_POUCH, key: 'C_POUCH' };
+    case 'consumable': {
+      // bomb/trap/pouch/tool → C_BOMB/C_TRAP/C_POUCH/C_TOOL (subType-driven).
+      const m: Record<string, string> = { bomb: 'C_BOMB', trap: 'C_TRAP', pouch: 'C_POUCH', tool: 'C_TOOL' };
+      const k = m[item.subType || 'pouch'] || 'C_POUCH';
+      return { tpl: TEMPLATES[k], key: k };
+    }
     default: return { tpl: TEMPLATES.C_POUCH, key: 'C_POUCH' };
   }
 }
