@@ -7,7 +7,7 @@ import { dst } from './utils.js';
 import { RARITY_C, rareName, t, tx } from './i18n.js';
 import { paintIcon } from './sprites.js';
 import { getMeta } from './meta.js';
-import { CLASSES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, RELICS } from './data.js';
+import { CLASSES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, ENDLESS_GEAR, RELICS } from './data.js';
 import { LORE_ENTRIES, LORE_CATS } from './lore.js';
 import { bridge } from './bridge.js';
 
@@ -241,9 +241,9 @@ function renderLoreSection(): string {
 function renderItemSection(): string {
   const disc = new Set(getMeta().discoveredItems);
   const tables: { type: string; label: string; arr: { id?: string; n: { en: string; zh: string } }[] }[] = [
-    { type: 'weapon', label: t('intro.type.weapon'), arr: ALL_WEAPONS },
-    { type: 'armor', label: t('intro.type.armor'), arr: ALL_ARMORS },
-    { type: 'accessory', label: t('intro.type.accessory'), arr: ALL_ACCESSORIES },
+    { type: 'weapon', label: t('intro.type.weapon'), arr: [...ALL_WEAPONS, ...ENDLESS_GEAR.weapons] },
+    { type: 'armor', label: t('intro.type.armor'), arr: [...ALL_ARMORS, ...ENDLESS_GEAR.armors] },
+    { type: 'accessory', label: t('intro.type.accessory'), arr: [...ALL_ACCESSORIES, ...ENDLESS_GEAR.accessories] },
     { type: 'potion', label: t('intro.type.potion'), arr: ALL_POTIONS },
     { type: 'scroll', label: t('intro.type.scroll'), arr: ALL_SCROLLS },
     { type: 'consumable', label: t('intro.type.consumable'), arr: ALL_CONSUMABLES },

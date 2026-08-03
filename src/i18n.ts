@@ -560,7 +560,6 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "intro.type.scroll": { en: "Scroll", zh: "卷轴" },
   "intro.type.consumable": { en: "Consumable", zh: "消耗品" },
   "intro.type.food": { en: "Food", zh: "食物" },
-  "intro.type.gold": { en: "Gold", zh: "金币" },
   "codex.tabLore": { en: "Lore", zh: "剧情" },
   "codex.tabItems": { en: "Items", zh: "道具" },
   "codex.itemLocked": { en: "🔒 ??? Not yet discovered", zh: "🔒 尚未发现" },
