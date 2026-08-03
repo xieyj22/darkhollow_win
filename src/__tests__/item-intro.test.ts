@@ -25,7 +25,7 @@ vi.mock('../meta.js', async () => {
 });
 
 import { initMeta, getMeta, discoverItem } from '../meta.js';
-import { queueItemIntro, closeItemIntro } from '../item-intro.js';
+import { queueItemIntro, queueRelicIntro, closeItemIntro } from '../item-intro.js';
 import { showOverlay, hideOverlay } from '../ui-panels.js';
 
 beforeEach(() => { localStorage.clear(); introState.open = false; introState.enabled = true; });
@@ -115,6 +115,28 @@ describe('queueItemIntro gold guard (Task 8 wiring)', () => {
     const weapon = { type: 'weapon', name: 'Iron Sword', id: 'iron_sword', rarity: 0, ch: ')', c: '#fff', desc: '', x: 0, y: 0 } as any;
     queueItemIntro(weapon);
     expect(discoverItem).toHaveBeenCalledWith('weapon:iron_sword');
+    expect(showOverlay).not.toHaveBeenCalled();
+  });
+});
+
+// Task 11: queueRelicIntro coverage (noted untested in Task 7 review).
+describe('queueRelicIntro', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    document.body.innerHTML = '<div id="item-intro-content"></div><div id="item-intro-hint"></div>';
+  });
+
+  it('first discovery of a relic shows overlay', () => {
+    (discoverItem as any).mockReturnValue(true);
+    queueRelicIntro('war_totem');
+    expect(discoverItem).toHaveBeenCalledWith('relic:war_totem');
+    expect(showOverlay).toHaveBeenCalledWith('item-intro-overlay');
+  });
+
+  it('already-discovered relic does not show overlay again', () => {
+    (discoverItem as any).mockReturnValue(false);
+    queueRelicIntro('war_totem');
+    expect(discoverItem).toHaveBeenCalledWith('relic:war_totem');
     expect(showOverlay).not.toHaveBeenCalled();
   });
 });

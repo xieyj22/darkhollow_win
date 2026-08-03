@@ -253,7 +253,7 @@ function renderItemSection(): string {
   for (const { type, label, arr } of tables) {
     const rows = arr.map(d => {
       const has = d.id ? disc.has(`${type}:${d.id}`) : false;
-      const name = has ? tx(d.n) : '🔒 ???';
+      const name = has ? tx(d.n) : t('codex.itemLocked');
       return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#ffd700' : '#333'};background:rgba(255,255,255,.02)"><span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
     }).join('');
     if (rows) html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${label}</div>${rows}`;
@@ -261,7 +261,7 @@ function renderItemSection(): string {
   // Relics
   const rrows = RELICS.map(r => {
     const has = disc.has('relic:' + r.id);
-    const name = has ? tx(r.n) : '🔒 ???';
+    const name = has ? tx(r.n) : t('codex.itemLocked');
     return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)"><span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
   }).join('');
   html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${t('intro.relicTag')}</div>${rrows}`;

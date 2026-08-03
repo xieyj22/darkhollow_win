@@ -21,10 +21,11 @@ describe('catalog id + flavor integrity', () => {
     for (const d of [...ENDLESS_GEAR.weapons, ...ENDLESS_GEAR.armors, ...ENDLESS_GEAR.accessories])
       expect(d.id).toBeTruthy();
     for (const r of RELICS) expect(r.id).toBeTruthy(); // relics already have id
-    // global uniqueness
+    // global uniqueness across ALL catalog ids + relics (128 total)
     const ids = [
       ...Object.values(tables).flat().map(d => d.id),
       ...[...ENDLESS_GEAR.weapons, ...ENDLESS_GEAR.armors, ...ENDLESS_GEAR.accessories].map(d => d.id),
+      ...RELICS.map(r => r.id),
     ];
     expect(new Set(ids).size).toBe(ids.length);
   });
