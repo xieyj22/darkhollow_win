@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('../audio.js', () => ({ snd: () => {} }));
 vi.mock('../state.js', () => ({ lang: 'en' }));
 
-import { rarityTint, itemSpriteKind } from '../sprites.js';
+import { rarityTint, itemSpriteKind, catalogSpriteColor } from '../sprites.js';
 import { genWeapon } from '../item-gen.js';
 
 describe('rarityTint', () => {
@@ -48,5 +48,32 @@ describe('itemSpriteKind', () => {
   it('armor maps to I_SHIELD (pre-W2 default)', () => {
     const it = { type: 'armor', c: '#7ec8e3', rarity: 0 } as any;
     expect(itemSpriteKind(it)).toBe('I_SHIELD');
+  });
+});
+
+describe('catalogSpriteColor', () => {
+  it('weapon def (no c) → rarityTint on warm base', () => {
+    expect(catalogSpriteColor({ r: 2 }, 'weapon')).toBe(rarityTint('#f4845f', 2));
+  });
+  it('armor def → rarityTint on cool blue base', () => {
+    expect(catalogSpriteColor({ r: 1 }, 'armor')).toBe(rarityTint('#7ec8e3', 1));
+  });
+  it('accessory def → rarityTint on green base', () => {
+    expect(catalogSpriteColor({ r: 3 }, 'accessory')).toBe(rarityTint('#06d6a0', 3));
+  });
+  it('weapon rarity 5 → void purple (endless gear)', () => {
+    expect(catalogSpriteColor({ r: 5 }, 'weapon')).toBe('#9b5de5');
+  });
+  it('potion def (has c, no r) → returns def.c verbatim', () => {
+    expect(catalogSpriteColor({ c: '#e63946' }, 'potion')).toBe('#e63946');
+  });
+  it('consumable def (has c and r) → returns def.c (r ignored for consumables)', () => {
+    expect(catalogSpriteColor({ c: '#abc123', r: 4 }, 'consumable')).toBe('#abc123');
+  });
+  it('food def → returns def.c', () => {
+    expect(catalogSpriteColor({ c: '#06d6a0', r: 2 }, 'food')).toBe('#06d6a0');
+  });
+  it('falls back to #ccc when neither r nor c', () => {
+    expect(catalogSpriteColor({}, 'potion')).toBe('#cccccc');
   });
 });

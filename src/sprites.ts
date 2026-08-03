@@ -3,7 +3,7 @@
 // Enemy templates use 'M' (main = enemy color). Item templates are per-type AND
 // sub-type (sword/axe/hammer..., health/mana/poison...). Player has 4 class
 // templates. To swap in real PNG art later, replace blit()/getSprite() — render.ts unchanged.
-import type { Enemy, Item } from './types.js';
+import type { Enemy, Item, ItemType } from './types.js';
 import { TS } from './config.js';
 import { darken } from './utils.js';
 
@@ -926,6 +926,20 @@ export function rarityTint(base: string, rarity: number): string {
     case 2: return base;
     case 3: return lighten(base, 0.18);
     default: return lighten(base, 0.34);   // rarity 4
+  }
+}
+
+// Derive a sprite color for a catalog DEF (not a runtime Item). Weapons/armor/
+// accessories store only rarity `r` (no `c`), so their color comes from
+// rarityTint on a per-type base hue; potions/scrolls/consumables/food/relics
+// already carry `c` and return it verbatim. Used by the Codex items tab, which
+// iterates defs rather than live Items.
+export function catalogSpriteColor(def: { r?: number; c?: string }, type: ItemType): string {
+  switch (type) {
+    case 'weapon': return rarityTint('#f4845f', def.r ?? 2);
+    case 'armor': return rarityTint('#7ec8e3', def.r ?? 2);
+    case 'accessory': return rarityTint('#06d6a0', def.r ?? 2);
+    default: return def.c || '#cccccc';   // potion/scroll/consumable/food/relic
   }
 }
 

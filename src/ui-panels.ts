@@ -5,7 +5,8 @@ import { G, lang, legendVisible, setLegendVisible, keysVisible, setKeysVisible, 
 import { TS, MW, MH, TL } from './config.js';
 import { dst } from './utils.js';
 import { RARITY_C, rareName, t, tx } from './i18n.js';
-import { paintIcon } from './sprites.js';
+import { paintIcon, paintItemIcon, catalogSpriteColor } from './sprites.js';
+import type { ItemType } from './types.js';
 import { getMeta } from './meta.js';
 import { CLASSES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, ENDLESS_GEAR, RELICS } from './data.js';
 import { LORE_ENTRIES, LORE_CATS } from './lore.js';
@@ -223,6 +224,26 @@ export function renderCodex(): void {
   content.querySelectorAll<HTMLElement>('[data-ctab]').forEach(btn => {
     btn.onclick = () => { codexTab = (btn.dataset.ctab as 'lore' | 'items') || 'lore'; renderCodex(); };
   });
+  // Paint pixel sprites into each discovered item row's canvas. Reuses the
+  // help-panel pattern: query all canvas.lic, then for each look up the catalog
+  // def by data-type+data-id and construct a minimal Item-like carrying the
+  // derived color (catalogSpriteColor) + ef/subType routing for paintItemIcon.
+  content.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => {
+    const type = (cv.dataset.type || '') as ItemType;
+    const id = cv.dataset.id || '';
+    if (!id) return;
+    const def = findCatalogDefFull(type, id);
+    if (!def) return;
+    const itemLike = {
+      type, id,
+      name: def.n ? tx(def.n) : '',
+      c: catalogSpriteColor(def, type),
+      ef: def.ef,
+      subType: def.subType,
+      rarity: def.r ?? 0,
+    } as any;
+    paintItemIcon(cv, itemLike);
+  });
 }
 
 function renderLoreSection(): string {
@@ -238,9 +259,26 @@ function renderLoreSection(): string {
   }).join('') || `<div style="color:#555;padding:12px">${t('up.noEntries')}</div>`;
 }
 
+// Reverse-lookup a full catalog def (with r/c/ef/subType) by type + id — used by
+// the Codex items tab to build an Item-like for paintItemIcon. Relics are
+// intentionally excluded (Task 6 wires relic sprites separately).
+function findCatalogDefFull(type: ItemType, id: string): { r?: number; c?: string; ef?: string; subType?: string; n?: { en: string; zh: string } } | null {
+  const search = <T extends { id?: string }>(arr: T[]) => arr.find(d => d.id === id) || null;
+  switch (type) {
+    case 'weapon': return search([...ALL_WEAPONS, ...ENDLESS_GEAR.weapons]);
+    case 'armor': return search([...ALL_ARMORS, ...ENDLESS_GEAR.armors]);
+    case 'accessory': return search([...ALL_ACCESSORIES, ...ENDLESS_GEAR.accessories]);
+    case 'potion': return search(ALL_POTIONS);
+    case 'scroll': return search(ALL_SCROLLS);
+    case 'consumable': return search(ALL_CONSUMABLES);
+    case 'food': return search(FOODS);
+    default: return null;
+  }
+}
+
 function renderItemSection(): string {
   const disc = new Set(getMeta().discoveredItems);
-  const tables: { type: string; label: string; arr: { id?: string; n: { en: string; zh: string } }[] }[] = [
+  const tables: { type: ItemType; label: string; arr: { id?: string; n: { en: string; zh: string } }[] }[] = [
     { type: 'weapon', label: t('intro.type.weapon'), arr: [...ALL_WEAPONS, ...ENDLESS_GEAR.weapons] },
     { type: 'armor', label: t('intro.type.armor'), arr: [...ALL_ARMORS, ...ENDLESS_GEAR.armors] },
     { type: 'accessory', label: t('intro.type.accessory'), arr: [...ALL_ACCESSORIES, ...ENDLESS_GEAR.accessories] },
@@ -254,11 +292,14 @@ function renderItemSection(): string {
     const rows = arr.map(d => {
       const has = d.id ? disc.has(`${type}:${d.id}`) : false;
       const name = has ? tx(d.n) : t('codex.itemLocked');
-      return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#ffd700' : '#333'};background:rgba(255,255,255,.02)"><span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
+      // Discovered rows get a pixel-sprite canvas (painted in renderCodex);
+      // locked rows show nothing — keeps the 🔒 feel without an empty canvas.
+      const icon = has && d.id ? `<canvas class="lic codex-icon" width="16" height="16" data-type="${type}" data-id="${d.id}" style="vertical-align:middle;margin-right:6px;image-rendering:pixelated"></canvas>` : '';
+      return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#ffd700' : '#333'};background:rgba(255,255,255,.02)">${icon}<span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
     }).join('');
     if (rows) html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${label}</div>${rows}`;
   }
-  // Relics
+  // Relics — no canvas yet (Task 6 unifies relic sprites).
   const rrows = RELICS.map(r => {
     const has = disc.has('relic:' + r.id);
     const name = has ? tx(r.n) : t('codex.itemLocked');
