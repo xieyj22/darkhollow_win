@@ -48,3 +48,23 @@ describe('catalog id + flavor integrity', () => {
     }
   });
 });
+
+describe('catalog subType integrity', () => {
+  const VALID: Record<string, string[]> = {
+    armor: ['plate', 'leather', 'cloak', 'robe', 'scale'],
+    accessory: ['ring', 'amulet', 'brooch', 'crown'],
+    scroll: ['fire', 'frost', 'arcane', 'holy', 'nature'],
+    consumable: ['bomb', 'trap', 'pouch', 'tool'],
+    food: ['meat', 'bread', 'fruit', 'feast'],
+  };
+  it('every armor/accessory/scroll/consumable/food has a valid subType', () => {
+    const tables: [string, { subType?: string }[]][] = [
+      ['armor', ALL_ARMORS], ['accessory', ALL_ACCESSORIES], ['scroll', ALL_SCROLLS],
+      ['consumable', ALL_CONSUMABLES], ['food', FOODS],
+    ];
+    for (const [t, arr] of tables) for (const d of arr) {
+      expect(d.subType, `${t} missing subType`).toBeTruthy();
+      expect(VALID[t], `${t} invalid subType ${d.subType}`).toContain(d.subType);
+    }
+  });
+});

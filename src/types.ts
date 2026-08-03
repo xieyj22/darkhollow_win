@@ -74,6 +74,7 @@ export interface ArmorDef {
   r: number;
   d: number;
   ch: string;
+  subType?: string;
   el?: Element;
   set?: string;
 }
@@ -87,6 +88,7 @@ export interface AccessoryDef {
   d: number;
   h: number;
   ch: string;
+  subType?: string;
   set?: string;
 }
 
@@ -109,6 +111,7 @@ export interface ScrollDef {
   v: number;
   c: string;
   ch: string;
+  subType?: string;
   dur?: number;
 }
 
@@ -120,6 +123,7 @@ export interface ConsumableDef {
   v: number;
   c: string;
   ch: string;
+  subType?: string;
   r: number;
   desc: I18nText;
   dur?: number;
@@ -133,6 +137,7 @@ export interface FoodDef {
   hpHeal?: number;
   c: string;
   ch: string;
+  subType?: string;
   r: number;
 }
 

@@ -54,38 +54,38 @@ export const WEAPONS: WeaponDef[] = [
 ];
 
 export const ARMORS: ArmorDef[] = [
-  { id: 'leather_vest', n: { en: 'Leather Vest', zh: '皮甲' }, r: 0, d: 1, ch: '▦',
+  { id: 'leather_vest', n: { en: 'Leather Vest', zh: '皮甲' }, r: 0, d: 1, ch: '▦', subType: 'leather',
     flavor: { en: 'Coarse-tanned from cave bison hide, its reek never fades; it is the only protection the poor can afford on the way down.', zh: '用洞穴野牛皮粗鞣而成，腥味难除，却是穷苦下山者唯一负担得起的护身之物。' } },
-  { id: 'chain_mail', n: { en: 'Chain Mail', zh: '锁子甲' }, r: 0, d: 2, ch: '#',
+  { id: 'chain_mail', n: { en: 'Chain Mail', zh: '锁子甲' }, r: 0, d: 2, ch: '#', subType: 'scale',
     flavor: { en: 'Thousands of rings hand-joined, heavy and stifling; each ring, they say, cost an apprentice his sight at the forge.', zh: '数千枚铁环手工编就，重而闷热，相传每一环都由一名学徒在炉前耗尽视力。' } },
-  { id: 'iron_plate', n: { en: 'Iron Plate', zh: '铁甲' }, r: 1, d: 4, ch: '▣',
+  { id: 'iron_plate', n: { en: 'Iron Plate', zh: '铁甲' }, r: 1, d: 4, ch: '▣', subType: 'plate',
     flavor: { en: 'Mass-produced heavy iron plate; the dull note it makes when struck tells veterans whether a comrade is still on his feet.', zh: '量产的厚重铁板，被击中时声音沉闷，老兵凭那声响就能判断同伴是否还站着。' } },
-  { id: 'steel_armor', n: { en: 'Steel Armor', zh: '钢甲' }, r: 1, d: 5, ch: '▣',
+  { id: 'steel_armor', n: { en: 'Steel Armor', zh: '钢甲' }, r: 1, d: 5, ch: '▣', subType: 'plate',
     flavor: { en: 'Carbon-hardened steel, lighter and tougher than iron; the regulars\' crest is branded on the breast, and rarely saves its wearer.', zh: '经过渗碳淬火的钢板比铁更硬也更轻，正规军的徽记常烙在胸口，鲜能保住主人。' } },
-  { id: 'mithril_mail', n: { en: 'Mithril Mail', zh: '秘银甲' }, r: 2, d: 7, ch: '#',
+  { id: 'mithril_mail', n: { en: 'Mithril Mail', zh: '秘银甲' }, r: 2, d: 7, ch: '#', subType: 'scale',
     flavor: { en: 'Rings forged of mithril drawn from the dwarves\' deep wells—weightless, and cold blue under the moon.', zh: '矮人深井里采得的秘银锻成的锁环，轻若无物，月光下泛着清冷的蓝。' } },
-  { id: 'dragon_scale', n: { en: 'Dragon Scale', zh: '龙鳞甲' }, r: 2, d: 8, ch: '◆',
+  { id: 'dragon_scale', n: { en: 'Dragon Scale', zh: '龙鳞甲' }, r: 2, d: 8, ch: '◆', subType: 'scale',
     flavor: { en: 'Sewn from scales shed by an adult ancient dragon; each scale still holds a spark of unquenchable hate.', zh: '以成年古龙脱落的鳞片缝缀而成，每片鳞都残留着一段无法熄灭的恨意。' } },
-  { id: 'shadow_cloak', n: { en: 'Shadow Cloak', zh: '暗影斗篷' }, r: 3, d: 10, ch: '≈',
+  { id: 'shadow_cloak', n: { en: 'Shadow Cloak', zh: '暗影斗篷' }, r: 3, d: 10, ch: '≈', subType: 'cloak',
     flavor: { en: 'Woven from shadow-spider silk, it makes its wearer near-invisible in the dark; those who wear it long can no longer find their own shadow.', zh: '织自影蛛之丝的斗篷，穿戴者在黑暗中几近隐形，长久披挂后却再难照见自己的影子。' } },
-  { id: 'celestial_plate', n: { en: 'Celestial Plate', zh: '天界甲' }, r: 4, d: 14, ch: '▣',
+  { id: 'celestial_plate', n: { en: 'Celestial Plate', zh: '天界甲' }, r: 4, d: 14, ch: '▣', subType: 'plate',
     flavor: { en: 'Said to be cast from the relics of a fallen saint; the celestial sigils on its face still glow, faintly, even in corrupted ground.', zh: '据说是坠落圣徒的遗骸熔铸，甲面铭刻的天界符文在腐化之地仍微微发光。' } },
 ];
 
 export const ACCESSORIES: AccessoryDef[] = [
-  { id: 'copper_ring', n: { en: 'Copper Ring', zh: '铜戒指' }, r: 0, a: 1, d: 0, h: 0, ch: '○',
+  { id: 'copper_ring', n: { en: 'Copper Ring', zh: '铜戒指' }, r: 0, a: 1, d: 0, h: 0, ch: '○', subType: 'ring',
     flavor: { en: 'A cheap ring thrown off by the village coppersmith; descenders wear it as a charm, but it is only a poor man\'s comfort.', zh: '村庄铜匠随手打造的廉价戒指，常被下山者当作护身符，其实只是穷人的心理安慰。' } },
-  { id: 'iron_amulet', n: { en: 'Iron Amulet', zh: '铁护符' }, r: 0, a: 0, d: 1, h: 5, ch: '✝',
+  { id: 'iron_amulet', n: { en: 'Iron Amulet', zh: '铁护符' }, r: 0, a: 0, d: 1, h: 5, ch: '✝', subType: 'amulet',
     flavor: { en: 'A ward-iron chip worn by miners; said to turn aside the death-breath of a cave-in, though no one has lived to confirm it.', zh: '矿工们佩戴的避邪铁片，据说能挡住一次洞穴塌方的死气，谁也没法证实。' } },
-  { id: 'ruby_ring', n: { en: 'Ruby Ring', zh: '红宝石戒指' }, r: 1, a: 2, d: 0, h: 0, ch: '○',
+  { id: 'ruby_ring', n: { en: 'Ruby Ring', zh: '红宝石戒指' }, r: 1, a: 2, d: 0, h: 0, ch: '○', subType: 'ring',
     flavor: { en: 'The stone is red as clotted blood; it belonged to a countess who loved torture, and her screams, they say, are sealed inside.', zh: '戒面红石色泽如凝固的鲜血，传说曾属于一位以酷刑为乐的伯爵夫人，她的尖叫仍封存石中。' } },
-  { id: 'sapphire_pendant', n: { en: 'Sapphire Pendant', zh: '蓝宝石吊坠' }, r: 1, a: 0, d: 2, h: 10, ch: '◇',
+  { id: 'sapphire_pendant', n: { en: 'Sapphire Pendant', zh: '蓝宝石吊坠' }, r: 1, a: 0, d: 2, h: 10, ch: '◇', subType: 'amulet',
     flavor: { en: 'A deep-sea sapphire set in silver; wearers breathe underwater in their dreams, and wake always tasting salt.', zh: '深海打捞而得的蓝宝嵌于银托，传说佩戴者能在梦中呼吸水下，醒来却总带着咸味。' } },
-  { id: 'emerald_brooch', n: { en: 'Emerald Brooch', zh: '翡翠胸针' }, r: 2, a: 2, d: 2, h: 15, ch: '✿',
+  { id: 'emerald_brooch', n: { en: 'Emerald Brooch', zh: '翡翠胸针' }, r: 2, a: 2, d: 2, h: 15, ch: '✿', subType: 'brooch',
     flavor: { en: 'The last treasure an elven exile carried from court; its green holds an echo of home that makes all who see it yearn.', zh: '精灵宫廷流亡者带出的最后一件珍宝，绿意中藏着故园的回响，见了它的人都会思乡。' } },
-  { id: 'crown_of_flames', n: { en: 'Crown of Flames', zh: '火焰王冠' }, r: 3, a: 4, d: 2, h: 20, ch: '♛',
+  { id: 'crown_of_flames', n: { en: 'Crown of Flames', zh: '火焰王冠' }, r: 3, a: 4, d: 2, h: 20, ch: '♛', subType: 'crown',
     flavor: { en: 'A gilded crown left by a tyrant who burned his city; its crest is hot to this day, and wearers dream of raining fire.', zh: '一位焚城暴君遗落的金冠，顶端的火焰纹至今烫手，戴上它的人梦境里总下着火雨。' } },
-  { id: 'ring_of_void', n: { en: 'Ring of the Void', zh: '虚空之戒' }, r: 4, a: 5, d: 5, h: 30, ch: '○',
+  { id: 'ring_of_void', n: { en: 'Ring of the Void', zh: '虚空之戒' }, r: 4, a: 5, d: 5, h: 30, ch: '○', subType: 'ring',
     flavor: { en: 'The band casts no reflection, as if a piece of reality had been scooped away; staring at it brings a faint sense of falling.', zh: '戒环上没有任何反光，仿佛被挖去了一小块现实，凝视久了会感到一阵轻微的下坠。' } },
 ];
 
@@ -109,38 +109,38 @@ export const POTIONS: PotionDef[] = [
 ];
 
 export const SCROLLS: ScrollDef[] = [
-  { id: 'fireball_scroll', n: { en: 'Scroll of Fireball', zh: '火球术卷轴' }, ef: 'fireball', v: 25, c: '#f4845f', ch: '☀',
+  { id: 'fireball_scroll', n: { en: 'Scroll of Fireball', zh: '火球术卷轴' }, ef: 'fireball', v: 25, c: '#f4845f', ch: '☀', subType: 'fire',
     flavor: { en: 'The fire school\'s first incantation; warm parchment, ink of brimstone and charred agave, and letters that catch as you read.', zh: '火元素学派的入门咒文，纸面温热，墨迹中混着硫磺与龙舌兰的焦香，朗读时字迹会燃起。' } },
-  { id: 'lightning_scroll', n: { en: 'Scroll of Lightning', zh: '闪电术卷轴' }, ef: 'lightning', v: 30, c: '#ffd700', ch: '⚡',
+  { id: 'lightning_scroll', n: { en: 'Scroll of Lightning', zh: '闪电术卷轴' }, ef: 'lightning', v: 30, c: '#ffd700', ch: '⚡', subType: 'arcane',
     flavor: { en: 'A short charm of the storm school; the scroll is left blank, for the true words appear only on a thunderous night.', zh: '风暴学派的短咒，卷轴上留着空白，因为真正的咒文只在雷雨夜才会显形。' } },
-  { id: 'teleport_scroll', n: { en: 'Scroll of Teleport', zh: '传送卷轴' }, ef: 'teleport', v: 0, c: '#9b5de5', ch: '↻',
+  { id: 'teleport_scroll', n: { en: 'Scroll of Teleport', zh: '传送卷轴' }, ef: 'teleport', v: 0, c: '#9b5de5', ch: '↻', subType: 'arcane',
     flavor: { en: 'A displacement charm circulated by the spatialists\' guild; most of its former owners, it is said, did not arrive entirely.', zh: '空间法师公会流传的位移咒，据说前主人大多没能完整地传送到目的地。' } },
-  { id: 'mapping_scroll', n: { en: 'Scroll of Mapping', zh: '地图卷轴' }, ef: 'mapping', v: 0, c: '#4895ef', ch: '▦',
+  { id: 'mapping_scroll', n: { en: 'Scroll of Mapping', zh: '地图卷轴' }, ef: 'mapping', v: 0, c: '#4895ef', ch: '▦', subType: 'arcane',
     flavor: { en: 'The cartographers\' guild pathfinding charm; unrolled, it sketches the layout of the surrounding halls—though never the traps.', zh: '制图师公会的探路咒文，展开时会自行勾勒出周围的格局，却从不标出陷阱所在。' } },
-  { id: 'shield_scroll', n: { en: 'Scroll of Shield', zh: '护盾卷轴' }, ef: 'shield', v: 5, c: '#7ec8e3', ch: '◈', dur: 30,
+  { id: 'shield_scroll', n: { en: 'Scroll of Shield', zh: '护盾卷轴' }, ef: 'shield', v: 5, c: '#7ec8e3', ch: '◈', subType: 'arcane', dur: 30,
     flavor: { en: 'A ward from the protective school; once read, an unseen field circles the caster with a faint, persistent hum.', zh: '守护学派的防御咒文，朗读完毕后，一段无形的力场会环绕施法者，发出极轻的嗡鸣。' } },
-  { id: 'fear_scroll', n: { en: 'Scroll of Fear', zh: '恐惧卷轴' }, ef: 'fear', v: 0, c: '#aaa', ch: '☾',
+  { id: 'fear_scroll', n: { en: 'Scroll of Fear', zh: '恐惧卷轴' }, ef: 'fear', v: 0, c: '#aaa', ch: '☾', subType: 'arcane',
     flavor: { en: 'A forbidden text of the shadow school; its grey ink writhes under moonlight, and after the reading, nearby creatures shrink back by instinct.', zh: '暗影学派的禁忌咒文，灰黑墨迹在月光下会蠕动，朗读后附近生灵都会本能地退却。' } },
 ];
 
 export const CONSUMABLES: ConsumableDef[] = [
-  { id: 'bomb', n: { en: 'Bomb', zh: '炸弹' }, ef: 'bomb', v: 30, c: '#ff4500', ch: '*', r: 1, desc: { en: 'AoE fire dmg to nearby foes', zh: '对附近敌人造成范围火焰伤害' },
+  { id: 'bomb', n: { en: 'Bomb', zh: '炸弹' }, ef: 'bomb', v: 30, c: '#ff4500', ch: '*', subType: 'bomb', r: 1, desc: { en: 'AoE fire dmg to nearby foes', zh: '对附近敌人造成范围火焰伤害' },
     flavor: { en: 'A spherical powder pot from the dwarven powder-makers; its fuse burns damp, and has unseated a hundred siege-walls.', zh: '矮人爆破匠量产的球形火药罐，引信潮湿地燃烧，曾在无数次围城中掀开城墙。' } },
-  { id: 'throwing_knife', n: { en: 'Throwing Knife', zh: '飞刀' }, ef: 'throw_knife', v: 20, c: '#c0c0c0', ch: '†', r: 0, desc: { en: 'Throw at nearest enemy', zh: '投向最近的敌人' },
+  { id: 'throwing_knife', n: { en: 'Throwing Knife', zh: '飞刀' }, ef: 'throw_knife', v: 20, c: '#c0c0c0', ch: '†', subType: 'tool', r: 0, desc: { en: 'Throw at nearest enemy', zh: '投向最近的敌人' },
     flavor: { en: 'A well-balanced throwing knife, the grip wound with thread for easy pulling; the silent opening of partisans and fleeing men.', zh: '平衡精准的轻掷刀，刀柄缠线以利拔出，是游击手与逃亡者无声的开场白。' } },
-  { id: 'purified_water', n: { en: 'Purified Water', zh: '净水' }, ef: 'purify', v: 20, c: '#7ec8e3', ch: '💧', r: 1, desc: { en: 'Cleanses 20 corruption', zh: '净化 20 腐化' },
+  { id: 'purified_water', n: { en: 'Purified Water', zh: '净水' }, ef: 'purify', v: 20, c: '#7ec8e3', ch: '💧', subType: 'pouch', r: 1, desc: { en: 'Cleanses 20 corruption', zh: '净化 20 腐化' },
     flavor: { en: 'Water blessed by the order; it briefly rinses the corruption from the soul, and a thin ring of light clings to the flask\'s inner wall.', zh: '教团祝圣过的清水，能短暂洗去灵魂上的腐化，瓶壁内侧凝着一圈极细的光环。' } },
-  { id: 'torch', n: { en: 'Torch', zh: '火把' }, ef: 'torch', v: 5, c: '#f4845f', ch: '☀', r: 0, desc: { en: '+5 FOV for 30 turns', zh: '视野+5持续30回合' }, dur: 30,
+  { id: 'torch', n: { en: 'Torch', zh: '火把' }, ef: 'torch', v: 5, c: '#f4845f', ch: '☀', subType: 'tool', r: 0, desc: { en: '+5 FOV for 30 turns', zh: '视野+5持续30回合' }, dur: 30,
     flavor: { en: 'A coarse hemp torch dipped in pitch; the plainest answer to the dark below, and the only company when loneliness sets in.', zh: '浸过松脂的粗麻火把，是下山者对抗黑暗的最朴素的手段，也是孤独时唯一的伴侣。' } },
-  { id: 'bear_trap', n: { en: 'Bear Trap', zh: '捕兽夹' }, ef: 'bear_trap', v: 20, c: '#a0522d', ch: '▲', r: 0, desc: { en: 'Place trap on ground', zh: '在地面放置陷阱' },
+  { id: 'bear_trap', n: { en: 'Bear Trap', zh: '捕兽夹' }, ef: 'bear_trap', v: 20, c: '#a0522d', ch: '▲', subType: 'trap', r: 0, desc: { en: 'Place trap on ground', zh: '在地面放置陷阱' },
     flavor: { en: 'An iron-jaw trap a hunter left at the wood\'s edge; the rust has not dulled the teeth, and what it holds rarely keeps the whole leg.', zh: '猎人遗落在林边的铁齿陷阱，锈迹未掩其锋利，被它咬住的猎物很少能留下全腿。' } },
-  { id: 'smoke_bomb', n: { en: 'Smoke Bomb', zh: '烟雾弹' }, ef: 'smoke_bomb', v: 0, c: '#888', ch: '○', r: 1, desc: { en: 'Fear nearby enemies', zh: '恐惧附近的敌人' },
+  { id: 'smoke_bomb', n: { en: 'Smoke Bomb', zh: '烟雾弹' }, ef: 'smoke_bomb', v: 0, c: '#888', ch: '○', subType: 'bomb', r: 1, desc: { en: 'Fear nearby enemies', zh: '恐惧附近的敌人' },
     flavor: { en: 'A small clay pot adapted from Eastern firework-craft; it bursts into thick grey smoke—the parting gift of thieves and assassins.', zh: '改良自东方烟火术的小型陶罐，裂开后涌出浓密灰烟，是盗贼与刺客最爱的告别礼。' } },
-  { id: 'ward_stone', n: { en: 'Ward Stone', zh: '护身石' }, ef: 'ward', v: 0, c: '#4895ef', ch: '◆', r: 1, desc: { en: 'Block next hit completely', zh: '完全抵挡下一次攻击' },
+  { id: 'ward_stone', n: { en: 'Ward Stone', zh: '护身石' }, ef: 'ward', v: 0, c: '#4895ef', ch: '◆', subType: 'tool', r: 1, desc: { en: 'Block next hit completely', zh: '完全抵挡下一次攻击' },
     flavor: { en: 'A blue cobble carved thick with old wards; warm in the palm, said to step between its holder and a single killing blow.', zh: '刻满古老护符的蓝卵石，握在掌心会微微发暖，据说能在致命一击来临前替主人挡下。' } },
-  { id: 'haste_potion', n: { en: 'Haste Potion', zh: '加速药水' }, ef: 'haste', v: 0, c: '#06d6a0', ch: '»', r: 1, desc: { en: 'Take a free extra turn', zh: '获得一次免费额外行动' },
+  { id: 'haste_potion', n: { en: 'Haste Potion', zh: '加速药水' }, ef: 'haste', v: 0, c: '#06d6a0', ch: '»', subType: 'pouch', r: 1, desc: { en: 'Take a free extra turn', zh: '获得一次免费额外行动' },
     flavor: { en: 'A green brew cut from a wind-sylph\'s core; after drinking, the world seems to slow while the heartbeat runs frighteningly fast.', zh: '以风精之核调成的青绿药水，饮下后周遭一切仿佛放缓，唯有自己的心跳快得惊人。' } },
-  { id: 'antidote', n: { en: 'Antidote', zh: '解毒剂' }, ef: 'antidote', v: 0, c: '#80ed99', ch: '✦', r: 0, desc: { en: 'Cure poison + resist', zh: '治愈中毒并获得抗性' },
+  { id: 'antidote', n: { en: 'Antidote', zh: '解毒剂' }, ef: 'antidote', v: 0, c: '#80ed99', ch: '✦', subType: 'pouch', r: 0, desc: { en: 'Cure poison + resist', zh: '治愈中毒并获得抗性' },
     flavor: { en: 'A general antidote the herbalists have refined for generations; bitter to the throat, but it breaks a poison before venom reaches the heart.', zh: '草药师代代改良的通用解毒方，味苦难咽，却能在毒素尚未咬透心脉之前将其化解。' } },
 ];
 
@@ -361,21 +361,21 @@ export const ALL_WEAPONS: WeaponDef[] = [...WEAPONS, ...NEW_WEAPONS];
 
 // ===== New Armors =====
 export const NEW_ARMORS: ArmorDef[] = [
-  { id: 'brigandine', n: { en: 'Brigandine', zh: '镶甲' }, r: 1, d: 3, ch: '▦',
+  { id: 'brigandine', n: { en: 'Brigandine', zh: '镶甲' }, r: 1, d: 3, ch: '▦', subType: 'plate',
     flavor: { en: 'Iron plates riveted inside coarse cloth; unremarkable to look at, yet trusted by mercenaries and bandits alike.', zh: '内衬铁片、外覆粗布的实用铠甲，貌不惊人却深受雇佣兵与山贼的信赖。' } },
-  { id: 'inferno_plate', n: { en: 'Inferno Plate', zh: '烈焰板甲' }, r: 2, d: 7, ch: '▣', el: 'fire', set: 'fire_lord',
+  { id: 'inferno_plate', n: { en: 'Inferno Plate', zh: '烈焰板甲' }, r: 2, d: 7, ch: '▣', subType: 'plate', el: 'fire', set: 'fire_lord',
     flavor: { en: 'Reforged from the ribs of the Fire Lord; the plate runs hot year-round, and its wearer rarely feels cold—or anything else.', zh: '炎魔之王的肋骨重塑而成，板甲内部终年滚烫，穿上它的人很少会感到寒冷——或其他任何感觉。' } },
-  { id: 'frostweave_robe', n: { en: 'Frostweave Robe', zh: '霜织法袍' }, r: 2, d: 6, ch: '≈', el: 'ice', set: 'frost_mage',
+  { id: 'frostweave_robe', n: { en: 'Frostweave Robe', zh: '霜织法袍' }, r: 2, d: 6, ch: '≈', subType: 'robe', el: 'ice', set: 'frost_mage',
     flavor: { en: 'Woven from the silk of ice-worms that never melt; the frost patterns on the robe drift slowly with the caster\'s mood.', zh: '以永不融化的冰蚕丝织就，法袍上的霜花纹会随施法者的情绪缓缓移动。' } },
-  { id: 'shadow_mantle', n: { en: 'Shadow Mantle', zh: '暗影披风' }, r: 3, d: 9, ch: '≈', el: 'shadow', set: 'shadow_set',
+  { id: 'shadow_mantle', n: { en: 'Shadow Mantle', zh: '暗影披风' }, r: 3, d: 9, ch: '≈', subType: 'cloak', el: 'shadow', set: 'shadow_set',
     flavor: { en: 'The ceremonial mantle of the Night-Cult\'s high priests; its hem is ever damp with dew, as if just back from another\'s dream.', zh: '夜行教派高阶祭司的礼袍，披风下摆永远沾着未干的露水，仿佛刚刚踏过他人的梦境。' } },
-  { id: 'sanctified_plate', n: { en: 'Sanctified Plate', zh: '圣化板甲' }, r: 3, d: 12, ch: '▣', el: 'holy', set: 'divine',
+  { id: 'sanctified_plate', n: { en: 'Sanctified Plate', zh: '圣化板甲' }, r: 3, d: 12, ch: '▣', subType: 'plate', el: 'holy', set: 'divine',
     flavor: { en: 'Purified through seven nights of consecration; slivers of holy relic line its seams, and corruption cannot easily take hold.', zh: '经七昼夜祝圣仪式净化过的板甲，接缝处嵌着细小的圣物碎片，腐化难以在其上附着。' } },
-  { id: 'abyssal_carapace', n: { en: 'Abyssal Carapace', zh: '深渊甲壳' }, r: 3, d: 11, ch: '◆', el: 'ice', set: 'abyssal',
+  { id: 'abyssal_carapace', n: { en: 'Abyssal Carapace', zh: '深渊甲壳' }, r: 3, d: 11, ch: '◆', subType: 'scale', el: 'ice', set: 'abyssal',
     flavor: { en: 'Pieced from the molted shell of an abyssal leviathan; it is dark of hue, and at close range smells of ancient tidal brine.', zh: '用深海巨兽褪下的甲壳拼接而成，色泽幽暗，靠近时会闻到一股古老咸腥的潮汐味。' } },
-  { id: 'void_shroud', n: { en: 'Void Shroud', zh: '虚空罩袍' }, r: 4, d: 13, ch: '≈', el: 'shadow',
+  { id: 'void_shroud', n: { en: 'Void Shroud', zh: '虚空罩袍' }, r: 4, d: 13, ch: '≈', subType: 'robe', el: 'shadow',
     flavor: { en: 'Woven from threads of congealed void; beneath the shroud is no true outline, and staring too long makes a name slip from the mind.', zh: '以凝固的虚空为线织就，罩袍下没有真正的轮廓，凝视它过久会让人忘却自己的姓名。' } },
-  { id: 'godslayer_armor', n: { en: 'Godslayer Armor', zh: '弑神铠甲' }, r: 4, d: 16, ch: '▣',
+  { id: 'godslayer_armor', n: { en: 'Godslayer Armor', zh: '弑神铠甲' }, r: 4, d: 16, ch: '▣', subType: 'plate',
     flavor: { en: 'The few suits that remain vanished after the Creation War; wearers hear the last whisper of a dying god, and sleep no more.', zh: '仅存的几套都在创世战争后失踪，据说穿上它的人会听见神祇临终前的低语，彻夜难眠。' } },
 ];
 
@@ -383,19 +383,19 @@ export const ALL_ARMORS: ArmorDef[] = [...ARMORS, ...NEW_ARMORS];
 
 // ===== New Accessories =====
 export const NEW_ACCESSORIES: AccessoryDef[] = [
-  { id: 'jade_pendant', n: { en: 'Jade Pendant', zh: '翡翠吊坠' }, r: 1, a: 1, d: 1, h: 8, ch: '◇',
+  { id: 'jade_pendant', n: { en: 'Jade Pendant', zh: '翡翠吊坠' }, r: 1, a: 1, d: 1, h: 8, ch: '◇', subType: 'amulet',
     flavor: { en: 'A ward-jade carved by far-eastern lapidaries; it steadies the heart, granting the wearer a moment\'s clarity amid the corruption\'s whisper.', zh: '远东玉匠雕琢的护身玉，据传能稳住心神，使佩戴者在腐化的低语中保持片刻清明。' } },
-  { id: 'inferno_band', n: { en: 'Inferno Band', zh: '烈焰戒指' }, r: 2, a: 3, d: 1, h: 5, ch: '○', set: 'fire_lord',
+  { id: 'inferno_band', n: { en: 'Inferno Band', zh: '烈焰戒指' }, r: 2, a: 3, d: 1, h: 5, ch: '○', subType: 'ring', set: 'fire_lord',
     flavor: { en: 'A wick of undying fire is sealed in the stone; the finger that wears it is always warm, yet bears no mark.', zh: '戒面内封着一缕永不熄灭的火心，戴上后手指常年灼热，却不会留下任何伤痕。' } },
-  { id: 'frost_amulet', n: { en: 'Frost Amulet', zh: '冰霜护符' }, r: 2, a: 1, d: 3, h: 15, ch: '✝', set: 'frost_mage',
+  { id: 'frost_amulet', n: { en: 'Frost Amulet', zh: '冰霜护符' }, r: 2, a: 1, d: 3, h: 15, ch: '✝', subType: 'amulet', set: 'frost_mage',
     flavor: { en: 'The token given to northern frost mages on their initiation; worn at the breast, it carries the distant echo of calving glaciers.', zh: '北境冰法师的入职信物，护符贴胸佩戴时，能听见远方冰川缓慢崩裂的回声。' } },
-  { id: 'shadow_signet', n: { en: 'Shadow Signet', zh: '暗影印戒' }, r: 3, a: 3, d: 3, h: 15, ch: '○', set: 'shadow_set',
+  { id: 'shadow_signet', n: { en: 'Shadow Signet', zh: '暗影印戒' }, r: 3, a: 3, d: 3, h: 15, ch: '○', subType: 'ring', set: 'shadow_set',
     flavor: { en: 'The signet of the Assassins\' Council; covenants sealed in blood by this ring are binding, and defaulters are swallowed by its shadow.', zh: '刺客议会的印信，盖上蜡封的契约以鲜血为证，违约者会被戒面上的阴影慢慢吞没。' } },
-  { id: 'divine_halo', n: { en: 'Divine Halo', zh: '神圣光环' }, r: 3, a: 3, d: 3, h: 20, ch: '◎', set: 'divine',
+  { id: 'divine_halo', n: { en: 'Divine Halo', zh: '神圣光环' }, r: 3, a: 3, d: 3, h: 20, ch: '◎', subType: 'crown', set: 'divine',
     flavor: { en: 'A congealed fragment of a saint\'s halo, hovering an inch above the wearer; its light dims whenever a lie is spoken nearby.', zh: '圣徒头顶光环的凝固残片，悬浮于佩戴者顶上寸许，光环中的光会在谎言响起时黯淡。' } },
-  { id: 'abyssal_pearl', n: { en: 'Abyssal Pearl', zh: '深渊珍珠' }, r: 3, a: 2, d: 4, h: 25, ch: '●', set: 'abyssal',
+  { id: 'abyssal_pearl', n: { en: 'Abyssal Pearl', zh: '深渊珍珠' }, r: 3, a: 2, d: 4, h: 25, ch: '●', subType: 'amulet', set: 'abyssal',
     flavor: { en: 'A black pearl grown a century in an abyssal oyster; at its core is sealed a briny drop—the last tear shed before Creation.', zh: '深海巨蚌百年孕育的黑珠，珠心封着一滴咸水，据说是创世前的最后一滴眼泪。' } },
-  { id: 'astral_crown', n: { en: 'Astral Crown', zh: '星界王冠' }, r: 4, a: 6, d: 6, h: 40, ch: '♛',
+  { id: 'astral_crown', n: { en: 'Astral Crown', zh: '星界王冠' }, r: 4, a: 6, d: 6, h: 40, ch: '♛', subType: 'crown',
     flavor: { en: 'A circlet cast from congealed starlight; the wearer hears, briefly, the hum of revolving stars—and sleeps but poorly afterward.', zh: '以凝固星光铸成的环冠，戴上它的人能短暂听见星辰运转的嗡鸣，此后再难安睡。' } },
 ];
 
@@ -417,11 +417,11 @@ export const ALL_POTIONS: PotionDef[] = [...POTIONS, ...NEW_POTIONS];
 
 // ===== New Scrolls =====
 export const NEW_SCROLLS: ScrollDef[] = [
-  { id: 'blizzard_scroll', n: { en: 'Scroll of Blizzard', zh: '暴风雪卷轴' }, ef: 'blizzard', v: 35, c: '#00ced1', ch: '✻',
+  { id: 'blizzard_scroll', n: { en: 'Scroll of Blizzard', zh: '暴风雪卷轴' }, ef: 'blizzard', v: 35, c: '#00ced1', ch: '✻', subType: 'frost',
     flavor: { en: 'A high charm of the northern frost mages; frost clings to the edge of the parchment, and after the reading the air goes abruptly still.', zh: '北境霜法师的高阶咒文，展开时纸缘已凝着冰碴，朗读后整片空气都会骤然安静。' } },
-  { id: 'holy_light_scroll', n: { en: 'Scroll of Holy Light', zh: '圣光卷轴' }, ef: 'holy_blast', v: 40, c: '#ffd700', ch: '✦',
+  { id: 'holy_light_scroll', n: { en: 'Scroll of Holy Light', zh: '圣光卷轴' }, ef: 'holy_blast', v: 40, c: '#ffd700', ch: '✦', subType: 'holy',
     flavor: { en: 'A consecrated charm the temple knights use to drive out the unholy; its gold ink glimmers in the dark, and demands a clean heart.', zh: '圣殿骑士团用以驱散邪祟的祝圣咒文，金墨在黑暗中微微发亮，朗读需以纯净之心。' } },
-  { id: 'summoning_scroll', n: { en: 'Scroll of Summoning', zh: '召唤卷轴' }, ef: 'summon_ally', v: 0, c: '#06d6a0', ch: '☉',
+  { id: 'summoning_scroll', n: { en: 'Scroll of Summoning', zh: '召唤卷轴' }, ef: 'summon_ally', v: 0, c: '#06d6a0', ch: '☉', subType: 'arcane',
     flavor: { en: 'The summoners\' school most debated pact; the called one fights in the caster\'s stead, and the price surfaces only afterward.', zh: '召唤学派富于争议的契约咒，被召者会暂代施法者而战，代价常在事后才显形。' } },
 ];
 
@@ -429,13 +429,13 @@ export const ALL_SCROLLS: ScrollDef[] = [...SCROLLS, ...NEW_SCROLLS];
 
 // ===== New Consumables =====
 export const NEW_CONSUMABLES: ConsumableDef[] = [
-  { id: 'void_bomb', n: { en: 'Void Bomb', zh: '虚空炸弹' }, ef: 'bomb', v: 50, c: '#9400d3', ch: '*', r: 2, desc: { en: 'AoE void dmg to nearby foes', zh: '对附近敌人造成范围虚空伤害' },
+  { id: 'void_bomb', n: { en: 'Void Bomb', zh: '虚空炸弹' }, ef: 'bomb', v: 50, c: '#9400d3', ch: '*', subType: 'bomb', r: 2, desc: { en: 'AoE void dmg to nearby foes', zh: '对附近敌人造成范围虚空伤害' },
     flavor: { en: 'A forbidden charge cored with congealed void; the blast leaves a brief rift that swallows anything that comes too near.', zh: '以凝固虚空为芯的禁制爆裂物，引爆处会留下一道短暂的裂口，吞噬一切过于靠近的东西。' } },
-  { id: 'holy_water', n: { en: 'Holy Water', zh: '圣水' }, ef: 'holy_water', v: 30, c: '#ffd700', ch: '+', r: 2, desc: { en: 'Holy dmg to undead/demons', zh: '对亡灵/恶魔造成神圣伤害' },
+  { id: 'holy_water', n: { en: 'Holy Water', zh: '圣水' }, ef: 'holy_water', v: 30, c: '#ffd700', ch: '+', subType: 'pouch', r: 2, desc: { en: 'Holy dmg to undead/demons', zh: '对亡灵/恶魔造成神圣伤害' },
     flavor: { en: 'Well-water purified through seven nights of consecration, kept in silver flasks; it rises in white smoke where it touches undead or demon.', zh: '经七昼夜祝圣仪式净化的井水，盛于银瓶中，浇在亡灵与恶魔身上会腾起白烟。' } },
-  { id: 'recall_stone', n: { en: 'Recall Stone', zh: '回城石' }, ef: 'recall', v: 0, c: '#4895ef', ch: '@', r: 2, desc: { en: 'Teleport to floor start', zh: '传送回楼层起点' },
+  { id: 'recall_stone', n: { en: 'Recall Stone', zh: '回城石' }, ef: 'recall', v: 0, c: '#4895ef', ch: '@', subType: 'tool', r: 2, desc: { en: 'Teleport to floor start', zh: '传送回楼层起点' },
     flavor: { en: 'A pebble the spatialists have imprinted with a return-coordinate; squeeze and speak to be drawn back to the stair, at the cost of a wave of dizziness.', zh: '空间法师公会刻印归返坐标的石子，握紧默念即能回到楼层入口，代价是一阵眩晕。' } },
-  { id: 'invis_cloak', n: { en: 'Shadow Cloak', zh: '暗影斗篷' }, ef: 'invis', v: 0, c: '#2f4f4f', ch: '~', r: 3, desc: { en: 'Invisible for 10 turns', zh: '隐身10回合' },
+  { id: 'invis_cloak', n: { en: 'Shadow Cloak', zh: '暗影斗篷' }, ef: 'invis', v: 0, c: '#2f4f4f', ch: '~', subType: 'tool', r: 3, desc: { en: 'Invisible for 10 turns', zh: '隐身10回合' },
     flavor: { en: 'A thin cloak woven by shadow-mages from distilled shadow; wrapped in it, the wearer\'s image dissolves, though his own heartbeat grows deafening.', zh: '影法师以蒸馏的影织成的薄披风，裹住后周身影像消融，唯独心跳声会被自己听得格外清晰。' } },
 ];
 
@@ -451,13 +451,13 @@ export const ALL_TRAPS: TrapDef[] = [...TRAPS, ...NEW_TRAPS];
 
 // ===== Food Definitions =====
 export const FOODS: FoodDef[] = [
-  { id: 'dried_meat', n: { en: 'Dried Meat', zh: '肉干' }, hungerRestore: 30, c: '#f4845f', ch: '≡', r: 0,
+  { id: 'dried_meat', n: { en: 'Dried Meat', zh: '肉干' }, hungerRestore: 30, c: '#f4845f', ch: '≡', subType: 'meat', r: 0,
     flavor: { en: 'Strips of wind-cured salted meat, so tough they must be softened with spit; the most reliable ration on a long descent.', zh: '风干腌制的肉条，硬得需要用口水慢慢软化，却是长途下山最可靠的口粮。' } },
-  { id: 'fresh_bread', n: { en: 'Fresh Bread', zh: '新鲜面包' }, hungerRestore: 20, hpHeal: 5, c: '#daa520', ch: '◯', r: 0,
+  { id: 'fresh_bread', n: { en: 'Fresh Bread', zh: '新鲜面包' }, hungerRestore: 20, hpHeal: 5, c: '#daa520', ch: '◯', subType: 'bread', r: 0,
     flavor: { en: 'A dark-rye round baked at first light in the town at the pass; its faint smoke is the last taste of home on the way down.', zh: '山口小镇清晨烤出的黑麦圆包，麦香里带着一丝烟熏味，是下山前最后的家常味道。' } },
-  { id: 'elven_feast', n: { en: 'Elven Feast', zh: '精灵盛宴' }, hungerRestore: 50, hpHeal: 20, c: '#06d6a0', ch: '※', r: 1,
+  { id: 'elven_feast', n: { en: 'Elven Feast', zh: '精灵盛宴' }, hungerRestore: 50, hpHeal: 20, c: '#06d6a0', ch: '※', subType: 'feast', r: 1,
     flavor: { en: 'Thin cakes and mead left by elven wayfarers; those who eat them dream of the evergreen wood, and wake with dew at the eye\'s corner.', zh: '精灵旅人留下的薄饼与蜜酒，据说吃下后会梦见永青之林，醒来时眼角常带着露水。' } },
-  { id: 'divine_ambrosia', n: { en: 'Divine Ambrosia', zh: '神仙甘露' }, hungerRestore: 100, hpHeal: 50, c: '#ffd700', ch: '✦', r: 3,
+  { id: 'divine_ambrosia', n: { en: 'Divine Ambrosia', zh: '神仙甘露' }, hungerRestore: 100, hpHeal: 50, c: '#ffd700', ch: '✦', subType: 'feast', r: 3,
     flavor: { en: 'The golden liquor the gods were said to drink, glowing faintly in its white porcelain flask; a single sip lets a mortal forget days of toil.', zh: '传闻诸神饮用的金液，封在白瓷瓶中盈盈发光，凡人喝下一口便足以忘却数日的疲惫。' } },
 ];
 
