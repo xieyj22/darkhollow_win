@@ -233,7 +233,7 @@ export function renderCodex(): void {
     const id = cv.dataset.id || '';
     if (!id) return;
     // Relic canvases route through paintRelicIcon (def.c-driven palette).
-    if (type === ('relic' as any)) {
+    if ((type as string) === 'relic') {
       const rdef = RELICS.find(r => r.id === id);
       if (rdef) paintRelicIcon(cv, rdef);
       return;
