@@ -7,7 +7,7 @@ import { executeSkill } from './skills.js';
 import { getMeta } from './meta.js';
 import { t, tMsg, tx, RARITY_C } from './i18n.js';
 import { RELICS } from './data.js';
-import { paintIcon, paintItemIcon } from './sprites.js';
+import { paintIcon, paintItemIcon, paintRelicIcon } from './sprites.js';
 import { showOverlay, hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
 
@@ -50,7 +50,7 @@ function renderInv(): void {
       if (!def) continue;
       const row = document.createElement('div');
       row.className = `ii rc${def.rarity}`;
-      row.innerHTML = `<span style="display:flex;gap:6px;align-items:center;flex:1"><span style="color:${def.c};font-size:1.1em">${def.ch}</span><span style="color:${RARITY_C[def.rarity]}">${tx(def.n)}</span></span><span class="id">${tx(def.d)}</span>`;
+      row.innerHTML = `<span style="display:flex;gap:6px;align-items:center;flex:1"><canvas class="lic" width="16" height="16" data-relic="${rid}" style="image-rendering:pixelated"></canvas><span style="color:${RARITY_C[def.rarity]}">${tx(def.n)}</span></span><span class="id">${tx(def.d)}</span>`;
       rsec.appendChild(row);
     }
     div.appendChild(rsec);
@@ -136,7 +136,14 @@ function renderInv(): void {
   // Paint pixel sprites into every <canvas class="lic"> in the inventory.
   // Done once at the end (after all rows are in the DOM) so each canvas has its
   // final parent; idx maps back to p.inv for the live Item (color stays in sync).
+  // Relic rows carry data-relic (the relic id) instead of data-idx.
   div.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => {
+    const rid = cv.dataset.relic;
+    if (rid) {
+      const rdef = RELICS.find(r => r.id === rid);
+      if (rdef) paintRelicIcon(cv, rdef);
+      return;
+    }
     const idx = +(cv.dataset.idx || 0);
     const it = p.inv[idx];
     if (it) paintItemIcon(cv, it);

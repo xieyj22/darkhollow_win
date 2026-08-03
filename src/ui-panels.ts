@@ -5,7 +5,7 @@ import { G, lang, legendVisible, setLegendVisible, keysVisible, setKeysVisible, 
 import { TS, MW, MH, TL } from './config.js';
 import { dst } from './utils.js';
 import { RARITY_C, rareName, t, tx } from './i18n.js';
-import { paintIcon, paintItemIcon, catalogSpriteColor } from './sprites.js';
+import { paintIcon, paintItemIcon, paintRelicIcon, catalogSpriteColor } from './sprites.js';
 import type { ItemType } from './types.js';
 import { getMeta } from './meta.js';
 import { CLASSES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, ENDLESS_GEAR, RELICS } from './data.js';
@@ -232,6 +232,12 @@ export function renderCodex(): void {
     const type = (cv.dataset.type || '') as ItemType;
     const id = cv.dataset.id || '';
     if (!id) return;
+    // Relic canvases route through paintRelicIcon (def.c-driven palette).
+    if (type === ('relic' as any)) {
+      const rdef = RELICS.find(r => r.id === id);
+      if (rdef) paintRelicIcon(cv, rdef);
+      return;
+    }
     const def = findCatalogDefFull(type, id);
     if (!def) return;
     const itemLike = {
@@ -299,11 +305,12 @@ function renderItemSection(): string {
     }).join('');
     if (rows) html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${label}</div>${rows}`;
   }
-  // Relics — no canvas yet (Task 6 unifies relic sprites).
+  // Relics — discovered rows get a themed pixel sprite (Task 6).
   const rrows = RELICS.map(r => {
     const has = disc.has('relic:' + r.id);
     const name = has ? tx(r.n) : t('codex.itemLocked');
-    return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)"><span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
+    const icon = has ? `<canvas class="lic codex-icon" width="16" height="16" data-type="relic" data-id="${r.id}" style="vertical-align:middle;margin-right:6px;image-rendering:pixelated"></canvas>` : '';
+    return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)">${icon}<span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
   }).join('');
   html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${t('intro.relicTag')}</div>${rrows}`;
   return html || `<div style="color:#555;padding:12px">${t('up.noEntries')}</div>`;

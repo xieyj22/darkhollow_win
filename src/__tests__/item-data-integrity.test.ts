@@ -68,3 +68,24 @@ describe('catalog subType integrity', () => {
     }
   });
 });
+
+describe('relic spriteKind integrity', () => {
+  const VALID = ['R_ATTACK', 'R_DEFENSE', 'R_ARCANE', 'R_SOUL', 'R_NATURE', 'R_VOID', 'R_UTILITY'];
+  it('every relic has a non-empty spriteKind in the R_* set', () => {
+    expect(RELICS.length).toBeGreaterThan(0);
+    for (const r of RELICS) {
+      expect(r.spriteKind, `relic ${r.id} missing spriteKind`).toBeTruthy();
+      expect(VALID, `relic ${r.id} invalid spriteKind ${r.spriteKind}`).toContain(r.spriteKind);
+    }
+  });
+  it('every relic spriteKind resolves to a real TEMPLATES entry', async () => {
+    const { TEMPLATES } = await import('../sprites.js');
+    const N = 16;
+    for (const r of RELICS) {
+      const tpl = TEMPLATES[r.spriteKind!];
+      expect(tpl, `relic ${r.id} spriteKind ${r.spriteKind} not in TEMPLATES`).toBeDefined();
+      expect(tpl.length, `relic ${r.id} template must be ${N} rows`).toBe(N);
+      for (const row of tpl) expect(row.length, `relic ${r.id} bad row width`).toBe(N);
+    }
+  });
+});

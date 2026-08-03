@@ -3,7 +3,7 @@
 // Enemy templates use 'M' (main = enemy color). Item templates are per-type AND
 // sub-type (sword/axe/hammer..., health/mana/poison...). Player has 4 class
 // templates. To swap in real PNG art later, replace blit()/getSprite() — render.ts unchanged.
-import type { Enemy, Item, ItemType } from './types.js';
+import type { Enemy, Item, ItemType, RelicDef } from './types.js';
 import { TS } from './config.js';
 import { darken } from './utils.js';
 
@@ -1203,6 +1203,143 @@ export const TEMPLATES: Record<string, Template> = {
     "................",
     "................",
   ],
+
+  // ===== Relic templates (Task 6) — themed by effect, ~7 silhouettes.
+  // Each relic gets def.c-driven palette so same-template relics still differ
+  // in color. Premium feel via E (#ff7a3c glow) + G (#ffd54a gold) accents.
+  // R_ATTACK — radiant blade (offense: atk/crit/execute/fire/lifesteal).
+  R_ATTACK: [
+    "................",
+    ".......E........",
+    "......ELE.......",
+    ".......E........",
+    ".......ML.......",
+    ".......MM.......",
+    ".......MM.......",
+    ".......MM.......",
+    ".......MM.......",
+    "......GGGG......",
+    ".......NN.......",
+    ".......NN.......",
+    "......KNNK......",
+    "................",
+    "................",
+    "................",
+  ],
+  // R_DEFENSE — ward shield with glowing gem boss (def/dodge/maxhp/thorns).
+  R_DEFENSE: [
+    "................",
+    ".....KKKKKK.....",
+    "....KGGGGGGK....",
+    "...KGMMMMMMGK...",
+    "...KMMMMMMMMK...",
+    "...KMMWMMWMMK...",
+    "...KMMMEEEMMK...",
+    "...KMMMMMMMMK...",
+    "...KMMKKKKMMK...",
+    "...KMMMMMMMMK...",
+    "....KMMMMMMK....",
+    ".....KKKKKK.....",
+    "......KKKK......",
+    "................",
+    "................",
+    "................",
+  ],
+  // R_ARCANE — glowing glass orb on a pedestal (spell/exp/crystal/amulet).
+  R_ARCANE: [
+    "................",
+    ".......EE.......",
+    "......EWWWE.....",
+    ".....EWMMMWE....",
+    ".....EMMLMME....",
+    ".....EWMMMWE....",
+    "......EWWWE.....",
+    ".......EE.......",
+    ".......NN.......",
+    "......KNNK......",
+    "......KNNK......",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // R_SOUL — heart with soul-flame (lifesteal/revive/kill-mp/soul).
+  R_SOUL: [
+    "................",
+    ".......E........",
+    "......EWE.......",
+    ".....EE..EE.....",
+    "....KEEEKEEEK...",
+    "....KMMMMMMMK...",
+    "....KMMEEEMMK...",
+    "....KMMMMMMMK...",
+    ".....KMMMMMK....",
+    "......KMMMK.....",
+    ".......KMK......",
+    "........K.......",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // R_NATURE — faceted frost crystal (ice/wind/dodge-heal).
+  R_NATURE: [
+    "................",
+    ".......E........",
+    "......WLW.......",
+    ".....WLMMLW.....",
+    "....WLMMMMLW....",
+    "....WMMMMMMW....",
+    "....WLMMMMLW....",
+    ".....WLMMLW.....",
+    "......WLW.......",
+    ".......W........",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // R_VOID — abyssal eye with glowing iris (void/corruption/chaos/endless).
+  R_VOID: [
+    "................",
+    "................",
+    ".....KKKKKK.....",
+    "....KMMMMMMMK...",
+    "...KMMWMMWMMMK..",
+    "...KMMMEEEEMMK..",
+    "...KMMMKKKMMMK..",
+    "...KMMMMMMMMMK..",
+    "....KMMMMMMMK...",
+    ".....KKKKKK.....",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // R_UTILITY — gold idol/totem with glowing eye (greed/luck/economy + fallback).
+  R_UTILITY: [
+    "................",
+    "......KGGK......",
+    ".....KGLLGK.....",
+    "....KGGGGGGK....",
+    "....KGMGMMGK....",
+    "....KGGEGGGK....",
+    "....KGGEGGGK....",
+    "....KGGGGGGK....",
+    "....KNNNNNNK....",
+    ".....KNNNNK.....",
+    "......KKKK......",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
 };
 
 // Dev-time sanity: every template row must be exactly N(16) chars.
@@ -1479,6 +1616,14 @@ export function itemSpriteKind(item: Item): string {
 // around paintIcon. Used by inventory + hotbar so their icons match the map.
 export function paintItemIcon(target: HTMLCanvasElement, item: Item): void {
   paintIcon(target, itemSpriteKind(item), item.c);
+}
+
+// Paint a relic's pixel sprite into a 16×16 canvas. Relics aren't runtime Items
+// (no pickItemTemplate routing), so they route by def.spriteKind directly. The
+// def.c color drives the palette so same-template relics still differ in hue.
+// Task 6: used by the pickup popup, inventory relic row, and Codex relic rows.
+export function paintRelicIcon(target: HTMLCanvasElement, def: RelicDef): void {
+  paintIcon(target, def.spriteKind || 'R_UTILITY', def.c);
 }
 
 // Paint a named sprite into a 16×16 canvas — used by the legend/help panels so

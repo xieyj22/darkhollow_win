@@ -6,7 +6,7 @@ import { introOpen, setIntroOpen, introEnabled } from './state.js';
 import { discoverItem } from './meta.js';
 import { showOverlay, hideOverlay } from './ui-panels.js';
 import { t, tx, rareName, RARITY_C } from './i18n.js';
-import { paintItemIcon } from './sprites.js';
+import { paintItemIcon, paintRelicIcon } from './sprites.js';
 import {
   ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS,
   ALL_CONSUMABLES, FOODS, ENDLESS_GEAR, RELICS,
@@ -56,11 +56,14 @@ function showNext(): void {
   const target = queue.shift();
   if (!target) { hideOverlay('item-intro-overlay'); setIntroOpen(false); return; }
   document.getElementById('item-intro-content')!.innerHTML = renderCard(target);
-  // Paint the pixel sprite into the card's canvas (normal-item branch only;
-  // relic cards still render the def.ch emoji — Task 6 unifies relic sprites).
-  if (target.kind === 'item') {
-    const cv = document.querySelector<HTMLCanvasElement>('#item-intro-content canvas.lic');
-    if (cv) paintItemIcon(cv, target.item);
+  // Paint the pixel sprite into the card's canvas (item OR relic branch).
+  const cv = document.querySelector<HTMLCanvasElement>('#item-intro-content canvas.lic');
+  if (cv) {
+    if (target.kind === 'item') paintItemIcon(cv, target.item);
+    else {
+      const rdef = RELICS.find(r => r.id === target.id);
+      if (rdef) paintRelicIcon(cv, rdef);
+    }
   }
   document.getElementById('item-intro-hint')!.textContent = t('intro.closeHint');
   setIntroOpen(true);
@@ -85,7 +88,7 @@ function renderCard(target: IntroTarget): string {
     const flavor = def.flavor ? tx(def.flavor) : '';
     return `
       <div style="text-align:center;margin-bottom:8px">
-        <div style="font-size:2.4em;color:${def.c};line-height:1">${def.ch}</div>
+        <canvas class="lic" width="16" height="16" style="image-rendering:pixelated;width:48px;height:48px;vertical-align:middle;background:${def.c}22;border:1px solid ${def.c};border-radius:4px;padding:4px"></canvas>
         <div style="color:${RARITY_C[def.rarity] || '#ffd700'};font-size:1.3em;font-weight:700;margin-top:4px">${tx(def.n)}</div>
         <div style="color:#777;font-size:.8em">${t('intro.relicTag')} · ${rareName(def.rarity)}</div>
         <div style="color:#ffd700;font-size:.8em;margin-top:4px">✦ ${t('intro.firstDiscover')}</div>

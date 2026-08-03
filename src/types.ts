@@ -539,6 +539,9 @@ export interface RelicDef {
   effect: string;   // effect key (interpreted in relics.ts)
   value: number;    // effect magnitude
   flavor?: I18nText; // lore blurb for the intro card / codex (separate from effect `d`)
+  // Task 6: relic sprite template key (R_ATTACK/R_DEFENSE/.../R_UTILITY).
+  // Drives paintRelicIcon; absent → R_UTILITY fallback.
+  spriteKind?: string;
 }
 
 // --- Save Data ---
