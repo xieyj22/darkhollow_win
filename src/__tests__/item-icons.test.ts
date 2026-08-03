@@ -12,9 +12,21 @@ describe('rarityTint', () => {
   it('higher rarity → lighter (more luminance)', () => {
     const r0 = rarityTint('#f4845f', 0);
     const r4 = rarityTint('#f4845f', 4);
-    // r4 should be lighter than r0 (parse rgb, compare sum)
-    const lum = (s: string) => { const m = s.match(/\d+/g)!; return +m[0] + +m[1] + +m[2]; };
+    // r4 should be lighter than r0. Parse either `#rrggbb` or `rgb(r,g,b)`.
+    const lum = (s: string) => {
+      if (s.startsWith('#')) {
+        const h = s.slice(1);
+        return parseInt(h.slice(0, 2), 16) + parseInt(h.slice(2, 4), 16) + parseInt(h.slice(4, 6), 16);
+      }
+      const m = s.match(/\d+/g)!;
+      return +m[0] + +m[1] + +m[2];
+    };
     expect(lum(r4)).toBeGreaterThan(lum(r0));
+  });
+  it('every tier returns canonical #rrggbb hex (so buildPalette D/L shading works)', () => {
+    for (const r of [0, 1, 2, 3, 4, 5]) {
+      expect(rarityTint('#f4845f', r)).toMatch(/^#[0-9a-f]{6}$/);
+    }
   });
   it('deterministic (same input → same output)', () => {
     expect(rarityTint('#06d6a0', 3)).toBe(rarityTint('#06d6a0', 3));

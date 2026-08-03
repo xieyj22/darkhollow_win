@@ -1356,6 +1356,17 @@ function lighten(hex: string, amt: number): string {
   return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
 }
 
+// Canonicalize an `rgb(r,g,b)` / `rgba(...)` CSS color to `#rrggbb` hex so it
+// survives darken/lighten's hex-only guard. Already-`#hex` input passes through.
+// Used by rarityTint so item.c is always canonical hex for buildPalette shading.
+function rgbToHex(col: string): string {
+  if (col.startsWith('#')) return col;
+  const m = col.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (!m) return col;
+  const h = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${h(+m[1])}${h(+m[2])}${h(+m[3])}`;
+}
+
 // Fixed palette for player classes (baked-in colors; A/P/B/H are class mains).
 const PLAYER_PAL: Record<string, string> = {
   A: '#4a6b8a', P: '#6a3a8a', B: '#3a6bc0', H: '#e8c84a',
@@ -1369,11 +1380,11 @@ const PLAYER_PAL: Record<string, string> = {
 export function rarityTint(base: string, rarity: number): string {
   if (rarity >= 5) return '#9b5de5';
   switch (rarity) {
-    case 0: return darken(base, 0.70);
-    case 1: return darken(base, 0.88);
+    case 0: return rgbToHex(darken(base, 0.70));
+    case 1: return rgbToHex(darken(base, 0.88));
     case 2: return base;
-    case 3: return lighten(base, 0.18);
-    default: return lighten(base, 0.34);   // rarity 4
+    case 3: return rgbToHex(lighten(base, 0.18));
+    default: return rgbToHex(lighten(base, 0.34));   // rarity 4
   }
 }
 
