@@ -7,7 +7,7 @@ import { dst } from './utils.js';
 import { RARITY_C, rareName, t, tx } from './i18n.js';
 import { paintIcon } from './sprites.js';
 import { getMeta } from './meta.js';
-import { CLASSES } from './data.js';
+import { CLASSES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, RELICS } from './data.js';
 import { LORE_ENTRIES, LORE_CATS } from './lore.js';
 import { bridge } from './bridge.js';
 
@@ -207,19 +207,63 @@ export function renderRecords(): void {
 }
 
 // ===== Lore Codex (Wave 8) — clones the records-overlay pattern =====
+let codexTab: 'lore' | 'items' = 'lore';
+
 export function renderCodex(): void {
+  const titleEl = document.getElementById('codex-title');
+  if (titleEl) titleEl.textContent = t('up.codex');
+  const content = document.getElementById('codex-content');
+  if (!content) return;
+  content.innerHTML =
+    `<div class="opt-tabs" id="codex-tabs" role="tablist" style="margin-bottom:8px">
+      <button class="opt-tab${codexTab === 'lore' ? ' active' : ''}" data-ctab="lore">${t('codex.tabLore')}</button>
+      <button class="opt-tab${codexTab === 'items' ? ' active' : ''}" data-ctab="items">${t('codex.tabItems')}</button>
+    </div>` +
+    (codexTab === 'lore' ? renderLoreSection() : renderItemSection());
+  content.querySelectorAll<HTMLElement>('[data-ctab]').forEach(btn => {
+    btn.onclick = () => { codexTab = (btn.dataset.ctab as 'lore' | 'items') || 'lore'; renderCodex(); };
+  });
+}
+
+function renderLoreSection(): string {
   const unlocked = new Set(getMeta().unlockedLore);
-  const sections = LORE_CATS.map(cat => {
+  return LORE_CATS.map(cat => {
     const rows = LORE_ENTRIES.filter(e => e.cat === cat.id).map(e => {
       const has = unlocked.has(e.id);
       const name = has ? tx(e.n) : '🔒 ???';
       const body = has ? tx(e.body) : t('up.notDiscovered');
       return `<div style="padding:8px 10px;margin:4px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)"><div style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</div><div style="color:${has ? '#999' : '#444'};font-size:.9em;margin-top:3px">${body}</div></div>`;
     }).join('');
-    return rows
-      ? `<div style="color:#8888aa;margin:14px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${tx(cat.label)}</div>${rows}`
-      : '';
+    return rows ? `<div style="color:#8888aa;margin:14px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${tx(cat.label)}</div>${rows}` : '';
+  }).join('') || `<div style="color:#555;padding:12px">${t('up.noEntries')}</div>`;
+}
+
+function renderItemSection(): string {
+  const disc = new Set(getMeta().discoveredItems);
+  const tables: { type: string; label: string; arr: { id?: string; n: { en: string; zh: string } }[] }[] = [
+    { type: 'weapon', label: t('intro.type.weapon'), arr: ALL_WEAPONS },
+    { type: 'armor', label: t('intro.type.armor'), arr: ALL_ARMORS },
+    { type: 'accessory', label: t('intro.type.accessory'), arr: ALL_ACCESSORIES },
+    { type: 'potion', label: t('intro.type.potion'), arr: ALL_POTIONS },
+    { type: 'scroll', label: t('intro.type.scroll'), arr: ALL_SCROLLS },
+    { type: 'consumable', label: t('intro.type.consumable'), arr: ALL_CONSUMABLES },
+    { type: 'food', label: t('intro.type.food'), arr: FOODS },
+  ];
+  let html = '';
+  for (const { type, label, arr } of tables) {
+    const rows = arr.map(d => {
+      const has = d.id ? disc.has(`${type}:${d.id}`) : false;
+      const name = has ? tx(d.n) : '🔒 ???';
+      return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#ffd700' : '#333'};background:rgba(255,255,255,.02)"><span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
+    }).join('');
+    if (rows) html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${label}</div>${rows}`;
+  }
+  // Relics
+  const rrows = RELICS.map(r => {
+    const has = disc.has('relic:' + r.id);
+    const name = has ? tx(r.n) : '🔒 ???';
+    return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)"><span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
   }).join('');
-  (document.getElementById('codex-content')!).innerHTML = sections || `<div style="color:#555;padding:12px">${t('up.noEntries')}</div>`;
-  (document.getElementById('codex-title')!).textContent = t('up.codex');
+  html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${t('intro.relicTag')}</div>${rrows}`;
+  return html || `<div style="color:#555;padding:12px">${t('up.noEntries')}</div>`;
 }
