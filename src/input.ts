@@ -1,5 +1,5 @@
 // Keyboard and touch input handling
-import { G, invOpen, helpOpen, skillOpen, achOpen, talentOpen, eventOpen, eventActions, menuOpen } from './state.js';
+import { G, invOpen, helpOpen, skillOpen, achOpen, talentOpen, eventOpen, eventActions, menuOpen, introOpen } from './state.js';
 import { movePlayer, pickupItem, descendStairs, doWait } from './player.js';
 import { quickQuaff, quickRead, useQuickSlot, useItem, equipItem, sellItem } from './items.js';
 import { executeSkill } from './skills.js';
@@ -7,13 +7,14 @@ import { saveGame } from './save.js';
 import { closeEvent } from './events.js';
 import { hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
+import { closeItemIntro } from './item-intro.js';
 import { openInventory, closeInventory, openHelp, closeHelp, tryCastSkill, openSkillPanel, closeSkillPanel, openAchievements, closeAchievements, openTalentPanel, closeTalentPanel, sellMode } from './panels.js';
 
 export function initInput(): void {
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     // F11 toggles real (windowed) fullscreen under Electron; browsers handle their own.
     if (e.key === 'F11' && (window as any).dh?.toggleFullscreen) { e.preventDefault(); (window as any).dh.toggleFullscreen(); }
-    if (G && G.gameOver && !invOpen && !helpOpen && !skillOpen && !achOpen && !talentOpen && !eventOpen && !menuOpen) return;
+    if (G && G.gameOver && !invOpen && !helpOpen && !skillOpen && !achOpen && !talentOpen && !eventOpen && !menuOpen && !introOpen) return;
 
     // Focus trap: when an overlay is open, let Tab cycle only within it (don't swallow it).
     if (e.key === 'Tab') {
@@ -36,6 +37,11 @@ export function initInput(): void {
     if (optOv && optOv.classList.contains('active')) {
       if (e.key === 'Escape') { bridge.closeOptions?.(); e.preventDefault(); }
       return;
+    }
+    // Item intro card — ESC / B closes it; swallow all other keys while open.
+    if (introOpen) {
+      if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') { closeItemIntro(); e.preventDefault(); return; }
+      e.preventDefault(); return;
     }
     // Pause menu — ESC / B closes it; swallow all other keys while open.
     if (menuOpen) {
@@ -146,6 +152,7 @@ export function initInput(): void {
 
 // Close whichever overlay is currently open. Returns true if one was closed.
 function closeActiveOverlay(): boolean {
+  if (introOpen) { closeItemIntro(); return true; }
   if (eventOpen) { closeEvent(); return true; }
   if (invOpen) { closeInventory(); return true; }
   if (skillOpen) { closeSkillPanel(); return true; }
@@ -172,7 +179,7 @@ function pollGamepad(): void {
   const edge = (i: number) => btn(i) && !gpPrevBtn[i];
   const optOv = document.getElementById('options-overlay');
   const forgeOv = document.getElementById('forge-overlay');
-  const overlay = invOpen || skillOpen || talentOpen || achOpen || helpOpen || eventOpen || menuOpen
+  const overlay = invOpen || skillOpen || talentOpen || achOpen || helpOpen || eventOpen || menuOpen || introOpen
     || !!optOv?.classList.contains('active')
     || (!!forgeOv && getComputedStyle(forgeOv).display !== 'none');
   if (G && !G.gameOver) {

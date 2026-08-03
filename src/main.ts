@@ -32,6 +32,7 @@ import { openOptions, closeOptions, renderOptions, applyOptionsUI, applyTextScal
 import { bridge } from './bridge.js';
 import { updateLangUI, toggleLang, toggleSound, updateSoundBtn, applyAudioUI, applyZoom, applySafe, applyReducedMotion, minimapZoom } from './ui-settings.js';
 import { toggleLegend, toggleObjective, toggleKeys, initTooltip, showOverlay, hideOverlay, openPause, closePause, renderRecords, renderCodex } from './ui-panels.js';
+import { closeItemIntro } from './item-intro.js';
 
 // ===== Wire up late-bound dependencies =====
 setCombatGenItem(genItem);
@@ -213,6 +214,7 @@ function bindButtons(): void {
   on('btn-close-records', () => { hideOverlay('records-overlay'); });
   on('btn-codex', () => { showOverlay('codex-overlay'); renderCodex(); });
   on('btn-close-codex', () => { hideOverlay('codex-overlay'); });
+  on('btn-close-intro', closeItemIntro);
   on('btn-ending-slay', () => resolveEnding('slay'));
   on('btn-ending-refuse', () => resolveEnding('refuse'));
   on('btn-back-title', () => {
