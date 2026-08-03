@@ -12,6 +12,7 @@ import { addMsg } from './messages.js';
 import { recalc, checkLevelUp, killEnemy, applyCorruption } from './combat.js';
 import { queueItemIntro } from './item-intro.js';
 import { discoverItem } from './meta.js';
+import { paintItemIcon } from './sprites.js';
 
 // Item generation lives in item-gen.ts (Polish-B Q6 split). isGear/isConsumable are
 // imported for local use (inventory caps); the whole family is re-exported so
@@ -281,15 +282,21 @@ export function renderHotbar(): void {
       const invIdx = p.inv.indexOf(item);
       if (invIdx === -1) {
         p.quickSlots[i] = null;
-        html += `<div class="hb-slot empty"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:#555">·</span></div>`;
+        html += `<div class="hb-slot empty"><span class="hb-key">${i + 1}</span><span class="hb-icon">·</span></div>`;
         continue;
       }
-      html += `<div class="hb-slot" tabindex="0" role="button" style="border-color:${RARITY_C[item.rarity]}44" data-qs="${i}" title="${item.name}: ${item.desc}"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:${item.c}">${item.ch}</span><span class="hb-sub" style="color:${RARITY_C[item.rarity]}">${item.name}</span></div>`;
+      html += `<div class="hb-slot" tabindex="0" role="button" style="border-color:${RARITY_C[item.rarity]}44" data-qs="${i}" title="${item.name}: ${item.desc}"><span class="hb-key">${i + 1}</span><canvas class="lic hb-icon" width="16" height="16" data-slot="${i}"></canvas><span class="hb-sub" style="color:${RARITY_C[item.rarity]}">${item.name}</span></div>`;
     } else {
-      html += `<div class="hb-slot empty" data-qs="${i}"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:#555">·</span></div>`;
+      html += `<div class="hb-slot empty" data-qs="${i}"><span class="hb-key">${i + 1}</span><span class="hb-icon">·</span></div>`;
     }
   }
   hb.innerHTML = html;
+  // Paint pixel sprites into each occupied slot's canvas (empty slots show "·").
+  hb.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => {
+    const slot = +(cv.dataset.slot || 0);
+    const item = p.quickSlots[slot];
+    if (item) paintItemIcon(cv, item);
+  });
   // Bind click + keyboard activation (Enter/Space) so slots are reachable without a mouse
   hb.querySelectorAll('.hb-slot').forEach(el => {
     const slot = el as HTMLElement;

@@ -2,7 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('../audio.js', () => ({ snd: () => {} }));
 vi.mock('../state.js', () => ({ lang: 'en' }));
 
-import { rarityTint } from '../sprites.js';
+import { rarityTint, itemSpriteKind } from '../sprites.js';
+import { genWeapon } from '../item-gen.js';
 
 describe('rarityTint', () => {
   it('rarity 5 (endless) returns void purple', () => {
@@ -32,5 +33,20 @@ describe('rarityTint', () => {
     };
     const [r, , b] = chan(rarityTint('#f4845f', 2));
     expect(r).toBeGreaterThan(b);
+  });
+});
+
+describe('itemSpriteKind', () => {
+  it('a sword maps to W_SWORD', () => {
+    const it = genWeapon(1);
+    expect(itemSpriteKind(it)).toMatch(/^W_/);
+  });
+  it('a heal potion maps to P_HEALTH', () => {
+    const it = { type: 'potion', ef: 'heal', c: '#e63946', rarity: 0 } as any;
+    expect(itemSpriteKind(it)).toBe('P_HEALTH');
+  });
+  it('armor maps to I_SHIELD (pre-W2 default)', () => {
+    const it = { type: 'armor', c: '#7ec8e3', rarity: 0 } as any;
+    expect(itemSpriteKind(it)).toBe('I_SHIELD');
   });
 });

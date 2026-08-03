@@ -1084,44 +1084,56 @@ export function drawEnemySprite(c: CanvasRenderingContext2D, x: number, y: numbe
 }
 
 // Pick a weapon template by its name (sword / axe / hammer / dagger / staff / spear / scythe).
-function pickWeaponTemplate(name: string): Template {
-  if (/axe|cleaver|斧/.test(name)) return TEMPLATES.W_AXE;
-  if (/hammer|mace|锤/.test(name)) return TEMPLATES.W_HAMMER;
-  if (/dagger|匕首/.test(name)) return TEMPLATES.W_DAGGER;
-  if (/wand|staff|法杖|杖/.test(name)) return TEMPLATES.W_STAFF;
-  if (/spear|trident|矛|戟/.test(name)) return TEMPLATES.W_SPEAR;
-  if (/reaper|scythe|镰/.test(name)) return TEMPLATES.W_SCYTHE;
-  return TEMPLATES.W_SWORD;
+function pickWeaponTemplate(name: string): { tpl: Template; key: string } {
+  if (/axe|cleaver|斧/.test(name)) return { tpl: TEMPLATES.W_AXE, key: 'W_AXE' };
+  if (/hammer|mace|锤/.test(name)) return { tpl: TEMPLATES.W_HAMMER, key: 'W_HAMMER' };
+  if (/dagger|匕首/.test(name)) return { tpl: TEMPLATES.W_DAGGER, key: 'W_DAGGER' };
+  if (/wand|staff|法杖|杖/.test(name)) return { tpl: TEMPLATES.W_STAFF, key: 'W_STAFF' };
+  if (/spear|trident|矛|戟/.test(name)) return { tpl: TEMPLATES.W_SPEAR, key: 'W_SPEAR' };
+  if (/reaper|scythe|镰/.test(name)) return { tpl: TEMPLATES.W_SCYTHE, key: 'W_SCYTHE' };
+  return { tpl: TEMPLATES.W_SWORD, key: 'W_SWORD' };
 }
 
 // Pick an item template by type (+ name for weapons, + effect for potions/consumables).
-function pickItemTemplate(item: Item): Template {
+function pickItemTemplate(item: Item): { tpl: Template; key: string } {
   switch (item.type) {
     case 'weapon': return pickWeaponTemplate(item.name);
-    case 'armor': return TEMPLATES.I_SHIELD;
-    case 'accessory': return TEMPLATES.I_RING;
+    case 'armor': return { tpl: TEMPLATES.I_SHIELD, key: 'I_SHIELD' };
+    case 'accessory': return { tpl: TEMPLATES.I_RING, key: 'I_RING' };
     case 'potion':
-      if (item.ef === 'heal') return TEMPLATES.P_HEALTH;
-      if (item.ef === 'mana') return TEMPLATES.P_MANA;
-      if (item.ef === 'poison') return TEMPLATES.P_POISON;
-      return TEMPLATES.P_GENERIC;
-    case 'scroll': return TEMPLATES.I_SCROLL;
-    case 'food': return TEMPLATES.I_FOOD;
-    case 'gold': return TEMPLATES.I_GOLD;
+      if (item.ef === 'heal') return { tpl: TEMPLATES.P_HEALTH, key: 'P_HEALTH' };
+      if (item.ef === 'mana') return { tpl: TEMPLATES.P_MANA, key: 'P_MANA' };
+      if (item.ef === 'poison') return { tpl: TEMPLATES.P_POISON, key: 'P_POISON' };
+      return { tpl: TEMPLATES.P_GENERIC, key: 'P_GENERIC' };
+    case 'scroll': return { tpl: TEMPLATES.I_SCROLL, key: 'I_SCROLL' };
+    case 'food': return { tpl: TEMPLATES.I_FOOD, key: 'I_FOOD' };
+    case 'gold': return { tpl: TEMPLATES.I_GOLD, key: 'I_GOLD' };
     case 'consumable':
-      if (item.ef === 'bomb') return TEMPLATES.C_BOMB;
-      return TEMPLATES.C_POUCH;
-    default: return TEMPLATES.C_POUCH;
+      if (item.ef === 'bomb') return { tpl: TEMPLATES.C_BOMB, key: 'C_BOMB' };
+      return { tpl: TEMPLATES.C_POUCH, key: 'C_POUCH' };
+    default: return { tpl: TEMPLATES.C_POUCH, key: 'C_POUCH' };
   }
 }
 
 export function drawItemSprite(c: CanvasRenderingContext2D, x: number, y: number, item: Item): void {
-  const tpl = pickItemTemplate(item);
-  // Sprite visuals depend only on template (type+ef) + palette (color), not the
-  // random affix name — dropping item.name keeps spriteCache/silCache bounded
-  // (affix names are mostly unique, which grew both caches without limit).
-  const sig = item.type + ':' + item.ef + ':' + item.c;
+  const { tpl, key } = pickItemTemplate(item);
+  // Sprite visuals depend only on template (type+ef → key) + palette (color).
+  // sig uses `key` (not item.name) so the sprite cache stays bounded — and key
+  // will carry subType routing in Task 5 when weapons/potions get variants.
+  const sig = key + ':' + item.c;
   blitOutlined(c, x, y, getSprite(tpl, buildPalette(item.c), sig), sig);
+}
+
+// Public helper: the TEMPLATES key an item maps to (W_SWORD / I_SHIELD / P_HEALTH ...).
+// Used by paintItemIcon so HTML panels can render the exact in-game pixel sprite.
+export function itemSpriteKind(item: Item): string {
+  return pickItemTemplate(item).key;
+}
+
+// Paint an item's pixel sprite into a 16×16 canvas — the panel-facing wrapper
+// around paintIcon. Used by inventory + hotbar so their icons match the map.
+export function paintItemIcon(target: HTMLCanvasElement, item: Item): void {
+  paintIcon(target, itemSpriteKind(item), item.c);
 }
 
 // Paint a named sprite into a 16×16 canvas — used by the legend/help panels so

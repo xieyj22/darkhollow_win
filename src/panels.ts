@@ -7,7 +7,7 @@ import { executeSkill } from './skills.js';
 import { getMeta } from './meta.js';
 import { t, tMsg, tx, RARITY_C } from './i18n.js';
 import { RELICS } from './data.js';
-import { paintIcon } from './sprites.js';
+import { paintIcon, paintItemIcon } from './sprites.js';
 import { showOverlay, hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
 
@@ -80,7 +80,8 @@ function renderInv(): void {
       const qsTag = qsIdx >= 0 ? `<span style="color:#ffd700;font-size:var(--fs-floor);margin-left:3px">⚡${qsIdx + 1}</span>` : '';
       const name = document.createElement('span');
       name.style.cssText = 'display:flex;align-items:center;gap:5px;flex:1;min-width:0';
-      name.innerHTML = `<span class="ik">[${p.inv.indexOf(it) + 1}]</span><span style="color:${it.c}">${it.ch}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}${qsTag}</span>`;
+      const _idx = p.inv.indexOf(it);
+      name.innerHTML = `<span class="ik">[${_idx + 1}]</span><canvas class="lic" width="16" height="16" data-idx="${_idx}"></canvas><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}${qsTag}</span>`;
       const desc = document.createElement('span');
       desc.className = 'id'; desc.textContent = it.desc; desc.style.cssText = 'margin:0 8px;text-align:right;flex-shrink:0';
       const acts = document.createElement('span');
@@ -132,6 +133,14 @@ function renderInv(): void {
     }
     div.appendChild(sec);
   }
+  // Paint pixel sprites into every <canvas class="lic"> in the inventory.
+  // Done once at the end (after all rows are in the DOM) so each canvas has its
+  // final parent; idx maps back to p.inv for the live Item (color stays in sync).
+  div.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => {
+    const idx = +(cv.dataset.idx || 0);
+    const it = p.inv[idx];
+    if (it) paintItemIcon(cv, it);
+  });
 }
 
 // --- Help ---
