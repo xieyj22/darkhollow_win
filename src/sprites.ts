@@ -1103,7 +1103,10 @@ function pickItemTemplate(item: Item): Template {
 
 export function drawItemSprite(c: CanvasRenderingContext2D, x: number, y: number, item: Item): void {
   const tpl = pickItemTemplate(item);
-  const sig = item.type + ':' + item.ef + ':' + item.name + ':' + item.c;
+  // Sprite visuals depend only on template (type+ef) + palette (color), not the
+  // random affix name — dropping item.name keeps spriteCache/silCache bounded
+  // (affix names are mostly unique, which grew both caches without limit).
+  const sig = item.type + ':' + item.ef + ':' + item.c;
   blitOutlined(c, x, y, getSprite(tpl, buildPalette(item.c), sig), sig);
 }
 

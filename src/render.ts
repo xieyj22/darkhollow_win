@@ -72,15 +72,13 @@ export function drawPlayerLayer(c: CanvasRenderingContext2D): void {
     if (performance.now() - _playerTween.t0 >= TWEEN_DUR_MS) _playerTween = null;
   }
   const px = (lx - G.vx) * TS, py = (ly - G.vy) * TS;
-  const pGlow = getGlow('player-glow', TS * 2, 2, TS * 1.5,
-    [[0, 'rgba(255,215,0,0.12)'], [0.5, 'rgba(255,215,0,0.05)'], [1, 'rgba(255,215,0,0)']]);
+  const pGlow = getGlow('player-glow', TS * 2, 2, TS * 1.5, PLAYER_GLOW_STOPS);
   c.drawImage(pGlow, px - TS * 0.5, py - TS * 0.5);
   // Torch: enlarged warm halo while a torch buff is active (visible light boost).
   const torch = G.player.buffs.reduce((s, b) => b.type === 'torch' ? s + b.value : s, 0);
   if (torch > 0) {
     const tsize = TS * (3 + torch * 0.25);
-    const tg = getGlow('torch-halo:' + torch, tsize, 2, tsize * 0.7,
-      [[0, 'rgba(255,160,60,0.20)'], [0.5, 'rgba(255,120,40,0.09)'], [1, 'rgba(255,100,30,0)']]);
+    const tg = getGlow('torch-halo:' + torch, tsize, 2, tsize * 0.7, TORCH_GLOW_STOPS);
     c.drawImage(tg, px + TS / 2 - tsize / 2, py + TS / 2 - tsize / 2);
   }
   c.textAlign = 'center'; c.textBaseline = 'middle';
@@ -109,14 +107,11 @@ export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
     c.fillRect(sx, sy, TS, TS);
 
     if (e.isBoss) {
-      const aura = getGlow('boss-aura', TS * 2, 2, TS * 1.5,
-        [[0, 'rgba(255,215,0,0.18)'], [0.5, 'rgba(255,215,0,0.08)'], [1, 'rgba(255,215,0,0)']]);
+      const aura = getGlow('boss-aura', TS * 2, 2, TS * 1.5, BOSS_AURA_STOPS);
       c.drawImage(aura, sx - TS * 0.5, sy - TS * 0.5);
     }
     if (e.isElite && e.el !== 'none') {
-      const ecg = EL_COLORS[e.el] || '255,255,255';
-      const eg = getGlow('elite-glow:' + e.el, TS + 8, 1, TS,
-        [[0, `rgba(${ecg},0.12)`], [1, `rgba(${ecg},0)`]]);
+      const eg = getGlow('elite-glow:' + e.el, TS + 8, 1, TS, ELITE_GLOW_STOPS[e.el] || ELITE_GLOW_STOPS.fire);
       c.drawImage(eg, sx - 4, sy - 4);
     }
 
@@ -160,6 +155,17 @@ function getGlow(key: string, size: number, innerR: number, outerR: number, stop
   glowCache.set(key, cv);
   return cv;
 }
+
+// Hoisted glow stops — the draw* layers used to allocate a fresh nested array
+// literal (with a template-string color for elites) every player/enemy every
+// frame. These feed getGlow, which only reads them on a cache miss, so a
+// module-level constant is exactly equivalent at zero per-frame allocation.
+const PLAYER_GLOW_STOPS: [number, string][] = [[0, 'rgba(255,215,0,0.12)'], [0.5, 'rgba(255,215,0,0.05)'], [1, 'rgba(255,215,0,0)']];
+const TORCH_GLOW_STOPS: [number, string][] = [[0, 'rgba(255,160,60,0.20)'], [0.5, 'rgba(255,120,40,0.09)'], [1, 'rgba(255,100,30,0)']];
+const BOSS_AURA_STOPS: [number, string][] = [[0, 'rgba(255,215,0,0.18)'], [0.5, 'rgba(255,215,0,0.08)'], [1, 'rgba(255,215,0,0)']];
+const ELITE_GLOW_STOPS: Record<string, [number, string][]> = Object.fromEntries(
+  Object.entries(EL_COLORS).map(([el, rgb]) => [el, [[0, `rgba(${rgb},0.12)`], [1, `rgba(${rgb},0)`]] as [number, string][]]),
+);
 
 // Pre-rendered scanline overlay (avoids 300+ fillRect calls per frame)
 let scanlineCanvas: HTMLCanvasElement | null = null;
