@@ -16,7 +16,7 @@ import { MW, MH } from './config.js';
 import { renderMinimap } from './render.js';
 import { showOverlay, hideOverlay, toggleLegend, toggleKeys } from './ui-panels.js';
 import { bridge } from './bridge.js';
-import { bindingsFor, resetKeybinds, setCapturing } from './keybinds.js';
+import { bindingsFor, buttonBindingsFor, resetKeybinds, setCapturing } from './keybinds.js';
 import type { Action } from './keybinds.js';
 
 type OptOrigin = 'title' | 'game' | 'pause';
@@ -335,10 +335,17 @@ const KB_META: Action[] = ['overlay_close', 'pause', 'lang', 'mute'];
 
 function renderKeybinds(body: HTMLElement): void {
   const renderActionRow = (a: Action): string => {
-    const binds = bindingsFor(a).join(', ') || '—';
+    const kb = bindingsFor(a).join(', ');
+    const gp = buttonBindingsFor(a).join(', ');
+    // Build a compact "KB: …  GP: …" display; fall back to — when both empty.
+    let bindDisplay: string;
+    if (kb && gp) bindDisplay = `<span class="kb-kb">KB: ${kb}</span> <span class="kb-gp">GP: ${gp}</span>`;
+    else if (kb) bindDisplay = `<span class="kb-kb">KB: ${kb}</span>`;
+    else if (gp) bindDisplay = `<span class="kb-gp">GP: ${gp}</span>`;
+    else bindDisplay = '—';
     return row(
       t('kb.' + a),
-      `<span class="kb-key">${binds}</span> <button class="kb-rebind" data-rebind="${a}">${t('kb.rebind')}</button>`,
+      `<span class="kb-key">${bindDisplay}</span> <button class="kb-rebind" data-rebind="${a}">${t('kb.rebind')}</button>`,
     );
   };
 

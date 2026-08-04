@@ -9,10 +9,14 @@ import { hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
 import { closeItemIntro } from './item-intro.js';
 import { openInventory, closeInventory, openHelp, closeHelp, tryCastSkill, openSkillPanel, closeSkillPanel, openAchievements, closeAchievements, openTalentPanel, closeTalentPanel, sellMode } from './panels.js';
-import { keyToAction, buttonToAction, getCapturing, setCapturing, rebind, rebindButton, bindingFor, type Action } from './keybinds.js';
+import { keyToAction, buttonToAction, getCapturing, setCapturing, rebind, rebindButton, bindingFor, loadKeybinds, type Action } from './keybinds.js';
 import { t, tMsg } from './i18n.js';
 
 export function initInput(): void {
+  // Load persisted keybinds before registering any input listener, so the very
+  // first keydown / gamepad poll consults the user's saved bindings (not just
+  // the DEFAULT_KEYS copy from module load). Safe no-op if localStorage is empty.
+  loadKeybinds();
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     // Keybind capture mode — intercept ALL keys before anything else. When the
     // user clicks "Rebind" in the Keybinds tab, getCapturing() returns the

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('../audio.js', () => ({ snd: () => {} }));
 vi.mock('../state.js', () => ({ lang: 'en' }));
-import { keyToAction, buttonToAction, rebind, rebindButton, bindingFor, bindingsFor, resetKeybinds, DEFAULT_KEYS } from '../keybinds.js';
+import { keyToAction, buttonToAction, rebind, rebindButton, bindingFor, bindingsFor, buttonBindingsFor, loadKeybinds, resetKeybinds, DEFAULT_KEYS, DEFAULT_BUTTONS } from '../keybinds.js';
 
 const ke = (key: string, ctrl = false) => ({ key, ctrlKey: ctrl, toLowerCase: () => key.toLowerCase() } as any);
 
@@ -108,5 +108,70 @@ describe('rebindButton (T5): gamepad conflict detection', () => {
     const r = rebindButton('wait', 0); // button 0 IS wait
     expect(r.conflict).toBeUndefined();
     expect(buttonToAction(0)).toBe('wait');
+  });
+});
+
+describe('buttonBindingsFor (T5 fix): reverse-lookup gamepad labels', () => {
+  beforeEach(() => resetKeybinds());
+  it('returns friendly labels for default button bindings', () => {
+    expect(buttonBindingsFor('move_up')).toEqual(['D-pad↑']);
+    expect(buttonBindingsFor('wait')).toEqual(['A']);
+    expect(buttonBindingsFor('overlay_close')).toEqual(['B']);
+    expect(buttonBindingsFor('pause')).toEqual(['Start']);
+  });
+  it('reflects rebinds as friendly labels', () => {
+    rebindButton('pickup', 6); // LT
+    expect(buttonBindingsFor('pickup')).toEqual(['LT']);
+  });
+  it('returns empty array for actions with no button binding', () => {
+    expect(buttonBindingsFor('help')).toEqual([]);
+    expect(buttonBindingsFor('pickup')).toEqual([]);
+  });
+});
+
+describe('loadKeybinds (T5 fix): persisted bindings survive reload', () => {
+  beforeEach(() => { localStorage.clear(); resetKeybinds(); });
+
+  it('loads a stored keyboard rebind so keyToAction reflects it', () => {
+    // Simulate a saved rebind: pickup moved from 'g' to 'p'. A real rebind
+    // frees 'g' before saving, so the stored map has 'p' but NOT 'g'.
+    const savedKeys = { ...DEFAULT_KEYS };
+    delete savedKeys.g;  // g was freed by the rebind that produced this save
+    (savedKeys as any).p = 'pickup';
+    localStorage.setItem('dh_keybinds', JSON.stringify({
+      keys: savedKeys,
+      buttons: { ...DEFAULT_BUTTONS },
+    }));
+    // Before load, defaults are active (g→pickup, p→null).
+    expect(keyToAction(ke('g'))).toBe('pickup');
+    expect(keyToAction(ke('p'))).toBeNull();
+    loadKeybinds();
+    // After load, the stored map takes over verbatim: p→pickup, g absent.
+    expect(keyToAction(ke('p'))).toBe('pickup');
+    expect(keyToAction(ke('g'))).toBeNull();
+  });
+
+  it('loads a stored gamepad rebind so buttonToAction reflects it', () => {
+    localStorage.setItem('dh_keybinds', JSON.stringify({
+      keys: {},
+      buttons: { 6: 'pickup' }, // LT → pickup
+    }));
+    loadKeybinds();
+    expect(buttonToAction(6)).toBe('pickup');
+    // The stored map is used verbatim — buttons NOT in the save are unbound.
+    expect(buttonToAction(0)).toBeNull(); // A (wait in defaults) is absent
+  });
+
+  it('falls back to defaults on corrupt localStorage data', () => {
+    localStorage.setItem('dh_keybinds', 'not valid json{{{');
+    loadKeybinds();
+    expect(keyToAction(ke('g'))).toBe('pickup'); // default restored
+    expect(buttonToAction(0)).toBe('wait');
+  });
+
+  it('falls back to defaults when no save exists', () => {
+    loadKeybinds();
+    expect(keyToAction(ke('g'))).toBe('pickup');
+    expect(buttonToAction(12)).toBe('move_up');
   });
 });

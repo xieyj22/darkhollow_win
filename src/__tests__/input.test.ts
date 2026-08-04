@@ -88,13 +88,13 @@ describe('dispatchGamepadAction — overlay gating', () => {
   it('move only fires when !overlay', () => {
     dispatchGamepadAction('move_up', false);
     expect(movePlayer).toHaveBeenCalledWith(0, -1);
-    movePlayer.mockClear();
+    vi.clearAllMocks();
     dispatchGamepadAction('move_up', true);
     expect(movePlayer).not.toHaveBeenCalled();
   });
   it('wait (A) only fires when !overlay', () => {
     dispatchGamepadAction('wait', false); expect(doWait).toHaveBeenCalled();
-    doWait.mockClear();
+    vi.clearAllMocks();
     dispatchGamepadAction('wait', true);  expect(doWait).not.toHaveBeenCalled();
   });
   it('skill/inventory/quaff/descend only fire when !overlay', () => {
@@ -102,7 +102,7 @@ describe('dispatchGamepadAction — overlay gating', () => {
     dispatchGamepadAction('inventory', false);  expect(openInventory).toHaveBeenCalled();
     dispatchGamepadAction('quaff', false);      expect(quickQuaff).toHaveBeenCalled();
     dispatchGamepadAction('descend', false);    expect(descendStairs).toHaveBeenCalled();
-    openSkillPanel.mockClear();
+    vi.clearAllMocks();
     dispatchGamepadAction('skill', true);
     expect(openSkillPanel).not.toHaveBeenCalled();
   });

@@ -144,6 +144,31 @@ export function bindingsFor(action: Action): string[] {
   return out;
 }
 
+// Friendly labels for standard gamepad button indices (Xbox layout).
+const GAMEPAD_BTN_LABELS: Record<number, string> = {
+  0: 'A', 1: 'B', 2: 'X', 3: 'Y',
+  4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT',
+  8: 'Back', 9: 'Start', 10: 'LS', 11: 'RS',
+  12: 'D-pad↑', 13: 'D-pad↓', 14: 'D-pad←', 15: 'D-pad→',
+};
+
+/**
+ * Reverse-lookup: ALL gamepad buttons currently bound to `action`, returned as
+ * friendly labels (e.g. ['A', 'LB']). Empty array if no button is bound. Used
+ * by the Keybinds tab so the user can see gamepad bindings alongside keyboard
+ * bindings in the same row. Raw indices are recoverable but not needed for
+ * display — capture/conflict logic operates on indices via rebindButton().
+ */
+export function buttonBindingsFor(action: Action): string[] {
+  const out: string[] = [];
+  for (const b in currentButtons) {
+    if (currentButtons[b] === action) {
+      out.push(GAMEPAD_BTN_LABELS[Number(b)] ?? `B${b}`);
+    }
+  }
+  return out;
+}
+
 // ===== Rebind =====
 
 export interface RebindResult {
