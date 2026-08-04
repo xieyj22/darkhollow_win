@@ -219,6 +219,18 @@ canvas.lic,canvas.hic{width:22px;height:22px;image-rendering:pixelated;vertical-
 .toggle input:checked ~ .track{background:#e6394633;border-color:var(--accent-red)}
 .toggle input:checked ~ .thumb{left:22px;background:var(--accent-red)}
 
+/* --- Keybinds tab --- */
+.kb-group{padding-top:6px}
+.kb-group:not(:first-child){border-top:1px solid var(--border-default);margin-top:10px}
+.kb-key{display:inline-flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg-card);border:1px solid var(--border-default);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--text-bright);min-height:28px;line-height:1}
+.kb-key .kb-kb{color:var(--text-bright)}
+.kb-key .kb-gp{color:var(--accent-blue-light)}
+.kb-rebind{background:none;border:1px solid var(--border-default);color:var(--text-secondary);min-height:44px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:var(--fs-sm);border-radius:var(--radius-sm);transition:all .15s;flex-shrink:0}
+.kb-rebind:hover{color:var(--accent-red);border-color:var(--accent-red)}
+.kb-rebind.capturing{color:var(--accent-gold);border-color:var(--accent-gold);box-shadow:var(--shadow-glow-gold)}
+.kb-reset{display:block;width:100%;margin-top:12px;padding:8px 14px;min-height:44px;background:none;border:1px solid var(--border-default);color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:var(--fs-sm);border-radius:var(--radius-sm);transition:all .15s}
+.kb-reset:hover{color:var(--accent-red);border-color:var(--accent-red)}
+
 /* ===== Event Popup ===== */
 #event-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-card);border:2px solid var(--accent-purple);padding:20px;min-width:400px;max-width:500px;z-index:550;border-radius:var(--radius-lg);text-align:center;box-shadow:var(--shadow-panel),0 0 20px rgba(155,93,229,0.15)}
 #event-popup h3{color:var(--accent-purple);margin-bottom:10px}
@@ -331,7 +343,7 @@ canvas.hb-icon{width:20px;height:20px}
 .death-echoes,.victory-echoes{margin-top:10px}
 
 /* ===== Focus Styles ===== */
-button:focus-visible,.menu-btn:focus-visible,.sb-btn:focus-visible,.close-btn:focus-visible,.evb:focus-visible,.fu-buy:focus-visible,.mc-btn:focus-visible,.keys-x:focus-visible,#keys-toggle:focus-visible,.tb:focus-visible,.forge-tab:focus-visible,.hb-slot:focus-visible,.talent-cell:focus-visible,.opt-tab:focus-visible,.seg button:focus-visible,.toggle input:focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}
+button:focus-visible,.menu-btn:focus-visible,.sb-btn:focus-visible,.close-btn:focus-visible,.evb:focus-visible,.fu-buy:focus-visible,.mc-btn:focus-visible,.keys-x:focus-visible,#keys-toggle:focus-visible,.tb:focus-visible,.forge-tab:focus-visible,.hb-slot:focus-visible,.talent-cell:focus-visible,.opt-tab:focus-visible,.seg button:focus-visible,.kb-rebind:focus-visible,.kb-reset:focus-visible,.toggle input:focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}
 
 /* ===== Sidebar Collapse ===== */
 #sidebar{transition:width .3s,min-width .3s,padding .3s,opacity .3s}
