@@ -3,7 +3,7 @@ import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';
 
 // Main entry point — wires all modules together
-import { G, setGameState, setLang, lang, setMuted, muted, setUiZoom, uiZoom, setMinimapScale, minimapScale, setLegendVisible, legendVisible, setKeysVisible, keysVisible, setInvOpen, setHelpOpen, setSkillOpen, setAchOpen, setTalentOpen, setSafeZone, safeZone, setReducedMotion, reducedMotion, setMenuOpen } from './state.js';
+import { G, setGameState, setLang, lang, setUiZoom, uiZoom, setMinimapScale, minimapScale, setLegendVisible, legendVisible, setKeysVisible, keysVisible, setInvOpen, setHelpOpen, setSkillOpen, setAchOpen, setTalentOpen, setSafeZone, safeZone, setReducedMotion, reducedMotion, setMenuOpen } from './state.js';
 import { MH, MW, FOV, MAX_INV, FINAL, TL, TS } from './config.js';
 import { rng, pick, clamp, dst, darken } from './utils.js';
 import { L, t, tMsg, rareName, itemName, tx, RARITY_C } from './i18n.js';
@@ -28,9 +28,10 @@ import { paintIcon } from './sprites.js';
 import { renderForge, renderTitleStats, getMeta } from './meta.js';
 import { LORE_ENTRIES, LORE_CATS } from './lore.js';
 import { startParticles, stopParticles, setDrawPlayerLayerFn, setDrawEnemyLayerFn } from './particles.js';
-import { openOptions, closeOptions, renderOptions, applyOptionsUI, applyTextScale, applyColorblind, applyBarCues } from './options.js';
+import { openOptions, closeOptions, renderOptions, applyOptionsUI } from './options.js';
 import { bridge } from './bridge.js';
-import { updateLangUI, toggleLang, toggleSound, updateSoundBtn, applyAudioUI, applyZoom, applySafe, applyReducedMotion, minimapZoom } from './ui-settings.js';
+import { updateLangUI, toggleLang, toggleSound, updateSoundBtn, applyAudioUI, minimapZoom } from './ui-settings.js';
+import { applyAll } from './settings.js';
 import { toggleLegend, toggleObjective, toggleKeys, initTooltip, showOverlay, hideOverlay, openPause, closePause, renderRecords, renderCodex } from './ui-panels.js';
 import { closeItemIntro } from './item-intro.js';
 
@@ -49,7 +50,7 @@ setDrawEnemyLayerFn(drawEnemyLayer);
 
 // Expose to typed bridge registry for cross-module access
 bridge.initAudio = initAudio;
-bridge.muted = muted;
+bridge.muted = isMuted();
 bridge.classes = CLASSES;
 bridge.achDefs = ACH_DEFS;
 bridge.talentTrees = TALENT_TREES;
@@ -263,12 +264,10 @@ function bindButtons(): void {
 // ===== Window Init =====
 window.addEventListener('load', () => {
   updateLangUI();
-  applyZoom();
-  applySafe();
-  applyReducedMotion();
-  applyTextScale();
-  applyColorblind();
-  applyBarCues();
+  // One-pass apply of every persisted setting's DOM side-effect (CSS vars +
+  // body classes for zoom / safe-zone / reduced-motion / text-scale / colorblind
+  // / bar-cues, plus the mute bridge flag). Replaces the old per-apply chain.
+  applyAll();
   applyAudioUI();
   initTitleParticles();
   bindButtons();

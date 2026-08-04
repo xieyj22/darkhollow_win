@@ -46,10 +46,12 @@ export let lang: string = localStorage.getItem('dh_lang') || 'en';
 export function setLang(l: string) { lang = l; localStorage.setItem('dh_lang', l); }
 
 // Audio
+// NOTE: the muted/setMuted mirror used to live here (a duplicate of audio.ts's
+// persisted `dh_muted` flag). Removed in settings-core Task 1 — audio.ts is now
+// the single source of truth (isMuted()/setMutedState()); bridge.muted is fed
+// from there at startup and on toggle. uiZoom/reducedMotion/etc. stay here.
 export let audioCtx: AudioContext | null = null;
-export let muted = false;
 export function setAudioCtx(a: AudioContext | null) { audioCtx = a; }
-export function setMuted(m: boolean) { muted = m; }
 
 // Minimap (persisted — remembers the player's preferred zoom across sessions)
 export let minimapScale: number = clampInt(localStorage.getItem('dh_minimap_scale'), 3, 2, 5);

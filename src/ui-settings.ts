@@ -1,6 +1,9 @@
-// Settings UI: language, sound, zoom, safe-zone, reduced-motion, minimap zoom.
-// Extracted from main.ts (Polish-B Q6). Pure relocation — function bodies verbatim.
-import { G, lang, muted, setLang, setMuted, uiZoom, setUiZoom, minimapScale, setMinimapScale, legendVisible, safeZone, setSafeZone, reducedMotion, setReducedMotion } from './state.js';
+// Settings UI: language, sound, minimap zoom.
+// Extracted from main.ts (Polish-B Q6). The apply helpers (applyZoom /
+// applySafe / applyReducedMotion) and their adjust*/toggle* wrappers used to
+// live here as duplicates of options.ts — removed in settings-core Task 1
+// (settings.ts now owns the apply dispatch via applyAll()).
+import { G, lang, setLang, minimapScale, setMinimapScale, legendVisible } from './state.js';
 import { clamp } from './utils.js';
 import { t } from './i18n.js';
 import { addMsg } from './messages.js';
@@ -52,7 +55,7 @@ export function updateLangUI(): void {
 export function toggleLang(): void {
   const newLang = lang === 'en' ? 'zh' : 'en';
   setLang(newLang);
-  bridge.muted = muted;
+  bridge.muted = isMuted();
   updateLangUI();
   if (G) addMsg(t('langChanged'), 'mi');
 }
@@ -61,7 +64,6 @@ export function toggleLang(): void {
 export function toggleSound(): void {
   const newMuted = !isMuted();
   setMutedState(newMuted);            // audio.ts owns the persisted mute state
-  setMuted(newMuted);                 // mirror into state.muted for UI reads
   bridge.muted = newMuted;
   updateSoundBtn();
   addMsg(newMuted ? t('muted') : t('unmuted'), 'mi');
@@ -71,64 +73,24 @@ export function updateSoundBtn(): void {
   const on = document.getElementById('btn-sound');
   const off = document.getElementById('btn-mute');
   if (on && off) {
-    if (muted) { on.style.display = 'none'; off.style.display = 'block'; off.classList.add('active'); }
+    if (isMuted()) { on.style.display = 'none'; off.style.display = 'block'; off.classList.add('active'); }
     else { on.style.display = 'block'; on.classList.add('active'); off.style.display = 'none'; }
   }
 }
 
-// Sync audio-panel sliders + mute mirror from persisted prefs.
+// Sync audio-panel sliders + bridge.muted from persisted prefs.
 export function applyAudioUI(): void {
   const set = (id: string, v: number) => { const el = document.getElementById(id) as HTMLInputElement | null; if (el) el.value = String(Math.round(v * 100)); };
   set('vol-master', getMasterVol());
   set('vol-music', getMusicVol());
   set('vol-sfx', getSfxVol());
   const m = isMuted();
-  setMuted(m);                        // mirror so updateSoundBtn reads correctly
-  bridge.muted = m;
+  bridge.muted = m;                   // render.ts reads this for the sound icon
   updateSoundBtn();
 }
 
-// ===== Zoom =====
-// NOTE: adjustZoom is retained verbatim from the pre-split main.ts; the live zoom
-// controls now live in options.ts, which has its own slider handling. Kept here so
-// the settings module stays cohesive (no behavior change).
-function adjustZoom(dir: number): void {
-  let newZoom = dir === 0 ? 1 : clamp(+(uiZoom + dir * 0.1).toFixed(1), 0.7, 1.5);
-  setUiZoom(newZoom);
-  applyZoom();
-}
-
-export function applyZoom(): void {
-  document.documentElement.style.setProperty('--ui-zoom', String(uiZoom));
-  const lbl = document.getElementById('zoom-label');
-  if (lbl) lbl.textContent = Math.round(uiZoom * 100) + '%';
-}
-
-// ===== Safe zone (accessibility) — mirrors adjustZoom/applyZoom =====
-// NOTE: adjustSafe is retained verbatim; live safe-zone controls are in options.ts.
-function adjustSafe(dir: number): void {
-  const n = dir === 0 ? 16 : clamp(safeZone + dir * 4, 0, 64);
-  setSafeZone(n);
-  applySafe();
-}
-export function applySafe(): void {
-  document.documentElement.style.setProperty('--safe', safeZone + 'px');
-  const lbl = document.getElementById('safe-label');
-  if (lbl) lbl.textContent = String(safeZone);
-}
-
-// ===== Reduced motion (accessibility) =====
-export function applyReducedMotion(): void {
-  document.body.classList.toggle('reduced-motion', reducedMotion);
-  const btn = document.getElementById('btn-motion');
-  if (btn) btn.textContent = (reducedMotion ? '🎞️ On' : '🎞️ Off');
-}
-// NOTE: toggleReducedMotion is retained verbatim; the live toggle is in options.ts.
-function toggleReducedMotion(): void {
-  setReducedMotion(!reducedMotion);
-  applyReducedMotion();
-}
-
+// ===== Minimap zoom (live controls are in options.ts; this handles the
+// sidebar +/- buttons which call minimapZoom directly) =====
 export function minimapZoom(dir: number): void {
   const newScale = clamp(minimapScale + dir, 2, 5);
   setMinimapScale(newScale);
