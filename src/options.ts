@@ -10,7 +10,7 @@
 
 import { t } from './i18n.js';
 import { legendVisible, keysVisible, minimapScale } from './state.js';
-import { SETTING_DEFS, resetDefaults, applyAll } from './settings.js';
+import { SETTING_DEFS, resetDefaults } from './settings.js';
 import type { SettingDef, SettingTab } from './settings.js';
 import { MW, MH } from './config.js';
 import { renderMinimap } from './render.js';
@@ -108,6 +108,7 @@ export function renderOptions(): void {
 
 /** Create or refresh the reset-defaults button below the options body. */
 function ensureResetButton(bodyEl: HTMLElement): void {
+  // #opt-body is a direct child of #options-panel (see setupPanel) — parentElement is the panel we append the reset button to.
   const panel = bodyEl.parentElement;
   if (!panel) return;
   let btn = panel.querySelector<HTMLButtonElement>('#opt-reset');
@@ -123,10 +124,11 @@ function ensureResetButton(bodyEl: HTMLElement): void {
   btn.style.display = optActiveTab === 'keybinds' ? 'none' : '';
   btn.onclick = () => {
     if (confirm(t('opt.confirmReset'))) {
+      // resetDefaults() already calls d.set(default) + d.apply?.() for every
+      // def, so no separate applyAll() is needed here. The POST_CHANGE pass
+      // below covers side-effects the schema apply skips (e.g. minimap canvas
+      // resize), and renderOptions() refreshes the panel.
       resetDefaults();
-      applyAll();
-      // Run post-change hooks that schema apply?.() skips (e.g. minimap canvas
-      // resize) so the canvas matches the reset value, not just the checkbox.
       for (const fn of Object.values(POST_CHANGE)) fn();
       renderOptions();
     }
