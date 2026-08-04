@@ -182,6 +182,7 @@ export const SETTING_DEFS: readonly SettingDef[] = [
   },
   {
     key: 'safeZone', tab: 'display', labelKey: 'optSafeZone', control: 'slider',
+    descKey: 'opt.safeZoneDesc',
     min: 0, max: 64, step: 1,
     get: () => safeZone, set: asSetter(setSafeZone),
     apply: applySafeZone,
@@ -203,17 +204,20 @@ export const SETTING_DEFS: readonly SettingDef[] = [
   // ----- Accessibility tab -----
   {
     key: 'reducedMotion', tab: 'access', labelKey: 'optReducedMotion', control: 'toggle',
+    descKey: 'opt.reducedMotionDesc',
     get: () => reducedMotion, set: asSetter(setReducedMotion),
     apply: applyReducedMotion, default: false,
   },
   {
     key: 'shake', tab: 'access', labelKey: 'optShake', control: 'slider',
+    descKey: 'opt.shakeDesc',
     min: 0, max: 1, step: 0.05, disabledWhen: 'reducedMotion',
     get: () => shakeScale, set: asSetter(setShakeScale),
     toDisplay: v => `${Math.round((v as number) * 100)}%`, default: 1,
   },
   {
     key: 'colorblind', tab: 'access', labelKey: 'optColorblind', control: 'seg',
+    descKey: 'opt.colorblindDesc',
     options: [
       { id: 'off', labelKey: 'cbOff' }, { id: 'proto', labelKey: 'cbProto' },
       { id: 'deutan', labelKey: 'cbDeutan' }, { id: 'tritan', labelKey: 'cbTritan' },
@@ -223,6 +227,7 @@ export const SETTING_DEFS: readonly SettingDef[] = [
   },
   {
     key: 'barCues', tab: 'access', labelKey: 'optBarCues', control: 'toggle',
+    descKey: 'opt.barCuesDesc',
     get: () => barCues, set: asSetter(setBarCues),
     apply: applyBarCues, default: true,
   },

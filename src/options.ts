@@ -3,67 +3,29 @@
 // scattered across the sidebar footer (zoom / safe-zone / motion / audio) and adds accessibility
 // options (fullscreen, screen-shake scale, color-blindness filter, text-size tiers).
 //
-// Reuses existing persisted setters in state.ts / audio.ts wherever possible; the only new
-// application logic here is text-scale (CSS --fs-scale) and color-blindness (body class).
+// Architecture (Task 2): the four tab renderers are now schema-driven via
+// `renderSchemaTab(body, tab)` which filters SETTING_DEFS by tab and emits a row per
+// def. Three display-tab rows that don't fit the schema's set(v) contract — fullscreen
+// (async/DOM-read), legend, keys (ui-panels togglers) — remain hand-rendered.
 
 import { t } from './i18n.js';
-import {
-  lang, setLang,
-  uiZoom, setUiZoom,
-  safeZone, setSafeZone,
-  reducedMotion, setReducedMotion,
-  minimapScale, setMinimapScale,
-  legendVisible, keysVisible,
-  shakeScale, setShakeScale,
-  textScale, setTextScale,
-  colorblind, setColorblind,
-  barCues, setBarCues,
-  introEnabled, setIntroEnabled,
-} from './state.js';
-import {
-  isMuted, setMutedState,
-  getMasterVol, setMasterVol,
-  getMusicVol, setMusicVol,
-  getSfxVol, setSfxVol,
-} from './audio.js';
+import { legendVisible, keysVisible, minimapScale } from './state.js';
+import { SETTING_DEFS, resetDefaults, applyAll } from './settings.js';
+import type { SettingDef, SettingTab } from './settings.js';
 import { MW, MH } from './config.js';
 import { renderMinimap } from './render.js';
 import { showOverlay, hideOverlay, toggleLegend, toggleKeys } from './ui-panels.js';
 import { bridge } from './bridge.js';
 
 type OptOrigin = 'title' | 'game' | 'pause';
-const TABS = ['audio', 'display', 'access', 'game'] as const;
-type TabId = (typeof TABS)[number];
+const TABS: readonly SettingTab[] = ['audio', 'display', 'access', 'game'];
 
-let optActiveTab: TabId = 'audio';
+let optActiveTab: SettingTab = 'audio';
 let optionsOrigin: OptOrigin = 'game';
 
-// ===== Application helpers (write the setting to the DOM) =====
-
-export function applyTextScale(): void {
-  document.documentElement.style.setProperty('--fs-scale', String(textScale));
-}
-
-export function applyColorblind(): void {
-  document.body.classList.remove('cb-proto', 'cb-deutan', 'cb-tritan');
-  if (colorblind !== 'off') document.body.classList.add('cb-' + colorblind);
-}
-
-export function applyBarCues(): void {
-  document.body.classList.toggle('bar-cues', barCues);
-}
-
-function applyUiZoom(): void {
-  document.documentElement.style.setProperty('--ui-zoom', String(uiZoom));
-}
-
-function applySafe(): void {
-  document.documentElement.style.setProperty('--safe', safeZone + 'px');
-}
-
-function applyReducedMotion(): void {
-  document.body.classList.toggle('reduced-motion', reducedMotion);
-}
+// ===== Local apply helpers (not in settings.ts schema) =====
+// applyMinimap resizes the minimap canvas — it needs config + render imports
+// that don't belong in the schema module. Wired as a post-change hook.
 
 function applyMinimap(): void {
   const c = document.getElementById('minimap-canvas') as HTMLCanvasElement | null;
@@ -112,14 +74,14 @@ export function renderOptions(): void {
   const bodyEl = document.getElementById('opt-body');
   if (!tabsEl || !bodyEl) return;
 
-  const tabLabels: Record<TabId, string> = {
+  const tabLabels: Record<SettingTab, string> = {
     audio: t('optTabAudio'), display: t('optTabDisplay'), access: t('optTabAccess'), game: t('optTabGame'),
   };
   tabsEl.innerHTML = TABS.map(id =>
     `<button class="opt-tab${id === optActiveTab ? ' active' : ''}" data-tab="${id}" role="tab">${tabLabels[id]}</button>`,
   ).join('');
   tabsEl.querySelectorAll<HTMLElement>('.opt-tab').forEach(btn => {
-    btn.onclick = () => { optActiveTab = (btn.dataset.tab as TabId) || 'audio'; renderOptions(); };
+    btn.onclick = () => { optActiveTab = (btn.dataset.tab as SettingTab) || 'audio'; renderOptions(); };
   });
 
   bodyEl.innerHTML = '';
@@ -131,151 +93,200 @@ export function renderOptions(): void {
   // Focus the first control so keyboard/controller nav lands inside the tab.
   const first = bodyEl.querySelector<HTMLElement>('button, input, .toggle input');
   first?.focus();
+
+  // Reset-defaults button — lives after opt-body, persists across tab switches.
+  ensureResetButton(bodyEl);
 }
 
-// ----- control builders -----
-
-function row(label: string, controlHtml: string, disabled = false): string {
-  return `<div class="opt-row${disabled ? ' disabled' : ''}"><span class="opt-label">${label}</span>${controlHtml}</div>`;
+/** Create or refresh the reset-defaults button below the options body. */
+function ensureResetButton(bodyEl: HTMLElement): void {
+  const panel = bodyEl.parentElement;
+  if (!panel) return;
+  let btn = panel.querySelector<HTMLButtonElement>('#opt-reset');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'opt-reset';
+    panel.appendChild(btn);
+  }
+  btn.textContent = `↺ ${t('opt.resetDefaults')}`;
+  btn.onclick = () => {
+    if (confirm(t('opt.confirmReset'))) {
+      resetDefaults();
+      applyAll();
+      renderOptions();
+    }
+  };
 }
-function toggleHtml(checked: boolean): string {
-  return `<label class="toggle"><input type="checkbox"${checked ? ' checked' : ''}><span class="track"></span><span class="thumb"></span></label>`;
+
+// ----- row + control builders -----
+
+/**
+ * Render an options row. When `desc` is non-empty, a small gray helper line is
+ * rendered under the label. When `disabled` is true the row gets the `disabled`
+ * class (CSS dims it and blocks pointer events on the control).
+ */
+function row(label: string, controlHtml: string, desc = '', disabled = false): string {
+  const descHtml = desc ? `<small class="opt-desc">${desc}</small>` : '';
+  return `<div class="opt-row${disabled ? ' disabled' : ''}"><span class="opt-label">${label}${descHtml}</span>${controlHtml}</div>`;
+}
+
+function toggleHtml(checked: boolean, extraKey = ''): string {
+  const attr = extraKey ? ` data-extra="${extraKey}"` : '';
+  return `<label class="toggle"><input type="checkbox"${attr}${checked ? ' checked' : ''}><span class="track"></span><span class="thumb"></span></label>`;
 }
 function segHtml(opts: { id: string; label: string; active: boolean }[]): string {
   return `<div class="seg">` + opts.map(o =>
     `<button data-seg="${o.id}" class="${o.active ? 'active' : ''}">${o.label}</button>`,
   ).join('') + `</div>`;
 }
-function volSliderHtml(id: string, value01: number): string {
-  return `<input type="range" class="vol-slider" data-vol="${id}" min="0" max="100" value="${Math.round(value01 * 100)}"><span class="opt-val" data-vollabel="${id}">${Math.round(value01 * 100)}</span>`;
+
+/** Build control HTML for a schema-driven SettingDef. */
+function schemaControlHtml(d: SettingDef): string {
+  if (d.control === 'toggle') {
+    return `<label class="toggle"><input type="checkbox" data-optkey="${d.key}"${d.get() ? ' checked' : ''}><span class="track"></span><span class="thumb"></span></label>`;
+  }
+  if (d.control === 'seg') {
+    const opts = d.options ?? [];
+    const cur = String(d.get());
+    return `<div class="seg" data-optkey="${d.key}">` + opts.map(o =>
+      `<button data-seg="${o.id}" class="${o.id === cur ? 'active' : ''}">${t(o.labelKey)}</button>`,
+    ).join('') + `</div>`;
+  }
+  // slider — uses schema min/max/step directly; value IS the setting value.
+  const v = d.get() as number;
+  const min = d.min ?? 0;
+  const max = d.max ?? 100;
+  const step = d.step ?? 1;
+  const display = d.toDisplay ? d.toDisplay(v) : String(v);
+  return `<input type="range" class="vol-slider" data-optkey="${d.key}" min="${min}" max="${max}" step="${step}" value="${v}"><span class="opt-val" data-optlabel="${d.key}">${display}</span>`;
+}
+
+/** True when the def's disabledWhen guard setting is currently truthy. */
+function isDisabledBy(def: SettingDef): boolean {
+  if (!def.disabledWhen) return false;
+  const guard = SETTING_DEFS.find(d => d.key === def.disabledWhen);
+  return guard ? !!guard.get() : false;
+}
+
+/** Seg change handler — parses seg id to number when the default is numeric. */
+function segValue(d: SettingDef, id: string): unknown {
+  return typeof d.default === 'number' ? Number(id) : id;
 }
 
 function bindToggle(input: HTMLInputElement, fn: (checked: boolean) => void): void {
   input.onchange = () => fn(input.checked);
 }
-function bindSeg(container: HTMLElement, fn: (id: string) => void): void {
-  container.querySelectorAll<HTMLElement>('[data-seg]').forEach(b => {
-    b.onclick = () => fn(b.dataset.seg || '');
-  });
-}
 
-// ----- Audio tab -----
+// ===== Schema-driven tab renderer =====
 
-function renderAudio(body: HTMLElement): void {
-  body.innerHTML =
-    row(t('optMute'), toggleHtml(isMuted())) +
-    row(t('volMaster'), volSliderHtml('master', getMasterVol())) +
-    row(t('volMusic'), volSliderHtml('music', getMusicVol())) +
-    row(t('volSfx'), volSliderHtml('sfx', getSfxVol()));
-  const muteInput = body.querySelector<HTMLInputElement>('.toggle input');
-  if (muteInput) bindToggle(muteInput, v => { setMutedState(v); bridge.muted = v; bridge.updateSoundBtn?.(); });
-  body.querySelectorAll<HTMLInputElement>('[data-vol]').forEach(sl => {
+/**
+ * Post-change hooks for settings whose DOM side-effects can't live in
+ * settings.ts (minimap canvas resize needs render.ts + config.ts imports).
+ */
+const POST_CHANGE: Record<string, () => void> = { minimap: applyMinimap };
+
+/**
+ * Schema-driven tab renderer: filters SETTING_DEFS by tab, emits a row per def
+ * (label from labelKey, optional desc from descKey, control from d.control),
+ * and wires each control to d.set → d.apply → optional post-hook → refresh.
+ *
+ * Sliders update their display label inline (no panel refresh — preserves drag
+ * focus). Toggles and segs refresh the panel after change so cross-row effects
+ * propagate (e.g. toggling reduced-motion disables the shake slider).
+ */
+function renderSchemaTab(body: HTMLElement, tab: SettingTab): void {
+  const defs = SETTING_DEFS.filter(d => d.tab === tab);
+  body.innerHTML = defs.map(d => {
+    const desc = d.descKey ? t(d.descKey) : '';
+    const disabled = isDisabledBy(d);
+    return row(t(d.labelKey), schemaControlHtml(d), desc, disabled);
+  }).join('');
+
+  // Sliders — inline label update only, no panel refresh.
+  body.querySelectorAll<HTMLInputElement>('input[type="range"][data-optkey]').forEach(sl => {
+    const d = defs.find(dd => dd.key === sl.dataset.optkey);
+    if (!d) return;
     sl.oninput = () => {
-      const v = parseInt(sl.value) / 100;
-      const which = sl.dataset.vol;
-      if (which === 'master') setMasterVol(v);
-      else if (which === 'music') setMusicVol(v);
-      else if (which === 'sfx') setSfxVol(v);
-      const lbl = body.querySelector<HTMLElement>(`[data-vollabel="${which}"]`);
-      if (lbl) lbl.textContent = String(Math.round(v * 100));
+      const v = parseFloat(sl.value);
+      d.set(v);
+      d.apply?.();
+      const lbl = body.querySelector<HTMLElement>(`[data-optlabel="${d.key}"]`);
+      if (lbl && d.toDisplay) lbl.textContent = d.toDisplay(v);
     };
   });
+
+  // Toggles — refresh panel after change.
+  body.querySelectorAll<HTMLInputElement>('input[type="checkbox"][data-optkey]').forEach(cb => {
+    const d = defs.find(dd => dd.key === cb.dataset.optkey);
+    if (!d) return;
+    cb.onchange = () => {
+      d.set(cb.checked);
+      d.apply?.();
+      renderOptions();
+    };
+  });
+
+  // Segmented controls — refresh panel after change (lang re-renders all labels).
+  body.querySelectorAll<HTMLElement>('.seg[data-optkey]').forEach(seg => {
+    const d = defs.find(dd => dd.key === seg.dataset.optkey);
+    if (!d) return;
+    seg.querySelectorAll<HTMLElement>('[data-seg]').forEach(b => {
+      b.onclick = () => {
+        d.set(segValue(d, b.dataset.seg || ''));
+        d.apply?.();
+        POST_CHANGE[d.key]?.();
+        renderOptions();
+      };
+    });
+  });
 }
 
-// ----- Display tab -----
+// ===== Tab renderers (thin schema callers) =====
 
-function zoomToSlider(z: number): number { return Math.round(((z - 0.7) / 0.8) * 100); }
-function sliderToZoom(v: number): number { return +(0.7 + (v / 100) * 0.8).toFixed(2); }
+function renderAudio(body: HTMLElement): void {
+  renderSchemaTab(body, 'audio');
+}
 
 function renderDisplay(body: HTMLElement): void {
-  body.innerHTML =
-    row(t('optFullscreen'), toggleHtml(!!document.fullscreenElement)) +
-    row(t('optZoom'), `<input type="range" class="vol-slider" data-zoom min="0" max="100" value="${zoomToSlider(uiZoom)}"><span class="opt-val" data-zoomlabel>${Math.round(uiZoom * 100)}%</span>`) +
-    row(t('optTextSize'), segHtml([
-      { id: '0.85', label: t('tsSmall'), active: Math.abs(textScale - 0.85) < 0.01 },
-      { id: '1', label: t('tsMedium'), active: Math.abs(textScale - 1) < 0.01 },
-      { id: '1.15', label: t('tsLarge'), active: Math.abs(textScale - 1.15) < 0.01 },
-    ])) +
-    row(t('optMinimap'), segHtml([2, 3, 4, 5].map(n => ({ id: String(n), label: String(n), active: minimapScale === n })))) +
-    row(t('optSafeZone'), `<input type="range" class="vol-slider" data-safe min="0" max="64" value="${safeZone}"><span class="opt-val" data-safelabel>${safeZone}</span>`) +
-    row(t('optLanguage'), segHtml([
-      { id: 'en', label: 'EN', active: lang === 'en' },
-      { id: 'zh', label: '中文', active: lang === 'zh' }, // lang-state check (not i18n text) — highlights the active language button
-    ]));
+  renderSchemaTab(body, 'display');
+  appendDisplayExtras(body);
+}
 
-  const fsInput = body.querySelector<HTMLInputElement>('.toggle input');
-  if (fsInput) bindToggle(fsInput, () => toggleFullscreen());
-  // Keep the checkbox in sync with real fullscreen state (toggle is async).
+function renderAccess(body: HTMLElement): void {
+  renderSchemaTab(body, 'access');
+}
+
+function renderGame(body: HTMLElement): void {
+  renderSchemaTab(body, 'game');
+}
+
+// ===== Hand-rendered display rows: fullscreen / legend / keys =====
+//
+// These three don't fit the schema's set(v) contract:
+//  - Fullscreen reads the DOM live (document.fullscreenElement) and is async
+//    (requestFullscreen returns a promise; state syncs via fullscreenchange).
+//  - Legend/keys route through ui-panels togglers that guard against redundant
+//    calls, so the setter is conditional (`if (v !== legendVisible) toggle…`).
+
+function appendDisplayExtras(body: HTMLElement): void {
+  body.insertAdjacentHTML('beforeend',
+    row(t('optFullscreen'), toggleHtml(!!document.fullscreenElement, 'fullscreen')) +
+    row(t('optLegend'), toggleHtml(legendVisible, 'legend')) +
+    row(t('optKeys'), toggleHtml(keysVisible, 'keys')),
+  );
+
+  const fs = body.querySelector<HTMLInputElement>('[data-extra="fullscreen"]');
+  const lg = body.querySelector<HTMLInputElement>('[data-extra="legend"]');
+  const ky = body.querySelector<HTMLInputElement>('[data-extra="keys"]');
+  if (fs) bindToggle(fs, () => toggleFullscreen());
+  if (lg) bindToggle(lg, v => { if (v !== legendVisible) toggleLegend(); });
+  if (ky) bindToggle(ky, v => { if (v !== keysVisible) toggleKeys(); });
+
+  // Keep the fullscreen checkbox in sync with real fullscreen state (async).
   document.addEventListener('fullscreenchange', syncFs, { once: true });
-
-  const zoom = body.querySelector<HTMLInputElement>('[data-zoom]');
-  if (zoom) zoom.oninput = () => {
-    setUiZoom(sliderToZoom(parseInt(zoom.value)));
-    applyUiZoom();
-    const lbl = body.querySelector<HTMLElement>('[data-zoomlabel]');
-    if (lbl) lbl.textContent = Math.round(uiZoom * 100) + '%';
-  };
-  bindSeg(body, id => {
-    if (id === '0.85' || id === '1' || id === '1.15') { setTextScale(parseFloat(id)); applyTextScale(); }
-    else if (id === '2' || id === '3' || id === '4' || id === '5') { setMinimapScale(parseInt(id)); applyMinimap(); }
-    else if (id === 'en' || id === 'zh') { setLang(id); bridge.updateLangUI?.(); }
-    renderOptions();
-  });
-  const safe = body.querySelector<HTMLInputElement>('[data-safe]');
-  if (safe) safe.oninput = () => {
-    setSafeZone(parseInt(safe.value));
-    applySafe();
-    const lbl = body.querySelector<HTMLElement>('[data-safelabel]');
-    if (lbl) lbl.textContent = String(safeZone);
-  };
 }
 
 function syncFs(): void {
-  const cb = document.querySelector<HTMLElement>('#opt-body .opt-row .toggle input') as HTMLInputElement | null;
+  const cb = document.querySelector<HTMLInputElement>('[data-extra="fullscreen"]');
   if (cb) cb.checked = !!document.fullscreenElement;
-}
-
-// ----- Accessibility tab -----
-
-function renderAccess(body: HTMLElement): void {
-  body.innerHTML =
-    row(t('optReducedMotion'), toggleHtml(reducedMotion)) +
-    row(t('optShake'), `<input type="range" class="vol-slider" data-shake min="0" max="100" value="${Math.round(shakeScale * 100)}"><span class="opt-val" data-shakelabel>${Math.round(shakeScale * 100)}%</span>`, reducedMotion) +
-    row(t('optColorblind'), segHtml([
-      { id: 'off', label: t('cbOff'), active: colorblind === 'off' },
-      { id: 'proto', label: t('cbProto'), active: colorblind === 'proto' },
-      { id: 'deutan', label: t('cbDeutan'), active: colorblind === 'deutan' },
-      { id: 'tritan', label: t('cbTritan'), active: colorblind === 'tritan' },
-    ])) +
-    row(t('optBarCues'), toggleHtml(barCues));
-
-  const rmInput = body.querySelector<HTMLInputElement>('.opt-row .toggle input');
-  if (rmInput) bindToggle(rmInput, v => { setReducedMotion(v); applyReducedMotion(); renderOptions(); });
-  const shake = body.querySelector<HTMLInputElement>('[data-shake]');
-  if (shake) shake.oninput = () => {
-    setShakeScale(parseInt(shake.value) / 100);
-    const lbl = body.querySelector<HTMLElement>('[data-shakelabel]');
-    if (lbl) lbl.textContent = Math.round(shakeScale * 100) + '%';
-  };
-  bindSeg(body, id => {
-    if (id === 'off' || id === 'proto' || id === 'deutan' || id === 'tritan') { setColorblind(id as any); applyColorblind(); }
-    renderOptions();
-  });
-  // Bar-cues toggle is the second .toggle in this tab (after reduced motion).
-  const toggles = body.querySelectorAll<HTMLInputElement>('.toggle input');
-  const barInput = toggles[1];
-  if (barInput) bindToggle(barInput, v => { setBarCues(v); applyBarCues(); });
-}
-
-// ----- Gameplay tab -----
-
-function renderGame(body: HTMLElement): void {
-  body.innerHTML =
-    row(t('opt.introEnabled'), toggleHtml(introEnabled)) +
-    row(t('optLegend'), toggleHtml(legendVisible)) +
-    row(t('optKeys'), toggleHtml(keysVisible));
-  const toggles = body.querySelectorAll<HTMLInputElement>('.toggle input');
-  if (toggles[0]) bindToggle(toggles[0], v => { setIntroEnabled(v); });
-  if (toggles[1]) bindToggle(toggles[1], v => { if (v !== legendVisible) toggleLegend(); });
-  if (toggles[2]) bindToggle(toggles[2], v => { if (v !== keysVisible) toggleKeys(); });
 }

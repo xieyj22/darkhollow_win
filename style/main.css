@@ -204,6 +204,9 @@ canvas.lic,canvas.hic{width:22px;height:22px;image-rendering:pixelated;vertical-
 .opt-row .opt-val{min-width:48px;text-align:right;color:var(--text-bright);font-variant-numeric:tabular-nums;font-size:var(--fs-sm)}
 .opt-row.disabled{opacity:.4}
 .opt-row.disabled .vol-slider,.opt-row.disabled .seg,.opt-row.disabled .toggle{pointer-events:none}
+.opt-desc{display:block;font-size:var(--fs-sm);color:var(--text-muted);margin-top:2px;line-height:1.3}
+#opt-reset{display:block;width:100%;margin-top:12px;padding:8px 14px;min-height:44px;background:none;border:1px solid var(--border-default);color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:var(--fs-sm);border-radius:var(--radius-sm);transition:all .15s}
+#opt-reset:hover{color:var(--accent-red);border-color:var(--accent-red)}
 .seg{display:inline-flex;border:1px solid var(--border-default);border-radius:var(--radius-sm);overflow:hidden}
 .seg button{background:none;border:none;color:var(--text-secondary);min-height:44px;min-width:44px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:var(--fs-sm);border-right:1px solid var(--border-default);transition:all .15s}
 .seg button:last-child{border-right:none}
