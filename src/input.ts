@@ -9,10 +9,12 @@ import { hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
 import { closeItemIntro } from './item-intro.js';
 import { openInventory, closeInventory, openHelp, closeHelp, tryCastSkill, openSkillPanel, closeSkillPanel, openAchievements, closeAchievements, openTalentPanel, closeTalentPanel, sellMode } from './panels.js';
+import { keyToAction, buttonToAction, type Action } from './keybinds.js';
 
 export function initInput(): void {
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     // F11 toggles real (windowed) fullscreen under Electron; browsers handle their own.
+    // (Meta key — stays hardcoded, not routed through the action map.)
     if (e.key === 'F11' && (window as any).dh?.toggleFullscreen) { e.preventDefault(); (window as any).dh.toggleFullscreen(); }
     if (G && G.gameOver && !invOpen && !helpOpen && !skillOpen && !achOpen && !talentOpen && !eventOpen && !menuOpen && !introOpen) return;
 
@@ -31,21 +33,23 @@ export function initInput(): void {
       }
     }
 
-    // Options panel — ESC closes it. Tab nav is handled by the focus trap above;
+    // Options panel — overlay_close (ESC) closes it. Tab nav is handled by the focus trap above;
     // every other key is swallowed so it never reaches the global "ESC opens pause" below.
     const optOv = document.getElementById('options-overlay');
     if (optOv && optOv.classList.contains('active')) {
-      if (e.key === 'Escape') { bridge.closeOptions?.(); e.preventDefault(); }
+      if (keyToAction(e) === 'overlay_close') { bridge.closeOptions?.(); e.preventDefault(); }
       return;
     }
-    // Item intro card — ESC / B closes it; swallow all other keys while open.
+    // Item intro card — overlay_close (ESC) or `b` closes it; swallow all other keys while open.
+    // (`b` is kept literal here — it maps to `inventory` in the action map, but its secondary
+    //  behavior of closing these overlays must not also make `i` close them.)
     if (introOpen) {
-      if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') { closeItemIntro(); e.preventDefault(); return; }
+      if (keyToAction(e) === 'overlay_close' || e.key.toLowerCase() === 'b') { closeItemIntro(); e.preventDefault(); return; }
       e.preventDefault(); return;
     }
-    // Pause menu — ESC / B closes it; swallow all other keys while open.
+    // Pause menu — overlay_close (ESC) or `b` closes it; swallow all other keys while open.
     if (menuOpen) {
-      if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') { bridge.closePause?.(); e.preventDefault(); return; }
+      if (keyToAction(e) === 'overlay_close' || e.key.toLowerCase() === 'b') { bridge.closePause?.(); e.preventDefault(); return; }
       e.preventDefault(); return;
     }
 
@@ -53,13 +57,14 @@ export function initInput(): void {
     if (eventOpen) {
       const n = parseInt(e.key);
       if (n >= 1 && n <= eventActions.length) { eventActions[n - 1](); e.preventDefault(); return; }
-      if (e.key === 'Escape') { closeEvent(); e.preventDefault(); return; }
+      if (keyToAction(e) === 'overlay_close') { closeEvent(); e.preventDefault(); return; }
       e.preventDefault(); return;
     }
 
-    // Inventory modal
+    // Inventory modal — overlay_close (ESC) or `b` closes; digits 1-9 operate items (hardcoded,
+    // overlay-internal — not routed through the action map per the rebind boundary).
     if (invOpen) {
-      if (e.key === 'b' || e.key === 'B' || e.key === 'Escape') { closeInventory(); e.preventDefault(); return; }
+      if (keyToAction(e) === 'overlay_close' || e.key.toLowerCase() === 'b') { closeInventory(); e.preventDefault(); return; }
       const n = parseInt(e.key);
       if (n >= 1 && n <= 9 && G && n <= G.player.inv.length) {
         if (sellMode) {
@@ -77,11 +82,11 @@ export function initInput(): void {
       e.preventDefault(); return;
     }
 
-    // Help modal
-    if (helpOpen) { if (e.key === 'Escape' || e.key === '?') { closeHelp(); e.preventDefault(); } return; }
-    // Skill modal — K or Enter to execute, Escape to close
+    // Help modal — overlay_close (ESC) or `?` closes (`?` is overlay-internal, stays literal)
+    if (helpOpen) { if (keyToAction(e) === 'overlay_close' || e.key === '?') { closeHelp(); e.preventDefault(); } return; }
+    // Skill modal — K or Enter to execute (overlay-internal, literal), overlay_close (ESC) to close
     if (skillOpen) {
-      if (e.key === 'Escape') { closeSkillPanel(); e.preventDefault(); return; }
+      if (keyToAction(e) === 'overlay_close') { closeSkillPanel(); e.preventDefault(); return; }
       if (e.key === 'k' || e.key === 'K' || e.key === 'Enter') {
         // Try to execute skill if usable
         if (G) {
@@ -102,52 +107,71 @@ export function initInput(): void {
       }
       e.preventDefault(); return;
     }
-    // Achievement modal
-    if (achOpen) { if (e.key === 'Escape' || e.key === 't' || e.key === 'T') { closeAchievements(); e.preventDefault(); } return; }
-    // Talent modal
-    if (talentOpen) { if (e.key === 'Escape' || e.key === 'n' || e.key === 'N') { closeTalentPanel(); e.preventDefault(); } return; }
-    // Forge overlay — close on Escape
+    // Achievement modal — overlay_close (ESC) or `t`/`T` closes (overlay-internal, literal)
+    if (achOpen) { if (keyToAction(e) === 'overlay_close' || e.key === 't' || e.key === 'T') { closeAchievements(); e.preventDefault(); } return; }
+    // Talent modal — overlay_close (ESC) or `n`/`N` closes (overlay-internal, literal)
+    if (talentOpen) { if (keyToAction(e) === 'overlay_close' || e.key === 'n' || e.key === 'N') { closeTalentPanel(); e.preventDefault(); } return; }
+    // Forge overlay — close on overlay_close (ESC)
     const forgeEl = document.getElementById('forge-overlay');
-    if (forgeEl && getComputedStyle(forgeEl).display !== 'none') { if (e.key === 'Escape') { hideOverlay('forge-overlay'); e.preventDefault(); } return; }
+    if (forgeEl && getComputedStyle(forgeEl).display !== 'none') { if (keyToAction(e) === 'overlay_close') { hideOverlay('forge-overlay'); e.preventDefault(); } return; }
 
-    // ESC opens the in-game pause menu when no other overlay is open. (Options/pause are
-    // intercepted earlier, so reaching here means nothing else is open — safe to toggle pause.)
-    if (e.key === 'Escape') { bridge.openPause?.(); e.preventDefault(); return; }
+    // overlay_close (ESC) opens the in-game pause menu when no other overlay is open.
+    // (Options/pause are intercepted earlier, so reaching here means nothing else is open.)
+    // Positioned BEFORE the `!G` guard — ESC can open pause even when no game is active.
+    if (keyToAction(e) === 'overlay_close') { bridge.openPause?.(); e.preventDefault(); return; }
 
     if (!G) return;
 
-    // Ctrl+S save
+    // Ctrl+S save (meta key — stays hardcoded, not routed through the action map)
     if ((e.key === 's' || e.key === 'S') && e.ctrlKey) { e.preventDefault(); saveGame(); return; }
 
-    switch (e.key.toLowerCase()) {
-      case 'w': case 'arrowup': movePlayer(0, -1); break;
-      case 's': case 'arrowdown': movePlayer(0, 1); break;
-      case 'a': case 'arrowleft': movePlayer(-1, 0); break;
-      case 'd': case 'arrowright': movePlayer(1, 0); break;
-      case 'g': pickupItem(); break;
-      case '.': case '>': descendStairs(); break;
-      case ' ': doWait(); break;
-      case 'f': doWait(); break;
-      case 'i': case 'b': openInventory(); break;
-      case 'q': quickQuaff(); break;
-      case 'r': quickRead(); break;
-      case '?': openHelp(); break;
-      case 'k': tryCastSkill(); break;
-      case 't': openAchievements(); break;
-      case 'n': openTalentPanel(); break;
-      case 'l': bridge.toggleLang?.(); break;
-      case 'm': bridge.toggleSound?.(); break;
-      default: {
-        const n = parseInt(e.key);
-        if (n >= 1 && n <= 9) useQuickSlot(n - 1);
-        break;
-      }
-    }
+    // Gameplay dispatch — table-driven via keyToAction. Unmapped keys (a === null) skip the
+    // switch but still hit preventDefault below, preserving the original unconditional behavior.
+    const a = keyToAction(e);
+    if (a) dispatchKeyboardAction(a);
     e.preventDefault();
   });
 
   // Poll connected gamepads every 60ms for Steam Deck / controller play.
   setInterval(pollGamepad, 60);
+}
+
+/**
+ * Gameplay keyboard dispatch — action → side effect. Extracted from the keydown
+ * listener so the action→dispatch mapping is unit-testable without a DOM listener.
+ *
+ * `overlay_close` and `pause` never reach here from the keyboard handler: the
+ * standalone ESC-opens-pause check (above the `!G` guard) intercepts
+ * overlay_close before the gameplay section, and keyboard has no pause action.
+ */
+export function dispatchKeyboardAction(a: Action): void {
+  switch (a) {
+    case 'move_up': movePlayer(0, -1); break;
+    case 'move_down': movePlayer(0, 1); break;
+    case 'move_left': movePlayer(-1, 0); break;
+    case 'move_right': movePlayer(1, 0); break;
+    case 'pickup': pickupItem(); break;
+    case 'descend': descendStairs(); break;
+    case 'wait': doWait(); break;
+    case 'inventory': openInventory(); break;
+    case 'quaff': quickQuaff(); break;
+    case 'read': quickRead(); break;
+    case 'help': openHelp(); break;
+    case 'skill': tryCastSkill(); break;
+    case 'achieve': openAchievements(); break;
+    case 'talent': openTalentPanel(); break;
+    case 'lang': bridge.toggleLang?.(); break;
+    case 'mute': bridge.toggleSound?.(); break;
+    case 'quick1': useQuickSlot(0); break;
+    case 'quick2': useQuickSlot(1); break;
+    case 'quick3': useQuickSlot(2); break;
+    case 'quick4': useQuickSlot(3); break;
+    case 'quick5': useQuickSlot(4); break;
+    case 'quick6': useQuickSlot(5); break;
+    case 'quick7': useQuickSlot(6); break;
+    case 'quick8': useQuickSlot(7); break;
+    case 'quick9': useQuickSlot(8); break;
+  }
 }
 
 // Close whichever overlay is currently open. Returns true if one was closed.
@@ -167,6 +191,34 @@ function closeActiveOverlay(): boolean {
   return false;
 }
 
+/**
+ * Gamepad action dispatch — action → side effect, gated by overlay state.
+ * Extracted for unit-testability of the button→action→dispatch chain.
+ *
+ * Preserves the original pollGamepad semantics:
+ *   - D-pad / move: only when !overlay
+ *   - wait (A): only when !overlay (in overlay mode, A closes via the else-branch)
+ *   - overlay_close (B): closes an open overlay; ELSE (no overlay) picks up an item.
+ *     The B-pickup behavior MUST survive the refactor.
+ *   - skill/inventory/quaff/descend: only when !overlay
+ *   - pause (Start): toggles pause regardless of overlay
+ */
+export function dispatchGamepadAction(a: Action, overlay: boolean): void {
+  switch (a) {
+    case 'move_up': if (!overlay) movePlayer(0, -1); break;
+    case 'move_down': if (!overlay) movePlayer(0, 1); break;
+    case 'move_left': if (!overlay) movePlayer(-1, 0); break;
+    case 'move_right': if (!overlay) movePlayer(1, 0); break;
+    case 'wait': if (!overlay) doWait(); break;
+    case 'overlay_close': if (!closeActiveOverlay() && !overlay) pickupItem(); break;
+    case 'skill': if (!overlay) openSkillPanel(); break;
+    case 'inventory': if (!overlay) openInventory(); break;
+    case 'quaff': if (!overlay) quickQuaff(); break;
+    case 'descend': if (!overlay) descendStairs(); break;
+    case 'pause': menuOpen ? bridge.closePause?.() : bridge.openPause?.(); break;
+  }
+}
+
 // ===== Gamepad support (Steam Deck / controller) =====
 // Edge-triggered buttons + a move repeat cooldown so holding a direction steps tile-by-tile.
 let gpPrevBtn: boolean[] = [];
@@ -184,12 +236,7 @@ function pollGamepad(): void {
     || (!!forgeOv && getComputedStyle(forgeOv).display !== 'none');
   if (G && !G.gameOver) {
     if (!overlay) {
-      // D-pad
-      if (edge(12)) movePlayer(0, -1);
-      if (edge(13)) movePlayer(0, 1);
-      if (edge(14)) movePlayer(-1, 0);
-      if (edge(15)) movePlayer(1, 0);
-      // Left stick — 8-direction, 0.5 deadzone, repeat cooldown
+      // Left stick — 8-direction, 0.5 deadzone, repeat cooldown (NOT a button action)
       const axes = gp!.axes || [];
       const ax = axes[0] || 0, ay = axes[1] || 0;
       if (gpMoveCd <= 0 && (Math.abs(ax) > 0.5 || Math.abs(ay) > 0.5)) {
@@ -200,15 +247,18 @@ function pollGamepad(): void {
       }
       if (gpMoveCd > 0 && Math.abs(ax) <= 0.5 && Math.abs(ay) <= 0.5) gpMoveCd = 0;
     }
-    // Action buttons (edge-triggered)
-    if (edge(0)) { if (!overlay) doWait(); }                       // A
-    if (edge(1)) { if (!closeActiveOverlay() && !overlay) pickupItem(); } // B
-    if (edge(2)) { if (!overlay) openSkillPanel(); }               // X
-    if (edge(3)) { if (!overlay) openInventory(); }                 // Y
-    if (edge(4)) { if (!overlay) quickQuaff(); }                    // LB
-    if (edge(5)) { if (!overlay) descendStairs(); }                 // RB
-    if (edge(9)) { menuOpen ? bridge.closePause?.() : bridge.openPause?.(); }   // Start = pause
+    // Action buttons (edge-triggered) — dispatch via table lookup. Iterates all buttons
+    // the gamepad reports; unmapped indices (buttonToAction → null) are skipped.
+    for (let i = 0; i < gp.buttons.length; i++) {
+      if (edge(i)) {
+        const a = buttonToAction(i);
+        if (a) dispatchGamepadAction(a, overlay);
+      }
+    }
   } else if (overlay) {
+    // No active game (or gameOver) but an overlay is open — A or B closes it.
+    // (Not routed through dispatchGamepadAction: in this context A closes the
+    //  overlay rather than performing its gameplay `wait` action.)
     if (edge(0) || edge(1)) closeActiveOverlay();
   }
   if (gpMoveCd > 0) gpMoveCd--;
