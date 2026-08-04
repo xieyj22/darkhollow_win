@@ -113,6 +113,9 @@ function ensureResetButton(bodyEl: HTMLElement): void {
     if (confirm(t('opt.confirmReset'))) {
       resetDefaults();
       applyAll();
+      // Run post-change hooks that schema apply?.() skips (e.g. minimap canvas
+      // resize) so the canvas matches the reset value, not just the checkbox.
+      for (const fn of Object.values(POST_CHANGE)) fn();
       renderOptions();
     }
   };
@@ -249,7 +252,7 @@ function renderAudio(body: HTMLElement): void {
 
 function renderDisplay(body: HTMLElement): void {
   renderSchemaTab(body, 'display');
-  appendDisplayExtras(body);
+  appendFullscreenRow(body);
 }
 
 function renderAccess(body: HTMLElement): void {
@@ -258,32 +261,45 @@ function renderAccess(body: HTMLElement): void {
 
 function renderGame(body: HTMLElement): void {
   renderSchemaTab(body, 'game');
+  appendGameplayExtras(body);
 }
 
-// ===== Hand-rendered display rows: fullscreen / legend / keys =====
+// ===== Hand-rendered rows outside the schema =====
 //
-// These three don't fit the schema's set(v) contract:
+// These rows don't fit the schema's set(v) contract:
 //  - Fullscreen reads the DOM live (document.fullscreenElement) and is async
 //    (requestFullscreen returns a promise; state syncs via fullscreenchange).
+//    Lives on the Display tab (matches base options.ts:192).
 //  - Legend/keys route through ui-panels togglers that guard against redundant
 //    calls, so the setter is conditional (`if (v !== legendVisible) toggle…`).
+//    Live on the Gameplay tab (matches base options.ts:275-276).
 
-function appendDisplayExtras(body: HTMLElement): void {
+/** Display-tab extra: fullscreen toggle (async, reads DOM live). */
+function appendFullscreenRow(body: HTMLElement): void {
   body.insertAdjacentHTML('beforeend',
-    row(t('optFullscreen'), toggleHtml(!!document.fullscreenElement, 'fullscreen')) +
+    row(t('optFullscreen'), toggleHtml(!!document.fullscreenElement, 'fullscreen')),
+  );
+  const fs = body.querySelector<HTMLInputElement>('[data-extra="fullscreen"]');
+  if (fs) bindToggle(fs, () => toggleFullscreen());
+
+  // Transient listener scoped to display-tab visibility: re-registered on each
+  // renderOptions() when the display tab is active, auto-removed after one fire
+  // ({ once: true }). Intentionally NOT a global permanent listener — if the
+  // user is on another tab, renderOptions() will rebuild the checkbox with the
+  // correct state from document.fullscreenElement on the next display-tab render.
+  document.addEventListener('fullscreenchange', syncFs, { once: true });
+}
+
+/** Gameplay-tab extras: legend + keys toggles (conditional ui-panels togglers). */
+function appendGameplayExtras(body: HTMLElement): void {
+  body.insertAdjacentHTML('beforeend',
     row(t('optLegend'), toggleHtml(legendVisible, 'legend')) +
     row(t('optKeys'), toggleHtml(keysVisible, 'keys')),
   );
-
-  const fs = body.querySelector<HTMLInputElement>('[data-extra="fullscreen"]');
   const lg = body.querySelector<HTMLInputElement>('[data-extra="legend"]');
   const ky = body.querySelector<HTMLInputElement>('[data-extra="keys"]');
-  if (fs) bindToggle(fs, () => toggleFullscreen());
   if (lg) bindToggle(lg, v => { if (v !== legendVisible) toggleLegend(); });
   if (ky) bindToggle(ky, v => { if (v !== keysVisible) toggleKeys(); });
-
-  // Keep the fullscreen checkbox in sync with real fullscreen state (async).
-  document.addEventListener('fullscreenchange', syncFs, { once: true });
 }
 
 function syncFs(): void {

@@ -68,14 +68,14 @@ describe('schema-driven options render — row counts', () => {
     expect(rows.length).toBe(SETTING_DEFS.filter(d => d.tab === 'audio').length);
   });
 
-  it('display tab: schema defs + fullscreen/legend/keys extras', () => {
+  it('display tab: schema defs + fullscreen extra', () => {
     switchTab('display');
     const rows = document.querySelectorAll('#opt-body .opt-row');
     const schemaCount = SETTING_DEFS.filter(d => d.tab === 'display').length;
-    expect(rows.length).toBe(schemaCount + 3);
-    // The three extras should be the last rows.
+    expect(rows.length).toBe(schemaCount + 1); // fullscreen only
     const extras = document.querySelectorAll('#opt-body [data-extra]');
-    expect(extras.length).toBe(3);
+    expect(extras.length).toBe(1);
+    expect(extras[0].getAttribute('data-extra')).toBe('fullscreen');
   });
 
   it('access tab: one row per schema def', () => {
@@ -84,10 +84,15 @@ describe('schema-driven options render — row counts', () => {
     expect(rows.length).toBe(SETTING_DEFS.filter(d => d.tab === 'access').length);
   });
 
-  it('game tab: one row per schema def', () => {
+  it('game tab: schema defs + legend/keys extras', () => {
     switchTab('game');
     const rows = document.querySelectorAll('#opt-body .opt-row');
-    expect(rows.length).toBe(SETTING_DEFS.filter(d => d.tab === 'game').length);
+    const schemaCount = SETTING_DEFS.filter(d => d.tab === 'game').length;
+    expect(rows.length).toBe(schemaCount + 2); // legend + keys
+    const extras = document.querySelectorAll('#opt-body [data-extra]');
+    const extraKeys = Array.from(extras).map(e => e.getAttribute('data-extra'));
+    expect(extraKeys).toContain('legend');
+    expect(extraKeys).toContain('keys');
   });
 });
 
