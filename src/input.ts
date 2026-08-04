@@ -9,7 +9,7 @@ import { hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
 import { closeItemIntro } from './item-intro.js';
 import { openInventory, closeInventory, openHelp, closeHelp, tryCastSkill, openSkillPanel, closeSkillPanel, openAchievements, closeAchievements, openTalentPanel, closeTalentPanel, sellMode } from './panels.js';
-import { keyToAction, buttonToAction, getCapturing, setCapturing, rebind, rebindButton, bindingFor, loadKeybinds, type Action } from './keybinds.js';
+import { keyToAction, buttonToAction, getCapturing, setCapturing, rebind, rebindButton, bindingFor, gamepadBtnLabel, loadKeybinds, type Action } from './keybinds.js';
 import { t, tMsg } from './i18n.js';
 
 export function initInput(): void {
@@ -24,20 +24,36 @@ export function initInput(): void {
     // the overlay_close key) cancels without rebinding (standard capture UX).
     const cap = getCapturing();
     if (cap) {
-      e.preventDefault();
-      if (e.key === 'Escape' || keyToAction(e) === 'overlay_close') {
+      // Defense-in-depth: if capturing is set but the options overlay is NOT
+      // open, treat it as a stale flag (closeOptions or another path missed it).
+      // Clear and fall through to normal dispatch — never silently rebind.
+      const optOv = document.getElementById('options-overlay');
+      if (!optOv || !optOv.classList.contains('active')) {
         setCapturing(null);
+      } else {
+        e.preventDefault();
+        // Escape / overlay_close key cancels capture without rebinding.
+        if (e.key === 'Escape' || keyToAction(e) === 'overlay_close') {
+          setCapturing(null);
+          bridge.renderOptions?.();
+          return;
+        }
+        // Reject modifier-chord keys (Ctrl+K, Alt+K, etc.) and bare modifier
+        // keys (Shift/Control/Alt/Meta). Stay in capturing mode — don't commit,
+        // don't cancel — so the user presses a clean key.
+        if (e.ctrlKey || e.altKey || e.metaKey ||
+            e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') {
+          return;
+        }
+        const r = rebind(cap, e.key.toLowerCase(), bindingFor(cap) ?? undefined);
+        setCapturing(null);
+        if (r.conflict) {
+          // Conflict: the pressed key already belongs to another action.
+          alert(tMsg('kb.conflict', e.key.toLowerCase(), t('kb.' + r.conflict)));
+        }
         bridge.renderOptions?.();
         return;
       }
-      const r = rebind(cap, e.key.toLowerCase(), bindingFor(cap) ?? undefined);
-      setCapturing(null);
-      if (r.conflict) {
-        // Conflict: the pressed key already belongs to another action.
-        alert(tMsg('kb.conflict', e.key.toLowerCase(), t('kb.' + r.conflict)));
-      }
-      bridge.renderOptions?.();
-      return;
     }
 
     // F11 toggles real (windowed) fullscreen under Electron; browsers handle their own.
@@ -262,21 +278,29 @@ function pollGamepad(): void {
   // press rebinds the action via rebindButton(); conflicts are alerted.
   const cap = getCapturing();
   if (cap) {
-    for (let i = 0; i < gp.buttons.length; i++) {
-      if (edge(i)) {
-        const r = rebindButton(cap, i);
-        setCapturing(null);
-        if (r.conflict) {
-          alert(tMsg('kb.conflict', 'B' + i, t('kb.' + r.conflict)));
+    // Defense-in-depth: only honor capture while the options overlay is open.
+    // A stale flag (options closed via a path that didn't clear capture) is
+    // treated as cancelled — clear and fall through to normal gamepad dispatch.
+    const optOv = document.getElementById('options-overlay');
+    if (!optOv || !optOv.classList.contains('active')) {
+      setCapturing(null);
+    } else {
+      for (let i = 0; i < gp.buttons.length; i++) {
+        if (edge(i)) {
+          const r = rebindButton(cap, i);
+          setCapturing(null);
+          if (r.conflict) {
+            alert(tMsg('kb.conflict', gamepadBtnLabel(i), t('kb.' + r.conflict)));
+          }
+          bridge.renderOptions?.();
+          break;
         }
-        bridge.renderOptions?.();
-        break;
       }
+      // Maintain edge-detection state + cooldown even during capture.
+      gpPrevBtn = gp.buttons.map(b => !!(b && b.pressed));
+      if (gpMoveCd > 0) gpMoveCd--;
+      return;
     }
-    // Maintain edge-detection state + cooldown even during capture.
-    gpPrevBtn = gp.buttons.map(b => !!(b && b.pressed));
-    if (gpMoveCd > 0) gpMoveCd--;
-    return;
   }
 
   const optOv = document.getElementById('options-overlay');

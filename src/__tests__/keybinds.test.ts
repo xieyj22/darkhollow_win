@@ -1,7 +1,35 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-vi.mock('../audio.js', () => ({ snd: () => {} }));
-vi.mock('../state.js', () => ({ lang: 'en' }));
-import { keyToAction, buttonToAction, rebind, rebindButton, bindingFor, bindingsFor, buttonBindingsFor, loadKeybinds, resetKeybinds, DEFAULT_KEYS, DEFAULT_BUTTONS } from '../keybinds.js';
+// Expanded mocks: settings.ts (imported transitively by options.ts) references
+// many state.js/audio.js exports at module-evaluation time (SETTING_DEFS).
+vi.mock('../audio.js', () => ({
+  snd: () => {},
+  isMuted: () => false, setMutedState: () => {},
+  getMasterVol: () => 0.9, setMasterVol: () => {},
+  getMusicVol: () => 0.45, setMusicVol: () => {},
+  getSfxVol: () => 0.9, setSfxVol: () => {},
+}));
+vi.mock('../state.js', () => ({
+  lang: 'en', setLang: () => {},
+  uiZoom: 1, setUiZoom: () => {},
+  minimapScale: 3, setMinimapScale: () => {},
+  reducedMotion: false, setReducedMotion: () => {},
+  safeZone: 16, setSafeZone: () => {},
+  shakeScale: 1, setShakeScale: () => {},
+  textScale: 1, setTextScale: () => {},
+  colorblind: 'off', setColorblind: () => {},
+  barCues: true, setBarCues: () => {},
+  introEnabled: true, setIntroEnabled: () => {},
+  legendVisible: false, keysVisible: false,
+}));
+// Mocks for options.ts transitive deps so closeOptions can be imported.
+vi.mock('../config.js', () => ({ MW: 64, MH: 64 }));
+vi.mock('../render.js', () => ({ renderMinimap: () => {} }));
+vi.mock('../ui-panels.js', () => ({
+  showOverlay: () => {}, hideOverlay: () => {},
+  toggleLegend: () => {}, toggleKeys: () => {},
+}));
+import { keyToAction, buttonToAction, rebind, rebindButton, bindingFor, bindingsFor, buttonBindingsFor, gamepadBtnLabel, loadKeybinds, resetKeybinds, getCapturing, setCapturing, DEFAULT_KEYS, DEFAULT_BUTTONS } from '../keybinds.js';
+import { closeOptions } from '../options.js';
 
 const ke = (key: string, ctrl = false) => ({ key, ctrlKey: ctrl, toLowerCase: () => key.toLowerCase() } as any);
 
@@ -170,8 +198,43 @@ describe('loadKeybinds (T5 fix): persisted bindings survive reload', () => {
   });
 
   it('falls back to defaults when no save exists', () => {
+    localStorage.clear(); // beforeEach's resetKeybinds() writes defaults; clear for a true empty test
     loadKeybinds();
     expect(keyToAction(ke('g'))).toBe('pickup');
     expect(buttonToAction(12)).toBe('move_up');
+  });
+});
+
+describe('gamepadBtnLabel (review fix): shared button labels', () => {
+  it('maps standard indices to Xbox-layout labels', () => {
+    expect(gamepadBtnLabel(0)).toBe('A');
+    expect(gamepadBtnLabel(1)).toBe('B');
+    expect(gamepadBtnLabel(4)).toBe('LB');
+    expect(gamepadBtnLabel(12)).toBe('D-pad↑');
+  });
+  it('falls back to B<index> for non-standard indices', () => {
+    expect(gamepadBtnLabel(16)).toBe('B16');
+    expect(gamepadBtnLabel(99)).toBe('B99');
+  });
+});
+
+describe('capture flag cleanup on options close (review fix: Important #1)', () => {
+  beforeEach(() => resetKeybinds());
+
+  it('closeOptions clears an in-flight capture flag', () => {
+    setCapturing('move_up');
+    expect(getCapturing()).toBe('move_up');
+    closeOptions();
+    expect(getCapturing()).toBeNull();
+  });
+
+  it('after closeOptions, bindings are unchanged (no silent rebind)', () => {
+    setCapturing('move_up');
+    closeOptions();
+    // Capture cleared → a gameplay keypress hits normal dispatch, not rebind.
+    // Bindings remain at defaults.
+    expect(keyToAction(ke('w'))).toBe('move_up');
+    expect(keyToAction(ke('arrowup'))).toBe('move_up');
+    expect(keyToAction(ke('g'))).toBe('pickup');
   });
 });

@@ -153,6 +153,15 @@ const GAMEPAD_BTN_LABELS: Record<number, string> = {
 };
 
 /**
+ * Friendly label for a single gamepad button index (e.g. 0 → 'A', 12 → 'D-pad↑').
+ * Shared by the Keybinds tab display and the capture-conflict alert so they
+ * always agree on button naming. Falls back to `B<index>` for unknown indices.
+ */
+export function gamepadBtnLabel(i: number): string {
+  return GAMEPAD_BTN_LABELS[i] ?? `B${i}`;
+}
+
+/**
  * Reverse-lookup: ALL gamepad buttons currently bound to `action`, returned as
  * friendly labels (e.g. ['A', 'LB']). Empty array if no button is bound. Used
  * by the Keybinds tab so the user can see gamepad bindings alongside keyboard
@@ -163,7 +172,7 @@ export function buttonBindingsFor(action: Action): string[] {
   const out: string[] = [];
   for (const b in currentButtons) {
     if (currentButtons[b] === action) {
-      out.push(GAMEPAD_BTN_LABELS[Number(b)] ?? `B${b}`);
+      out.push(gamepadBtnLabel(Number(b)));
     }
   }
   return out;

@@ -60,6 +60,10 @@ export function openOptions(from: OptOrigin = 'game'): void {
 
 export function closeOptions(): void {
   hideOverlay('options-overlay');
+  // Clear any in-flight keybind capture so a subsequent gameplay keypress
+  // doesn't silently rebind an action (the Rebind button sets capturingAction;
+  // closing the overlay via X / gamepad-B / closeActiveOverlay must cancel it).
+  setCapturing(null);
   // Opened from the pause menu → return to it so ESC/B flows back to Resume/Quit.
   if (optionsOrigin === 'pause') bridge.openPause?.();
 }
