@@ -34,7 +34,7 @@ import { bridge } from './bridge.js';
 
 // ===== Types =====
 
-export type SettingTab = 'audio' | 'display' | 'access' | 'game';
+export type SettingTab = 'audio' | 'display' | 'access' | 'game' | 'keybinds';
 export type ControlKind = 'toggle' | 'seg' | 'slider';
 
 /**

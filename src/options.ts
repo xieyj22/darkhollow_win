@@ -16,9 +16,11 @@ import { MW, MH } from './config.js';
 import { renderMinimap } from './render.js';
 import { showOverlay, hideOverlay, toggleLegend, toggleKeys } from './ui-panels.js';
 import { bridge } from './bridge.js';
+import { bindingsFor, resetKeybinds, setCapturing } from './keybinds.js';
+import type { Action } from './keybinds.js';
 
 type OptOrigin = 'title' | 'game' | 'pause';
-const TABS: readonly SettingTab[] = ['audio', 'display', 'access', 'game'];
+const TABS: readonly SettingTab[] = ['audio', 'display', 'access', 'game', 'keybinds'];
 
 let optActiveTab: SettingTab = 'audio';
 let optionsOrigin: OptOrigin = 'game';
@@ -76,6 +78,7 @@ export function renderOptions(): void {
 
   const tabLabels: Record<SettingTab, string> = {
     audio: t('optTabAudio'), display: t('optTabDisplay'), access: t('optTabAccess'), game: t('optTabGame'),
+    keybinds: t('optTabKeybinds'),
   };
   tabsEl.innerHTML = TABS.map(id =>
     `<button class="opt-tab${id === optActiveTab ? ' active' : ''}" data-tab="${id}" role="tab">${tabLabels[id]}</button>`,
@@ -88,6 +91,7 @@ export function renderOptions(): void {
   if (optActiveTab === 'audio') renderAudio(bodyEl);
   else if (optActiveTab === 'display') renderDisplay(bodyEl);
   else if (optActiveTab === 'access') renderAccess(bodyEl);
+  else if (optActiveTab === 'keybinds') renderKeybinds(bodyEl);
   else renderGame(bodyEl);
 
   // Focus the first control so keyboard/controller nav lands inside the tab.
@@ -109,6 +113,10 @@ function ensureResetButton(bodyEl: HTMLElement): void {
     panel.appendChild(btn);
   }
   btn.textContent = `↺ ${t('opt.resetDefaults')}`;
+  // The Keybinds tab has its own reset control (resetKeybinds); the generic
+  // #opt-reset only covers schema settings (audio/display/access/game), so hide
+  // it on the keybinds tab to avoid implying it resets keybinds too.
+  btn.style.display = optActiveTab === 'keybinds' ? 'none' : '';
   btn.onclick = () => {
     if (confirm(t('opt.confirmReset'))) {
       resetDefaults();
@@ -300,6 +308,65 @@ function appendGameplayExtras(body: HTMLElement): void {
   const ky = body.querySelector<HTMLInputElement>('[data-extra="keys"]');
   if (lg) bindToggle(lg, v => { if (v !== legendVisible) toggleLegend(); });
   if (ky) bindToggle(ky, v => { if (v !== keysVisible) toggleKeys(); });
+}
+
+// ===== Keybinds tab (Task 5) =====
+//
+// Lists every rebindable Action (the Action union from keybinds.ts) grouped by
+// category. Each row shows the action label, ALL current keyboard bindings
+// (multi-key actions like move_up show "w, arrowup"), and a rebind button.
+// Clicking rebind sets the capture flag in keybinds.ts; input.ts intercepts
+// the next key/button press to complete the rebind. A reset button restores
+// DEFAULT_KEYS / DEFAULT_BUTTONS. Gamepad rebind is wired via pollGamepad's
+// capture hook (first pressed button captures), though only keyboard bindings
+// are displayed here.
+
+const KB_GAMEPLAY: Action[] = [
+  'move_up', 'move_down', 'move_left', 'move_right',
+  'pickup', 'descend', 'wait',
+  'inventory', 'quaff', 'read', 'help',
+  'skill', 'achieve', 'talent',
+];
+const KB_QUICK: Action[] = [
+  'quick1', 'quick2', 'quick3', 'quick4', 'quick5',
+  'quick6', 'quick7', 'quick8', 'quick9',
+];
+const KB_META: Action[] = ['overlay_close', 'pause', 'lang', 'mute'];
+
+function renderKeybinds(body: HTMLElement): void {
+  const renderActionRow = (a: Action): string => {
+    const binds = bindingsFor(a).join(', ') || '—';
+    return row(
+      t('kb.' + a),
+      `<span class="kb-key">${binds}</span> <button class="kb-rebind" data-rebind="${a}">${t('kb.rebind')}</button>`,
+    );
+  };
+
+  body.innerHTML =
+    `<div class="kb-group">${KB_GAMEPLAY.map(renderActionRow).join('')}</div>` +
+    `<div class="kb-group">${KB_QUICK.map(renderActionRow).join('')}</div>` +
+    `<div class="kb-group">${KB_META.map(renderActionRow).join('')}</div>`;
+
+  // Wire each rebind button → enter capture mode for that action.
+  body.querySelectorAll<HTMLElement>('[data-rebind]').forEach(btn => {
+    btn.onclick = () => {
+      const action = (btn.dataset.rebind as Action) || null;
+      if (!action) return;
+      setCapturing(action);
+      btn.textContent = t('kb.capturing');
+      btn.classList.add('capturing');
+    };
+  });
+
+  // Keybinds-specific reset (separate from the schema #opt-reset which is hidden
+  // on this tab). Restores DEFAULT_KEYS / DEFAULT_BUTTONS and re-renders.
+  body.insertAdjacentHTML('beforeend',
+    `<div class="opt-row"><button class="kb-reset" id="kb-reset-btn">↺ ${t('kb.reset')}</button></div>`,
+  );
+  const resetBtn = body.querySelector<HTMLButtonElement>('#kb-reset-btn');
+  if (resetBtn) {
+    resetBtn.onclick = () => { resetKeybinds(); renderOptions(); };
+  }
 }
 
 function syncFs(): void {

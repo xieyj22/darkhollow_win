@@ -9,10 +9,33 @@ import { hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
 import { closeItemIntro } from './item-intro.js';
 import { openInventory, closeInventory, openHelp, closeHelp, tryCastSkill, openSkillPanel, closeSkillPanel, openAchievements, closeAchievements, openTalentPanel, closeTalentPanel, sellMode } from './panels.js';
-import { keyToAction, buttonToAction, type Action } from './keybinds.js';
+import { keyToAction, buttonToAction, getCapturing, setCapturing, rebind, rebindButton, bindingFor, type Action } from './keybinds.js';
+import { t, tMsg } from './i18n.js';
 
 export function initInput(): void {
   document.addEventListener('keydown', (e: KeyboardEvent) => {
+    // Keybind capture mode — intercept ALL keys before anything else. When the
+    // user clicks "Rebind" in the Keybinds tab, getCapturing() returns the
+    // action being rebound. The next key press completes the rebind; Escape (or
+    // the overlay_close key) cancels without rebinding (standard capture UX).
+    const cap = getCapturing();
+    if (cap) {
+      e.preventDefault();
+      if (e.key === 'Escape' || keyToAction(e) === 'overlay_close') {
+        setCapturing(null);
+        bridge.renderOptions?.();
+        return;
+      }
+      const r = rebind(cap, e.key.toLowerCase(), bindingFor(cap) ?? undefined);
+      setCapturing(null);
+      if (r.conflict) {
+        // Conflict: the pressed key already belongs to another action.
+        alert(tMsg('kb.conflict', e.key.toLowerCase(), t('kb.' + r.conflict)));
+      }
+      bridge.renderOptions?.();
+      return;
+    }
+
     // F11 toggles real (windowed) fullscreen under Electron; browsers handle their own.
     // (Meta key — stays hardcoded, not routed through the action map.)
     if (e.key === 'F11' && (window as any).dh?.toggleFullscreen) { e.preventDefault(); (window as any).dh.toggleFullscreen(); }
@@ -229,6 +252,29 @@ function pollGamepad(): void {
   if (!gp) return;
   const btn = (i: number) => !!(gp!.buttons[i] && gp!.buttons[i].pressed);
   const edge = (i: number) => btn(i) && !gpPrevBtn[i];
+
+  // Keybind capture mode — first pressed (edge) gamepad button captures. Mirrors
+  // the keyboard capture hook at the top of the keydown handler. The next button
+  // press rebinds the action via rebindButton(); conflicts are alerted.
+  const cap = getCapturing();
+  if (cap) {
+    for (let i = 0; i < gp.buttons.length; i++) {
+      if (edge(i)) {
+        const r = rebindButton(cap, i);
+        setCapturing(null);
+        if (r.conflict) {
+          alert(tMsg('kb.conflict', 'B' + i, t('kb.' + r.conflict)));
+        }
+        bridge.renderOptions?.();
+        break;
+      }
+    }
+    // Maintain edge-detection state + cooldown even during capture.
+    gpPrevBtn = gp.buttons.map(b => !!(b && b.pressed));
+    if (gpMoveCd > 0) gpMoveCd--;
+    return;
+  }
+
   const optOv = document.getElementById('options-overlay');
   const forgeOv = document.getElementById('forge-overlay');
   const overlay = invOpen || skillOpen || talentOpen || achOpen || helpOpen || eventOpen || menuOpen || introOpen

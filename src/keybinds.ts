@@ -130,6 +130,20 @@ export function bindingFor(action: Action): string | null {
   return null;
 }
 
+/**
+ * Reverse-lookup: ALL keys currently bound to `action`. Multi-key actions
+ * (e.g. move_up has both 'w' and 'arrowup') return every key. Empty array if
+ * the action has no key binding. Used by the Keybinds tab so multi-key actions
+ * display fully instead of showing only the first match.
+ */
+export function bindingsFor(action: Action): string[] {
+  const out: string[] = [];
+  for (const k in currentKeys) {
+    if (currentKeys[k] === action) out.push(k);
+  }
+  return out;
+}
+
 // ===== Rebind =====
 
 export interface RebindResult {
@@ -138,28 +152,61 @@ export interface RebindResult {
 }
 
 /**
- * Rebind `action` to `newKey` (keyboard only). Behavior:
+ * Rebind `action` to `newKey` (keyboard). Behavior:
  *
  *   - If `newKey` already maps to a DIFFERENT action → return `{ conflict }`
  *     and change nothing (caller can prompt the user to confirm a swap).
- *   - Otherwise: clear the action's previous key (free it), set newKey→action,
+ *   - Otherwise: clear the action's previous binding(s), set newKey→action,
  *     persist, and return `{}`.
  *
+ * The optional `oldKey` param controls WHICH previous binding is freed:
+ *   - When OMITTED (legacy behavior): ALL keys currently bound to `action` are
+ *     freed. This is what T3's original test exercises, so the signature stays
+ *     backward-compatible.
+ *   - When PROVIDED: ONLY `oldKey` is freed (if it currently belongs to
+ *     `action`). Sibling keys survive. This resolves the multi-key regression
+ *     where rebinding `move_up` (default 'w' + 'arrowup') to 'p' would
+ *     otherwise free BOTH keys and break arrow-key movement.
+ *
  * Rebinding an action to the key it already owns is a no-op success (no
- * conflict). `newKey` is normalized via toLowerCase() before lookup so the
- * caller may pass either case.
+ * conflict). `newKey` and `oldKey` are normalized via toLowerCase().
  */
-export function rebind(action: Action, newKey: string): RebindResult {
+export function rebind(action: Action, newKey: string, oldKey?: string): RebindResult {
   const k = newKey.toLowerCase();
   const occupant = currentKeys[k];
   if (occupant && occupant !== action) {
     return { conflict: occupant };
   }
-  // Free the action's old binding (if any).
-  for (const existing in currentKeys) {
-    if (currentKeys[existing] === action) delete currentKeys[existing];
+  if (oldKey !== undefined) {
+    // Free ONLY the specified old key (preserves multi-key siblings).
+    const ok = oldKey.toLowerCase();
+    if (currentKeys[ok] === action) delete currentKeys[ok];
+  } else {
+    // Legacy: free ALL keys currently bound to this action.
+    for (const existing in currentKeys) {
+      if (currentKeys[existing] === action) delete currentKeys[existing];
+    }
   }
   currentKeys[k] = action;
+  saveKeybinds();
+  return {};
+}
+
+/**
+ * Rebind `action` to gamepad button `btnIdx`. Mirrors keyboard rebind()'s
+ * conflict-detection logic for the BUTTON map. Buttons are 1:1 (each action has
+ * at most one default button), so no `oldKey` param — the action's previous
+ * button is freed automatically.
+ */
+export function rebindButton(action: Action, btnIdx: number): RebindResult {
+  const occupant = currentButtons[btnIdx];
+  if (occupant && occupant !== action) {
+    return { conflict: occupant };
+  }
+  for (const existing in currentButtons) {
+    if (currentButtons[existing] === action) delete currentButtons[existing];
+  }
+  currentButtons[btnIdx] = action;
   saveKeybinds();
   return {};
 }
@@ -221,4 +268,24 @@ export function resetKeybinds(): void {
   currentKeys = { ...DEFAULT_KEYS };
   currentButtons = { ...DEFAULT_BUTTONS };
   saveKeybinds();
+}
+
+// ===== Capture mode (Keybinds settings tab) =====
+//
+// When the user clicks "Rebind" in the Keybinds tab, the target Action is
+// stored here. input.ts polls this at the TOP of its keydown / pollGamepad
+// handlers — if set, the next key / button press rebinds the action (or
+// Escape cancels). This lives in keybinds.ts (not input.ts) so options.ts can
+// set it without importing input.ts (which would create an import cycle:
+// input → state → … → options). Getter/setter wrapping avoids `export let`
+// reassignment ambiguity under TS strict.
+
+let capturingAction: Action | null = null;
+
+export function getCapturing(): Action | null {
+  return capturingAction;
+}
+
+export function setCapturing(action: Action | null): void {
+  capturingAction = action;
 }
