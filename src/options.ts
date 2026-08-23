@@ -172,9 +172,10 @@ function row(label: string, controlHtml: string, desc = '', disabled = false): s
   return `<div class="opt-row${disabled ? ' disabled' : ''}"><span class="opt-label">${label}${descHtml}</span>${controlHtml}</div>`;
 }
 
-function toggleHtml(checked: boolean, extraKey = ''): string {
+function toggleHtml(checked: boolean, extraKey = '', label = ''): string {
   const attr = extraKey ? ` data-extra="${extraKey}"` : '';
-  return `<label class="toggle"><input type="checkbox"${attr}${checked ? ' checked' : ''}><span class="track"></span><span class="thumb"></span></label>`;
+  const aria = label ? ` aria-label="${label}"` : '';
+  return `<label class="toggle"><input type="checkbox" role="switch" aria-checked="${checked}"${aria}${attr}${checked ? ' checked' : ''}><span class="track"></span><span class="thumb"></span></label>`;
 }
 function segHtml(opts: { id: string; label: string; active: boolean }[]): string {
   return `<div class="seg">` + opts.map(o =>
@@ -321,7 +322,7 @@ function renderGame(body: HTMLElement): void {
 /** Display-tab extra: fullscreen toggle (async, reads DOM live). */
 function appendFullscreenRow(body: HTMLElement): void {
   body.insertAdjacentHTML('beforeend',
-    row(t('optFullscreen'), toggleHtml(!!document.fullscreenElement, 'fullscreen')),
+    row(t('optFullscreen'), toggleHtml(!!document.fullscreenElement, 'fullscreen', t('optFullscreen'))),
   );
   const fs = body.querySelector<HTMLInputElement>('[data-extra="fullscreen"]');
   if (fs) bindToggle(fs, () => toggleFullscreen());
@@ -337,8 +338,8 @@ function appendFullscreenRow(body: HTMLElement): void {
 /** Gameplay-tab extras: legend + keys toggles (conditional ui-panels togglers). */
 function appendGameplayExtras(body: HTMLElement): void {
   body.insertAdjacentHTML('beforeend',
-    row(t('optLegend'), toggleHtml(legendVisible, 'legend')) +
-    row(t('optKeys'), toggleHtml(keysVisible, 'keys')),
+    row(t('optLegend'), toggleHtml(legendVisible, 'legend', t('optLegend'))) +
+    row(t('optKeys'), toggleHtml(keysVisible, 'keys', t('optKeys'))),
   );
   const lg = body.querySelector<HTMLInputElement>('[data-extra="legend"]');
   const ky = body.querySelector<HTMLInputElement>('[data-extra="keys"]');

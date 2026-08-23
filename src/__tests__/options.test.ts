@@ -37,6 +37,7 @@ vi.mock('../ui-panels.js', () => ({
 
 import { SETTING_DEFS } from '../settings.js';
 import { renderOptions } from '../options.js';
+import { t } from '../i18n.js';
 // Import the mocked setters so we can assert they were called by resetDefaults.
 import { setMutedState, setMasterVol } from '../audio.js';
 import { setUiZoom, setReducedMotion, setBarCues, setIntroEnabled } from '../state.js';
@@ -77,6 +78,10 @@ describe('schema-driven options render — row counts', () => {
     const extras = document.querySelectorAll('#opt-body [data-extra]');
     expect(extras.length).toBe(1);
     expect(extras[0].getAttribute('data-extra')).toBe('fullscreen');
+    // follow-up: legacy extras render as proper switches (match schema pattern)
+    expect(extras[0].getAttribute('role')).toBe('switch');
+    expect(extras[0].getAttribute('aria-checked')).toBe('false'); // headless: no fullscreenElement
+    expect(extras[0].getAttribute('aria-label')).toBe(t('optFullscreen'));
   });
 
   it('access tab: one row per schema def', () => {
@@ -94,6 +99,12 @@ describe('schema-driven options render — row counts', () => {
     const extraKeys = Array.from(extras).map(e => e.getAttribute('data-extra'));
     expect(extraKeys).toContain('legend');
     expect(extraKeys).toContain('keys');
+    // follow-up: legend/keys extras render as switches with labels
+    for (const el of Array.from(extras)) {
+      expect(el.getAttribute('role')).toBe('switch');
+      expect(el.getAttribute('aria-checked')).not.toBeNull();
+      expect(el.getAttribute('aria-label')).toBeTruthy();
+    }
   });
 });
 
