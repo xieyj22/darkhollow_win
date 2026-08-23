@@ -12,6 +12,7 @@ vi.mock('../state.js', () => ({
   shakeScale: 1, setShakeScale: vi.fn(), textScale: 1, setTextScale: vi.fn(),
   colorblind: 'off', setColorblind: vi.fn(), barCues: true, setBarCues: vi.fn(),
   introEnabled: true, setIntroEnabled: vi.fn(), legendVisible: false, keysVisible: false,
+  hc: false, setHc: vi.fn(),
 }));
 import { SETTING_DEFS, resetDefaults } from '../settings.js';
 
@@ -35,5 +36,16 @@ describe('settings schema', () => {
   it('resetDefaults calls set(default) for every def', () => {
     resetDefaults();
     for (const d of SETTING_DEFS) expect(d.set).toHaveBeenCalledWith(d.default);
+  });
+});
+
+describe('hc (high contrast) setting', () => {
+  it('schema def: access tab, toggle, default false, has descKey', () => {
+    const def = SETTING_DEFS.find(d => d.key === 'hc');
+    expect(def).toBeDefined();
+    expect(def!.tab).toBe('access');
+    expect(def!.control).toBe('toggle');
+    expect(def!.default).toBe(false);
+    expect(def!.descKey).toBe('opt.hcDesc');
   });
 });

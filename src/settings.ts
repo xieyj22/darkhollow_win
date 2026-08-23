@@ -23,6 +23,7 @@ import {
   colorblind, setColorblind,
   barCues, setBarCues,
   introEnabled, setIntroEnabled,
+  hc, setHc,
 } from './state.js';
 import {
   isMuted, setMutedState,
@@ -112,8 +113,11 @@ function applyColorblind(): void {
 function applyBarCues(): void {
   document.body.classList.toggle('bar-cues', barCues);
 }
+function applyHc(): void {
+  document.body.classList.toggle('hc', hc);
+}
 
-// ===== Schema (14 settings across 4 tabs) =====
+// ===== Schema (15 settings across 4 tabs) =====
 //
 // Tab layout follows the design spec: audio (mute + 3 volumes),
 // display (zoom / text / minimap / safe-zone / language), access (motion /
@@ -230,6 +234,11 @@ export const SETTING_DEFS: readonly SettingDef[] = [
     descKey: 'opt.barCuesDesc',
     get: () => barCues, set: asSetter(setBarCues),
     apply: applyBarCues, default: true,
+  },
+  {
+    key: 'hc', tab: 'access', labelKey: 'optHc', descKey: 'opt.hcDesc', control: 'toggle',
+    get: () => hc, set: asSetter(setHc),
+    apply: applyHc, default: false,
   },
 
   // ----- Gameplay tab -----

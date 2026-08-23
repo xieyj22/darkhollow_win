@@ -384,3 +384,17 @@ body.bar-cues .bar .bh::after{content:'♥'}
 body.bar-cues .bar .bm::after{content:'✦'}
 body.bar-cues .bar .bx::after{content:'★'}
 body.bar-cues .bar .bt::after{content:'🍖';font-size:12px}
+
+/* ===== High contrast (accessibility toggle → body.hc) =====
+   Lifts text tokens, brightens borders, flattens translucent backgrounds.
+   Combinable with cb-* filters (different mechanisms). */
+body.hc{--text-secondary:#b8b8cc;--text-muted:#999999;--border-default:#555570;--border-subtle:#44445c}
+body.hc .panel{background:#141420}
+body.hc #keys-panel,body.hc #legend-panel,body.hc #objective-panel{background:#0f0f1a}
+/* Solid coverage for the remaining translucent (ee/cc-suffixed) HUD surfaces
+   found via grep: #tooltip (L162), .mc-btn/#keys-toggle (#1a1a2ecc), .hb-slot
+   gradient (#20203aee/#15152aee), .hb-slot.empty:hover (#1a1a2eee). */
+body.hc #tooltip{background:#12121d}
+body.hc .mc-btn,body.hc #keys-toggle{background:#1a1a2e}
+body.hc .hb-slot{background:#20203a}
+body.hc .hb-slot.empty:hover{background:#1a1a2e}

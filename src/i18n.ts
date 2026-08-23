@@ -128,6 +128,7 @@ export const L: Record<string, I18nText | I18nText[]> = {
   optShake: { en: 'Screen Shake', zh: '震屏强度' },
   optColorblind: { en: 'Color Blindness', zh: '色弱滤镜' },
   optBarCues: { en: 'Bar Shape Cues', zh: '状态条图标' },
+  optHc: { en: 'High Contrast', zh: '高对比度' },
   optLegend: { en: 'Show Legend', zh: '显示图例' },
   optKeys: { en: 'Show Key Hints', zh: '显示键位提示' },
   "opt.introEnabled": { en: "First-Pickup Item Intro", zh: "首次拾取道具介绍" },
@@ -137,6 +138,7 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "opt.shakeDesc": { en: "Intensity of camera shake on impacts", zh: "受击时画面震动的强度" },
   "opt.colorblindDesc": { en: "Shift hues for easier color distinction", zh: "调整色相以便区分颜色" },
   "opt.barCuesDesc": { en: "Add shape icons to health and mana bars", zh: "在生命与法力条上添加形状图标" },
+  "opt.hcDesc": { en: "Brighter text and stronger borders across the interface", zh: "界面文字更亮、边框更强" },
   "opt.resetDefaults": { en: "Reset to Defaults", zh: "恢复默认设置" },
   "opt.confirmReset": { en: "Reset all settings to their defaults?", zh: "将所有设置恢复为默认值？" },
   // ===== Keybinds tab (Task 5) — action labels + capture prompts =====

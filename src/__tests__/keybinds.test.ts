@@ -20,6 +20,7 @@ vi.mock('../state.js', () => ({
   barCues: true, setBarCues: () => {},
   introEnabled: true, setIntroEnabled: () => {},
   legendVisible: false, keysVisible: false,
+  hc: false, setHc: () => {},
 }));
 // Mocks for options.ts transitive deps so closeOptions can be imported.
 vi.mock('../config.js', () => ({ MW: 64, MH: 64 }));

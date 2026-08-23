@@ -19,6 +19,7 @@ vi.mock('../state.js', () => ({
   colorblind: 'off', setColorblind: vi.fn(), barCues: true, setBarCues: vi.fn(),
   introEnabled: true, setIntroEnabled: vi.fn(),
   legendVisible: false, keysVisible: false,
+  hc: false, setHc: vi.fn(),
 }));
 vi.mock('../config.js', () => ({ MW: 48, MH: 32 }));
 vi.mock('../render.js', () => ({

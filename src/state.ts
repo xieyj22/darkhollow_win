@@ -104,6 +104,12 @@ export function setBarCues(v: boolean) { barCues = v; localStorage.setItem('dh_b
 export let introEnabled: boolean = localStorage.getItem('dh_intro_enabled') !== '0';
 export function setIntroEnabled(v: boolean) { introEnabled = v; localStorage.setItem('dh_intro_enabled', v ? '1' : '0'); }
 
+// High contrast (accessibility) — brighter text tokens, stronger borders, solid
+// HUD backgrounds via body.hc. Off by default (unlike barCues/introEnabled,
+// which are opt-out). Combinable with cb-* colorblind filters (different mechanisms).
+export let hc: boolean = localStorage.getItem('dh_hc') === '1';
+export function setHc(v: boolean) { hc = v; localStorage.setItem('dh_hc', v ? '1' : '0'); }
+
 // Pause menu open flag (not persisted — a transient UI state like invOpen/helpOpen)
 export let menuOpen = false;
 export function setMenuOpen(v: boolean) { menuOpen = v; }
