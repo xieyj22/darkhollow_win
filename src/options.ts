@@ -84,13 +84,19 @@ export function renderOptions(): void {
     audio: t('optTabAudio'), display: t('optTabDisplay'), access: t('optTabAccess'), game: t('optTabGame'),
     keybinds: t('optTabKeybinds'),
   };
+  // Icon prefix per tab — visual affordance alongside the text label.
+  const TAB_ICONS: Record<SettingTab, string> = {
+    audio: '🔊', display: '🖥', access: '♿', game: '⚔', keybinds: '⌨',
+  };
   tabsEl.innerHTML = TABS.map(id =>
-    `<button class="opt-tab${id === optActiveTab ? ' active' : ''}" data-tab="${id}" role="tab">${tabLabels[id]}</button>`,
+    `<button class="opt-tab${id === optActiveTab ? ' active' : ''}" data-tab="${id}" role="tab" aria-selected="${id === optActiveTab}" aria-controls="opt-body">${TAB_ICONS[id]} ${tabLabels[id]}</button>`,
   ).join('');
   tabsEl.querySelectorAll<HTMLElement>('.opt-tab').forEach(btn => {
     btn.onclick = () => { optActiveTab = (btn.dataset.tab as SettingTab) || 'audio'; renderOptions(); };
   });
 
+  bodyEl.setAttribute('role', 'tabpanel');
+  bodyEl.setAttribute('tabindex', '0');
   bodyEl.innerHTML = '';
   if (optActiveTab === 'audio') renderAudio(bodyEl);
   else if (optActiveTab === 'display') renderDisplay(bodyEl);
@@ -160,13 +166,13 @@ function segHtml(opts: { id: string; label: string; active: boolean }[]): string
 /** Build control HTML for a schema-driven SettingDef. */
 function schemaControlHtml(d: SettingDef): string {
   if (d.control === 'toggle') {
-    return `<label class="toggle"><input type="checkbox" data-optkey="${d.key}"${d.get() ? ' checked' : ''}><span class="track"></span><span class="thumb"></span></label>`;
+    return `<label class="toggle"><input type="checkbox" role="switch" aria-checked="${d.get()}" aria-label="${t(d.labelKey)}" data-optkey="${d.key}"${d.get() ? ' checked' : ''}><span class="track"></span><span class="thumb"></span></label>`;
   }
   if (d.control === 'seg') {
     const opts = d.options ?? [];
     const cur = String(d.get());
-    return `<div class="seg" data-optkey="${d.key}">` + opts.map(o =>
-      `<button data-seg="${o.id}" class="${o.id === cur ? 'active' : ''}">${t(o.labelKey)}</button>`,
+    return `<div class="seg" role="radiogroup" data-optkey="${d.key}">` + opts.map(o =>
+      `<button data-seg="${o.id}" role="radio" aria-checked="${o.id === cur}" class="${o.id === cur ? 'active' : ''}">${t(o.labelKey)}</button>`,
     ).join('') + `</div>`;
   }
   // slider — uses schema min/max/step directly; value IS the setting value.
@@ -175,7 +181,7 @@ function schemaControlHtml(d: SettingDef): string {
   const max = d.max ?? 100;
   const step = d.step ?? 1;
   const display = d.toDisplay ? d.toDisplay(v) : String(v);
-  return `<input type="range" class="vol-slider" data-optkey="${d.key}" min="${min}" max="${max}" step="${step}" value="${v}"><span class="opt-val" data-optlabel="${d.key}">${display}</span>`;
+  return `<input type="range" class="vol-slider" data-optkey="${d.key}" min="${min}" max="${max}" step="${step}" value="${v}" aria-valuemin="${min}" aria-valuemax="${max}" aria-valuenow="${v}" aria-valuetext="${display}"><span class="opt-val" data-optlabel="${d.key}">${display}</span>`;
 }
 
 /** True when the def's disabledWhen guard setting is currently truthy. */
@@ -356,9 +362,9 @@ function renderKeybinds(body: HTMLElement): void {
   };
 
   body.innerHTML =
-    `<div class="kb-group">${KB_GAMEPLAY.map(renderActionRow).join('')}</div>` +
-    `<div class="kb-group">${KB_QUICK.map(renderActionRow).join('')}</div>` +
-    `<div class="kb-group">${KB_META.map(renderActionRow).join('')}</div>`;
+    `<div class="kb-group-title">🎮 ${t('kb.grpGameplay')}</div><div class="kb-group">${KB_GAMEPLAY.map(renderActionRow).join('')}</div>` +
+    `<div class="kb-group-title">1️⃣ ${t('kb.grpQuick')}</div><div class="kb-group">${KB_QUICK.map(renderActionRow).join('')}</div>` +
+    `<div class="kb-group-title">⚙ ${t('kb.grpMeta')}</div><div class="kb-group">${KB_META.map(renderActionRow).join('')}</div>`;
 
   // Wire each rebind button → enter capture mode for that action.
   body.querySelectorAll<HTMLElement>('[data-rebind]').forEach(btn => {

@@ -150,3 +150,45 @@ describe('reset-defaults button', () => {
     spy.mockRestore();
   });
 });
+
+describe('ARIA roles and tab icons', () => {
+  it('tabs have role=tab + aria-selected + aria-controls; body has tabpanel', () => {
+    const tabs = document.querySelectorAll('.opt-tab');
+    expect(tabs.length).toBe(5);
+    const active = document.querySelector('.opt-tab.active')!;
+    expect(active.getAttribute('role')).toBe('tab');
+    expect(active.getAttribute('aria-selected')).toBe('true');
+    expect(active.getAttribute('aria-controls')).toBe('opt-body');
+    const inactive = document.querySelector('.opt-tab:not(.active)')!;
+    expect(inactive.getAttribute('aria-selected')).toBe('false');
+    const body = document.getElementById('opt-body')!;
+    expect(body.getAttribute('role')).toBe('tabpanel');
+  });
+  it('schema toggle has role=switch + aria-checked + aria-label', () => {
+    switchTab('audio');
+    const cb = document.querySelector<HTMLInputElement>('#opt-body input[data-optkey="mute"]')!;
+    expect(cb.getAttribute('role')).toBe('switch');
+    expect(cb.getAttribute('aria-checked')).toBe('false');
+    expect(cb.getAttribute('aria-label')).toBeTruthy();
+  });
+  it('schema slider carries aria valuemin/max/now + valuetext', () => {
+    switchTab('audio');
+    const sl = document.querySelector<HTMLInputElement>('#opt-body input[data-optkey="master"]')!;
+    expect(sl.getAttribute('aria-valuemin')).toBe('0');
+    expect(sl.getAttribute('aria-valuemax')).toBe('1');
+    expect(sl.getAttribute('aria-valuetext')).toBe('90%');
+  });
+  it('seg container is radiogroup with radio + aria-checked children', () => {
+    switchTab('display');
+    const seg = document.querySelector<HTMLElement>('#opt-body .seg[data-optkey="lang"]')!;
+    expect(seg.getAttribute('role')).toBe('radiogroup');
+    const activeBtn = seg.querySelector<HTMLButtonElement>('button.active')!;
+    expect(activeBtn.getAttribute('role')).toBe('radio');
+    expect(activeBtn.getAttribute('aria-checked')).toBe('true');
+  });
+  it('keybinds groups have visible titles', () => {
+    switchTab('keybinds');
+    const titles = document.querySelectorAll('#opt-body .kb-group-title');
+    expect(titles.length).toBe(3);
+  });
+});

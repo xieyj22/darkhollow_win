@@ -139,19 +139,19 @@ export const SETTING_DEFS: readonly SettingDef[] = [
     key: 'master', tab: 'audio', labelKey: 'volMaster', control: 'slider',
     min: 0, max: 1, step: 0.01,
     get: () => getMasterVol(), set: asSetter(setMasterVol),
-    toDisplay: v => `${Math.round((v as number) * 100)}`, default: 0.9,
+    toDisplay: v => `${Math.round((v as number) * 100)}%`, default: 0.9,
   },
   {
     key: 'music', tab: 'audio', labelKey: 'volMusic', control: 'slider',
     min: 0, max: 1, step: 0.01,
     get: () => getMusicVol(), set: asSetter(setMusicVol),
-    toDisplay: v => `${Math.round((v as number) * 100)}`, default: 0.45,
+    toDisplay: v => `${Math.round((v as number) * 100)}%`, default: 0.45,
   },
   {
     key: 'sfx', tab: 'audio', labelKey: 'volSfx', control: 'slider',
     min: 0, max: 1, step: 0.01,
     get: () => getSfxVol(), set: asSetter(setSfxVol),
-    toDisplay: v => `${Math.round((v as number) * 100)}`, default: 0.9,
+    toDisplay: v => `${Math.round((v as number) * 100)}%`, default: 0.9,
   },
 
   // ----- Display tab -----
