@@ -94,6 +94,25 @@ export function renderOptions(): void {
   tabsEl.querySelectorAll<HTMLElement>('.opt-tab').forEach(btn => {
     btn.onclick = () => { optActiveTab = (btn.dataset.tab as SettingTab) || 'audio'; renderOptions(); };
   });
+  // Arrow-key tab traversal (WAI-ARIA tablist pattern). Bubble-phase handler on
+  // the tabs container + stopPropagation: the document keydown (input.ts)
+  // swallows arrows while the options overlay is open (arrowleft/right are
+  // bound to move_left/move_right), so this handler must consume the event
+  // before it bubbles out of the tabs container. (onkeydown property
+  // assignment, not addEventListener — tabs innerHTML is rebuilt per render but
+  // the container persists, so property assignment can't accumulate listeners.)
+  tabsEl.onkeydown = (ev: KeyboardEvent) => {
+    if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    const btns = Array.from(tabsEl!.querySelectorAll<HTMLElement>('.opt-tab'));
+    const idx = btns.indexOf(document.activeElement as HTMLElement);
+    if (idx === -1) return;
+    const dir = ev.key === 'ArrowRight' ? 1 : -1;
+    const next = btns[(idx + dir + btns.length) % btns.length];
+    next.focus();
+    next.click();
+  };
 
   bodyEl.setAttribute('role', 'tabpanel');
   bodyEl.setAttribute('tabindex', '0');
@@ -233,8 +252,13 @@ function renderSchemaTab(body: HTMLElement, tab: SettingTab): void {
       const v = parseFloat(sl.value);
       d.set(v);
       d.apply?.();
+      // Keep aria in sync with the drag (render-time attrs alone go stale):
+      // valuenow is the raw slider value, valuetext the human-readable form.
+      const display = d.toDisplay ? d.toDisplay(v) : String(v);
+      sl.setAttribute('aria-valuenow', String(v));
+      sl.setAttribute('aria-valuetext', display);
       const lbl = body.querySelector<HTMLElement>(`[data-optlabel="${d.key}"]`);
-      if (lbl && d.toDisplay) lbl.textContent = d.toDisplay(v);
+      if (lbl) lbl.textContent = display;
     };
   });
 

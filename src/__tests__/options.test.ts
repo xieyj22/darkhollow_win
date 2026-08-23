@@ -178,6 +178,14 @@ describe('ARIA roles and tab icons', () => {
     expect(sl.getAttribute('aria-valuemax')).toBe('1');
     expect(sl.getAttribute('aria-valuetext')).toBe('90%');
   });
+  it('slider input event syncs aria-valuenow/valuetext (no stale aria while dragging)', () => {
+    switchTab('audio');
+    const sl = document.querySelector<HTMLInputElement>('#opt-body input[data-optkey="master"]')!;
+    sl.value = '0.5';
+    sl.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(sl.getAttribute('aria-valuenow')).toBe('0.5');
+    expect(sl.getAttribute('aria-valuetext')).toBe('50%');
+  });
   it('seg container is radiogroup with radio + aria-checked children', () => {
     switchTab('display');
     const seg = document.querySelector<HTMLElement>('#opt-body .seg[data-optkey="lang"]')!;
@@ -190,5 +198,35 @@ describe('ARIA roles and tab icons', () => {
     switchTab('keybinds');
     const titles = document.querySelectorAll('#opt-body .kb-group-title');
     expect(titles.length).toBe(3);
+  });
+});
+
+describe('tablist arrow-key navigation', () => {
+  it('ArrowRight/ArrowLeft move focus and activate the neighbor tab', () => {
+    const tabs = Array.from(document.querySelectorAll<HTMLElement>('.opt-tab'));
+    tabs[0].focus(); // audio
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    const active = document.querySelector('.opt-tab.active') as HTMLElement;
+    expect(active.dataset.tab).toBe('display');
+    // Deviation from the brief's `expect(document.activeElement).toBe(active)`:
+    // next.click() re-renders the panel — the tabs innerHTML rebuild replaces
+    // the focused tab button, and renderOptions() then focuses the first
+    // control of the new tab body ("focus lands inside the tab"). So focus
+    // follows activation INTO the panel rather than staying on the (replaced)
+    // tab button; assert that instead.
+    const body = document.getElementById('opt-body')!;
+    expect(body.contains(document.activeElement)).toBe(true);
+    // Arrows act on the focused element — re-focus the new tab button to walk
+    // back (in-app equivalent of Shift+Tab back into the tablist).
+    active.focus();
+    active.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect((document.querySelector('.opt-tab.active') as HTMLElement).dataset.tab).toBe('audio');
+  });
+  it('wraps at both ends', () => {
+    const tabs = Array.from(document.querySelectorAll<HTMLElement>('.opt-tab'));
+    const last = tabs[tabs.length - 1];
+    last.focus();
+    last.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect((document.querySelector('.opt-tab.active') as HTMLElement).dataset.tab).toBe('audio');
   });
 });
