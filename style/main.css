@@ -386,6 +386,8 @@ body.reduced-motion .seg button{transition:none}
 body.reduced-motion .opt-tab::after{transition:none}
 body.reduced-motion .toggle .track,body.reduced-motion .toggle .thumb{transition:none}
 body.reduced-motion .vol-slider::-webkit-slider-thumb{transition:none}
+/* Follow-up sweep: the 5 settings-wave controls that still carried bare transition:all. */
+body.reduced-motion #opt-reset,body.reduced-motion .kb-rebind,body.reduced-motion .kb-reset,body.reduced-motion .hb-slot,body.reduced-motion .forge-tab{transition:none}
 @keyframes ft-fade{from{opacity:1}to{opacity:0}}
 @keyframes smoke-fade{from{opacity:.7}to{opacity:0}}
 
