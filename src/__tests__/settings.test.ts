@@ -49,3 +49,14 @@ describe('hc (high contrast) setting', () => {
     expect(def!.descKey).toBe('opt.hcDesc');
   });
 });
+
+describe('textScale continuous slider', () => {
+  it('def is a slider 0.85–1.5 step 0.05 with percent display', () => {
+    const def = SETTING_DEFS.find(d => d.key === 'textScale')!;
+    expect(def.control).toBe('slider');
+    expect(def.min).toBe(0.85);
+    expect(def.max).toBe(1.5);
+    expect(def.step).toBe(0.05);
+    expect(def.toDisplay!(1.5)).toBe('150%');
+  });
+});

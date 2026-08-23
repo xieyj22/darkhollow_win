@@ -163,14 +163,11 @@ export const SETTING_DEFS: readonly SettingDef[] = [
     toDisplay: v => `${Math.round((v as number) * 100)}%`, default: 1,
   },
   {
-    key: 'textScale', tab: 'display', labelKey: 'optTextSize', control: 'seg',
-    options: [
-      { id: '0.85', labelKey: 'tsSmall' },
-      { id: '1', labelKey: 'tsMedium' },
-      { id: '1.15', labelKey: 'tsLarge' },
-    ],
+    key: 'textScale', tab: 'display', labelKey: 'optTextSize', control: 'slider',
+    min: 0.85, max: 1.5, step: 0.05,
     get: () => textScale, set: asSetter(setTextScale),
     apply: applyTextScale, default: 1,
+    toDisplay: v => `${Math.round((v as number) * 100)}%`,
   },
   {
     key: 'minimap', tab: 'display', labelKey: 'optMinimap', control: 'seg',

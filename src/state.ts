@@ -86,8 +86,8 @@ export function setSafeZone(n: number) { safeZone = n; localStorage.setItem('dh_
 export let shakeScale: number = clampFloat(localStorage.getItem('dh_shake_scale'), 1, 0, 1);
 export function setShakeScale(v: number) { shakeScale = v; localStorage.setItem('dh_shake_scale', String(v)); }
 
-// Text size tier (accessibility) — multiplier on the --fs-* font tokens. 0.85/1/1.15 = Small/Medium/Large.
-export let textScale: number = clampFloat(localStorage.getItem('dh_text_scale'), 1, 0.85, 1.2);
+// Text size (accessibility) — continuous multiplier on the --fs-* font tokens, 0.85–1.5 (default 1).
+export let textScale: number = clampFloat(localStorage.getItem('dh_text_scale'), 1, 0.85, 1.5);
 export function setTextScale(v: number) { textScale = v; localStorage.setItem('dh_text_scale', String(v)); }
 
 // Color-blindness filter (accessibility)
