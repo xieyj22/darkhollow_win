@@ -75,8 +75,12 @@ def main():
         # Use system Chrome (CDN download stalls on CN network).
         browser = p.chromium.launch(headless=True, channel='chrome')
         page = browser.new_page(viewport={'width': 1280, 'height': 800})
-        page.on('console', lambda m: console_errors.append(f'{m.text} :: {m.location.get("url", "?")}') if m.type == 'error' else None)
-        page.on('response', lambda r: console_errors.append(f'HTTP {r.status} {r.url}') if r.status >= 400 else None)
+        # favicon.ico 404 is expected under vite preview (no icon shipped) —
+        # whitelist it so console_errors can gate the CI exit code honestly.
+        # NB: the console-error text ("Failed to load resource: …404") does NOT
+        # contain "favicon"; the URL lives in m.location.
+        page.on('console', lambda m: console_errors.append(f'{m.text} :: {m.location.get("url", "?")}') if m.type == 'error' and 'favicon' not in m.text and 'favicon' not in (m.location.get('url') or '') else None)
+        page.on('response', lambda r: console_errors.append(f'HTTP {r.status} {r.url}') if r.status >= 400 and 'favicon' not in r.url else None)
         page.on('pageerror', lambda e: console_errors.append(str(e)))
         # auto-accept native confirm() dialogs (reset + conflict alerts)
         page.on('dialog', lambda d: d.accept())
