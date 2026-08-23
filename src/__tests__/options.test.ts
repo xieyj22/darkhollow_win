@@ -228,5 +228,12 @@ describe('tablist arrow-key navigation', () => {
     last.focus();
     last.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect((document.querySelector('.opt-tab.active') as HTMLElement).dataset.tab).toBe('audio');
+    // First→last wrap: ArrowLeft from tab index 0 lands on the last tab. The
+    // tabs innerHTML is rebuilt per render — re-query index 0 AFTER the wrap
+    // above, or `first` points at a detached button whose handler is gone.
+    const first = document.querySelector<HTMLElement>('.opt-tab')!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect((document.querySelector('.opt-tab.active') as HTMLElement).dataset.tab).toBe('keybinds');
   });
 });

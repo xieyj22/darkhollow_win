@@ -34,6 +34,9 @@ pnpm-debug.log*
 Thumbs.db
 Desktop.ini
 
+# Smoke screenshot output (generated, not tracked)
+scripts/smoke_out/
+
 # Claude Code (local settings & tools)
 .claude/
 
