@@ -19,7 +19,7 @@ import { SETTING_DEFS, resetDefaults } from '../settings.js';
 beforeEach(() => vi.clearAllMocks());
 
 describe('settings schema', () => {
-  it('covers 14 settings across 4 tabs', () => {
+  it('covers 15 settings across 4 tabs', () => {
     expect(SETTING_DEFS.length).toBeGreaterThanOrEqual(13); // mute+3vol + fullscreen? + zoom+text+minimap+safe+lang + reduced+shake+cb+bar + intro
     const tabs = new Set(SETTING_DEFS.map(d => d.tab));
     expect(tabs).toContain('audio'); expect(tabs).toContain('display');
