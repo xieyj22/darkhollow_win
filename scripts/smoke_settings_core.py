@@ -111,6 +111,9 @@ def main():
         row_labels = page.eval_on_selector_all('#opt-body .opt-label', "els => els.map(e => e.textContent.slice(0,30))")
         has_fs = page.query_selector('#opt-body [data-extra="fullscreen"]') is not None
         check('S1', 'display tab = 5 schema rows + fullscreen extra', rows == 6 and has_fs, f'{rows} labels={row_labels}')
+        fs_switch = page.eval_on_selector('#opt-body [data-extra="fullscreen"]',
+            'el => el.getAttribute("role") === "switch" && el.getAttribute("aria-checked") === "false" && !!el.getAttribute("aria-label")')
+        check('S1', 'fullscreen extra = switch with aria state/label', fs_switch)
         n_desc = page.eval_on_selector_all('#opt-body .opt-desc', 'els => els.length')
         check('S1', 'display rows with desc (safeZone)', n_desc >= 1, f'{n_desc}')
 
@@ -132,6 +135,9 @@ def main():
         check('S1', 'game tab desc present', n_desc >= 1, f'{n_desc}')
         has_lk = page.query_selector('#opt-body [data-extra="legend"]') is not None and page.query_selector('#opt-body [data-extra="keys"]') is not None
         check('S1', 'game tab legend/keys extras rendered', has_lk)
+        lk_switch = page.eval_on_selector_all('#opt-body [data-extra="legend"], #opt-body [data-extra="keys"]',
+            'els => els.length === 2 && els.every(e => e.getAttribute("role") === "switch" && !!e.getAttribute("aria-label"))')
+        check('S1', 'legend/keys extras = switches with aria labels', lk_switch)
 
         # reset defaults: dirty every mutable setting, then #opt-reset restores
         click_tab(page, 'audio')
@@ -456,11 +462,8 @@ def main():
         # ending-choice + event-modal verified structurally (need boss kill / npc — JS-level presence only)
         endings_el = page.evaluate("!!document.getElementById('ending-choice')")
         check('S5', 'ending-choice overlay element present', endings_el)
-        ev_ok = page.evaluate("""() => {
-          // event modal is dynamically created; at minimum the events module is loaded (no import error on boot = already proven by console)
-          return true;
-        }""")
-        check('S5', 'dynamic event modal (boot import ok)', ev_ok)
+        # (removed a constant-True "dynamic event modal" check — a failed events-module
+        # import already surfaces via console_errors/pageerror, which gate the exit code)
 
         # b-key dual semantics: b opens inventory (map main action) when nothing open
         page.keyboard.press('b')
@@ -469,11 +472,11 @@ def main():
         check('S5', "dual-key 'b' opens inventory (map main action)", b_inv)
         page.keyboard.press('Escape')
         page.wait_for_timeout(200)
-        # i must NOT close inventory while open? No — spec: b closes overlays it opens; i has no close semantics per literal context rule
-        # verified: i while inventory open closes it (overlay-internal literal? No: i is not a closer; b is). Check actual: press i, expect still open
+        # i re-opens inventory from the closed state (dispatch guard: only when no overlay)
         page.keyboard.press('i')
         page.wait_for_timeout(250)
-        check('S5', "'i' re-opens/toggles inventory without error", True)
+        i_inv = overlay_active(page, 'inventory-overlay')
+        check('S5', "'i' opens inventory (b-closed state, guard path)", i_inv)
 
         page.screenshot(path=f'{OUT}/final_game_state.png')
 
@@ -539,6 +542,7 @@ def main():
           return popup && getComputedStyle(popup).display !== 'none';
         }""")
         if not ev_open:
+            popup_ok = False
             placed = page.evaluate("""() => {
               // Reuse the game's own state via the hotbar/inventory path is not
               // possible without module access; instead synthesize the popup by
@@ -557,9 +561,10 @@ def main():
             }""")
             if placed:
                 page.wait_for_timeout(200)
+                popup_ok = page.evaluate("() => document.getElementById('event-popup').style.display === 'block' && document.getElementById('ev-title').textContent !== ''")
                 page.screenshot(path=f'{OUT}/radius-event-popup.png')
                 page.evaluate("() => { document.getElementById('event-popup').style.display = 'none'; }")
-        check('MATRIX', '#event-popup shot (markup synthesized — showEvent not exposed headless)', True)
+            check('MATRIX', '#event-popup synthesized popup visible for shot', popup_ok)
 
         # --- D. forge overlay: same control set new skin spot-check ---
         page.evaluate("() => document.querySelector('#btn-forge').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
@@ -570,6 +575,42 @@ def main():
             page.screenshot(path=f'{OUT}/surface-forge-seg.png')
             page.evaluate("() => document.querySelector('#btn-close-forge').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
             page.wait_for_timeout(200)
+
+        # --- E. hc × colorblind composite HUD view (follow-up screenshot 1/2) ---
+        # colorblind is a SEG control (off/proto/deutan/tritan) — click its option
+        # button, not a checkbox. Screenshot the HUD (options closed) to show the
+        # hc tokens + cb color-matrix filter applied together.
+        open_options(page)
+        click_tab(page, 'access')
+        page.evaluate("() => document.querySelector('[data-optkey=\"hc\"]').click()")                                # hc on
+        page.evaluate("() => document.querySelector('[data-optkey=\"colorblind\"] [data-seg=\"deutan\"]').click()")  # cb deutan
+        page.wait_for_timeout(250)
+        page.keyboard.press('Escape')  # close options → HUD view
+        page.wait_for_timeout(250)
+        page.screenshot(path=f'{OUT}/surface-hc-cb-hud.png')
+        open_options(page)
+        click_tab(page, 'access')
+        page.evaluate("() => document.querySelector('[data-optkey=\"colorblind\"] [data-seg=\"off\"]').click()")     # cb off
+        page.evaluate("() => document.querySelector('[data-optkey=\"hc\"]').click()")                                # hc off
+        page.wait_for_timeout(150)
+
+        # --- F. textScale 1.5 HUD overflow doc (follow-up screenshot 2/2) ---
+        # sidebar hardcodes 13px (immune); this documents hotbar/log/panels at max
+        # text scale + guards the hotbar stays inside the viewport.
+        click_tab(page, 'display')
+        page.evaluate("() => { const el = document.querySelector('[data-optkey=\"textScale\"]'); el.value = 1.5; el.dispatchEvent(new Event('input', {bubbles:true})); }")
+        page.wait_for_timeout(250)
+        page.keyboard.press('Escape')
+        page.wait_for_timeout(250)
+        page.screenshot(path=f'{OUT}/surface-ts15-hud.png')
+        hud_ok = page.evaluate("() => document.getElementById('hotbar').getBoundingClientRect().right <= window.innerWidth + 1")
+        check('MATRIX', 'textScale 1.5 — hotbar stays within viewport', hud_ok)
+        open_options(page)
+        click_tab(page, 'display')
+        page.evaluate("() => { const el = document.querySelector('[data-optkey=\"textScale\"]'); el.value = 1; el.dispatchEvent(new Event('input', {bubbles:true})); }")
+        page.wait_for_timeout(150)
+        page.keyboard.press('Escape')
+        page.wait_for_timeout(150)
 
         browser.close()
 
