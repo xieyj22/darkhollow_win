@@ -63,12 +63,12 @@
 - `settings.ts` `textScale` def：`control: 'seg'`（3 档）→ `control: 'slider'`，`min:0.85 / max:1.5 / step:0.05`，`toDisplay: v => \`${Math.round(v*100)}%\``
 - `state.ts:90` clamp 上限 `1.2` → `1.5`（否则 slider 拉过 1.2 被静默截断）
 - 老档兼容：`dh_text_scale` 存值语义不变，直接生效
-- 删除 `tsSmall/tsMedium/tsLarge` 三个 i18n key 的引用（key 本体保留，防其他站点引用报 missing——grep 确认后可删）
+- `tsSmall/tsMedium/tsLarge` 三个 i18n key：引用站点仅 settings.ts 的 textScale options（i18n.ts:178-180 定义）——seg→slider 后引用消失，**key 本体一并删除**（已 grep 确认无其他引用）；三个 mock（settings/options/keybinds.test 的 `textScale:1` mock 行）不需动（mock 的是 state source 非 i18n）
 
 ### 2.2 高对比模式（新 setting `hc`）
 
 - `SETTING_DEFS` 新增：`{ key:'hc', tab:'access', labelKey:'optHc', descKey:'opt.hcDesc', control:'toggle', default:false }`
-- `state.ts` 加 source：`hc: boolean`（`dh_hc` 持久化，false 默认）+ setter；`settings.ts` import + `apply: () => document.body.classList.toggle('hc', hc)`
+- `state.ts` 加 source：`hc: boolean`（`dh_hc` 持久化，false 默认）+ setter；apply 走 `settings.ts` 既有 body-class 模式（对齐 settings.ts:109-113 的 cb-*/bar-cues：`applyAll` 内 `document.body.classList.toggle('hc', hc)`）
 - CSS `body.hc` 覆盖：
   - `--text-secondary` / `--text-muted` 提亮（≥ #b8b8cc / #999）
   - `--border-default` / `--border-subtle` 加亮一档
@@ -80,7 +80,7 @@
 ### 2.3 ARIA / 键盘
 
 - **tablist**：`.opt-tab` 补 `role="tab"`（tablist 已有）+ `aria-selected`（随 active）+ `aria-controls="opt-body"`；`.opt-body` 加 `role="tabpanel"` + `tabindex="0"`
-- **方向键切 tab**：tablist 内 ←/→ 移动 focus 到相邻 tab 并激活（keydown 在 tabs 容器上，preventDefault；与 overlay_close 改键无冲突——方向键在 DEFAULT_KEYS 无绑定）
+- **方向键切 tab**：tablist 内 ←/→ 移动 focus 到相邻 tab 并激活（keydown 在 tabs 容器上，preventDefault + stopPropagation）。**注意**：方向键在 DEFAULT_KEYS 绑定 move_*（arrowleft 等），options overlay 的 keydown 块会 swallow 一切非 overlay_close 键（input.ts:79-84），所以 tablist 方向键 handler 必须挂容器级且在事件冒泡到 document 前消费（或用捕获阶段）；与 overlay_close 改键无冲突
 - **toggle**：input 加 `role="switch"` + `aria-checked`（checked 同步）+ `aria-label`（行 label 文本，渲染时传入）
 - **slider**：加 `aria-valuetext`（复用 toDisplay 输出，如 "90%"）；range 原生方向键 step 已有，验证不新写
 - **seg**：加 `role="radiogroup"`（容器）+ `role="radio"` + `aria-checked`（button 天生可 tab，键盘语义够用）
