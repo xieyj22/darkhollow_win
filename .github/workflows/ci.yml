@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # CI never launches Electron — skip the ~100MB binary download.
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Playwright (library only — smoke uses system Chrome)
+        run: pip install playwright
+
+      - name: Start preview server on :4173
+        run: |
+          nohup npm run preview -- --port 4173 --strictPort > preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4173 > /dev/null; then
+              echo "preview server up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "preview server failed to start:" && cat preview.log
+          exit 1
+
+      - name: Smoke test (settings + overlays + a11y)
+        run: python scripts/smoke_settings_core.py
+
+      - name: Kill preview server
+        if: always()
+        run: fuser -k 4173/tcp || true
+
+      - name: Upload smoke artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-debug
+          path: |
+            scripts/smoke_out/
+            preview.log
+          if-no-files-found: ignore
+          retention-days: 7
