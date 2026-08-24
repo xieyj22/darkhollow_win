@@ -67,3 +67,20 @@ export function makeEnemy(
     ...(m?.isBoss ? { phases: base.phases, summon: base.summon, bossAtkBase: Math.floor(base.atk * fs * atkM) } : {}),
   };
 }
+
+// ⑥ Deep-floor fallback pick (F55+, where the [floor-4, floor] mf window is
+// empty and uniform `pick` gave F1 rats Void-Titan odds). Weight falls off
+// with distance: w = exp(-(floor - mf)/15) → F60: mf50→0.51, mf42→0.41, mf1→0.02.
+export function pickWeightedByMf<T extends { mf: number }>(
+  pool: T[], floor: number, rand: () => number = Math.random,
+): T | undefined {
+  if (pool.length === 0) return undefined;
+  if (pool.length === 1) return pool[0];
+  const ws = pool.map(e => Math.exp(-(floor - e.mf) / 15));
+  let roll = rand() * ws.reduce((s, w) => s + w, 0);
+  for (let i = 0; i < pool.length; i++) {
+    roll -= ws[i];
+    if (roll < 0) return pool[i];
+  }
+  return pool[pool.length - 1];
+}

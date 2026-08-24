@@ -11,7 +11,7 @@ import { attack, killEnemy, checkLevelUp } from './combat.js';
 import { onPlayerDamaged, onEnemyHitPlayer, onPlayerDodged, onPlayerDeath, getManaShieldReduction } from './talents.js';
 import { relicOnDodge } from './relics.js';
 import { setEnemyTween } from './render.js';
-import { makeEnemy } from './enemy-factory.js';
+import { makeEnemy, pickWeightedByMf } from './enemy-factory.js';
 import { wardenStats } from './warden.js';
 import { shouldCastSkill, executeEnemySkill } from './enemy-skills.js';
 
@@ -33,7 +33,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
     if (rm === rooms[0]) return null;
     const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
     const se = el.filter(e => e.mf <= floor && e.mf >= Math.max(1, floor - 4) && e.mf >= 1);
-    const base = se.length > 0 ? pick(se) : pick(el);
+    const base = se.length > 0 ? pick(se) : (pickWeightedByMf(el, floor) ?? pick(el));
     const fs = 1 + (floor - 1) * .12 + (area ? area.enemyScaleBonus : 0);
     let nm = tx(base.n);
     let hpM = 1, atkM = 1, defM = 1, expM = 1, goldM = 1, isElite = false;
