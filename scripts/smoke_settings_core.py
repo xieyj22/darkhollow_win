@@ -5,7 +5,8 @@
 # Task 6 (settings-surface): + SURF block (hc / textScale slider / tablist aria /
 # arrow-nav / tab icons) + screenshot matrix (options tabs / hc on / forge /
 # radius-lg-affected surfaces: .tb touch buttons, #event-popup, .talent-cell).
-# Run: python scripts/with_server.py --server "npm run preview -- --port 4173" --port 4173 -- python scripts/smoke_settings_core.py
+# Run: npm run build && start preview on :4173 ("npm run preview -- --port 4173 --strictPort"),
+#      then: python scripts/smoke_settings_core.py  (expects the server up; uses system Chrome)
 import io
 import json
 import re
