@@ -178,6 +178,7 @@ function showCharSelect(): void {
     ov.remove();
     document.getElementById('title-screen')!.style.display = 'flex';
     initTitleParticles();
+    renderTitleStats();   // ④ refresh after a run may have changed meta stats
   };
 }
 
@@ -190,6 +191,7 @@ function returnToTitle(): void {
   stopParticles();
   setBgmScene('title');
   initTitleParticles();
+  renderTitleStats();   // ④ refresh after a run may have changed meta stats
 }
 
 // ===== Bind HTML buttons =====
@@ -270,6 +272,7 @@ window.addEventListener('load', () => {
   applyAll();
   applyAudioUI();
   initTitleParticles();
+  renderTitleStats();   // ④ first paint of the title stats row (was imported, never called)
   bindButtons();
   initInput();
   initTouchControls();

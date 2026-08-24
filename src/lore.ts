@@ -36,6 +36,8 @@ export const LORE_ENTRIES: LoreEntry[] = [
   { id: 'area:abyss',    cat: 'area', n: { en: 'The Abyss', zh: '无尽深渊' }, body: { en: 'F26-30. The seal gapes; the Abyss itself seeps through. Something watches from below.', zh: 'F26-30。封印裂缝已大，深渊本体渗入。有什么东西在下方注视。' } },
   { id: 'area:void',     cat: 'area', n: { en: 'Void Realm', zh: '虚空领域' }, body: { en: 'F31-35. Reality buckles here. Colors that should not exist hurt your eyes.', zh: 'F31-35。现实在此崩坏。不该存在的颜色刺痛双眼。' } },
   { id: 'area:sanctum',  cat: 'area', n: { en: 'The Final Sanctum', zh: '最终圣殿' }, body: { en: 'F36-40. The seal\'s heart — the Creator\'s cage and throne. The holy light is their thousand-year will.', zh: 'F36-40。封印的心脏，创世者的囚笼与王座。圣光是 Ta 千年未熄的意志。' } },
+  { id: 'area:fungal', cat: 'area', n: { en: 'Fungal Hollow', zh: '荧光菌穴' }, body: { en: "A pocket biome behind the portal — spore-choked dark where mycelium remembers every Descender who walked it. The Sovereign blooms quietly at its heart.", zh: '传送门后的秘境一隅，孢子弥漫的黑暗。菌丝记得每一位走过的下探者，菌主在其深处静静绽放。' } },
+  { id: 'area:endless', cat: 'area', n: { en: 'Endless Abyss', zh: '无尽深渊' }, body: { en: 'Beyond F40 the broken seal bleeds twisted void. Floors repeat, horrors compound — Descenders descend not to win, but to see how far they fall.', zh: 'F40 之后，破碎的封印渗出扭曲虚空。楼层重复，恐怖叠加——继续向下已非为了胜利，只为看自己能坠多深。' } },
 
   // --- Bosses (8, keyed boss:<fl>) ---
   { id: 'boss:5',  cat: 'boss', n: { en: 'Goblin King', zh: '哥布林王' }, body: { en: 'A petty tyrant of the rift\'s mouth. A small, early foe of no consequence to the main story.', zh: '裂口地表的小暴君，与主线无关的早期小角色。' } },

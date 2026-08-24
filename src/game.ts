@@ -174,6 +174,7 @@ export function enterBranch(): void {
   if (!fungal) return;
   G.branchReturn = { floor: G.floor, x: G.player.x, y: G.player.y };
   G.branchMode = true;
+  unlockLore('area:fungal');   // ⑤ branch floors never resolve the main area — unlock here
   const entry = G.floor;
   G.dungeon = genDungeon(entry, fungal);
   G.traps = G.dungeon.traps;
