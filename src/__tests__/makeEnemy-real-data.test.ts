@@ -47,4 +47,13 @@ describe('makeEnemy over real game data', () => {
     // loop zero times and pass vacuously — assert we actually exercised them.
     expect(checked).toBe(25);
   });
+
+  it('every BossDef with phases/summon surfaces them on the built instance (①)', () => {
+    for (const b of BOSSES) {
+      const out = makeEnemy(b, 5, 5, 1 + (b.fl - 1) * .1, { isBoss: true });
+      expect(out.phases).toBe(b.phases);
+      expect(out.summon).toBe(b.summon);
+      expect(out.bossAtkBase).toBe(out.atk);
+    }
+  });
 });

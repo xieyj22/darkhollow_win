@@ -271,6 +271,12 @@ export interface Enemy {
   el: Element;
   res: Partial<Record<Element, number>>;
   skillCd: number;
+  // ① reconnect: boss config travels with the instance — endless F45+ reuse
+  // another floor's BossDef, so the old floor-keyed table lookups came up
+  // empty there. Optional: legacy saves hold instances without them.
+  phases?: BossDef['phases'];
+  summon?: BossDef['summon'];
+  bossAtkBase?: number;
   skill?: EnemySkill;
   aiCd?: number;
   atkBuffTurns?: number;

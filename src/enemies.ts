@@ -1,5 +1,5 @@
 // Enemy generation and AI
-import type { Enemy, Room, Element } from './types.js';
+import type { Enemy, Room, Element, BossDef } from './types.js';
 import { G, lang } from './state.js';
 import { MW, MH, TL, FINAL } from './config.js';
 import { rng, pick, dst } from './utils.js';
@@ -14,6 +14,12 @@ import { setEnemyTween } from './render.js';
 import { makeEnemy } from './enemy-factory.js';
 import { wardenStats } from './warden.js';
 import { shouldCastSkill, executeEnemySkill } from './enemy-skills.js';
+
+// Endless F45+ boss reuse pool — excludes the fl:0 branch mini-boss
+// (Myconid Sovereign: no phases/summon, wrong tier for endless).
+export function endlessBossPool(): BossDef[] {
+  return BOSSES.filter(b => b.fl >= 5);
+}
 
 export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   const ens: Enemy[] = [];
@@ -62,7 +68,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   // in endless runs (normal mode ends at FINAL), but the floor>FINAL gate makes
   // it self-guarding regardless.
   if (floor > FINAL && floor % 5 === 0 && G && G.endless) {
-    const base = pick(BOSSES);
+    const base = pick(endlessBossPool());
     const fs = 1 + (floor - 1) * .1; // boss scale (.1), not enemy scale (.12)
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
     ens.push(makeEnemy(base, br.cx, br.cy, fs, { isBoss: true }, tx(base.n)));
@@ -139,11 +145,14 @@ export function processBossPhase(boss: Enemy): void {
   if (G.branchMode) return;
   const fl = G.floor;
   const bd = BOSSES.find(b => b.fl === fl);
-  if (!bd || !bd.phases) return;
+  // Instance-first: makeEnemy-copied bosses (endless F45+ reuse) carry their
+  // own phases; the table lookup stays as the legacy-save fallback.
+  const phases = boss.phases ?? bd?.phases;
+  if (!phases) return;
   if (!boss.phasesTriggered) boss.phasesTriggered = new Set();
-  const origAtk = bd.atk * (1 + (fl - 1) * .1);
-  for (let i = 0; i < bd.phases.length; i++) {
-    const phase = bd.phases[i];
+  const origAtk = boss.bossAtkBase ?? (bd ? bd.atk * (1 + (fl - 1) * .1) : boss.atk);
+  for (let i = 0; i < phases.length; i++) {
+    const phase = phases[i];
     if (boss.phasesTriggered.has(i)) continue;
     const hpRatio = boss.hp / boss.maxHp;
     if (hpRatio <= phase.hpThreshold) {
@@ -321,7 +330,7 @@ function processAlly(ally: Enemy): void {
 }
 
 // --- Boss summon (point 4): bosses with a summon def randomly call adds ---
-function tryBossSummon(boss: Enemy): void {
+export function tryBossSummon(boss: Enemy): void {
   if (!G) return;
   // Branch mini-boss is static (no summon). Same fl-coupling hole as
   // processBossPhase: G.floor = main entry floor in a branch, so a boss-floor
@@ -331,9 +340,9 @@ function tryBossSummon(boss: Enemy): void {
   if (G.branchMode) return;
   const fl = G.floor;
   const bd = BOSSES.find(b => b.fl === fl);
-  if (!bd || !bd.summon) return;
+  const cfg = boss.summon ?? bd?.summon;   // instance-first, table fallback
+  if (!cfg) return;
   if ((boss.aiCd ?? 0) > 0) return;                 // on cooldown
-  const cfg = bd.summon;
   // Count nearby adds so the boss doesn't flood the floor.
   const nearbyAdds = G.enemies.filter(en => !en.isBoss && !en.isAlly && dst(en.x, en.y, boss.x, boss.y) <= 8).length;
   if (nearbyAdds >= cfg.maxAdds) return;
@@ -346,8 +355,8 @@ function bossSummonAdd(boss: Enemy): void {
   if (!G) return;
   const fl = G.floor;
   const bd = BOSSES.find(b => b.fl === fl);
-  if (!bd || !bd.summon) return;
-  const cfg = bd.summon;
+  const cfg = boss.summon ?? bd?.summon;
+  if (!cfg) return;
   // 优先主题小弟(按 n.en);查不到回退楼层随机池
   let base = cfg.kind ? ENEMIES.find(en => en.n.en === cfg.kind) : undefined;
   if (!base) {

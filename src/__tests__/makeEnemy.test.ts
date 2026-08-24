@@ -80,3 +80,23 @@ describe('makeEnemy', () => {
     expect(e.skill).toBeUndefined();
   });
 });
+
+describe('boss config travels with the instance (① reconnect)', () => {
+  const bossBase = {
+    ...base,
+    phases: [{ hpThreshold: 0.5, atkM: 1.5 }],
+    summon: { chance: 0.4, cd: 3, maxAdds: 2 },
+  };
+  it('isBoss copies phases/summon refs + records bossAtkBase', () => {
+    const e = makeEnemy(bossBase as any, 1, 1, 1.4, { isBoss: true });
+    expect(e.phases).toBe(bossBase.phases);        // 引用拷贝（只读静态配置）
+    expect(e.summon).toBe(bossBase.summon);
+    expect(e.bossAtkBase).toBe(e.atk);             // 出生缩放后攻击，等价旧 origAtk 公式
+  });
+  it('non-boss carries no boss fields', () => {
+    const e = makeEnemy(bossBase as any, 1, 1, 1);
+    expect(e.phases).toBeUndefined();
+    expect(e.summon).toBeUndefined();
+    expect(e.bossAtkBase).toBeUndefined();
+  });
+});

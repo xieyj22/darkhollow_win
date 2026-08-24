@@ -1,7 +1,7 @@
 // Pure enemy-instance factory. Lives in its own module (not enemies.ts) so the
 // import chain stays light (only state+utils+types) and it is unit-testable
 // without pulling combat/render/talents/relics into the test environment.
-import type { Enemy, Element, I18nText, EnemySkill } from './types.js';
+import type { Enemy, Element, I18nText, EnemySkill, BossDef } from './types.js';
 import { lang } from './state.js';
 import { rng } from './utils.js';
 import { tx } from './i18n.js';
@@ -13,6 +13,8 @@ export type EnemyBase = {
   hp: number; atk: number; def: number; exp: number; g: [number, number];
   el?: Element; res?: Partial<Record<Element, number>>; tags?: string[]; ai?: string;
   skill?: EnemySkill;
+  phases?: BossDef['phases'];
+  summon?: BossDef['summon'];
 };
 
 export interface EnemyMult {
@@ -58,5 +60,10 @@ export function makeEnemy(
     atkBuffVal: 0,
     skillCd: 0,
     tags: base.tags ? [...base.tags] : [],
+    // ① Boss config rides the instance (reference copy — read-only static
+    // data, unlike `skill` which gets a defensive deep copy). bossAtkBase =
+    // post-scale spawn atk; with the .1 boss fs this equals the legacy
+    // origAtk formula bd.atk*(1+(fl-1)*.1).
+    ...(m?.isBoss ? { phases: base.phases, summon: base.summon, bossAtkBase: Math.floor(base.atk * fs * atkM) } : {}),
   };
 }
