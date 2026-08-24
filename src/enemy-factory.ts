@@ -61,7 +61,10 @@ export function makeEnemy(
     skillCd: 0,
     tags: base.tags ? [...base.tags] : [],
     // ① Boss config rides the instance (reference copy — read-only static
-    // data, unlike `skill` which gets a defensive deep copy). bossAtkBase is
+    // data, unlike `skill` which gets a defensive deep copy). Reference
+    // identity holds only pre-save: serializeEnemies spreads instances, so a
+    // reloaded boss carries structural clones — fine, the data is read-only.
+    // bossAtkBase is
     // DELIBERATELY UNFLOORED: processBossPhase computes floor(origAtk * atkM),
     // so with the .1 boss fs this reproduces the legacy origAtk formula
     // bd.atk*(1+(fl-1)*.1) bit-exactly on every main-line floor.

@@ -64,6 +64,19 @@ describe('① boss summon from the instance', () => {
     expect((globalThis as any).G.enemies.length).toBe(1);
     expect((globalThis as any).G.enemies[0].name).toContain('Goblin');
   });
+
+  it('legacy save (no instance summon) falls back to the floor table — F5 Goblin King', () => {
+    // Spec §5: pin BOTH summon paths so neither half can be silently deleted.
+    // Deleting `?? bd?.summon` must fail here (legacy bosses stop summoning).
+    vi.spyOn(Math, 'random').mockReturnValue(0);   // passes the 0.4 chance gate
+    (globalThis as any).G.floor = 5;
+    const boss = mkBoss();                          // no instance summon/phases
+    tryBossSummon(boss);
+    const gk = BOSSES.find(b => b.fl === 5)!;
+    expect((globalThis as any).G.enemies.length).toBe(1);
+    expect((globalThis as any).G.enemies[0].name).toContain(gk.summon!.kind!);   // 'Goblin' from the TABLE def
+    expect(boss.aiCd).toBe(gk.summon!.cd);                                       // cd consumed from table cfg
+  });
 });
 
 describe('① endless reuse pool excludes the branch mini-boss', () => {
