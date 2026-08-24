@@ -7,7 +7,6 @@ import { addMsg } from './messages.js';
 import { recalc, checkAchs } from './combat.js';
 import { corruptionMods } from './corruption.js';
 import { processEnemies, checkPlayerTraps } from './enemies.js';
-import { maybeEvent } from './events.js';
 import { updateUI, render } from './render.js';
 import { flt } from './effects.js';
 import { autoSave } from './save.js';
@@ -96,9 +95,6 @@ export function endTurn(): void {
     const mpRegen = 1 + getBonusMpRegen();
     G.player.mp = Math.min(G.player.maxMp, G.player.mp + mpRegen);
   }
-
-  // Random events
-  maybeEvent();
 
   updatePlayerFOV(G.player, G.dungeon.map, G.traps);
   updateUI();

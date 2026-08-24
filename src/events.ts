@@ -21,12 +21,6 @@ export { updateUI, render } from './render.js';
 
 // --- Random events ---
 
-export function maybeEvent(): void {
-  // Random popup events removed — merchants/chests now spawn as map entities
-  // the player steps on (point 1). Fountains/shrines are terrain tiles.
-  return;
-}
-
 // Wandering merchant price scales with progression so gold keeps draining
 // deeper into the run (point 3).
 export function merchantPrice(): number {
@@ -51,16 +45,6 @@ export function showEvent(type: string): void {
     document.getElementById('ev-desc')!.textContent = t('chestDesc');
     document.getElementById('ev-buttons')!.innerHTML = `<button class="evb" data-ea="0">[1] ${t('chestOpen')}</button><button class="evb" data-ea="1">[2] ${t('chestLeave')}</button>`;
     actions = [chestOpen, closeEvent];
-  } else if (type === 'fountain_event') {
-    document.getElementById('ev-title')!.textContent = t('fountainTitle');
-    document.getElementById('ev-desc')!.textContent = t('fountainDesc');
-    document.getElementById('ev-buttons')!.innerHTML = `<button class="evb" data-ea="0">[1] ${t('fountainDrink')}</button><button class="evb" data-ea="1">[2] ${t('fountainSkip')}</button>`;
-    actions = [fountainDrink, closeEvent];
-  } else if (type === 'shrine_event') {
-    document.getElementById('ev-title')!.textContent = t('shrineTitle');
-    document.getElementById('ev-desc')!.textContent = t('shrineDesc');
-    document.getElementById('ev-buttons')!.innerHTML = `<button class="evb" data-ea="0">[1] ${t('shrinePray')}</button><button class="evb" data-ea="1">[2] ${t('shrineSkip')}</button>`;
-    actions = [shrinePray, closeEvent];
   }
   setEventOpen(true);
   setEventActions(actions);
@@ -119,28 +103,6 @@ function chestOpen(): void {
   closeEvent(); updateUI(); render();
 }
 
-function fountainDrink(): void {
-  if (!G) return;
-  const h = Math.floor(G.player.maxHp * .35);
-  G.player.hp = Math.min(G.player.maxHp, G.player.hp + h);
-  G.player.mp = Math.min(G.player.maxMp, G.player.mp + Math.floor(G.player.maxMp * .3));
-  addMsg(t('fountainHeal'), 'mh'); snd('heal');
-  applyCorruption(-15); // fountain cleanses corruption (Playtest #9)
-  flt(G.player.x, G.player.y, `+${h}`, '#80ed99');
-  closeEvent(); updateUI(); render();
-}
-
-function shrinePray(): void {
-  if (!G) return;
-  const b = rng(1, 3);
-  if (b === 1) { G.player.baseAtk += 2; addMsg(t('ev.shrineBlessingAtk2'), 'ml'); }
-  else if (b === 2) { G.player.baseDef += 2; addMsg(t('ev.shrineBlessingDef2'), 'ml'); }
-  else { G.player.maxHp += 10; G.player.baseMaxHp += 10; G.player.hp += 10; addMsg(t('ev.shrineBlessingHp10'), 'ml'); }
-  applyCorruption(-20); // shrine cleanses corruption (Playtest #9)
-  recalc(); snd('levelup'); flt(G.player.x, G.player.y, '✨', '#ffd700');
-  closeEvent(); updateUI(); render();
-}
-
 // --- Trap checking ---
 
 export function checkTraps(): void {
@@ -192,13 +154,16 @@ export function checkTiles(): void {
   if (tile === TL.FOUNTAIN) {
     const h = Math.floor(G.player.maxHp * .3);
     const healed = Math.min(h, G.player.maxHp - G.player.hp);
-    // Only consume the fountain if the player actually benefits (HP or MP not full)
-    if (healed <= 0 && G.player.mp >= G.player.maxMp) {
+    const corrupt = G.player.corruption > 0;
+    // Consume when the player benefits any way: HP, MP, or a corruption
+    // cleanse (② reconnect — the -15 fountain cleanse was dead popup code).
+    if (healed <= 0 && G.player.mp >= G.player.maxMp && !corrupt) {
       addMsg(t('ev.fountainQuiet'), 'mi');
     } else {
       G.player.hp += healed;
       G.player.mp = Math.min(G.player.maxMp, G.player.mp + Math.floor(G.player.maxMp * .2));
       addMsg(tMsg('ev.fountainRestore', String(healed)), 'mh');
+      if (corrupt) { applyCorruption(-15); addMsg(t('ev.fountainPurify'), 'md'); }
       flt(G.player.x, G.player.y, `+${healed}`, '#80ed99'); snd('heal');
       G.dungeon.map[G.player.y][G.player.x] = TL.WATER;
     }
@@ -208,6 +173,7 @@ export function checkTiles(): void {
     if (b === 1) { G.player.baseAtk += rng(1, 2); addMsg(t('ev.shrineAtk'), 'ml'); }
     else if (b === 2) { G.player.baseDef += rng(1, 2); addMsg(t('ev.shrineDef'), 'ml'); }
     else { G.player.maxHp += rng(5, 10); G.player.baseMaxHp += rng(5, 10); G.player.hp += rng(5, 10); addMsg(t('ev.shrineHp'), 'ml'); }
+    if (G.player.corruption > 0) { applyCorruption(-20); addMsg(t('ev.shrinePurify'), 'md'); }
     recalc(); snd('levelup'); flt(G.player.x, G.player.y, '+STAT', '#ffd700');
     G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
   }

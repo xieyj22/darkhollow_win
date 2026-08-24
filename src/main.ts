@@ -16,7 +16,7 @@ import { attack, checkLevelUp, recalc, playerDeath, playerVictory, checkAch, che
 import { genItem, genWeapon, genArmor, genAcc, genPotion, genScroll, genFood, genConsumable, useItem, equipItem, quickQuaff, quickRead, renderHotbar, useQuickSlot, addItemWithOverflow, setEndTurnFn as setItemsEndTurn, setFindNearestEnemyFn } from './items.js';
 import { spawnEnemies, processEnemies, checkPlayerTraps } from './enemies.js';
 import { findNearestEnemy, executeSkill, setEndTurnFn as setSkillsEndTurn } from './skills.js';
-import { maybeEvent, showEvent, closeEvent, checkTraps, checkTiles } from './events.js';
+import { showEvent, closeEvent, checkTraps, checkTiles } from './events.js';
 import { createPlayer, movePlayer, pickupItem, descendStairs, doWait, setEndTurnFn as setPlayerEndTurn, setEnterFloorFn } from './player.js';
 import { endTurn, setPlayerDeathFn } from './turn.js';
 import { initGame, enterFloor } from './game.js';
