@@ -61,16 +61,17 @@ export function makeEnemy(
     skillCd: 0,
     tags: base.tags ? [...base.tags] : [],
     // ① Boss config rides the instance (reference copy — read-only static
-    // data, unlike `skill` which gets a defensive deep copy). bossAtkBase =
-    // post-scale spawn atk; with the .1 boss fs this equals the legacy
-    // origAtk formula bd.atk*(1+(fl-1)*.1).
-    ...(m?.isBoss ? { phases: base.phases, summon: base.summon, bossAtkBase: Math.floor(base.atk * fs * atkM) } : {}),
+    // data, unlike `skill` which gets a defensive deep copy). bossAtkBase is
+    // DELIBERATELY UNFLOORED: processBossPhase computes floor(origAtk * atkM),
+    // so with the .1 boss fs this reproduces the legacy origAtk formula
+    // bd.atk*(1+(fl-1)*.1) bit-exactly on every main-line floor.
+    ...(m?.isBoss ? { phases: base.phases, summon: base.summon, bossAtkBase: base.atk * fs * atkM } : {}),
   };
 }
 
 // ⑥ Deep-floor fallback pick (F55+, where the [floor-4, floor] mf window is
 // empty and uniform `pick` gave F1 rats Void-Titan odds). Weight falls off
-// with distance: w = exp(-(floor - mf)/15) → F60: mf50→0.51, mf42→0.41, mf1→0.02.
+// with distance: w = exp(-(floor - mf)/15) → F60: mf50→0.51, mf42→0.30, mf1→0.02.
 export function pickWeightedByMf<T extends { mf: number }>(
   pool: T[], floor: number, rand: () => number = Math.random,
 ): T | undefined {

@@ -53,7 +53,7 @@ describe('makeEnemy over real game data', () => {
       const out = makeEnemy(b, 5, 5, 1 + (b.fl - 1) * .1, { isBoss: true });
       expect(out.phases).toBe(b.phases);
       expect(out.summon).toBe(b.summon);
-      expect(out.bossAtkBase).toBe(out.atk);
+      expect(out.bossAtkBase).toBeCloseTo(b.atk * (1 + (b.fl - 1) * .1));  // unfloored legacy origAtk formula
     }
   });
 });

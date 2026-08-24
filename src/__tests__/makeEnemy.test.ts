@@ -91,7 +91,7 @@ describe('boss config travels with the instance (① reconnect)', () => {
     const e = makeEnemy(bossBase as any, 1, 1, 1.4, { isBoss: true });
     expect(e.phases).toBe(bossBase.phases);        // 引用拷贝（只读静态配置）
     expect(e.summon).toBe(bossBase.summon);
-    expect(e.bossAtkBase).toBe(e.atk);             // 出生缩放后攻击，等价旧 origAtk 公式
+    expect(e.bossAtkBase).toBeCloseTo(8.4);        // 未取整的出生缩放攻击(6*1.4)，floor 留给 phase 触发时
   });
   it('non-boss carries no boss fields', () => {
     const e = makeEnemy(bossBase as any, 1, 1, 1);
@@ -113,7 +113,7 @@ describe('pickWeightedByMf (⑥ deep-floor fallback)', () => {
   it('high-mf entry wins the large majority of a uniform sweep at F60', () => {
     let deep = 0;
     for (let i = 0; i <= 100; i++) if (pickWeightedByMf(pool, 60, () => i / 100) === pool[2]) deep++;
-    expect(deep).toBeGreaterThanOrEqual(50);   // mf50 share ≈ exp(-10/15)=0.51 vs mf42 0.41 + mf1 0.02
+    expect(deep).toBeGreaterThanOrEqual(50);   // mf50 share ≈ exp(-10/15)=0.51 vs mf42 0.30 + mf1 0.02
   });
   it('degenerate pools: empty -> undefined, single -> itself', () => {
     expect(pickWeightedByMf([], 60, () => 0)).toBeUndefined();
