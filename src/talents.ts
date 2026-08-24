@@ -295,6 +295,10 @@ export function getSkillModifiers(clsIdx: number): SkillModifiers {
   if (tr(p, 'w_titan_strike') > 0) mods.dmgMult += 0.5;
   if (tr(p, 'r_master_assassin') > 0) mods.dmgMult += 0.5;
   if (tr(p, 'p_smite') > 0) mods.dmgMult += 0.4;
+  // ③ Shield Mastery — warrior's only active skill is Shield Bash (case
+  // 'stun'), so a class-scoped dmgMult is exactly "Shield Bash +20%/rank".
+  const smRank = tr(p, 'w_shield_mastery');
+  if (smRank > 0) mods.dmgMult += 0.2 * smRank;
 
   // Skill AOE
   if ((clsIdx === 0 && tr(p, 'w_whirlwind') > 0) || (clsIdx === 1 && tr(p, 'r_fan_knives') > 0)) {

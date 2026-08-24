@@ -9,7 +9,8 @@ vi.mock('../state.js', () => ({
 }));
 vi.mock('../effects.js', () => ({ flt: () => {} }));
 vi.mock('../messages.js', () => ({ addMsg: () => {} }));
-vi.mock('../data.js', () => ({ TALENT_TREES: {} }));
+// data.js NOT mocked — getSkillModifiers reads real talent ids; tr() only
+// touches player.talents.talents so the other tests stay hermetic.
 vi.mock('../utils.js', () => ({ rng: () => 0, dst: () => 1 }));
 vi.mock('../meta.js', () => ({ bonusGold: (g: number) => g, bonusExp: (e: number) => e }));
 vi.mock('../relics.js', () => ({ hasRelic: () => false }));
@@ -20,7 +21,7 @@ vi.mock('../i18n.js', () => ({
 }));
 vi.mock('../combat.js', () => ({ killEnemy: vi.fn() }));
 
-import { onEnemyHitPlayer } from '../talents.js';
+import { onEnemyHitPlayer, getSkillModifiers } from '../talents.js';
 import { killEnemy } from '../combat.js';
 import type { Enemy, Player } from '../types.js';
 
@@ -45,5 +46,16 @@ describe('P0-2 counter-attack kill routes through killEnemy', () => {
     (globalThis as any).G.enemies = [attacker];
     onEnemyHitPlayer(attacker);
     expect(killEnemy).toHaveBeenCalledWith(attacker);
+  });
+});
+
+describe('③ w_shield_mastery consumes into skill dmgMult', () => {
+  it('rank 2 -> dmgMult 1.4', () => {
+    (globalThis as any).G = { player: { talents: { talents: { w_shield_mastery: 2 } } } };
+    expect(getSkillModifiers(0).dmgMult).toBeCloseTo(1.4);
+  });
+  it('rank 0 -> base 1.0', () => {
+    (globalThis as any).G = { player: { talents: { talents: {} } } };
+    expect(getSkillModifiers(0).dmgMult).toBe(1);
   });
 });

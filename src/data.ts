@@ -203,7 +203,7 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Pyro Drake', zh: '烈焰飞龙' }, ch: '¤', c: '#ff6347', hp: 115, atk: 34, def: 12, exp: 95, g: [40, 80], ai: 'ranged', mf: 21, el: 'fire', tags: ['dragon'], skill: { name: { en: 'Pyro Breath', zh: '烈焰龙息' }, effect: 'dmg_aoe', chance: 0.35, cd: 5, dmg: 1.5, aoe: 3, range: 6, el: 'fire' } },
   { n: { en: 'Drake Zealot', zh: '龙血信徒' }, ch: '☧', c: '#8b0000', hp: 95, atk: 30, def: 10, exp: 90, g: [30, 65], ai: 'summon', mf: 22, tags: ['cultist'], skill: { name: { en: 'Frenzy', zh: '狂热' }, effect: 'buff', chance: 0.3, cd: 6, dmg: 6, aoe: 4 } },
   { n: { en: 'Magma Behemoth', zh: '熔岩巨兽' }, ch: '●', c: '#ff4500', hp: 135, atk: 32, def: 16, exp: 100, g: [40, 85], ai: 'chase', mf: 23, el: 'fire', tags: ['elemental'], skill: { name: { en: 'Eruption', zh: '熔岩喷发' }, effect: 'dmg_aoe', chance: 0.35, cd: 5, dmg: 1.5, aoe: 2, range: 2, el: 'fire' } },
-  { n: { en: 'Drakeborn Knight', zh: '龙裔骑士' }, ch: '†', c: '#b22222', hp: 115, atk: 38, def: 14, exp: 110, g: [45, 90], ai: 'chase', mf: 24, tags: ['knight'] },
+  { n: { en: 'Drakeborn Knight', zh: '龙裔骑士' }, ch: '†', c: '#b22222', hp: 115, atk: 38, def: 14, exp: 110, g: [45, 90], ai: 'chase', mf: 24, tags: ['knight'], skill: { name: { en: 'Dragon Bash', zh: '龙裔盾击' }, effect: 'debuff_stun', chance: 0.25, cd: 5, aoe: 1, range: 1 } },
   { n: { en: 'Storm Wraith', zh: '雷霆怨灵' }, ch: '⚡', c: '#4682b4', hp: 100, atk: 36, def: 10, exp: 100, g: [40, 80], ai: 'ranged', mf: 25, el: 'lightning', tags: ['spirit'], skill: { name: { en: 'Storm Burst', zh: '雷霆爆裂' }, effect: 'dmg_aoe', chance: 0.35, cd: 5, dmg: 1.4, aoe: 3, range: 6, el: 'lightning' } },
   // === New: The Abyss (mf 26-30) ===
   { n: { en: 'Abyssal Jellyfish', zh: '深海水母' }, ch: '∞', c: '#00ced1', hp: 70, atk: 20, def: 6, exp: 55, g: [20, 50], ai: 'wander', mf: 26, el: 'ice', tags: ['aquatic'] },
@@ -222,7 +222,7 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Seraphim', zh: '炽天使' }, ch: '☀', c: '#ffd700', hp: 140, atk: 38, def: 16, exp: 110, g: [50, 100], ai: 'chase', mf: 36, el: 'holy', tags: ['seraph'], skill: { name: { en: 'Holy Lance', zh: '圣光矛' }, effect: 'dmg_bolt', chance: 0.35, cd: 5, dmg: 1.8, range: 5, el: 'holy' } },
   { n: { en: 'Fallen Seraph', zh: '堕落炽天使' }, ch: '✝', c: '#8b0000', hp: 150, atk: 42, def: 14, exp: 120, g: [55, 110], ai: 'chase', mf: 37, el: 'shadow', tags: ['seraph', 'undead', 'demon'], skill: { name: { en: 'Fallen Halo', zh: '堕落光晕' }, effect: 'dmg_aoe', chance: 0.35, cd: 5, dmg: 1.5, aoe: 3, range: 4, el: 'shadow' } },
   { n: { en: 'Divine Golem', zh: '神圣魔像' }, ch: '⊕', c: '#c0c0c0', hp: 200, atk: 30, def: 25, exp: 130, g: [40, 90], ai: 'chase', mf: 38, el: 'holy', tags: ['construct'] },
-  { n: { en: 'Cosmic Horror', zh: '宇宙恐怖' }, ch: '∇', c: '#1a0033', hp: 160, atk: 48, def: 12, exp: 150, g: [60, 120], ai: 'erratic', mf: 39, el: 'shadow', tags: ['aberration', 'demon'] },
+  { n: { en: 'Cosmic Horror', zh: '宇宙恐怖' }, ch: '∇', c: '#1a0033', hp: 160, atk: 48, def: 12, exp: 150, g: [60, 120], ai: 'erratic', mf: 39, el: 'shadow', tags: ['aberration', 'demon'], skill: { name: { en: 'Mind Fracture', zh: '心智撕裂' }, effect: 'debuff_stun', chance: 0.25, cd: 5, aoe: 1 } },
   { n: { en: 'Archon', zh: '执政官' }, ch: '♔', c: '#ffffff', hp: 180, atk: 45, def: 18, exp: 160, g: [70, 140], ai: 'ranged', mf: 40, el: 'holy', tags: ['seraph'], skill: { name: { en: 'Holy Beam', zh: '圣光束' }, effect: 'dmg_bolt', chance: 0.4, cd: 5, dmg: 2.0, range: 7, el: 'holy' } },
   // === Wave 6b: 主题敌人填中段辨识度 ===
   { n: { en: 'Cave Beetle', zh: '洞穴甲虫' }, ch: '⬟', c: '#7a5230', hp: 14, atk: 5, def: 4, exp: 8, g: [2, 6], ai: 'ambush', mf: 2, tags: ['insect'] },
@@ -232,7 +232,7 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Fire Imp', zh: '火焰小妖' }, ch: 'æ', c: '#ff7847', hp: 50, atk: 16, def: 5, exp: 38, g: [12, 26], ai: 'erratic', mf: 12, el: 'fire', tags: ['demon'], skill: { name: { en: 'Fire Bolt', zh: '火焰箭' }, effect: 'dmg_bolt', chance: 0.45, cd: 3, dmg: 1.6, range: 5, el: 'fire' } },
   { n: { en: 'Magma Hound', zh: '熔岩犬' }, ch: 'Ð', c: '#b22222', hp: 70, atk: 18, def: 8, exp: 45, g: [15, 30], ai: 'chase', mf: 13, el: 'fire', tags: ['hound'] },
   { n: { en: 'Cinder Wraith', zh: '余烬怨灵' }, ch: '§', c: '#ff6347', hp: 60, atk: 22, def: 6, exp: 50, g: [18, 35], ai: 'phase', mf: 15, el: 'fire', tags: ['spirit'], skill: { name: { en: 'Cinder Burst', zh: '余烬爆裂' }, effect: 'dmg_aoe', chance: 0.35, cd: 5, dmg: 1.4, aoe: 2, range: 3, el: 'fire' } },
-  { n: { en: 'Dread Legionnaire', zh: '恐惧军团兵' }, ch: '☨', c: '#5a5a6a', hp: 110, atk: 30, def: 14, exp: 85, g: [30, 60], ai: 'chase', mf: 18, el: 'shadow', tags: ['knight'] },
+  { n: { en: 'Dread Legionnaire', zh: '恐惧军团兵' }, ch: '☨', c: '#5a5a6a', hp: 110, atk: 30, def: 14, exp: 85, g: [30, 60], ai: 'chase', mf: 18, el: 'shadow', tags: ['knight'], skill: { name: { en: 'Terrifying Slam', zh: '威慑猛击' }, effect: 'debuff_stun', chance: 0.25, cd: 5, aoe: 1, range: 1 } },
   // === Wave 6c: Fungal Hollow branch enemies (mf 0 = branch-only, excluded
   // from main-floor spawns by the mf>=1 filter in spawnEnemies). Stats tuned to
   // ~F8-15 tier; spawnBranchEnemies applies a 0.7x side-content multiplier.

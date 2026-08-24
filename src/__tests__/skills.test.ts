@@ -12,16 +12,18 @@ vi.mock('../messages.js', () => ({ addMsg: () => {} }));
 vi.mock('../combat.js', () => ({
   recalc: () => {}, killEnemy: () => {}, checkLevelUp: () => {}, checkAch: () => {}, checkAchs: () => {},
   playerVictory: () => {}, applyCorruption: () => {}, grantKillRewards: vi.fn(),
+  getElementSymbol: (el: string) => el,   // ③ skills.ts imports it for Elemental Storm flt text
 }));
 vi.mock('../config.js', () => ({ FINAL: 40 }));
 vi.mock('../data.js', () => ({ CLASSES: [] }));
 vi.mock('../meta.js', () => ({ bonusGold: (g: number) => g, bonusExp: (e: number) => e }));
-vi.mock('../talents.js', () => ({ getSkillModifiers: () => ({}), onPlayerKill: () => {}, getSpellPenMult: () => 0 }));
+vi.mock('../talents.js', () => ({ getSkillModifiers: vi.fn(() => ({})), onPlayerKill: () => {}, getSpellPenMult: vi.fn(() => 1) }));
 vi.mock('../relics.js', () => ({ grantRandomRelic: () => {}, relicOnKill: () => {} }));
 vi.mock('../i18n.js', () => ({ t: (k: string) => k, tMsg: (k: string, ...a: string[]) => a.reduce((s: string, x) => s.replace('{}', x), k), tx: (f: { en?: string }) => (f && f.en) || '' }));
 
-import { processAoeKills } from '../skills.js';
+import { processAoeKills, executeSkill } from '../skills.js';
 import { grantKillRewards } from '../combat.js';
+import { getSkillModifiers } from '../talents.js';
 import type { Enemy } from '../types.js';
 
 function mkEnemy(over: Partial<Enemy> = {}): Enemy {
@@ -51,5 +53,30 @@ describe('P1 processAoeKills routes through the single reward pipeline', () => {
     (grantKillRewards as any).mockImplementation(() => { (globalThis as any).G.won = true; });
     processAoeKills([boss, other]);
     expect(grantKillRewards).toHaveBeenCalledTimes(1); // broke after the boss
+  });
+});
+
+describe('③ m_elemental_storm: aoe rides a random element with (1 - res) scaling', () => {
+  it('fire-locked roll halves damage vs a fire-resistant foe, matches combat.attack sign', () => {
+    const spy = vi.spyOn(Math, 'random').mockReturnValue(0);   // element idx 0 = fire; no other rolls in this path
+    vi.mocked(getSkillModifiers).mockReturnValue({
+      dmgMult: 1, forceCrit: false, aoe: false, chainCount: 0, radiusBonus: 0,
+      halfCd: false, alsoFear: false, alsoStun: false, alsoHolyDmg: false,
+      alsoHeal: false, alsoSlow: false, alsoBlind: false, randomElement: true,
+    } as any);
+    (globalThis as any).G = {
+      floor: 5, won: false,
+      player: { x: 0, y: 0, ci: 1, mp: 100, maxMp: 100, skillCd: 0, stunned: 0,
+        atk: 10, level: 3, spellPower: 1, exp: 0, gold: 0, kills: 0 },
+      enemies: [
+        { name: 'Neutral', x: 1, y: 0, hp: 100, maxHp: 100, isAlly: false, res: {} },
+        { name: 'FireWard', x: 0, y: 1, hp: 100, maxHp: 100, isAlly: false, res: { fire: 0.5 } },
+      ],
+    };
+    executeSkill({ cost: 5, effect: 'aoe', cd: 3 });
+    // base = (10 + 3*3) * 1 * 1 * 1 = 19; res .5 -> floor(19*.5) = 9
+    expect((globalThis as any).G.enemies[0].hp).toBe(81);
+    expect((globalThis as any).G.enemies[1].hp).toBe(91);
+    spy.mockRestore();
   });
 });

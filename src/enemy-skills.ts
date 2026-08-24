@@ -10,7 +10,8 @@ import { flt, shake } from './effects.js';
 import { snd } from './audio.js';
 import { makeEnemy } from './enemy-factory.js';
 import { ENEMIES } from './data.js';
-import { tMsg } from './i18n.js';
+import { isCCImmune } from './talents.js';
+import { t, tMsg } from './i18n.js';
 
 // Pure decision — extracted so it is unit-testable without G/enemies.
 export function shouldCastSkill(e: Enemy, dist: number, visible: boolean, playerInvis: boolean): boolean {
@@ -116,7 +117,9 @@ function castDebuff(caster: Enemy, sk: EnemySkill, kind: 'poison' | 'slow' | 'we
     p.buffs.push({ name: 'weakened', type: 'str_buff', value: -(sk.dmg ?? 6), turns });
     fxFlash(p.x, p.y, '#b583f6');
   } else { // stun
-    // v1: no caster uses the 'stun' kind yet (see spec §7 follow-ups); kept complete per spec §2.2 deliverable.
+    // ③ Sanctuary (paladin capstone-adjacent talent) makes the player immune
+    // to CC — the first live consumers are the 3 debuff_stun casters (audit #3).
+    if (isCCImmune()) { addMsg(t('esk.stunImmune'), 'mi'); return; }
     p.stunned = Math.min(2, Math.max(p.stunned ?? 0, turns));
     fxFlash(p.x, p.y, '#fff2a8'); shake(1);
   }

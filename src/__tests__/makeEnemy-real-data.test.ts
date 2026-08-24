@@ -43,9 +43,10 @@ describe('makeEnemy over real game data', () => {
       expect(e.skill!.effect).toBe(def.skill!.effect);
       expect(e.skill!.cd).toBe(def.skill!.cd);
     }
-    // Guard: if all 25 caster skills were silently dropped from data, this would
+    // Guard: if all caster skills were silently dropped from data, this would
     // loop zero times and pass vacuously — assert we actually exercised them.
-    expect(checked).toBe(25);
+    // 25 original casters + 3 stun casters added by ③ (audit #3) = 28.
+    expect(checked).toBe(28);
   });
 
   it('every BossDef with phases/summon surfaces them on the built instance (①)', () => {
@@ -55,5 +56,10 @@ describe('makeEnemy over real game data', () => {
       expect(out.summon).toBe(b.summon);
       expect(out.bossAtkBase).toBeCloseTo(b.atk * (1 + (b.fl - 1) * .1));  // unfloored legacy origAtk formula
     }
+  });
+
+  it('③ exactly 3 enemies carry debuff_stun (CC online, conservative)', () => {
+    const stunCasters = ENEMIES.filter(e => e.skill?.effect === 'debuff_stun');
+    expect(stunCasters.map(e => e.n.en).sort()).toEqual(['Cosmic Horror', 'Drakeborn Knight', 'Dread Legionnaire']);
   });
 });

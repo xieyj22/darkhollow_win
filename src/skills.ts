@@ -1,12 +1,12 @@
 // Skill system
-import type { Enemy } from './types.js';
+import type { Enemy, Element } from './types.js';
 import { G, lang } from './state.js';
 import { dst, rng } from './utils.js';
 import { snd } from './audio.js';
 import { flt, shake } from './effects.js';
 import { fxFlash, fxBolt, fxBeam, fxBurst } from './fx.js';
 import { addMsg } from './messages.js';
-import { killEnemy, checkLevelUp, checkAchs, grantKillRewards, applyCorruption } from './combat.js';
+import { killEnemy, checkLevelUp, checkAchs, grantKillRewards, applyCorruption, getElementSymbol } from './combat.js';
 import { FINAL } from './config.js';
 import { CLASSES } from './data.js';
 import { bonusGold, bonusExp } from './meta.js';
@@ -15,6 +15,9 @@ import { t, tMsg, tx } from './i18n.js';
 
 let _endTurn: (() => void) | null = null;
 export function setEndTurnFn(fn: () => void): void { _endTurn = fn; }
+
+// ③ Elemental Storm per-roll element colors (mirrors enemy-skills.ts EL_COLOR).
+const EL_COLOR: Record<string, string> = { fire: '#ff7a45', ice: '#7ec8e3', lightning: '#fff2a8', shadow: '#b583f6' };
 
 // Process AOE kills: route each through the single reward pipeline so they get the
 // SAME treatment as melee (relic gold/xp mults, streak, warden rewards, boss lore
@@ -131,11 +134,23 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
       fxFlash(p.x, p.y, '#7ec8e3', 2.2);
       const baseRadius = 5 + mods.radiusBonus;
       const spellPen = getSpellPenMult();
+      // ③ Elemental Storm — the blast rides a random element; each foe's
+      // resistance rescales damage with combat.attack's exact shape:
+      // (1 - res), positive res cuts, negative (vulnerability) boosts.
+      let el: Element = 'none';
+      let elColor = '#4895ef';
+      if (mods.randomElement) {
+        const RND_EL: Element[] = ['fire', 'ice', 'lightning', 'shadow'];
+        el = RND_EL[Math.floor(Math.random() * RND_EL.length)];
+        elColor = EL_COLOR[el] ?? elColor;
+      }
+      const sym = el !== 'none' ? getElementSymbol(el) : '';
       const enemies = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= baseRadius);
       const killed: Enemy[] = [];
       for (const e of enemies) {
-        let dmg = Math.floor((p.atk + p.level * 3) * p.spellPower * mods.dmgMult * spellPen);
-        e.hp -= dmg; fxFlash(e.x, e.y, '#4895ef'); flt(e.x, e.y, `-${dmg}`, '#4895ef');
+        const resMult = el !== 'none' ? (1 - (e.res?.[el] ?? 0)) : 1;
+        const dmg = Math.floor((p.atk + p.level * 3) * p.spellPower * mods.dmgMult * spellPen * resMult);
+        e.hp -= dmg; fxFlash(e.x, e.y, elColor); flt(e.x, e.y, `-${dmg}${sym}`, elColor);
         if (e.hp <= 0) killed.push(e);
         if (mods.alsoSlow) {
           // Slow effect — reduce enemy effectiveness (simplified as losing next turn)

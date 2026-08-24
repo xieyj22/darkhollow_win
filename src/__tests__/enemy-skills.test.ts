@@ -199,3 +199,16 @@ describe('executeEnemySkill — heal target faction (P1-6)', () => {
     expect(summon.hp).toBe(5);             // player's summon untouched
   });
 });
+
+describe('executeEnemySkill — ③ player CC meets Sanctuary', () => {
+  it('③ debuff_stun: Sanctuary (isCCImmune) blocks the stun', () => {
+    (globalThis as { G?: unknown }).G = {
+      player: { ...minimalPlayer, talents: { talents: { p_sanctuary: 1 }, points: 0 }, stunned: 0 },
+      enemies: [],
+      gameOver: false,
+    };
+    const e = mk({ x: 1, y: 0 });
+    executeEnemySkill(e, { name: { en: 'Z', zh: 'Z' }, effect: 'debuff_stun', chance: 1, cd: 1, aoe: 2 });
+    expect(G().player.stunned ?? 0).toBe(0);   // blocked by the immunity guard
+  });
+});
