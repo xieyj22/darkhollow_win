@@ -393,8 +393,8 @@ export function applyCorruption(n: number): void {
   }
 }
 
-// 100 corruption → run ends; you become the next Warden. (Phase 1: just ends run;
-// Phase 3 will persist you as a legacy/warden entity.)
+// 100 corruption → run ends; you become the next Warden.
+// (recordWardenLegacy persists the run as a warden entity.)
 function wardenDeath(): void {
   if (!G) return;
   const p = G.player;

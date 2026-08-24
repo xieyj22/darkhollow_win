@@ -166,8 +166,7 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
 // --- Portal branch biome ("Fungal Hollow") ---
 // A self-contained branch entered via a PORTAL tile on a main floor and exited
 // via another PORTAL in the branch's last room. branchMode/branchReturn track
-// the round-trip. Both resolve the Task-2 fungal area / branch enemy pool at
-// call time; until Task 2 lands, enterBranch no-ops (no 'fungal' area found).
+// the round-trip. Both resolve the fungal area / branch enemy pool at call time.
 export function enterBranch(): void {
   if (!G) return;
   const fungal = AREAS.find(a => a.id === 'fungal');

@@ -77,8 +77,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
 }
 
 // Branch-biome enemy spawn (portal "Fungal Hollow"). Pulls only enemies
-// tagged mf===0 and the fl===0 mini-boss (Task 2 data). Until Task 2 lands,
-// both filters come up empty and this returns [] — no branch enemies spawn.
+// tagged mf===0 and the fl===0 mini-boss.
 // Mini-boss is a STATIC isBoss (no phases/summon) so it does NOT couple to
 // G.floor via processBossPhase (the branch keeps G.floor = main floor).
 export function spawnBranchEnemies(rooms: Room[], entryFloor: number): Enemy[] {

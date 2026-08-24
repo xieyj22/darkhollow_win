@@ -782,11 +782,11 @@ export const TEMPLATES: Record<string, Template> = {
   ],
   I_CROWN: [
     "................",
-    ".......K........",
-    "......KMK.......",
-    ".....KMMMK......",
-    "...K.......K....",
-    "...KK.....KK....",
+    ".......KK.......",
+    "......KMMK......",
+    ".....KMMMMK.....",
+    "...K........K...",
+    "...KK......KK...",
     "....KKKKKKKK....",
     "..KKKKKKKKKKKK..",
     "..KWWGGGGGGWWK..",
@@ -1060,7 +1060,7 @@ export const TEMPLATES: Record<string, Template> = {
     "................",
     ".......KK.......",
     "......K..K......",
-    ".....DMMMM K....",   // fuse top
+    ".....DMMMMMK....",   // fuse top (hole filled — space wasn't a palette color)
     "...DDMMMMMMD....",
     "..DMMMMMMMMMD...",
     "..DMMMMMMMMMD...",
