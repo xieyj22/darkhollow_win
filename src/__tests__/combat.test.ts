@@ -125,9 +125,18 @@ describe('P0-4 corruption_ward negates +1 sources', () => {
   it('wardMult 0.5 + random 0 → a +1 source is negated (not ceil\'d back up to 1)', () => {
     const spy = vi.spyOn(Math, 'random').mockReturnValue(0);
     const G = (globalThis as any).G;
+    G.endless = true;   // ⑦ ward is an endless meta upgrade
     G.player.corruption = 10;
     applyCorruption(1);
     expect(G.player.corruption).toBe(10); // n reduced to 0 by the ward
+    spy.mockRestore();
+  });
+
+  it('⑦ normal mode ignores corruption_ward entirely (endless-gated)', () => {
+    const spy = vi.spyOn(Math, 'random').mockReturnValue(0);  // would always pass the 0.5 gate
+    const G = (globalThis as any).G;
+    applyCorruption(1);
+    expect(G.player.corruption).toBe(11);   // ward NOT applied — endless false
     spy.mockRestore();
   });
 });

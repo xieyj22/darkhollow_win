@@ -376,11 +376,12 @@ export function applyCorruption(n: number): void {
   if (hasRelic('eternal_sand') && n > 0) {
     n = n === 1 ? (Math.random() < 0.5 ? 0 : 1) : Math.ceil(n / 2);
   }
-  // Task 4: corruption_ward meta multiplies (same n>0 gate — never amplify cleanse).
+  // Task 4: corruption_ward (endless meta upgrade — ⑦ gated to G.endless so
+  // normal runs are untouched) multiplies (same n>0 gate — never amplify cleanse).
   // Probabilistic gate, not Math.ceil: ceil(1*mult) always rounds back to 1 for
   // the n=1 sources, which made this meta upgrade a no-op. Each +1 now has
   // (1-mult) chance to be negated entirely — expected reduction = n*(1-mult).
-  if (n > 0 && Math.random() < (1 - corruptionWardMult())) n -= 1;
+  if (G.endless && n > 0 && Math.random() < (1 - corruptionWardMult())) n -= 1;
   const r = addCorruption(p, n);
   if (r.maxed) { wardenDeath(); return; }
   if (r.crossed && r.after !== 'clean') {
