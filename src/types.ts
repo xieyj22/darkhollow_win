@@ -222,6 +222,9 @@ export interface BossDef {
   g: [number, number];
   fl: number;
   el?: Element;
+  // Batch2 ②: boss active skill — cast through the shared enemy-skill dispatch.
+  // Priority gate in actEnemies lets bosses cast even at melee range.
+  skill?: EnemySkill;
   phases?: Array<{
     hpThreshold: number;
     atkM: number;

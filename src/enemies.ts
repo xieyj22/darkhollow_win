@@ -196,6 +196,18 @@ export function processEnemies(): void {
       const dy = e.y > G.player.y ? 1 : e.y < G.player.y ? -1 : 0;
       tryMove(e, dx, dy); continue;
     }
+    // Batch2 ②: bosses cast even at melee range — without this priority gate
+    // the melee branch `continue`s every adjacent turn and chase bosses never cast.
+    if (e.isBoss && e.skill && e.skillCd <= 0) {
+      const bVis = !!G.player.visible?.[e.y]?.[e.x];
+      if (shouldCastSkill(e, d, bVis, playerInvis)) {
+        executeEnemySkill(e, e.skill);
+        e.skillCd = e.skill.cd;
+        if (G.gameOver) return;
+        continue;
+      }
+    }
+
     // Melee attack still works even when invisible (enemy is adjacent)
     if (d <= 1.5) { attack(e, G.player, false); if (G.gameOver) return; continue; }
 

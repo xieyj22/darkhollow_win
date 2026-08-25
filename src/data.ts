@@ -256,42 +256,51 @@ export const ENEMIES: EnemyDef[] = [
 
 export const BOSSES: BossDef[] = [
   { n: { en: 'Goblin King', zh: '哥布林王' }, ch: '♚', c: '#ffd700', hp: 60, atk: 10, def: 4, exp: 100, g: [50, 80], fl: 5,
+    skill: { name: { en: 'King\'s Menace', zh: '王之威吓' }, effect: 'debuff_weaken', chance: 0.3, cd: 4, range: 5, dmg: 6 },
     summon: { chance: 0.4, cd: 3, maxAdds: 2, kind: 'Goblin' },
     phases: [{ hpThreshold: 0.4, atkM: 1.4, newAi: 'chase' }] },
   { n: { en: 'Spider Queen', zh: '蜘蛛女王' }, ch: '♛', c: '#8a2be2', hp: 90, atk: 14, def: 6, exp: 180, g: [70, 120], fl: 10,
+    skill: { name: { en: 'Web Snare', zh: '蛛网束缚' }, effect: 'debuff_slow', chance: 0.35, cd: 4, range: 5, aoe: 3 },
     summon: { chance: 0.4, cd: 3, maxAdds: 2, kind: 'Spider' },
     phases: [{ hpThreshold: 0.5, atkM: 1.3, newAi: 'ambush' }] },
   { n: { en: 'Vampire Lord', zh: '吸血鬼领主' }, ch: '▼', c: '#dc143c', hp: 120, atk: 18, def: 8, exp: 280, g: [100, 180], fl: 15, el: 'shadow',
+    skill: { name: { en: 'Shadow Bolt', zh: '暗影箭' }, effect: 'dmg_bolt', chance: 0.3, cd: 4, range: 6, dmg: 1.6, el: 'shadow' },
     summon: { chance: 0.5, cd: 3, maxAdds: 4, kind: 'Vampire' },
     phases: [{ hpThreshold: 0.5, atkM: 1.3, newAi: 'lifesteal' }] },
   { n: { en: 'Elder Lich', zh: '远古巫妖' }, ch: '☯', c: '#9932cc', hp: 150, atk: 22, def: 10, exp: 400, g: [150, 250], fl: 20,
+    skill: { name: { en: 'Necrotic Burst', zh: '死灵爆发' }, effect: 'dmg_aoe', chance: 0.3, cd: 5, range: 6, dmg: 1.3, aoe: 2 },
     summon: { chance: 0.4, cd: 3, maxAdds: 3, kind: 'Skeleton' },
     phases: [{ hpThreshold: 0.5, atkM: 1.4, newAi: 'ranged' }] },
   { n: { en: 'Dragon Emperor', zh: '龙皇' }, ch: '♜', c: '#ff8c00', hp: 200, atk: 28, def: 14, exp: 600, g: [250, 500], fl: 25, el: 'fire',
+    skill: { name: { en: 'Dragon Breath', zh: '龙息' }, effect: 'dmg_bolt', chance: 0.35, cd: 4, range: 6, dmg: 1.7, el: 'fire' },
     summon: { chance: 0.35, cd: 4, maxAdds: 2, kind: 'Dragon Whelp' },
     phases: [{ hpThreshold: 0.3, atkM: 1.6, newAi: 'chase', newEl: 'fire' }] },
   // === New bosses ===
   { n: { en: 'Leviathan', zh: '利维坦' }, ch: '≈', c: '#00ced1', hp: 280, atk: 35, def: 14, exp: 800, g: [200, 400], fl: 30, el: 'ice',
+    skill: { name: { en: 'Abyssal Call', zh: '深渊呼唤' }, effect: 'summon', chance: 0.3, cd: 6, range: 6 },
     phases: [
       { hpThreshold: 0.5, atkM: 1.5, newAi: 'chase' },
     ] },
   { n: { en: 'Void Sovereign', zh: '虚空君主' }, ch: '◈', c: '#9400d3', hp: 400, atk: 45, def: 18, exp: 1200, g: [300, 600], fl: 35, el: 'shadow',
+    skill: { name: { en: 'Void Solidify', zh: '虚空凝固' }, effect: 'debuff_stun', chance: 0.3, cd: 6, range: 5, aoe: 1 },
     phases: [
       { hpThreshold: 0.3, atkM: 2, newAi: 'chase', newEl: 'shadow' },
     ],
     summon: { chance: 0.45, cd: 3, maxAdds: 3, kind: 'Void Wraith' } },
   { n: { en: 'The Creator', zh: '创世者' }, ch: 'Ω', c: '#ffffff', hp: 600, atk: 55, def: 22, exp: 2000, g: [500, 1000], fl: 40, el: 'holy',
+    skill: { name: { en: 'Reconstruction', zh: '重构' }, effect: 'heal', chance: 0.25, cd: 8, range: 9, dmg: 1.5 },
     phases: [
       { hpThreshold: 0.6, atkM: 1.4 },
       { hpThreshold: 0.25, atkM: 2, newAi: 'chase' },
     ],
-    summon: { chance: 0.5, cd: 3, maxAdds: 4 } },
+    summon: { chance: 0.5, cd: 3, maxAdds: 4, kind: 'Seraphim' } },
   // === Wave 6c: Fungal Hollow mini-boss (fl 0 = branch-only, never resolves via
   // the main-line BOSSES.find(fl===floor) lookup). Static — no phases/summon —
   // and processBossPhase early-returns when G.branchMode, so it stays a simple
   // tank. Bosses always render via the BOSS template (drawBossSprite), so no
   // tag is needed for sprite routing.
-  { n: { en: 'Myconid Sovereign', zh: '菌主' }, ch: '♫', c: '#9370db', hp: 150, atk: 24, def: 10, exp: 300, g: [100, 200], fl: 0, el: 'shadow' },
+  { n: { en: 'Myconid Sovereign', zh: '菌主' }, ch: '♫', c: '#9370db', hp: 150, atk: 24, def: 10, exp: 300, g: [100, 200], fl: 0, el: 'shadow',
+    skill: { name: { en: 'Mycelial Boon', zh: '菌丝回哺' }, effect: 'heal', chance: 0.3, cd: 5, range: 6, dmg: 1 } },
 ];
 
 export const ACH_DEFS: AchievementDef[] = [
