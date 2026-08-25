@@ -379,6 +379,12 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "it.teleported": { en: "Teleported!", zh: "传送！" },
   "it.mapRevealed": { en: "Map revealed!", zh: "地图已揭示！" },
   "it.magicShield": { en: "Magic Shield", zh: "魔法盾" },
+  // Batch2 ⑤: formerly hardcoded buff-gain / level-up stat lines.
+  "it.atkGain": { en: "+{} ATK for {} turns", zh: "攻击+{}，持续{}回合" },
+  "it.defGain": { en: "+{} DEF for {} turns", zh: "防御+{}，持续{}回合" },
+  "it.shieldGain": { en: "+{} DEF (shield) for {} turns", zh: "防御+{}（护盾），持续{}回合" },
+  "cb.levelStats": { en: "+{}HP +{}MP +{}ATK +{}DEF", zh: "生命+{} 法力+{} 攻击+{} 防御+{}" },
+  "buff.nullCrown": { en: "Null Crown's Gift", zh: "虚无之冕的馈赠" },
   "it.fearHit": { en: "{} enemies flee!", zh: "{}个敌人被恐惧！" },
   "it.blizzardHit": { en: "Blizzard! Hit {}, killed {}!", zh: "暴风雪！命中{}个，击杀{}个！" },
   "it.holyBlastHit": { en: "Holy blast! Hit {}, killed {}!", zh: "圣光！命中{}个，击杀{}个！" },

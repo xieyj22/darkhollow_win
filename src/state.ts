@@ -43,7 +43,10 @@ export function setEventActions(a: Array<() => void>) { eventActions = a; }
 
 // Language
 export let lang: string = localStorage.getItem('dh_lang') || 'en';
-export function setLang(l: string) { lang = l; localStorage.setItem('dh_lang', l); }
+// Batch2 ⑤: keep <html lang> in sync so screen readers / font shaping follow
+// the in-game language switch (index.html ships lang="en").
+document.documentElement.lang = lang;
+export function setLang(l: string) { lang = l; localStorage.setItem('dh_lang', l); document.documentElement.lang = l; }
 
 // Audio
 // NOTE: the muted/setMuted mirror used to live here (a duplicate of audio.ts's

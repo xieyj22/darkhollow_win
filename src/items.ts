@@ -43,8 +43,8 @@ export function useItem(idx: number): void {
     switch (item.ef) {
       case 'heal': { const raw = Math.floor((item.val || 0) * (1 + (p.healBonus || 0))); const h = Math.min(raw, p.maxHp - p.hp); p.hp += h; addMsg(tMsg('it.healed', String(h)), 'mh'); fxFlash(p.x, p.y, '#80ed99'); flt(p.x, p.y, `+${h}`, '#80ed99'); snd('heal'); break; }
       case 'mana': { const h = Math.min(item.val || 0, p.maxMp - p.mp); p.mp += h; addMsg(tMsg('it.restoredMp', String(h)), 'mh'); fxFlash(p.x, p.y, '#4895ef'); flt(p.x, p.y, `+${h}MP`, '#4895ef'); snd('heal'); break; }
-      case 'str_buff': p.buffs.push({ name: t('it.strengthBuff'), type: 'str_buff', value: item.val || 0, turns: item.dur || 30 }); addMsg(`+${item.val} ATK ${item.dur}t`, 'mi'); fxAura(p.x, p.y, '#ff6b6b'); break;
-      case 'def_buff': p.buffs.push({ name: t('it.ironSkin'), type: 'def_buff', value: item.val || 0, turns: item.dur || 30 }); addMsg(`+${item.val} DEF ${item.dur}t`, 'mi'); fxAura(p.x, p.y, '#8d99ae'); break;
+      case 'str_buff': p.buffs.push({ name: t('it.strengthBuff'), type: 'str_buff', value: item.val || 0, turns: item.dur || 30 }); addMsg(tMsg('it.atkGain', String(item.val || 0), String(item.dur || 30)), 'mi'); fxAura(p.x, p.y, '#ff6b6b'); break;
+      case 'def_buff': p.buffs.push({ name: t('it.ironSkin'), type: 'def_buff', value: item.val || 0, turns: item.dur || 30 }); addMsg(tMsg('it.defGain', String(item.val || 0), String(item.dur || 30)), 'mi'); fxAura(p.x, p.y, '#8d99ae'); break;
       case 'restore': p.hp = p.maxHp; p.mp = p.maxMp; addMsg(t('it.fullyRestored'), 'mh'); flt(p.x, p.y, 'FULL', '#ffd700'); snd('heal'); break;
       case 'poison': p.hp -= item.val || 0; addMsg(tMsg('it.poisonHit', String(item.val)), 'mc'); flt(p.x, p.y, `-${item.val}`, '#32cd32'); snd('trap'); if (p.hp <= 0) playerDeath(t('it.poisonCause')); break;
       case 'el_res_fire': p.buffs.push({ name: t('it.fireResist'), type: 'el_res_fire', value: item.val || 50, turns: item.dur || 30 }); addMsg(t('it.fireResistUp'), 'mi'); fxAura(p.x, p.y, '#ff7a45'); break;
@@ -84,7 +84,7 @@ export function useItem(idx: number): void {
         break;
       }
       case 'mapping': for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) p.explored[y][x] = true; fxAura(p.x, p.y, '#ffd700', 2); addMsg(t('it.mapRevealed'), 'mi'); break;
-      case 'shield': p.buffs.push({ name: t('it.magicShield'), type: 'shield', value: item.val || 0, turns: item.dur || 30 }); addMsg(`+${item.val} DEF ${item.dur}t`, 'mi'); fxAura(p.x, p.y, '#4895ef'); break;
+      case 'shield': p.buffs.push({ name: t('it.magicShield'), type: 'shield', value: item.val || 0, turns: item.dur || 30 }); addMsg(tMsg('it.shieldGain', String(item.val || 0), String(item.dur || 30)), 'mi'); fxAura(p.x, p.y, '#4895ef'); break;
       case 'fear': { const nb = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 5); nb.forEach(e => { e.feared = rng(5, 10); fxBurst(e.x, e.y, '#6a3a8a', 10); }); addMsg(tMsg('it.fearHit', String(nb.length)), 'mi'); break; }
       case 'blizzard': {
         let k = 0;

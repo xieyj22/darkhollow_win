@@ -247,7 +247,7 @@ export function checkLevelUp(): void {
     p.talents.points++;
     recalc();
     addMsg(tMsg('cb.levelUp', String(p.level)), 'ml');
-    addMsg(`+${hg}HP +${mg}MP +${ag}ATK +${dg}DEF`, 'ml');
+    addMsg(tMsg('cb.levelStats', String(hg), String(mg), String(ag), String(dg)), 'ml');
     flt(p.x, p.y, 'LEVEL UP!', '#ffd700'); snd('levelup'); checkAchs();
   }
 }

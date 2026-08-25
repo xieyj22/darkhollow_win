@@ -86,7 +86,7 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     // Gold piles
     for (let i = 0; i < rng(3, 7); i++) {
       const rm = pick(G!.dungeon.rooms);
-      G!.items.push({ type: 'gold', name: 'Gold', value: rng(5, 15) + floor * 3, ch: '$', c: '#ffd700', x: rng(rm.x + 1, rm.x + rm.w - 2), y: rng(rm.y + 1, rm.y + rm.h - 2), rarity: 0, desc: '' });
+      G!.items.push({ type: 'gold', name: t('gold'), value: rng(5, 15) + floor * 3, ch: '$', c: '#ffd700', x: rng(rm.x + 1, rm.x + rm.w - 2), y: rng(rm.y + 1, rm.y + rm.h - 2), rarity: 0, desc: '' });
     }
 
     // Food drops
@@ -155,7 +155,7 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     if (G!.endless && G!.floor >= 41 && hasRelic('null_crown')) {
       const kinds = [['str_buff', 5], ['def_buff', 5], ['shield', 5]] as const;
       const k = kinds[Math.floor(Math.random() * kinds.length)];
-      G!.player.buffs.push({ name: 'null_crown', type: k[0], value: k[1], turns: 3 });
+      G!.player.buffs.push({ name: t('buff.nullCrown'), type: k[0], value: k[1], turns: 3 });
     }
 
     updatePlayerFOV(G!.player, G!.dungeon.map, G!.traps);
@@ -212,7 +212,7 @@ export function enterBranch(): void {
   rit.rarity = Math.max(3, Math.min(4, rit.rarity));
   rit.x = last.cx; rit.y = last.cy;
   G.items.push(rit);
-  G.items.push({ type: 'gold', name: 'Gold', value: 200 + entry * 15, ch: '$', c: '#ffd700', x: last.cx, y: last.cy, rarity: 0, desc: '' });
+  G.items.push({ type: 'gold', name: t('gold'), value: 200 + entry * 15, ch: '$', c: '#ffd700', x: last.cx, y: last.cy, rarity: 0, desc: '' });
   G.dungeon.map[last.cy][last.cx] = TL.PORTAL;
   addMsg(t('gm.fungalHollow'), 'md');
   updatePlayerFOV(G.player, G.dungeon.map, G.traps);

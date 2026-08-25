@@ -279,7 +279,7 @@ describe('null_crown (enterFloor)', () => {
     enterFloor(41, true); // skipFade → synchronous setup()
     const buffs = (globalThis as any).G.player.buffs;
     expect(buffs.length).toBe(1);
-    expect(buffs[0].name).toBe('null_crown');
+    expect(buffs[0].name).toBe('buff.nullCrown'); // batch2 ⑤: buff name now an i18n key (t is identity-mocked here)
     expect(buffs[0].turns).toBe(3);
     expect(buffs[0].value).toBe(5);
     expect(['str_buff', 'def_buff', 'shield']).toContain(buffs[0].type);
