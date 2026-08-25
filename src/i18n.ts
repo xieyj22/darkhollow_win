@@ -637,9 +637,16 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "intro.type.scroll": { en: "Scroll", zh: "卷轴" },
   "intro.type.consumable": { en: "Consumable", zh: "消耗品" },
   "intro.type.food": { en: "Food", zh: "食物" },
+  "intro.mcCorruptionTitle": { en: "Corruption", zh: "腐化" },
+  "intro.mcCorruptionBody": { en: "Shadow damage and dark bargains raise your Corruption. Higher tiers empower your spells but twist your body — at 100 you become the next Warden. Fountains, shrines and certain wares can cleanse it. Your ending depends on where you stand.", zh: "暗影伤害与黑暗交易会累积腐化。腐化档位越高，法术越强，但身体也愈发扭曲——到 100 你将成为下一任守渊人。喷泉、神龛与某些商品可以净化腐化。你的结局取决于你身处何方。" },
+  "intro.mcWardenTitle": { en: "The Warden", zh: "守渊人" },
+  "intro.mcWardenBody": { en: "A nemesis that stalks you every 6-9 floors. Fight it for relics and lost memories — or descend and leave it behind. Descenders who succumb to corruption join its ranks.", zh: "每 6-9 层追猎你一次的天敌。击败它可获得圣物与失落的记忆——或者干脆下楼甩开它。被腐化吞噬的下潜者会加入它的行列。" },
+  "intro.mcFungalTitle": { en: "The Fungal Hollow", zh: "荧光菌穴" },
+  "intro.mcFungalBody": { en: "A glowing side-pocket of the Depths, entered through portals on floors 11-20. Weaker foes, but a high-rarity reward and gold guard the exit portal. Step on the return portal to go back to where you entered.", zh: "暗渊的荧光侧袋，经由 11-20 层的传送门进入。敌人较弱，但出口传送门前守着高稀有度奖励与金币。踏上归返传送门即可回到入口位置。" },
   "codex.tabLore": { en: "Lore", zh: "剧情" },
   "codex.tabItems": { en: "Items", zh: "道具" },
   "codex.itemLocked": { en: "🔒 ??? Not yet discovered", zh: "🔒 尚未发现" },
+  "codex.updated": { en: "📜 Codex updated.", zh: "📜 典籍已更新。" },
 };
 
 export function t(key: string): string {

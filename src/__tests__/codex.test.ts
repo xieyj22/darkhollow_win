@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('../data.js', () => ({ META_UPGRADES: [], ACH_DEFS: [], RELICS: [] }));
 vi.mock('../audio.js', () => ({ snd: () => {} }));
 vi.mock('../state.js', () => ({ lang: 'en' }));
+// batch2 ④: unlockLore now logs the codex update via messages.addMsg.
+vi.mock('../messages.js', () => ({ addMsg: () => {} }));
 
 import { initMeta, getMeta, unlockLore } from '../meta.js';
 import { LORE_ENTRIES, LORE_CATS } from '../lore.js';

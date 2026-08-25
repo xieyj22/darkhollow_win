@@ -14,6 +14,7 @@ import { setEnemyTween } from './render.js';
 import { makeEnemy, pickWeightedByMf } from './enemy-factory.js';
 import { wardenStats } from './warden.js';
 import { shouldCastSkill, executeEnemySkill } from './enemy-skills.js';
+import { queueMechanicIntro } from './item-intro.js';
 
 // Endless F45+ boss reuse pool — excludes the fl:0 branch mini-boss
 // (Myconid Sovereign: no phases/summon, wrong tier for endless).
@@ -131,6 +132,7 @@ export function spawnWarden(floor: number): void {
   unlockLore('warden:encounter');
   addMsg(t('em.wardenHunting'), 'me');
   flt(G.player.x, G.player.y, '⚠WARDEN', '#9a2be2'); snd('boss'); shake();
+  queueMechanicIntro('warden');
 }
 
 // Boss phase check — call after boss takes damage

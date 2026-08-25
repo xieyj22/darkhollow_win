@@ -41,6 +41,9 @@ vi.mock('../warden.js', () => ({
   pickWardenRelic: (owned: string[]) => owned.length === 0 ? 'warden_cloak' : null,
   nextWardenMemory: (u: string[]) => u.includes('warden:memory3') ? null : 'warden:memory1',
   wardenMemoryText: () => ({ en: 'mem', zh: '记忆' }),
+  // batch2 ④: combat → item-intro → ui-panels → lore reads WARDEN_MEMORIES
+  // at module load; provide an empty array so the mock satisfies it.
+  WARDEN_MEMORIES: [],
 }));
 vi.mock('../relics.js', () => ({
   getRelicExpMult: () => 1.5,

@@ -3,7 +3,7 @@
 // get their own card. Discovered keys persist跨局 in MetaSave.discoveredItems.
 import type { Item, ItemType } from './types.js';
 import { introOpen, setIntroOpen, introEnabled } from './state.js';
-import { discoverItem } from './meta.js';
+import { discoverItem, discoverMechanic } from './meta.js';
 import { showOverlay, hideOverlay } from './ui-panels.js';
 import { t, tx, rareName, RARITY_C } from './i18n.js';
 import { paintItemIcon, paintRelicIcon } from './sprites.js';
@@ -12,8 +12,15 @@ import {
   ALL_CONSUMABLES, FOODS, ENDLESS_GEAR, RELICS,
 } from './data.js';
 
-type IntroTarget = { kind: 'item'; item: Item } | { kind: 'relic'; id: string };
+type IntroTarget = { kind: 'item'; item: Item } | { kind: 'relic'; id: string } | { kind: 'mechanic'; id: string };
 const queue: IntroTarget[] = [];
+
+// Batch2 ④: first-encounter mechanic tutorials (corruption/warden/fungal).
+const MECHANIC_CARDS: Record<string, { sym: string; col: string; tk: string; bk: string }> = {
+  corruption: { sym: '🟪', col: '#b583f6', tk: 'intro.mcCorruptionTitle', bk: 'intro.mcCorruptionBody' },
+  warden:     { sym: '👁', col: '#9a2be2', tk: 'intro.mcWardenTitle',     bk: 'intro.mcWardenBody' },
+  fungal:     { sym: '🍄', col: '#06d6a0', tk: 'intro.mcFungalTitle',     bk: 'intro.mcFungalBody' },
+};
 
 // Reverse-lookup a catalog def by type + id to read its flavor (and name for relics).
 export function findCatalogDef(type: ItemType, id?: string): { flavor?: { en: string; zh: string }; n?: { en: string; zh: string } } | null {
@@ -52,6 +59,14 @@ export function queueRelicIntro(id: string): void {
   if (!introOpen) showNext();
 }
 
+export function queueMechanicIntro(id: string): void {
+  if (!MECHANIC_CARDS[id]) return;
+  if (!introEnabled) { discoverMechanic(id); return; }     // record for consistency, no popup
+  if (!discoverMechanic(id)) return;                        // already seen
+  queue.push({ kind: 'mechanic', id });
+  if (!introOpen) showNext();
+}
+
 function showNext(): void {
   const target = queue.shift();
   if (!target) { hideOverlay('item-intro-overlay'); setIntroOpen(false); return; }
@@ -82,6 +97,19 @@ function statRow(label: string, val: string | number, color = '#ccc'): string {
 }
 
 function renderCard(target: IntroTarget): string {
+  if (target.kind === 'mechanic') {
+    const mc = MECHANIC_CARDS[target.id];
+    if (!mc) return '';
+    return `
+      <div style="text-align:center;margin-bottom:8px">
+        <div style="font-size:2.2em;color:${mc.col};margin-top:4px">${mc.sym}</div>
+        <div style="color:${mc.col};font-size:1.3em;font-weight:700;margin-top:4px">${t(mc.tk)}</div>
+        <div style="color:#ffd700;font-size:.8em;margin-top:4px">✦ ${t('intro.firstDiscover')}</div>
+      </div>
+      <div style="background:rgba(155,83,229,.1);border:1px solid #9a2be2;border-radius:4px;padding:8px 10px;margin:8px 0">
+        <div style="color:#e8d8ff">${t(mc.bk)}</div>
+      </div>`;
+  }
   if (target.kind === 'relic') {
     const def = RELICS.find(r => r.id === target.id);
     if (!def) return '';

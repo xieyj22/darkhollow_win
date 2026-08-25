@@ -4,6 +4,7 @@ import { lang } from './state.js';
 import { META_UPGRADES, ACH_DEFS, RELICS } from './data.js';
 import { snd } from './audio.js';
 import { t, tx } from './i18n.js';
+import { addMsg } from './messages.js';
 
 const META_KEY = 'dh_meta';
 
@@ -24,6 +25,7 @@ export function initMeta(): MetaSave {
     runHistory: [], endlessLeaderboard: [],
     unlockedLore: [],
     discoveredItems: [],
+    seenMechanics: [],
     wardens: [],
   };
 }
@@ -42,6 +44,7 @@ export function getMeta(): MetaSave {
       if (!m.endlessLeaderboard) m.endlessLeaderboard = [];
       if (!m.unlockedLore) m.unlockedLore = [];
       if (!m.discoveredItems) m.discoveredItems = [];
+      if (!m.seenMechanics) m.seenMechanics = [];
       if (!m.wardens) m.wardens = [];
       return m;
     }
@@ -234,6 +237,7 @@ export function unlockLore(id: string): void {
   if (!meta.unlockedLore.includes(id)) {
     meta.unlockedLore.push(id);
     saveMeta(meta);
+    addMsg(t('codex.updated'), 'mi');   // Batch2 ④: silent unlocks no more
   }
 }
 
@@ -244,6 +248,17 @@ export function discoverItem(key: string): boolean {
   const meta = getMeta();
   if (!meta.discoveredItems.includes(key)) {
     meta.discoveredItems.push(key);
+    saveMeta(meta);
+    return true;
+  }
+  return false;
+}
+
+// Batch2 ④: mechanic tutorial cards — once per career, like item intros.
+export function discoverMechanic(key: string): boolean {
+  const meta = getMeta();
+  if (!meta.seenMechanics.includes(key)) {
+    meta.seenMechanics.push(key);
     saveMeta(meta);
     return true;
   }

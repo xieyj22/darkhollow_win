@@ -22,7 +22,7 @@ vi.mock('../meta.js', () => ({
   recordRun: () => {}, unlockLore: () => {}, recordWardenLegacy: () => {},
   corruptionWardMult: () => 1, // ward OFF — isolate the eternal_sand branch
 }));
-vi.mock('../warden.js', () => ({ pickWardenRelic: () => null, nextWardenMemory: () => null, wardenMemoryText: () => null }));
+vi.mock('../warden.js', () => ({ pickWardenRelic: () => null, nextWardenMemory: () => null, wardenMemoryText: () => null, WARDEN_MEMORIES: [] }));
 vi.mock('../relics.js', () => ({
   getRelicExpMult: () => 1, getRelicGoldMult: () => 1, relicOnKill: () => {},
   grantRandomRelic: () => {}, grantRelic: () => {}, relicOnHitEnemy: (d: number) => d,

@@ -17,6 +17,8 @@ vi.mock('../combat.js', () => ({ attack: () => false, killEnemy: () => {}, check
 vi.mock('../talents.js', () => ({ onPlayerDamaged: () => {}, onEnemyHitPlayer: () => {}, onPlayerDodged: () => {}, onPlayerDeath: () => false, getManaShieldReduction: () => 0 }));
 vi.mock('../meta.js', () => ({ bonusExp: () => 0, unlockLore: () => {}, getMeta: () => ({ wardens: [] }) }));
 vi.mock('../data.js', () => ({ ENEMIES: [], BOSSES: [], ELITE_PREFIX: [], AREAS: [] }));
+// batch2 ④: spawnWarden queues the warden mechanic card via item-intro.
+vi.mock('../item-intro.js', () => ({ queueMechanicIntro: () => {} }));
 
 import { wardenStats, pickWardenRelic, nextWardenMemory, WARDEN_RELIC_IDS, WARDEN_MEMORIES } from '../warden.js';
 import { spawnWarden } from '../enemies.js';

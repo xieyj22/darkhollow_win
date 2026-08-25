@@ -10,7 +10,7 @@ vi.mock('../combat.js', () => ({ attack: () => {}, killEnemy: () => {}, checkLev
 vi.mock('../talents.js', () => ({ onPlayerDamaged: () => false, onEnemyHitPlayer: () => {}, onPlayerDodged: () => {}, onPlayerDeath: () => false, getManaShieldReduction: () => 0 }));
 vi.mock('../relics.js', () => ({ relicOnDodge: () => {} }));
 vi.mock('../render.js', () => ({ setEnemyTween: () => {} }));
-vi.mock('../warden.js', () => ({ wardenStats: () => ({}) }));
+vi.mock('../warden.js', () => ({ wardenStats: () => ({}), WARDEN_MEMORIES: [] }));
 vi.mock('../enemy-skills.js', () => ({ shouldCastSkill: () => false, executeEnemySkill: () => {} }));
 vi.mock('../i18n.js', () => ({ t: (k: string) => k, tMsg: (k: string) => k, tx: (f: any) => f?.en ?? '' }));
 vi.mock('../audio.js', () => ({ snd: () => {} }));

@@ -18,6 +18,7 @@ import { applyCorruption } from './combat.js';
 import { hasRelic } from './relics.js';
 import { bridge } from './bridge.js';
 import { eligibleEventSites } from './event-sites.js';
+import { queueMechanicIntro } from './item-intro.js';
 
 export function initGame(ri: number, ci: number, endless = false): void {
   // Task 4: deep_start meta skips early endless floors (start at F41 + 5×rank).
@@ -189,6 +190,7 @@ export function enterBranch(): void {
   G.branchReturn = { floor: G.floor, x: G.player.x, y: G.player.y };
   G.branchMode = true;
   unlockLore('area:fungal');   // ⑤ branch floors never resolve the main area — unlock here
+  queueMechanicIntro('fungal');
   const entry = G.floor;
   G.dungeon = genDungeon(entry, fungal);
   G.traps = G.dungeon.traps;

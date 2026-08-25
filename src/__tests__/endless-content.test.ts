@@ -45,6 +45,9 @@ vi.mock('../warden.js', () => ({
   pickWardenRelic: () => null,
   nextWardenMemory: () => null,
   wardenMemoryText: () => null,
+  // batch2 ④: combat → item-intro → ui-panels → lore reads WARDEN_MEMORIES
+  // at module load; provide an empty array so the mock satisfies it.
+  WARDEN_MEMORIES: [],
 }));
 vi.mock('../relics.js', () => ({
   getRelicExpMult: () => 1,

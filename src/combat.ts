@@ -22,6 +22,7 @@ import {
 } from './talents.js';
 import { genEndlessGear, endlessLuckMult } from './item-gen.js';
 import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy, corruptionWardMult } from './meta.js';
+import { queueMechanicIntro } from './item-intro.js';
 
 // Late-bound dependency to break circular import with items.ts
 let _genItem: ((floor: number) => any) | null = null;
@@ -385,6 +386,7 @@ export function applyCorruption(n: number): void {
   const r = addCorruption(p, n);
   if (r.maxed) { wardenDeath(); return; }
   if (r.crossed && r.after !== 'clean') {
+    queueMechanicIntro('corruption');
     const label = tx(TIER_LABEL[r.after]);
     addMsg(`🟪 ${label}${t('cb.ellipsis')}`, 'md');
     flt(p.x, p.y, label.toUpperCase(), TIER_COLOR[r.after]);

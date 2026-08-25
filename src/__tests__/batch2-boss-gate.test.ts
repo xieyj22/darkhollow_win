@@ -11,7 +11,12 @@ vi.mock('../combat.js', () => ({ attack: vi.fn(), killEnemy: () => {}, checkLeve
 vi.mock('../talents.js', () => ({ onPlayerDamaged: () => false, onEnemyHitPlayer: () => {}, onPlayerDodged: () => {}, onPlayerDeath: () => false, getManaShieldReduction: () => 0 }));
 vi.mock('../relics.js', () => ({ relicOnDodge: () => {} }));
 vi.mock('../render.js', () => ({ setEnemyTween: () => {} }));
-vi.mock('../warden.js', () => ({ wardenStats: () => ({}) }));
+vi.mock('../warden.js', () => ({
+  wardenStats: () => ({}),
+  // batch2 ④: enemies → item-intro → ui-panels → lore reads WARDEN_MEMORIES
+  // at module load; provide an empty array so the mock satisfies it.
+  WARDEN_MEMORIES: [],
+}));
 // Real shouldCastSkill (it owns the per-turn chance roll); executeEnemySkill is
 // mocked because its handlers need a fuller game world than this fixture.
 vi.mock('../enemy-skills.js', async (importOriginal) => {
