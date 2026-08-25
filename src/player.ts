@@ -7,6 +7,7 @@ import { addMsg } from './messages.js';
 import { dst } from './utils.js';
 import { snd } from './audio.js';
 import { flt } from './effects.js';
+import { fxFlash } from './fx.js';
 import { setPlayerTween } from './render.js';
 import { t, tMsg, tx } from './i18n.js';
 import { attack, applyCorruption } from './combat.js';
@@ -97,6 +98,8 @@ export function movePlayer(dx: number, dy: number): void {
       triggerNpc(npcEntity);
     } else {
       G.items = G.items.filter(i => i.x !== nx || i.y !== ny);
+      // Batch2 ⑧: pickup flash on the grabbed tile.
+      fxFlash(nx, ny, '#ffd700', 0.9);
       for (const it of itemsHere) {
         if (it.type === 'gold') { const g = bonusGold(it.value || 0); G.player.gold += g; addMsg(tMsg('pl.pickupGold', String(g)), 'mp'); snd('pickup'); }
         else addItemWithOverflow(it);

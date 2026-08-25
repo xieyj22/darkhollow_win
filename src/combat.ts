@@ -5,10 +5,10 @@ import { FINAL } from './config.js';
 import { rng, dst } from './utils.js';
 import { snd, setBgmScene } from './audio.js';
 import { flt, shake } from './effects.js';
-import { fxFlash, fxBurst } from './fx.js';
+import { fxFlash, fxBurst, fxAura } from './fx.js';
 import { applyRelicBonuses, relicOnHitEnemy, relicOnDamaged, relicOnDeath, getRelicGoldMult, getRelicExpMult, grantRandomRelic, grantRelic, relicOnKill, relicOnDodge, relicOnCrit, hasRelic } from './relics.js';
 import { unlockAchievement } from './steam.js';
-import { t, tMsg, tx } from './i18n.js';
+import { t, tMsg, tx, RARITY_C } from './i18n.js';
 import { ACH_DEFS, EQUIPMENT_SETS } from './data.js';
 import { addMsg } from './messages.js';
 import { processBossPhase } from './enemies.js';
@@ -186,6 +186,8 @@ export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
           ? genEndlessGear(G.floor) : _genItem(G.floor);
         loot.x = def.x; loot.y = def.y;
         G.items.push(loot);
+        // Batch2 ⑧: loot lands with a rarity-colored burst.
+        fxBurst(loot.x, loot.y, RARITY_C[loot.rarity] || loot.c || '#c0c0c0', 6, 0.5);
         addMsg(tMsg('cb.enemyDropped', String(def.name), String(loot.name)), 'mp');
         if (loot.rarity >= 4) checkAch('legendary');
       }
@@ -248,6 +250,8 @@ export function checkLevelUp(): void {
     recalc();
     addMsg(tMsg('cb.levelUp', String(p.level)), 'ml');
     addMsg(tMsg('cb.levelStats', String(hg), String(mg), String(ag), String(dg)), 'ml');
+    // Batch2 ⑧: golden aura pulse on level-up.
+    fxAura(p.x, p.y, '#ffd700', 1.6);
     flt(p.x, p.y, 'LEVEL UP!', '#ffd700'); snd('levelup'); checkAchs();
   }
 }
