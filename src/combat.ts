@@ -392,10 +392,16 @@ export function applyCorruption(n: number): void {
   if (r.crossed && r.after !== 'clean') {
     queueMechanicIntro('corruption');
     const label = tx(TIER_LABEL[r.after]);
-    addMsg(`🟪 ${label}${t('cb.ellipsis')}`, 'md');
-    flt(p.x, p.y, label.toUpperCase(), TIER_COLOR[r.after]);
-    shake(1.5);
-    recalc(); // apply the new tier's mods immediately
+    if (n < 0) {
+      // Batch2 ⑩: a cleanse that DROPS a tier reads as relief — green, no shake.
+      addMsg(tMsg('cb.tierCleansed', label), 'md');
+      flt(p.x, p.y, label.toUpperCase(), '#80ed99');
+    } else {
+      addMsg(`🟪 ${label}${t('cb.ellipsis')}`, 'md');
+      flt(p.x, p.y, label.toUpperCase(), TIER_COLOR[r.after]);
+      shake(1.5);
+    }
+    recalc(); // apply the new tier's mods immediately (both directions)
   }
 }
 

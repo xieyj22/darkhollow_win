@@ -232,6 +232,7 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "cb.doubleStrike": { en: "⚔ Double Strike!", zh: "⚔ 双重打击！" },
   "cb.levelUp": { en: "LEVEL UP! Level {}!", zh: "升级！你现在是{}级！" },
   "cb.ellipsis": { en: "...", zh: "…" },
+  'cb.tierCleansed': { en: '🟢 {} — the corruption recedes.', zh: '🟢 {}——腐化退去了。' },
   "cb.className": { en: "{} {}", zh: "{}{}" },
   "cb.wardenJoin": { en: "You are no longer you... you join the Wardens, and will hunt future Descenders.", zh: "你不复是你……你加入了守渊人的行列,将在未来阻挡后来的下探者。" },
   "cb.becameWarden": { en: "became the Warden", zh: "化作守渊人" },

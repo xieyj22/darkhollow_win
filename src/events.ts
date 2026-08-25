@@ -5,6 +5,7 @@ import { MH, MW, TL } from './config.js';
 import { rng, pick, dst } from './utils.js';
 import { snd } from './audio.js';
 import { flt, shake } from './effects.js';
+import { fxAura } from './fx.js';
 import { t, tMsg, tx } from './i18n.js';
 import { bridge } from './bridge.js';
 import { addMsg } from './messages.js';
@@ -171,6 +172,15 @@ export function checkTiles(): void {
     }
   }
   if (tile === TL.SHRINE) {
+    // Batch2 ⑨: 20% powerful blessing (revives the dead shrineBuff key).
+    if (Math.random() < 0.2) {
+      G.player.baseAtk += 2; G.player.baseDef += 2;
+      G.player.baseMaxHp += 10; G.player.maxHp += 10; G.player.hp += 10;
+      addMsg(t('shrineBuff'), 'ml');
+      recalc(); snd('levelup'); fxAura(G.player.x, G.player.y, '#ffd700', 2);
+      G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
+      return;
+    }
     const b = rng(1, 3);
     if (b === 1) { G.player.baseAtk += rng(1, 2); addMsg(t('ev.shrineAtk'), 'ml'); }
     else if (b === 2) { G.player.baseDef += rng(1, 2); addMsg(t('ev.shrineDef'), 'ml'); }
