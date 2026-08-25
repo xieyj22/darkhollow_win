@@ -15,6 +15,7 @@ import { makeEnemy, pickWeightedByMf } from './enemy-factory.js';
 import { wardenStats } from './warden.js';
 import { shouldCastSkill, executeEnemySkill } from './enemy-skills.js';
 import { queueMechanicIntro } from './item-intro.js';
+import { fxAura } from './fx.js';
 
 // Endless F45+ boss reuse pool — excludes the fl:0 branch mini-boss
 // (Myconid Sovereign: no phases/summon, wrong tier for endless).
@@ -133,6 +134,24 @@ export function spawnWarden(floor: number): void {
   addMsg(t('em.wardenHunting'), 'me');
   flt(G.player.x, G.player.y, '⚠WARDEN', '#9a2be2'); snd('boss'); shake();
   queueMechanicIntro('warden');
+}
+
+// Batch2 ⑦: boss reveal — intro fx fires exactly once, when the boss first
+// becomes visible (NOT at floor entry: the boss spawns off-screen).
+export function shouldBossReveal(e: Enemy, vis: boolean): boolean {
+  return !!e.isBoss && !e.introPlayed && vis;
+}
+
+export function checkBossReveal(): void {
+  if (!G || G.gameOver) return;
+  for (const e of G.enemies) {
+    if (!shouldBossReveal(e, !!G.player.visible?.[e.y]?.[e.x])) continue;
+    e.introPlayed = true;
+    fxAura(e.x, e.y, e.c, 2.5);
+    flt(e.x, e.y, String(e.name), e.c, 'crit');
+    shake(2);
+    snd('boss');
+  }
 }
 
 // Boss phase check — call after boss takes damage

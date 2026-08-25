@@ -278,6 +278,8 @@ export interface Enemy {
   el: Element;
   res: Partial<Record<Element, number>>;
   skillCd: number;
+  // Batch2 ⑦: one-shot intro-fx guard — set when the boss is first seen.
+  introPlayed?: boolean;
   // ① reconnect: boss config travels with the instance — endless F45+ reuse
   // another floor's BossDef, so the old floor-keyed table lookups came up
   // empty there. Optional: legacy saves hold instances without them.

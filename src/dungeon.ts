@@ -5,6 +5,7 @@ import { rng, pick } from './utils.js';
 import { ALL_TRAPS, AREAS } from './data.js';
 import { getMetaFovBonus } from './meta.js';
 import { bridge } from './bridge.js';
+import { checkBossReveal } from './enemies.js';
 
 export function genDungeon(floor: number, areaOverride?: AreaDef): Dungeon {
   const map: number[][] = Array.from({ length: MH }, () => Array(MW).fill(TL.WALL));
@@ -168,4 +169,6 @@ export function updatePlayerFOV(player: Player, map: number[][], traps?: Trap[])
   const exploredNew = countExplored(player.explored) > before;
   if (exploredNew && bridge.markMinimapDirty) bridge.markMinimapDirty();
   if (traps) for (const trap of traps) if (player.visible[trap.y]?.[trap.x] && trap.hidden) trap.hidden = false;
+  // Batch2 ⑦: boss intro fx rides the FOV update — fires once, on first sight.
+  checkBossReveal();
 }
