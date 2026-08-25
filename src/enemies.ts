@@ -215,7 +215,11 @@ export function processEnemies(): void {
     if (playerInvis) { randMove(e); continue; }
 
     // Enemy skill gate (data-driven casting) — fires before the ai switch.
-    if (e.skill && e.skillCd <= 0) {
+    // Batch2 ② fix: bosses are excluded — the priority gate above already rolled
+    // them once this turn; a second roll here compounded their effective chance
+    // (0.35 → 0.578) at range. Non-boss casters (incl. the isWarden nemesis,
+    // which never sets isBoss) keep using this gate.
+    if (!e.isBoss && e.skill && e.skillCd <= 0) {
       const visible = !!G.player.visible?.[e.y]?.[e.x];
       if (shouldCastSkill(e, d, visible, playerInvis)) {
         executeEnemySkill(e, e.skill);
