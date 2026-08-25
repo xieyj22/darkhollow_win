@@ -187,9 +187,11 @@ export interface Item {
   set?: string;
   // map entity marker — when set, this "item" is not picked up; stepping on it
   // triggers its associated event instead. Used for chests/merchants on the map.
-  npc?: 'merchant' | 'chest' | 'treasure_merchant' | 'endless_merchant' | 'fountain' | 'shrine';
+  npc?: 'merchant' | 'chest' | 'treasure_merchant' | 'endless_merchant' | 'fountain' | 'shrine' | 'event';
   // merchant stock for treasure merchant (list of pre-rolled item refs to buy)
   stock?: Item[];
+  // event-site id (npc === 'event') — which random event this entity triggers.
+  eventId?: string;
 }
 
 // --- Enemies ---
@@ -525,6 +527,8 @@ export interface GameState {
   // Warden (Wave 8): floors remaining until the stalking nemesis next spawns.
   // Decrements in enterFloor; at <=0 spawnWarden fires and this resets.
   wardenCd: number;
+  // Batch2 ③: once-per-run flags for random event sites (id → triggered).
+  eventFlags?: Record<string, boolean>;
 }
 
 // --- Achievements ---

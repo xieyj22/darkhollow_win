@@ -12,9 +12,11 @@ import { genItem, genWeapon, genArmor, genAcc, addItemWithOverflow, itemToGold }
 import { recalc, playerDeath, applyCorruption } from './combat.js';
 import { genEndlessGear } from './item-gen.js';
 import { grantRelic, hasRelic } from './relics.js';
-import { RELICS } from './data.js';
+import { RELICS, ENEMIES } from './data.js';
 import { updateUI, render } from './render.js';
 import { enterBranch, exitBranch } from './game.js';
+import { EVENT_SITES, type EventSiteDef, type EventSiteId } from './event-sites.js';
+import { makeEnemy } from './enemy-factory.js';
 
 // Re-export for late-binding
 export { updateUI, render } from './render.js';
@@ -253,6 +255,7 @@ export function triggerNpc(entity: Item): void {
   else if (entity.npc === 'merchant') showEvent('merchant');
   else if (entity.npc === 'treasure_merchant') openTreasureMerchant(entity);
   else if (entity.npc === 'endless_merchant') openEndlessMerchant(entity);
+  else if (entity.npc === 'event' && entity.eventId) showEventSite(entity);
 }
 
 // --- Treasure merchant (point 11): expensive shop-only powerful gear ---
@@ -415,4 +418,92 @@ function buyEndless(entity: Item, idx: number): void {
   }
   updateUI(); render();
   openEndlessMerchant(entity);
+}
+
+// --- Batch2 ③: random event sites (8 low-frequency map events) ---
+
+export function showEventSite(entity: Item): void {
+  if (!G || !entity.eventId) return;
+  const def = EVENT_SITES.find(s => s.id === entity.eventId);
+  if (!def) return;
+  if (def.once) {
+    G.eventFlags = G.eventFlags || {};
+    G.eventFlags[def.id] = true;
+  }
+  const popup = document.getElementById('event-popup')!;
+  document.getElementById('ev-title')!.textContent = t('ev2.' + def.id + 'Title');
+  document.getElementById('ev-desc')!.textContent = t('ev2.' + def.id + 'Desc');
+  const btns = document.getElementById('ev-buttons')!;
+  btns.innerHTML = '';
+  const actions: Array<() => void> = [];
+  const addBtn = (label: string, action: () => void) => {
+    const b = document.createElement('button');
+    b.className = 'evb';
+    b.textContent = `[${actions.length + 1}] ${label}`;
+    btns.appendChild(b);
+    actions.push(action);
+  };
+  addBtn(t('ev2.' + def.id + 'Act'), () => runEventAction(def));
+  addBtn(t('merchantLeave'), closeEvent);
+  setEventOpen(true);
+  setEventActions(actions);
+  _bindEventBtns(actions);
+  popup.style.display = 'block';
+}
+
+function runEventAction(def: EventSiteDef): void {
+  if (!G) return;
+  const p = G.player;
+  switch (def.id) {
+    case 'cursed_altar': {
+      // Player equipment slots live under p.eq (types.ts Equipment) — p.eq.weapon, not p.weapon.
+      if (!p.eq.weapon) { addMsg(t('ev2.cursedAltarNoWeapon'), 'mi'); closeEvent(); return; }
+      p.eq.weapon = null;
+      p.baseAtk += 3;
+      recalc();
+      addMsg(tMsg('ev2.cursedAltarDone'), 'ml'); snd('levelup');
+      break;
+    }
+    case 'gambler_altar': {
+      if (p.gold < 50) { addMsg(t('merchantNoGold'), 'mi'); closeEvent(); return; }
+      p.gold -= 50;
+      const r = Math.random();
+      if (r < 0.45) { p.gold += 100; addMsg(tMsg('ev2.gamblerWin', '100'), 'me'); snd('chest'); }
+      else if (r < 0.90) { addMsg(t('ev2.gamblerLose'), 'mt'); snd('trap'); }
+      else { p.gold += 150; addMsg(tMsg('ev2.gamblerJackpot', '150'), 'ml'); snd('levelup'); }
+      break;
+    }
+    case 'trapped_npc': {
+      if (Math.random() < 0.25) {
+        spawnEventFoes(2);
+        addMsg(t('ev2.trappedAmbush'), 'mt'); snd('trap'); shake();
+      } else {
+        p.gold += 10 + G.floor * 5;
+        const it = genItem(G.floor + 2); it.x = p.x; it.y = p.y; G.items.push(it);
+        addMsg(tMsg('ev2.trappedReward', String(10 + G.floor * 5)), 'me'); snd('chest');
+      }
+      break;
+    }
+    default: break;  // T4 fills the rest
+  }
+  closeEvent(); updateUI(); render();
+}
+
+// Shared: place n foes from the floor-appropriate pool near the player.
+function spawnEventFoes(n: number): void {
+  if (!G) return;
+  const pool = ENEMIES.filter(en => en.mf <= G!.floor && en.mf >= Math.max(1, G!.floor - 6) && !en.tags?.includes('boss'));
+  if (!pool.length) return;
+  const fs = 1 + (G.floor - 1) * 0.1;
+  for (let k = 0; k < n; k++) {
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const sx = G.player.x + rng(-3, 3), sy = G.player.y + rng(-3, 3);
+      if (sx < 0 || sy < 0 || G.dungeon.map[sy]?.[sx] === undefined) continue;
+      if (G.dungeon.map[sy][sx] === TL.WALL || G.dungeon.map[sy][sx] === TL.VOID) continue;
+      if (G.enemies.some(o => o.x === sx && o.y === sy)) continue;
+      if (sx === G.player.x && sy === G.player.y) continue;
+      G.enemies.push(makeEnemy(pick(pool), sx, sy, fs, { hpM: 0.8, atkM: 0.9 }));
+      break;
+    }
+  }
 }

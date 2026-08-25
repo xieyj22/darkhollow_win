@@ -17,6 +17,7 @@ import { unlockLore, getMeta } from './meta.js';
 import { applyCorruption } from './combat.js';
 import { hasRelic } from './relics.js';
 import { bridge } from './bridge.js';
+import { eligibleEventSites } from './event-sites.js';
 
 export function initGame(ri: number, ci: number, endless = false): void {
   // Task 4: deep_start meta skips early endless floors (start at F41 + 5×rank).
@@ -108,6 +109,20 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     if (floor % 5 === 0) placeEntity('treasure_merchant', '¤', '#ffd700', 'gm.treasureMerchant', 4);
     // Endless F41+: endless_merchant every 3 floors (sells endless gear/rarity5 relics/purge/heal).
     if (G!.endless && floor >= 41 && floor % 3 === 0) placeEntity('endless_merchant', '∞', '#9b5de5', 'enm.entityName', 5);
+    // Batch2 ③: one random event site on ~28% of floors (F3+; main line & endless).
+    if (floor >= 3 && Math.random() < 0.28) {
+      const pool = eligibleEventSites(floor);
+      if (pool.length) {
+        const s = pick(pool);
+        const rooms = G!.dungeon.rooms.slice(1);
+        if (rooms.length) {
+          const rm = pick(rooms);
+          const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
+          if (G!.dungeon.map[y][x] !== TL.STAIR)
+            G!.items.push({ type: 'consumable', name: t('ev2.' + s.id + 'Title'), ch: s.ch, c: s.c, desc: '', x, y, rarity: 2, npc: 'event', eventId: s.id } as Item);
+        }
+      }
+    }
 
     if (floor > 1) {
       addMsg(tMsg('gm.descend', String(floor)), 'mi');
