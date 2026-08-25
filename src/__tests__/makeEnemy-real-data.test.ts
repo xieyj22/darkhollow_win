@@ -45,8 +45,9 @@ describe('makeEnemy over real game data', () => {
     }
     // Guard: if all caster skills were silently dropped from data, this would
     // loop zero times and pass vacuously — assert we actually exercised them.
-    // 25 original casters + 3 stun casters added by ③ (audit #3) = 28.
-    expect(checked).toBe(28);
+    // 25 original casters + 3 stun casters added by ③ (audit #3) + 3 dead-handler
+    // casters added by batch2 ① (heal/blink/summon) = 31.
+    expect(checked).toBe(31);
   });
 
   it('every BossDef with phases/summon surfaces them on the built instance (①)', () => {

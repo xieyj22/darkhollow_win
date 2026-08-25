@@ -1529,6 +1529,7 @@ function pickEnemyTemplate(e: Enemy): { tpl: Template; key: string } {
   if (has('aquatic'))    return { tpl: TEMPLATES.AQUATIC,    key: 'AQUATIC' };
   if (has('knight'))     return { tpl: TEMPLATES.KNIGHT,     key: 'KNIGHT' };
   if (has('mage'))       return { tpl: TEMPLATES.CASTER,     key: 'CASTER' };
+  if (has('caster'))     return { tpl: TEMPLATES.CASTER,     key: 'CASTER' };  // batch2 ① Crypt Summoner
   if (has('brute'))      return { tpl: TEMPLATES.BRUTE,      key: 'BRUTE' };
   if (has('construct'))  return { tpl: TEMPLATES.GOLEM,      key: 'GOLEM' };
   if (has('elemental'))  return { tpl: TEMPLATES.ELEMENTAL,  key: 'ELEMENTAL' };

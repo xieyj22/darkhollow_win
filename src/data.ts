@@ -197,6 +197,7 @@ export const ENEMIES: EnemyDef[] = [
   // === New: Dark Fortress (mf 16-19) — 填 F12-25 断层 ===
   { n: { en: 'Castellan', zh: '铁卫统领' }, ch: '♝', c: '#4a5a6a', hp: 95, atk: 26, def: 16, exp: 70, g: [25, 55], ai: 'chase', mf: 16, tags: ['knight'] },
   { n: { en: 'Gargoyle', zh: '石化魔像' }, ch: 'Γ', c: '#708090', hp: 85, atk: 30, def: 12, exp: 75, g: [20, 50], ai: 'ambush', mf: 17, tags: ['construct'] },
+  { n: { en: 'Crypt Summoner', zh: '地穴召唤师' }, ch: 'ψ', c: '#7b68ee', hp: 80, atk: 26, def: 8, exp: 78, g: [25, 55], ai: 'ranged', mf: 17, tags: ['caster'], skill: { name: { en: 'Raise Dead', zh: '亡者苏生' }, effect: 'summon', chance: 0.25, cd: 7, range: 6 } },
   { n: { en: 'Inquisitor', zh: '圣裁官' }, ch: '✠', c: '#d4af37', hp: 75, atk: 32, def: 8, exp: 80, g: [30, 60], ai: 'ranged', mf: 18, el: 'holy', tags: ['cultist'], skill: { name: { en: 'Judgement', zh: '审判' }, effect: 'debuff_weaken', chance: 0.35, cd: 5, dmg: 8, aoe: 3, range: 6, el: 'holy' } },
   { n: { en: 'Siege Golem', zh: '破城巨像' }, ch: '◍', c: '#696969', hp: 125, atk: 34, def: 15, exp: 85, g: [35, 70], ai: 'chase', mf: 19, tags: ['construct'] },
   // === New: Dragon's Domain (mf 21-25) ===
@@ -208,6 +209,7 @@ export const ENEMIES: EnemyDef[] = [
   // === New: The Abyss (mf 26-30) ===
   { n: { en: 'Abyssal Jellyfish', zh: '深海水母' }, ch: '∞', c: '#00ced1', hp: 70, atk: 20, def: 6, exp: 55, g: [20, 50], ai: 'wander', mf: 26, el: 'ice', tags: ['aquatic'] },
   { n: { en: 'Deep One', zh: '深潜者' }, ch: 'Σ', c: '#006400', hp: 85, atk: 24, def: 10, exp: 70, g: [25, 60], ai: 'chase', mf: 26, tags: ['aquatic'] },
+  { n: { en: 'Deep Mender', zh: '深渊修补者' }, ch: '⚕', c: '#20b2aa', hp: 90, atk: 22, def: 8, exp: 75, g: [25, 55], ai: 'ranged', mf: 26, tags: ['aquatic'], skill: { name: { en: 'Mending Tide', zh: '修补潮汐' }, effect: 'heal', chance: 0.35, cd: 4, dmg: 1.2, range: 7 } },
   { n: { en: 'Void Leech', zh: '虚空水蛭' }, ch: 'λ', c: '#483d8b', hp: 60, atk: 22, def: 5, exp: 50, g: [15, 45], ai: 'lifesteal', mf: 27, el: 'shadow', tags: ['aberration'] },
   { n: { en: 'Coral Golem', zh: '珊瑚魔像' }, ch: 'Φ', c: '#ff7f50', hp: 110, atk: 18, def: 18, exp: 75, g: [30, 65], ai: 'chase', mf: 28, tags: ['construct'] },
   { n: { en: 'Siren', zh: '塞壬' }, ch: '♪', c: '#ff69b4', hp: 65, atk: 28, def: 6, exp: 65, g: [25, 55], ai: 'ranged', mf: 29, el: 'ice', tags: ['aquatic'], skill: { name: { en: 'Luring Song', zh: '诱惑之歌' }, effect: 'debuff_slow', chance: 0.4, cd: 5, aoe: 3, range: 6, el: 'ice' } },
@@ -221,6 +223,7 @@ export const ENEMIES: EnemyDef[] = [
   // === New: The Final Sanctum (mf 36-40) ===
   { n: { en: 'Seraphim', zh: '炽天使' }, ch: '☀', c: '#ffd700', hp: 140, atk: 38, def: 16, exp: 110, g: [50, 100], ai: 'chase', mf: 36, el: 'holy', tags: ['seraph'], skill: { name: { en: 'Holy Lance', zh: '圣光矛' }, effect: 'dmg_bolt', chance: 0.35, cd: 5, dmg: 1.8, range: 5, el: 'holy' } },
   { n: { en: 'Fallen Seraph', zh: '堕落炽天使' }, ch: '✝', c: '#8b0000', hp: 150, atk: 42, def: 14, exp: 120, g: [55, 110], ai: 'chase', mf: 37, el: 'shadow', tags: ['seraph', 'undead', 'demon'], skill: { name: { en: 'Fallen Halo', zh: '堕落光晕' }, effect: 'dmg_aoe', chance: 0.35, cd: 5, dmg: 1.5, aoe: 3, range: 4, el: 'shadow' } },
+  { n: { en: 'Void Blinker', zh: '虚空闪行者' }, ch: '∆', c: '#7df9ff', hp: 110, atk: 46, def: 8, exp: 105, g: [45, 90], ai: 'ambush', mf: 37, el: 'shadow', tags: ['spirit'], skill: { name: { en: 'Void Step', zh: '虚空步' }, effect: 'blink', chance: 0.3, cd: 3 } },
   { n: { en: 'Divine Golem', zh: '神圣魔像' }, ch: '⊕', c: '#c0c0c0', hp: 200, atk: 30, def: 25, exp: 130, g: [40, 90], ai: 'chase', mf: 38, el: 'holy', tags: ['construct'] },
   { n: { en: 'Cosmic Horror', zh: '宇宙恐怖' }, ch: '∇', c: '#1a0033', hp: 160, atk: 48, def: 12, exp: 150, g: [60, 120], ai: 'erratic', mf: 39, el: 'shadow', tags: ['aberration', 'demon'], skill: { name: { en: 'Mind Fracture', zh: '心智撕裂' }, effect: 'debuff_stun', chance: 0.25, cd: 5, aoe: 1 } },
   { n: { en: 'Archon', zh: '执政官' }, ch: '♔', c: '#ffffff', hp: 180, atk: 45, def: 18, exp: 160, g: [70, 140], ai: 'ranged', mf: 40, el: 'holy', tags: ['seraph'], skill: { name: { en: 'Holy Beam', zh: '圣光束' }, effect: 'dmg_bolt', chance: 0.4, cd: 5, dmg: 2.0, range: 7, el: 'holy' } },
