@@ -6,7 +6,7 @@ import { clamp, dst, darken, darkenTinted } from './utils.js';
 import { RARITY_C, rareName, t, tMsg, tx } from './i18n.js';
 import { corruptionTier, TIER_LABEL, TIER_COLOR } from './corruption.js';
 import { AREAS, EQUIPMENT_SETS } from './data.js';
-import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite } from './sprites.js';
+import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite, drawDoorSprite, drawPortalSprite } from './sprites.js';
 import type { Enemy } from './types.js';
 import { captureSnapshot } from './particles.js';
 import { bridge } from './bridge.js';
@@ -286,6 +286,9 @@ export function render(): void {
       if (tile === TL.STAIR) { drawStairSprite(c, sx, sy); continue; }
       if (tile === TL.FOUNTAIN) { drawFountainSprite(c, sx, sy); continue; }
       if (tile === TL.SHRINE) { drawShrineSprite(c, sx, sy); continue; }
+      // Batch2 ⑥: door & portal leave the character layer for sprites too.
+      if (tile === TL.DOOR) { drawDoorSprite(c, sx, sy); continue; }
+      if (tile === TL.PORTAL) { drawPortalSprite(c, sx, sy); continue; }
       c.fillStyle = fg;
       c.fillText(ch, sx + TS / 2, sy + TS / 2);
     }

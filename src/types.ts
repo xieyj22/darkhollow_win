@@ -177,6 +177,8 @@ export interface Item {
   // ring/amulet/brooch/crown, scroll fire/frost/arcane/holy, consumable
   // bomb/trap/pouch/tool, food meat/bread/feast. Drives pickItemTemplate routing.
   subType?: string;
+  // explicit sprite override (Batch2 ⑥) — wins over type routing in pickItemTemplate
+  spriteKind?: string;
   // gold
   value?: number;
   // catalog id — matches the def.id the item was generated from; used as the

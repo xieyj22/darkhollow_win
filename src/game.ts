@@ -97,15 +97,15 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
 
     // Map entities: chests, wandering merchants, treasure merchants (point 1/3/11).
     // These appear as icons on the map; stepping on them triggers the event.
-    const placeEntity = (npc: Item['npc'], ch: string, c: string, nameKey: string, rarity: number) => {
+    const placeEntity = (npc: Item['npc'], ch: string, c: string, nameKey: string, rarity: number, spriteKind?: string) => {
       const rooms = G!.dungeon.rooms.slice(1); // never in the start room
       if (!rooms.length) return;
       const rm = pick(rooms);
       const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
       if (G!.dungeon.map[y][x] === TL.STAIR) return; // don't bury under stairs
-      G!.items.push({ type: 'consumable', name: t(nameKey), ch, c, desc: '', x, y, rarity, npc } as Item);
+      G!.items.push({ type: 'consumable', name: t(nameKey), ch, c, desc: '', x, y, rarity, npc, spriteKind } as Item);
     };
-    if (Math.random() < 0.5) placeEntity('chest', '▣', '#daa520', 'gm.chest', 2);
+    if (Math.random() < 0.5) placeEntity('chest', '▣', '#daa520', 'gm.chest', 2, 'CHEST');
     if (Math.random() < 0.35) placeEntity('merchant', '§', '#9b5de5', 'gm.merchant', 1);
     if (floor % 5 === 0) placeEntity('treasure_merchant', '¤', '#ffd700', 'gm.treasureMerchant', 4);
     // Endless F41+: endless_merchant every 3 floors (sells endless gear/rarity5 relics/purge/heal).

@@ -6,6 +6,7 @@
 import type { Enemy, Item, ItemType, RelicDef } from './types.js';
 import { TS } from './config.js';
 import { darken } from './utils.js';
+import { reducedMotion } from './state.js';
 
 type Template = string[];
 const N = 16; // pixel grid dimension
@@ -1204,6 +1205,62 @@ export const TEMPLATES: Record<string, Template> = {
     "................",
   ],
 
+  // Batch2 ⑥: terrain/entity templates — door, portal (animated), chest.
+  DOOR: [
+    "................",
+    "....KKKKKKKK....",
+    "...KNNNNNNNNK...",
+    "..KNNWNNNNWNNK..",
+    "..KNWNNNNNNWNK..",
+    "..KNNNNNNNNNNK..",
+    "..KNNNGNNGNNNK..",
+    "..KNNNGGGGNNNK..",
+    "..KNNNNDDNNNNK..",
+    "..KNNWNNNNWNNK..",
+    "..KNNDDNNDDNNK..",
+    "...KNNNNNNNNK...",
+    "....KKKKKKKK....",
+    "................",
+    "................",
+    "................",
+  ],
+  PORTAL: [
+    "................",
+    ".....MMMMMM.....",
+    "...MMMLLLLMMM...",
+    "..MMLLKKKKLLMM..",
+    ".MMLLKKddKKLLMM.",
+    ".MLLKddddddKLLM.",
+    ".MLLKdLLLLdKLLM.",
+    ".MLKdLLKKLLdKLM.",
+    ".MLKdLKKKKLdKLM.",
+    ".MLKdLLKKLLdKLM.",
+    ".MLLKdLLLLdKLLM.",
+    ".MLLKddddddKLLM.",
+    "..MMLLKKKKLLMM..",
+    "...MMMLLLLMMM...",
+    ".....MMMMMM.....",
+    "................",
+  ],
+  CHEST: [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "..KNNWWWWWWNNK..",
+    ".KNNWWWWWWWWNNK.",
+    ".KNNNNNNNNNNNNK.",
+    ".KKKKKKKKKKKKKK.",
+    ".KNNNNNGGNNNNNK.",
+    ".KNNNNNGGNNNNNK.",
+    ".KNNNNNNNNNNNNK.",
+    ".KKKKKKKKKKKKKK.",
+    "..KKKKKKKKKKKK..",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+
   // ===== Relic templates (Task 6) — themed by effect, ~7 silhouettes.
   // Each relic gets def.c-driven palette so same-template relics still differ
   // in color. Premium feel via E (#ff7a3c glow) + G (#ffd54a gold) accents.
@@ -1423,6 +1480,12 @@ const STAIR_PAL: Record<string, string> = {
   K: '#3a4a5a', C: '#5a6a7a', W: '#9aaab8', L: '#b8c8d8', V: '#7ec8e3',
 };
 
+// Batch2 ⑥ fixed terrain palettes.
+const DOOR_PAL: Record<string, string> = { K: '#140a0a', N: '#6b4423', D: '#4a2e17', G: '#ffd54a', W: '#8a5a30' };
+const PORTAL_PAL: Record<string, string> = { M: '#7df9ff', L: '#b266ff', d: '#3a0d5c', K: '#0a0015' };
+const PORTAL_PAL_B: Record<string, string> = { M: '#b266ff', L: '#7df9ff', d: '#3a0d5c', K: '#0a0015' };
+const CHEST_PAL: Record<string, string> = { K: '#140a0a', N: '#8a5a30', W: '#c89a5a', G: '#ffd54a' };
+
 // ===== Offscreen sprite cache (16×16, drawn once per template+palette signature) =====
 const spriteCache = new Map<string, HTMLCanvasElement>();
 
@@ -1506,6 +1569,24 @@ export function drawShrineSprite(c: CanvasRenderingContext2D, x: number, y: numb
   blit(c, x, y, getSprite(TEMPLATES.SHRINE, buildPalette('#06d6a0'), 'SHRINE'));
 }
 
+// Batch2 ⑥: door / portal / chest draw fns — same pattern as stair/fountain.
+export function drawDoorSprite(c: CanvasRenderingContext2D, x: number, y: number): void {
+  blit(c, x, y, getSprite(TEMPLATES.DOOR, DOOR_PAL, 'DOOR'));
+}
+
+// Batch2 ⑥: portal animates — palette phase swap + orbiting spark. Static under
+// reduced motion (same gate the enemy idle bob uses).
+export function drawPortalSprite(c: CanvasRenderingContext2D, x: number, y: number): void {
+  const phase = reducedMotion ? 0 : Math.floor(performance.now() / 400) % 2;
+  blit(c, x, y, getSprite(TEMPLATES.PORTAL, phase ? PORTAL_PAL_B : PORTAL_PAL, 'PORTAL:' + phase));
+  if (!reducedMotion) {
+    const a = performance.now() / 500;
+    const cx = x + TS / 2, cy = y + TS / 2;
+    c.fillStyle = '#e0b3ff';
+    c.fillRect(Math.round(cx + Math.cos(a) * TS * 0.28) - 1, Math.round(cy + Math.sin(a) * TS * 0.28) - 1, 2, 2);
+  }
+}
+
 export function drawBossSprite(c: CanvasRenderingContext2D, x: number, y: number, color: string): void {
   const sig = 'BOSS:' + color;
   blitOutlined(c, x, y, getSprite(TEMPLATES.BOSS, buildPalette(color), sig), sig, 2);
@@ -1569,7 +1650,12 @@ function pickWeaponTemplate(name: string): { tpl: Template; key: string } {
 }
 
 // Pick an item template by type (+ name for weapons, + subType/ef for variants).
-function pickItemTemplate(item: Item): { tpl: Template; key: string } {
+export function pickItemTemplate(item: Item): { tpl: Template; key: string } {
+  // Batch2 ⑥: explicit spriteKind wins (map entities like CHEST bypass type routing).
+  if (item.spriteKind && (TEMPLATES as Record<string, Template>)[item.spriteKind]) {
+    const k = item.spriteKind;
+    return { tpl: (TEMPLATES as Record<string, Template>)[k], key: k };
+  }
   switch (item.type) {
     case 'weapon': return pickWeaponTemplate(item.name);
     case 'armor': {
