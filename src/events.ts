@@ -484,7 +484,51 @@ function runEventAction(def: EventSiteDef): void {
       }
       break;
     }
-    default: break;  // T4 fills the rest
+    case 'ancient_remains': {
+      const r = Math.random();
+      if (r < 0.6) { const g = rng(10, 30) + G.floor * 2; p.gold += g; addMsg(tMsg('ev2.remainsGold', String(g)), 'me'); snd('pickup'); }
+      else if (r < 0.9) { addMsg(t('ev2.remainsEmpty'), 'mi'); }
+      else { spawnEventFoes(rng(1, 2)); addMsg(t('ev2.remainsAmbush'), 'mt'); snd('trap'); shake(); }
+      break;
+    }
+    case 'blood_pool': {
+      p.baseMaxHp += 5; p.hp += 5;
+      applyCorruption(3);
+      addMsg(t('ev2.bloodPoolDrunk'), 'md'); snd('heal');
+      break;
+    }
+    case 'ancient_stele': {
+      const b = rng(1, 3);
+      if (b === 1) { p.baseAtk += 1; addMsg(t('ev2.steleAtk'), 'ml'); }
+      else if (b === 2) { p.baseDef += 1; addMsg(t('ev2.steleDef'), 'ml'); }
+      else { p.baseMaxHp += 5; p.hp += 5; addMsg(t('ev2.steleHp'), 'ml'); }
+      recalc(); snd('levelup');
+      break;
+    }
+    case 'sealed_box': {
+      const r = Math.random();
+      if (r < 0.5) {
+        const it = genItem(G.floor + 3); it.rarity = Math.max(3, it.rarity); it.x = p.x; it.y = p.y;
+        G.items.push(it); addMsg(tMsg('ev2.sealedLoot', String(it.name)), 'me'); snd('chest');
+      } else if (r < 0.85) {
+        applyCorruption(8); addMsg(t('ev2.sealedCorrupt'), 'mc'); snd('trap'); shake();
+      } else {
+        const pool = RELICS.filter(x => x.rarity <= 3);
+        grantRelic(pick(pool).id, p.x, p.y); addMsg(t('ev2.sealedRelic'), 'ml'); snd('levelup');
+      }
+      break;
+    }
+    case 'sacrifice_well': {
+      // Cost is clamped so the well can never kill: at most hp-1, and players
+      // at hp<=1 are too weak to bleed at all (cost < 1 guard).
+      const cost = Math.min(Math.max(1, Math.floor(p.hp * 0.2)), p.hp - 1);
+      if (cost < 1) { addMsg(t('ev2.wellTooWeak'), 'mi'); closeEvent(); return; }
+      p.hp -= cost;
+      applyCorruption(-12);
+      addMsg(tMsg('ev2.wellPaid', String(cost)), 'md'); snd('heal');
+      break;
+    }
+    default: break;
   }
   closeEvent(); updateUI(); render();
 }
