@@ -7,7 +7,9 @@ vi.mock('../state.js', () => ({ get G() { return (globalThis as any).G; }, lang:
 vi.mock('../utils.js', () => ({ rng: () => 1, dst: () => 1, pick: (a: any[]) => a[0] }));
 vi.mock('../audio.js', () => ({ snd: () => {} }));
 vi.mock('../effects.js', () => ({ flt: () => {}, shake: () => {} }));
-vi.mock('../fx.js', () => ({ fxFlash: () => {}, fxBurst: () => {} }));
+// fxAura joined the fx surface when batch2 ⑨ gave SHRINE a 20% powerful-
+// blessing branch (events.ts) — provide it or vitest throws on the mock.
+vi.mock('../fx.js', () => ({ fxFlash: () => {}, fxBurst: () => {}, fxAura: () => {} }));
 vi.mock('../messages.js', () => ({ addMsg: vi.fn() }));
 vi.mock('../render.js', () => ({ updateUI: () => {}, render: () => {} }));
 vi.mock('../game.js', () => ({ enterBranch: () => {}, exitBranch: () => {} }));
@@ -67,8 +69,13 @@ describe('② fountain cleanses corruption', () => {
 
 describe('② shrine cleanses corruption', () => {
   it('corruption>0: blessing fires + applyCorruption(-20)', () => {
+    // Pin the roll ABOVE the batch2 ⑨ 20% powerful-blessing gate so this test
+    // exercises the classic 3-way roll path deterministically (an unpinned run
+    // flakes ~20%: the blessing branch returns early, skipping the -20 cleanse).
+    const roll = vi.spyOn(Math, 'random').mockReturnValue(0.5);
     (globalThis as any).G = mkG(TL.SHRINE, 30);
     checkTiles();
+    roll.mockRestore();
     expect(applyCorruption).toHaveBeenCalledWith(-20);
     expect((globalThis as any).G.dungeon.map[0][0]).toBe(TL.FLOOR);
   });

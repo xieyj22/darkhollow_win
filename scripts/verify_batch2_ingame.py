@@ -271,6 +271,67 @@ def main():
         clean_msg = ('corruption recedes' in log_text(page)) or ('腐化退去' in log_text(page))
         check('10 cleanse reads as relief (green message, not the gain shake line)', clean_msg)
 
+        # ============ 8b: fx trio live wiring (loot burst + pickup flash) ============
+        # Final-review Important 2: item 8's loot burst / pickup flash had no
+        # automated coverage. fxCount() (fx.ts) is the live observable.
+        # GOTCHA: after this session's HMR updates, combat.ts holds the fx
+        # module under a '?t=' cache-buster URL — a SECOND instance whose
+        # sparks/fxs arrays are invisible to a plain import('/src/fx.ts').
+        # A full page reload collapses the module graph back to one instance
+        # per URL, so 8b restarts the game on a clean page.
+        print('[8b] fx trio live wiring: loot burst + pickup flash')
+        page.reload()
+        page.wait_for_timeout(1200)
+        start_game(page)
+        fxw = page.evaluate("""async () => {
+            const st = await import('/src/state.ts');
+            const d = await import('/src/data.ts');
+            const fac = await import('/src/enemy-factory.ts');
+            const cb = await import('/src/combat.ts');
+            const fx = await import('/src/fx.ts');
+            const pl = await import('/src/player.ts');
+            const cfg = await import('/src/config.ts');
+            const p = st.G.player, out = {};
+            st.setReducedMotion(false);   // belt & suspenders vs headless reduce
+            fx.clearFx();
+
+            // (a) loot burst: melee-kill weak adjacent enemies until one rolls
+            // past the Math.random() < .3 drop gate (each kill's death-burst
+            // fires regardless, so fxTotal > 0 from the very first kill).
+            const ex = p.x + 1, ey = p.y;
+            const beforeIds = new Set(st.G.items.filter(i => i.x === ex && i.y === ey));
+            let kills = 0, loot = null;
+            while (!loot && kills < 20) {
+                const e = fac.makeEnemy(d.ENEMIES[0], ex, ey, 1);
+                e.hp = 1;
+                st.G.enemies = [e];
+                cb.attack(p, e, true);
+                kills++;
+                loot = st.G.items.find(i => i.x === ex && i.y === ey && i.type !== 'gold' && !beforeIds.has(i));
+            }
+            out.fxTotal = fx.fxCount();
+            out.kills = kills;
+            out.lootName = loot ? loot.name : null;
+            st.G.enemies = [];
+
+            // (b) pickup flash: clear fx, put a gold pile on the tile to the
+            // right, walk onto it via movePlayer -> pickup branch fires fxFlash.
+            fx.clearFx();
+            st.G.dungeon.map[p.y][p.x + 1] = cfg.TL.FLOOR;
+            st.G.items.push({ type: 'gold', name: 'gold', value: 5, ch: '$', c: '#ffd700',
+                              x: p.x + 1, y: p.y, rarity: 0, desc: '' });
+            pl.movePlayer(1, 0);
+            out.pickupFx = fx.fxCount();
+            out.goldGone = !st.G.items.some(i => i.x === p.x + 1 && i.y === p.y && i.type === 'gold');
+            return out;
+        }""")
+        check('8b melee kills fire bursts and loot drops (retry past the .3 gate)',
+              fxw['fxTotal'] > 0 and fxw['lootName'] is not None,
+              f"kills={fxw['kills']} fx={fxw['fxTotal']} loot={fxw['lootName']}")
+        check('8b stepping onto gold fires pickup flash',
+              fxw['pickupFx'] > 0 and fxw['goldGone'],
+              f"fx={fxw['pickupFx']} goldGone={fxw['goldGone']}")
+
         browser.close()
 
     fails = [r for r in results if not r[1]]

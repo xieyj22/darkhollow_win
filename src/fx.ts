@@ -128,6 +128,11 @@ export function fxBurst(x: number, y: number, color: string, count = 12, power =
 
 export function clearFx(): void { fxs.length = 0; sparks.length = 0; }
 
+// Test/e2e observable: total live fx entities (flashes/auras/beams + sparks).
+// Zero-cost when unused; lets the in-game verify script assert that wiring
+// sites (level-up aura, loot burst, pickup flash) actually fire.
+export function fxCount(): number { return fxs.length + sparks.length; }
+
 // Draw & advance every active FX/spark. Called once per frame by particles.ts.
 export function drawFx(c: CanvasRenderingContext2D): void {
   if (!fxs.length && !sparks.length) return;

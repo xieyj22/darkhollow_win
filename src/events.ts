@@ -16,7 +16,7 @@ import { grantRelic, hasRelic } from './relics.js';
 import { RELICS, ENEMIES } from './data.js';
 import { updateUI, render } from './render.js';
 import { enterBranch, exitBranch } from './game.js';
-import { EVENT_SITES, type EventSiteDef, type EventSiteId } from './event-sites.js';
+import { EVENT_SITES, type EventSiteDef } from './event-sites.js';
 import { makeEnemy } from './enemy-factory.js';
 
 // Re-export for late-binding
