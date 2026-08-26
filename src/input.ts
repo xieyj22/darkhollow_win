@@ -11,6 +11,7 @@ import { closeItemIntro } from './item-intro.js';
 import { openInventory, closeInventory, openHelp, closeHelp, tryCastSkill, openSkillPanel, closeSkillPanel, openAchievements, closeAchievements, openTalentPanel, closeTalentPanel, sellMode } from './panels.js';
 import { keyToAction, buttonToAction, getCapturing, setCapturing, rebind, rebindButton, bindingFor, gamepadBtnLabel, loadKeybinds, type Action } from './keybinds.js';
 import { t, tMsg } from './i18n.js';
+import { activeMenuContext, menuBack, closeActiveOverlay } from './menu-context.js';
 
 export function initInput(): void {
   // Load persisted keybinds before registering any input listener, so the very
@@ -215,23 +216,6 @@ export function dispatchKeyboardAction(a: Action): void {
     case 'quick8': useQuickSlot(7); break;
     case 'quick9': useQuickSlot(8); break;
   }
-}
-
-// Close whichever overlay is currently open. Returns true if one was closed.
-function closeActiveOverlay(): boolean {
-  if (introOpen) { closeItemIntro(); return true; }
-  if (eventOpen) { closeEvent(); return true; }
-  if (invOpen) { closeInventory(); return true; }
-  if (skillOpen) { closeSkillPanel(); return true; }
-  if (talentOpen) { closeTalentPanel(); return true; }
-  if (achOpen) { closeAchievements(); return true; }
-  if (helpOpen) { closeHelp(); return true; }
-  const forge = document.getElementById('forge-overlay');
-  if (forge && getComputedStyle(forge).display !== 'none') { hideOverlay('forge-overlay'); return true; }
-  const optOv = document.getElementById('options-overlay');
-  if (optOv && optOv.classList.contains('active')) { bridge.closeOptions?.(); return true; }
-  if (menuOpen) { bridge.closePause?.(); return true; }
-  return false;
 }
 
 /**
