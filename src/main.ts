@@ -32,7 +32,7 @@ import { openOptions, closeOptions, renderOptions, applyOptionsUI } from './opti
 import { bridge } from './bridge.js';
 import { updateLangUI, toggleLang, toggleSound, updateSoundBtn, applyAudioUI, minimapZoom } from './ui-settings.js';
 import { applyAll } from './settings.js';
-import { toggleLegend, toggleObjective, toggleKeys, initTooltip, showOverlay, hideOverlay, openPause, closePause, renderRecords, renderCodex } from './ui-panels.js';
+import { toggleLegend, toggleObjective, toggleKeys, initTooltip, initFocusTooltips, showOverlay, hideOverlay, openPause, closePause, renderRecords, renderCodex } from './ui-panels.js';
 import { closeItemIntro } from './item-intro.js';
 import { showCharSelect } from './char-select.js';
 
@@ -219,6 +219,7 @@ window.addEventListener('load', () => {
   initInput();
   initTouchControls();
   initTooltip();
+  initFocusTooltips();
 
   // Browsers suspend AudioContext until a user gesture — unlock on first input,
   // then start the title BGM if we're still on the title screen.

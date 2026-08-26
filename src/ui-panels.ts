@@ -150,6 +150,30 @@ export function initTooltip(): void {
   });
 }
 
+// Batch3A: focus-triggered tooltips. Focusing any element carrying a title
+// attribute (hotbar slots, talent cells, merchant buttons…) shows the shared
+// #tooltip div under the element; blur hides it. Mouse-hover behavior in
+// initTooltip above is untouched — this is additive for keyboard/gamepad focus.
+export function initFocusTooltips(): void {
+  const tt = document.getElementById('tooltip');
+  if (!tt) return;
+  document.addEventListener('focusin', (e) => {
+    const el = (e.target as HTMLElement).closest?.('[title]') as HTMLElement | null;
+    const title = el?.getAttribute('title');
+    if (!el || !title) return;
+    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    tt.innerHTML = `<div class="ttn">${esc(title).replace(/\n/g, '<br>')}</div>`;
+    tt.style.display = 'block';
+    const r = el.getBoundingClientRect();
+    tt.style.left = Math.max(4, Math.min(window.innerWidth - 230, r.left)) + 'px';
+    tt.style.top = (r.bottom + 90 > window.innerHeight ? Math.max(4, r.top - 90) : r.bottom + 8) + 'px';
+  });
+  document.addEventListener('focusout', () => {
+    tt.style.display = 'none';
+    tt.innerHTML = '';
+  });
+}
+
 // ===== Overlay Animation Helpers =====
 let lastFocused: HTMLElement | null = null;
 export function showOverlay(id: string): void {
