@@ -356,7 +356,7 @@ canvas.hb-icon{width:20px;height:20px}
 .death-echoes,.victory-echoes{margin-top:10px}
 
 /* ===== Focus Styles ===== */
-button:focus-visible,.menu-btn:focus-visible,.sb-btn:focus-visible,.close-btn:focus-visible,.evb:focus-visible,.fu-buy:focus-visible,.mc-btn:focus-visible,.keys-x:focus-visible,#keys-toggle:focus-visible,.tb:focus-visible,.forge-tab:focus-visible,.hb-slot:focus-visible,.talent-cell:focus-visible,.opt-tab:focus-visible,.seg button:focus-visible,.kb-rebind:focus-visible,.kb-reset:focus-visible,.toggle input:focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}
+button:focus-visible,.menu-btn:focus-visible,.sb-btn:focus-visible,.close-btn:focus-visible,.evb:focus-visible,.fu-buy:focus-visible,.mc-btn:focus-visible,.keys-x:focus-visible,#keys-toggle:focus-visible,.tb:focus-visible,.forge-tab:focus-visible,.hb-slot:focus-visible,.talent-cell:focus-visible,.opt-tab:focus-visible,.seg button:focus-visible,.kb-rebind:focus-visible,.kb-reset:focus-visible,.toggle input:focus-visible,.race-opt:focus-visible,.class-opt:focus-visible,.mode-opt:focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}
 .gp-focus{outline:2px solid var(--accent-gold);outline-offset:2px}
 
 /* ===== Sidebar Collapse ===== */
