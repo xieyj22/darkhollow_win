@@ -320,7 +320,6 @@ import { closeEvent } from '../events.js';
 beforeEach(() => {
   vi.clearAllMocks();
   document.body.innerHTML = '';
-  Object.values(mockState).forEach(v => { if (typeof v === 'boolean') (mockState as any)[v]; });
   mockState.invOpen = mockState.helpOpen = mockState.skillOpen = false;
   mockState.achOpen = mockState.talentOpen = mockState.eventOpen = false;
   mockState.menuOpen = mockState.introOpen = false;
@@ -564,7 +563,7 @@ describe('menu state — focus navigation', () => {
     expect(movePlayer).not.toHaveBeenCalled();
   });
 
-  it('B in a panel calls menuBack (close ladder) instead of pickup', () => {
+  it('B in a panel calls menuBack (close ladder) instead of pickup', async () => {
     document.body.innerHTML = `<div id="records-overlay" class="overlay active"></div>`;
     press(1);
     // hideOverlay mocked in ui-panels mock — assert via menuBack effect:
@@ -609,8 +608,6 @@ describe('menu state — focus navigation', () => {
   });
 });
 ```
-
-注意：`it('B in a panel…')` 用例含顶层 `await import` —— 该用例须写成 `async () => {...}`（vitest 支持）；提交前把该用例签名改为 `it('...', async () => {`。
 
 - [ ] **Step 2: 跑测试确认失败**
 
