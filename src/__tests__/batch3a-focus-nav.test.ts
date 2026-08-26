@@ -26,6 +26,15 @@ describe('focusablesIn', () => {
     document.body.innerHTML = `<div><button disabled>x</button><button>y</button></div>`;
     expect(focusablesIn(document.querySelector('div')!).length).toBe(1);
   });
+  it('keeps position:fixed elements (offsetParent is null for them per spec)', () => {
+    document.body.innerHTML = `<div><button id="fx" style="position:fixed">x</button><button id="st">y</button></div>`;
+    const fx = document.getElementById('fx')!, st = document.getElementById('st')!;
+    Object.defineProperty(fx, 'offsetParent', { get: () => null, configurable: true });
+    Object.defineProperty(st, 'offsetParent', { get: () => null, configurable: true });
+    const got = focusablesIn(document.querySelector('div')!);
+    expect(got).toContain(fx);    // fixed rescued
+    expect(got).not.toContain(st); // genuinely hidden stays out
+  });
 });
 
 describe('spatialNext — numeric rect geometry', () => {
@@ -39,8 +48,14 @@ describe('spatialNext — numeric rect geometry', () => {
   it('orthogonal offset weighs double: prefers aligned over nearer-but-skewed', () => {
     const cur = { x: 0, y: 0, w: 10, h: 10 };
     const skewed = R(20, 30), aligned = R(40, 2);
-    // skewed: pri=20 + 2*35=90; aligned: pri=40 + 2*7=54 → aligned wins
+    // skewed: pri=20 + 2*30=80; aligned: pri=40 + 2*2=44 → aligned wins
     expect(spatialNext(cur, [skewed, aligned], 1, 0)).toBe(aligned.el);
+  });
+  it('orthogonal offset weighs exactly double (pins the 2x weight)', () => {
+    const cur = { x: 0, y: 0, w: 10, h: 10 };
+    const a = R(40, 0), b = R(10, 20);
+    // a: 40+2×0=40; b: 10+2×20=50 → a wins. With 1× weight b (30) would win.
+    expect(spatialNext(cur, [b, a], 1, 0)).toBe(a.el);
   });
   it('ignores candidates on the wrong side / overlapping the axis', () => {
     const cur = { x: 50, y: 50, w: 10, h: 10 };
@@ -59,8 +74,10 @@ describe('spatialNext — numeric rect geometry', () => {
   });
   it('tie on score falls back to nearest center distance', () => {
     const cur = { x: 0, y: 0, w: 10, h: 10 };
-    const a = R(30, 10), b = R(10, 30); // symmetric scores; a is closer by hypot
-    expect(spatialNext(cur, [a, b], 1, 1)).toBe(a.el);
+    const a = R(30, 10), b = R(26, 12);
+    // both score 50 (pri + 2×orth); b is closer by hypot (≈28.64 < ≈31.62)
+    // and comes SECOND, so the dist tiebreak must flip the winner to b.
+    expect(spatialNext(cur, [a, b], 1, 1)).toBe(b.el);
   });
 });
 

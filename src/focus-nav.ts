@@ -10,11 +10,12 @@ export const FOCUSABLE_SEL =
 
 export function focusablesIn(container: HTMLElement): HTMLElement[] {
   const els = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SEL));
-  return els.filter(el => !(el as HTMLButtonElement).disabled && el.offsetParent !== null);
+  return els.filter(el => !(el as HTMLButtonElement).disabled
+    && (el.offsetParent !== null || getComputedStyle(el).position === 'fixed'));
 }
 
 // Spatial nearest-in-direction: filter to the direction half-plane (candidate
-// center must be ≥1px beyond the current rect on each pressed axis), then pick
+// center must be ≥1px beyond the current center on each pressed axis), then pick
 // the minimum score = primary-axis distance + 2 × orthogonal offset; ties fall
 // back to nearest center distance.
 export function spatialNext(
