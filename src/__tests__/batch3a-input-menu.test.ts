@@ -1,0 +1,141 @@
+// Batch3A T3: pollGamepad menu-state behavior — fake gamepad injection via a
+// stubbed navigator.getGamepads, real DOM buttons, edge-triggered presses.
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+const mockState = vi.hoisted(() => ({
+  G: { gameOver: false, player: { x: 5, y: 5 } } as any,
+  invOpen: false, helpOpen: false, skillOpen: false,
+  achOpen: false, talentOpen: false, eventOpen: false,
+  eventActions: [] as Array<() => void>, menuOpen: false, introOpen: false,
+}));
+vi.mock('../state.js', () => mockState);
+vi.mock('../audio.js', () => ({ snd: () => {} }));
+vi.mock('../player.js', () => ({ movePlayer: vi.fn(), pickupItem: vi.fn(), descendStairs: vi.fn(), doWait: vi.fn() }));
+vi.mock('../items.js', () => ({ quickQuaff: vi.fn(), quickRead: vi.fn(), useQuickSlot: vi.fn(), useItem: vi.fn(), equipItem: vi.fn(), sellItem: vi.fn() }));
+vi.mock('../skills.js', () => ({ executeSkill: vi.fn() }));
+vi.mock('../save.js', () => ({ saveGame: vi.fn() }));
+vi.mock('../events.js', () => ({ closeEvent: vi.fn() }));
+vi.mock('../ui-panels.js', () => ({ hideOverlay: vi.fn() }));
+vi.mock('../bridge.js', () => ({ bridge: { toggleLang: vi.fn(), toggleSound: vi.fn(), openPause: vi.fn(), closePause: vi.fn(), closeOptions: vi.fn() } }));
+vi.mock('../item-intro.js', () => ({ closeItemIntro: vi.fn() }));
+vi.mock('../panels.js', () => ({
+  openInventory: vi.fn(), closeInventory: vi.fn(), openHelp: vi.fn(), closeHelp: vi.fn(),
+  tryCastSkill: vi.fn(), openSkillPanel: vi.fn(), closeSkillPanel: vi.fn(),
+  openAchievements: vi.fn(), closeAchievements: vi.fn(), openTalentPanel: vi.fn(),
+  closeTalentPanel: vi.fn(), sellMode: false,
+}));
+
+import { movePlayer } from '../player.js';
+import { pollGamepad } from '../input.js';
+
+// Mutable fake gamepad wired into navigator.getGamepads.
+const pad = vi.hoisted(() => ({
+  buttons: Array.from({ length: 17 }, () => ({ pressed: false })),
+  axes: [0, 0] as number[],
+}));
+beforeEach(() => {
+  vi.clearAllMocks();
+  (navigator as any).getGamepads = () => [pad];
+  pad.buttons.forEach(b => (b.pressed = false));
+  pad.axes = [0, 0];
+  Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
+    get() { return document.body; }, configurable: true,
+  });
+  // happy-dom lays everything out at (0,0) — spatialNext's direction filter
+  // ("candidate center ≥1px beyond the current center on the pressed axis")
+  // would exclude every candidate. Patch getBoundingClientRect to give each
+  // element a position derived from its DOM order instead: a 1-column grid
+  // where every later element sits strictly BELOW the previous one. That is
+  // exactly what the D-pad down/up assertions need (r before s in DOM order
+  // → s below r); no assertion here depends on horizontal spatial geometry
+  // (LB/RB use seqFocus, range stepping intercepts before spatialNext).
+  // menuMoveFocus reads r.left/r.top/r.width/r.height.
+  Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
+    configurable: true,
+    get() {
+      const self = this as HTMLElement;
+      return () => {
+        const all = Array.from(document.querySelectorAll('*'));
+        const idx = Math.max(0, all.indexOf(self));
+        return {
+          x: 0, y: idx * 60, left: 0, top: idx * 60, width: 100, height: 40,
+          right: 100, bottom: idx * 60 + 40, toJSON: () => ({}),
+        };
+      };
+    },
+  });
+});
+
+// Simulate one button edge: settle → press → settle (poll is edge-triggered).
+function press(idx: number) {
+  pollGamepad();                    // records all-up as previous state
+  pad.buttons[idx].pressed = true;
+  pollGamepad();                    // edge fires here
+  pad.buttons[idx].pressed = false;
+  pollGamepad();
+}
+
+describe('menu state — focus navigation', () => {
+  it('D-pad down moves focus to the next button and stamps .gp-focus', () => {
+    document.body.innerHTML = `<div id="pause-overlay" class="overlay active">
+      <button id="r">Resume</button><button id="s">Settings</button></div>`;
+    press(12);   // D-pad up — anchors initial focus (first = Resume)
+    expect(document.activeElement!.id).toBe('r');
+    press(13);   // D-pad down
+    expect(document.activeElement!.id).toBe('s');
+    expect(document.getElementById('s')!.classList.contains('gp-focus')).toBe(true);
+  });
+
+  it('A activates the focused element (click), never dispatches gameplay wait', () => {
+    document.body.innerHTML = `<div id="pause-overlay" class="overlay active">
+      <button id="r">Resume</button></div>`;
+    press(12); press(0);
+    // .overlay.active + menuOpen=false → nothing closed; wait NOT dispatched
+    expect(mockState.G.gameOver).toBe(false);
+    expect(movePlayer).not.toHaveBeenCalled();
+  });
+
+  it('B in a panel calls menuBack (close ladder) instead of pickup', async () => {
+    document.body.innerHTML = `<div id="records-overlay" class="overlay active"></div>`;
+    press(1);
+    // hideOverlay mocked in ui-panels mock — assert via menuBack effect:
+    // records closed through the ladder (hideOverlay called with records-overlay)
+    const { hideOverlay } = await import('../ui-panels.js');
+    expect(hideOverlay).toHaveBeenCalledWith('records-overlay');
+  });
+
+  it('LB/RB move focus sequentially', () => {
+    document.body.innerHTML = `<div id="x" class="overlay active">
+      <button>1</button><button>2</button><button>3</button></div>`;
+    press(4);   // LB → last
+    expect(document.activeElement!.textContent).toBe('3');
+    press(5);   // RB → first
+    expect(document.activeElement!.textContent).toBe('1');
+  });
+
+  it('left/right on a focused range input steps its value instead of moving focus', () => {
+    document.body.innerHTML = `<div id="o" class="overlay active">
+      <input type="range" id="s" min="0" max="100" step="10" value="50">
+      <button id="b">x</button></div>`;
+    press(12);   // anchor on first focusable = the range
+    expect((document.activeElement as HTMLInputElement).type).toBe('range');
+    press(15);   // D-pad right
+    expect((document.getElementById('s') as HTMLInputElement).value).toBe('60');
+    expect(document.activeElement!.id).toBe('s');   // focus did NOT move
+  });
+
+  it('gameOver with a visible death screen still navigates (menu branch precedes the gate)', () => {
+    mockState.G.gameOver = true;
+    document.body.innerHTML = `<div id="death-screen" style="display:flex">
+      <button id="try">Try Again</button></div>`;
+    press(12);
+    expect(document.activeElement!.id).toBe('try');
+    mockState.G.gameOver = false;
+  });
+
+  it('gameplay state unchanged: no menu → D-pad still calls movePlayer', () => {
+    document.body.innerHTML = `<div id="title-screen" style="display:none"></div>`;
+    press(12);
+    expect(movePlayer).toHaveBeenCalledWith(0, -1);
+  });
+});

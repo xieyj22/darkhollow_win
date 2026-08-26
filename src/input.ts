@@ -12,6 +12,7 @@ import { openInventory, closeInventory, openHelp, closeHelp, tryCastSkill, openS
 import { keyToAction, buttonToAction, getCapturing, setCapturing, rebind, rebindButton, bindingFor, gamepadBtnLabel, loadKeybinds, type Action } from './keybinds.js';
 import { t, tMsg } from './i18n.js';
 import { activeMenuContext, menuBack, closeActiveOverlay } from './menu-context.js';
+import { focusablesIn, spatialNext, stepRange, gpFocus, seqFocus, type FocusRect } from './focus-nav.js';
 
 export function initInput(): void {
   // Load persisted keybinds before registering any input listener, so the very
@@ -55,6 +56,15 @@ export function initInput(): void {
         bridge.renderOptions?.();
         return;
       }
+    }
+
+    // Batch3A: ending-choice is a mandatory modal outside the open-flag
+    // bookkeeping — without this gate gameplay keys (movement!) leak through
+    // while the Slay/Refuse popup is up. Only Tab (native focus trap) passes.
+    const endingOv = document.getElementById('ending-choice');
+    if (endingOv && endingOv.classList.contains('active')) {
+      if (e.key !== 'Tab') e.preventDefault();
+      return;
     }
 
     // F11 toggles real (windowed) fullscreen under Electron; browsers handle their own.
@@ -224,7 +234,8 @@ export function dispatchKeyboardAction(a: Action): void {
  *
  * Preserves the original pollGamepad semantics:
  *   - D-pad / move: only when !overlay
- *   - wait (A): only when !overlay (in overlay mode, A closes via the else-branch)
+ *   - wait (A): only when !overlay (batch3A: in a menu context, pollGamepad's
+ *     menu branch reinterprets A as a click on the focused element instead)
  *   - overlay_close (B): closes an open overlay; ELSE (no overlay) picks up an item.
  *     The B-pickup behavior MUST survive the refactor.
  *   - skill/inventory/quaff/descend: only when !overlay
@@ -250,7 +261,9 @@ export function dispatchGamepadAction(a: Action, overlay: boolean): void {
 // Edge-triggered buttons + a move repeat cooldown so holding a direction steps tile-by-tile.
 let gpPrevBtn: boolean[] = [];
 let gpMoveCd = 0;
-function pollGamepad(): void {
+// Exported (batch3a T3) as the test injection point: tests stub
+// navigator.getGamepads and call pollGamepad() directly to simulate edges.
+export function pollGamepad(): void {
   const pads = navigator.getGamepads ? navigator.getGamepads() : [];
   const gp = pads && pads[0];
   if (!gp) return;
@@ -287,40 +300,92 @@ function pollGamepad(): void {
     }
   }
 
-  const optOv = document.getElementById('options-overlay');
-  const forgeOv = document.getElementById('forge-overlay');
-  const overlay = invOpen || skillOpen || talentOpen || achOpen || helpOpen || eventOpen || menuOpen || introOpen
-    || !!optOv?.classList.contains('active')
-    || (!!forgeOv && getComputedStyle(forgeOv).display !== 'none');
-  if (G && !G.gameOver) {
-    if (!overlay) {
-      // Left stick — 8-direction, 0.5 deadzone, repeat cooldown (NOT a button action)
-      const axes = gp!.axes || [];
-      const ax = axes[0] || 0, ay = axes[1] || 0;
-      if (gpMoveCd <= 0 && (Math.abs(ax) > 0.5 || Math.abs(ay) > 0.5)) {
-        const dx = Math.abs(ax) > 0.5 ? Math.sign(ax) : 0;
-        const dy = Math.abs(ay) > 0.5 ? Math.sign(ay) : 0;
-        movePlayer(dx, dy);
-        gpMoveCd = 8; // ~480ms at 60ms poll — controllable stepping pace
-      }
-      if (gpMoveCd > 0 && Math.abs(ax) <= 0.5 && Math.abs(ay) <= 0.5) gpMoveCd = 0;
+  // Batch3A: menu contexts take precedence over gameplay dispatch. Focus
+  // navigation runs regardless of G / gameOver — this is what makes title,
+  // char-sel, death, victory and ending screens reachable by gamepad.
+  const menu = activeMenuContext();
+  if (menu) {
+    // Anchor: if nothing inside the menu holds focus, focus the first element.
+    const active = document.activeElement as HTMLElement | null;
+    if (!active || !menu.contains(active)) {
+      const first = focusablesIn(menu)[0];
+      if (first) gpFocus(first);
     }
-    // Action buttons (edge-triggered) — dispatch via table lookup. Iterates all buttons
-    // the gamepad reports; unmapped indices (buttonToAction → null) are skipped.
+    // Left stick — directional focus movement, same repeat cooldown as walking.
+    const axes = gp!.axes || [];
+    const ax = axes[0] || 0, ay = axes[1] || 0;
+    if (gpMoveCd <= 0 && (Math.abs(ax) > 0.5 || Math.abs(ay) > 0.5)) {
+      menuMoveFocus(menu,
+        Math.abs(ax) > 0.5 ? Math.sign(ax) as -1 | 1 : 0,
+        Math.abs(ay) > 0.5 ? Math.sign(ay) as -1 | 1 : 0);
+      gpMoveCd = 8;
+    }
+    if (gpMoveCd > 0 && Math.abs(ax) <= 0.5 && Math.abs(ay) <= 0.5) gpMoveCd = 0;
+    // Buttons — edge-triggered, reinterpreted through the user's own bindings:
+    // move_* = spatial focus, wait = activate, overlay_close = back,
+    // quaff/descend (LB/RB) = sequential focus, pause stays pause.
+    for (let i = 0; i < gp.buttons.length; i++) {
+      if (!edge(i)) continue;
+      const a = buttonToAction(i);
+      if (!a) continue;
+      if (a === 'move_up') menuMoveFocus(menu, 0, -1);
+      else if (a === 'move_down') menuMoveFocus(menu, 0, 1);
+      else if (a === 'move_left') menuMoveFocus(menu, -1, 0);
+      else if (a === 'move_right') menuMoveFocus(menu, 1, 0);
+      else if (a === 'wait') {
+        const el = document.activeElement as HTMLElement | null;
+        if (el && menu.contains(el)) el.click();
+      }
+      else if (a === 'overlay_close') menuBack();
+      else if (a === 'quaff') seqFocus(menu, -1);
+      else if (a === 'descend') seqFocus(menu, 1);
+      else if (a === 'pause') {
+        if (menuOpen) bridge.closePause?.();
+        else if (G && !G.gameOver) bridge.openPause?.();
+      }
+    }
+  } else if (G && !G.gameOver) {
+    // ---- gameplay dispatch (pre-batch3A behavior, unchanged) ----
+    // Left stick — 8-direction, 0.5 deadzone, repeat cooldown (NOT a button action)
+    const axes = gp!.axes || [];
+    const ax = axes[0] || 0, ay = axes[1] || 0;
+    if (gpMoveCd <= 0 && (Math.abs(ax) > 0.5 || Math.abs(ay) > 0.5)) {
+      const dx = Math.abs(ax) > 0.5 ? Math.sign(ax) : 0;
+      const dy = Math.abs(ay) > 0.5 ? Math.sign(ay) : 0;
+      movePlayer(dx, dy);
+      gpMoveCd = 8; // ~480ms at 60ms poll — controllable stepping pace
+    }
+    if (gpMoveCd > 0 && Math.abs(ax) <= 0.5 && Math.abs(ay) <= 0.5) gpMoveCd = 0;
+    // Action buttons (edge-triggered) — dispatch via table lookup.
     for (let i = 0; i < gp.buttons.length; i++) {
       if (edge(i)) {
         const a = buttonToAction(i);
-        if (a) dispatchGamepadAction(a, overlay);
+        if (a) dispatchGamepadAction(a, false);
       }
     }
-  } else if (overlay) {
-    // No active game (or gameOver) but an overlay is open — A or B closes it.
-    // (Not routed through dispatchGamepadAction: in this context A closes the
-    //  overlay rather than performing its gameplay `wait` action.)
-    if (edge(0) || edge(1)) closeActiveOverlay();
   }
   if (gpMoveCd > 0) gpMoveCd--;
   gpPrevBtn = gp.buttons.map(b => !!(b && b.pressed));
+}
+
+// Batch3A: directional focus move within a menu context. A focused range input
+// captures horizontal input for value adjustment instead of moving focus.
+function menuMoveFocus(menu: HTMLElement, dx: -1 | 0 | 1, dy: -1 | 0 | 1): void {
+  if (!dx && !dy) return;
+  const active = document.activeElement as HTMLElement | null;
+  const inMenu = !!(active && menu.contains(active));
+  if (dx !== 0 && inMenu && active instanceof HTMLInputElement && active.type === 'range') {
+    if (stepRange(active, dx)) return;
+  }
+  const list = focusablesIn(menu);
+  if (!list.length) return;
+  const from = inMenu && list.includes(active!) ? active! : list[0];
+  const rect = (el: HTMLElement): FocusRect => {
+    const r = el.getBoundingClientRect();
+    return { x: r.left, y: r.top, w: r.width, h: r.height };
+  };
+  const next = spatialNext(rect(from), list.map(el => ({ el, r: rect(el) })), dx, dy);
+  if (next && next !== from) gpFocus(next);
 }
 
 // Touch controls setup
