@@ -11,6 +11,7 @@ import { getMeta } from './meta.js';
 import { CLASSES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, ENDLESS_GEAR, RELICS } from './data.js';
 import { LORE_ENTRIES, LORE_CATS } from './lore.js';
 import { bridge } from './bridge.js';
+import { clearGpFocus } from './focus-nav.js';
 
 // ===== Legend toggle =====
 export function toggleLegend(): void {
@@ -195,6 +196,10 @@ export function hideOverlay(id: string): void {
   if (!el) return;
   el.classList.remove('active');
   setTimeout(() => { if (!el.classList.contains('active')) el.style.display = 'none'; }, 200);
+  // Batch3A review fix: the gamepad focus ring dies with the panel — otherwise a
+  // stale .gp-focus outline lingers on the hidden element and shows up beside
+  // showOverlay's focused ✕ when the panel is reopened by keyboard.
+  clearGpFocus();
   // Restore focus to whatever opened the overlay
   if (lastFocused) { try { lastFocused.focus(); } catch { /* element may be gone */ } lastFocused = null; }
 }

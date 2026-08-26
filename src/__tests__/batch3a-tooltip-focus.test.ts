@@ -14,7 +14,8 @@ vi.mock('../state.js', () => ({
 vi.mock('../i18n.js', () => ({ t: (k: string) => k, tx: (v: { en: string }) => v.en }));
 vi.mock('../bridge.js', () => ({ bridge: {} }));
 
-import { initFocusTooltips } from '../ui-panels.js';
+import { initFocusTooltips, hideOverlay } from '../ui-panels.js';
+import { gpFocus } from '../focus-nav.js';
 
 beforeEach(() => {
   document.body.innerHTML = `<div id="tooltip"></div>
@@ -36,5 +37,19 @@ describe('focus-triggered tooltip', () => {
     expect(document.getElementById('tooltip')!.style.display).toBe('none');
     document.getElementById('c')!.focus();
     expect(document.getElementById('tooltip')!.style.display).toBe('none');
+  });
+});
+
+// Batch3A final-review fix: hideOverlay must clear the .gp-focus ring — a stale
+// gold outline on the hidden element would show up beside showOverlay's focused
+// ✕ the next time the panel opens via keyboard.
+describe('hideOverlay clears the gp-focus ring', () => {
+  it('closing an overlay strips .gp-focus from its elements', () => {
+    document.body.innerHTML = `<div id="tooltip"></div>
+      <div id="pause-overlay"><button class="close-btn" id="x">✕</button><button id="r">Resume</button></div>`;
+    gpFocus(document.getElementById('r')!);   // gamepad nav focused Resume in the panel
+    expect(document.getElementById('r')!.classList.contains('gp-focus')).toBe(true);
+    hideOverlay('pause-overlay');
+    expect(document.querySelectorAll('.gp-focus').length).toBe(0);
   });
 });

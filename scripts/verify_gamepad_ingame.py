@@ -107,6 +107,42 @@ def main():
             check('3 spatial nav reaches class column; A selects Mage', sel == 2,
                   f"race→{f1} →{f2} selIdx={sel}")
 
+            # [3b] Mode column (rightmost of the three): A-select the NON-default
+            #      mode (Endless, idx 1), assert aria-pressed mirrors it, then
+            #      re-select the default (Normal) so the run below stays Normal —
+            #      endless changes gameplay, and [4] continues from there as today.
+            #      Geometry note: the mode column is far right (option centers
+            #      x≈1045 vs Mage x≈522), so D-right from Mage diagonally picks
+            #      char-back-btn (score 249+2·154 < 523+2·95); one more D-right
+            #      from there reaches Endless. The loop adapts either way.
+            press(page, 15)   # right → out of the class column
+            mst = 'no'
+            for _ in range(5):
+                mst = page.evaluate("""() => {
+                    const el = document.activeElement;
+                    return el && el.classList.contains('mode-opt') ? el.dataset.idx : 'no';
+                }""")
+                if mst == '1':
+                    break
+                # Not on Endless yet: on Normal (idx 0) step DOWN to it; anywhere
+                # else (e.g. the diagonal landed on the button row) keep going right.
+                press(page, 13 if mst == '0' else 15)
+            m1 = None
+            if mst == '1':
+                press(page, 0)    # A on Endless
+                m1 = page.evaluate(
+                    "[...document.querySelectorAll('.mode-opt')].map(e => e.getAttribute('aria-pressed'))")
+            check('3b A on mode-opt selects Endless (aria-pressed)', m1 == ['false', 'true'],
+                  f"pressed={m1} landedOn={mst}")
+            m2 = None
+            if m1 == ['false', 'true']:
+                press(page, 12)   # up → Normal (mode idx 0)
+                press(page, 0)    # A re-selects the default mode
+                m2 = page.evaluate(
+                    "[...document.querySelectorAll('.mode-opt')].map(e => e.getAttribute('aria-pressed'))")
+            check('3b A re-selects Normal (default restored)', m2 == ['true', 'false'],
+                  f"pressed={m2}")
+
             # [4] Focus Begin (bottom row) → A starts the game. Down through the
             #     class column lands on the button row at EITHER button (spatial
             #     tie between start/char-back); if we land on Back, one D-left.
@@ -189,6 +225,53 @@ def main():
             press(page, 1); page.wait_for_timeout(400)      # B: pause→gameplay
             check('8 B×2 returns to gameplay',
                   not page.evaluate("document.querySelector('.overlay.active')"))
+
+            # [8b] Event popup choice, pure gamepad (spec acceptance "事件弹窗做选择"):
+            #      live-inject showEvent('chest') via the plain-URL live-import pattern
+            #      (same module instance the page graph runs), let the 60ms poll anchor
+            #      focus on the 1st .evb, D-pad to the 2nd option (Leave — deterministic:
+            #      popup closes, no RNG like chestOpen), A-activate, assert closure.
+            #      Failing loudly here also proves activeMenuContext detects #event-popup.
+            evbtn = page.evaluate("""async () => {
+                const ev = await import('/src/events.ts');
+                if (typeof ev.showEvent !== 'function') return 'no-showEvent';
+                ev.showEvent('chest');
+                return document.querySelectorAll('#ev-buttons .evb').length;
+            }""")
+            page.wait_for_timeout(250)   # ≥1 poll tick: anchor focus on .evb[0]
+            anchor = page.evaluate("""() => {
+                const b = document.querySelectorAll('#ev-buttons .evb');
+                return { n: b.length,
+                         open: getComputedStyle(document.getElementById('event-popup')).display !== 'none',
+                         anchored: b.length > 0 && document.activeElement === b[0],
+                         ring: b.length > 0 && b[0].classList.contains('gp-focus') };
+            }""")
+            check('8b live-injected chest event anchors gamepad focus (.evb[0] ring)',
+                  anchor.get('open') and anchor.get('anchored') and anchor.get('ring'),
+                  f"evbtn={evbtn} anchor={anchor}")
+            # .evb buttons are inline-block — the 2nd sits beside OR below the 1st
+            # depending on label widths; try D-down, then D-right if it didn't move.
+            press(page, 13)   # D-down
+            on2 = page.evaluate("""() => {
+                const b = document.querySelectorAll('#ev-buttons .evb');
+                return b.length >= 2 && document.activeElement === b[1] && b[1].classList.contains('gp-focus');
+            }""")
+            if not on2:
+                press(page, 15)   # D-right
+                on2 = page.evaluate("""() => {
+                    const b = document.querySelectorAll('#ev-buttons .evb');
+                    return b.length >= 2 && document.activeElement === b[1] && b[1].classList.contains('gp-focus');
+                }""")
+            check('8b D-pad moves .gp-focus onto the 2nd event option', on2)
+            press(page, 0)    # A = click → [2] Leave → closeEvent
+            page.wait_for_timeout(300)
+            closed = page.evaluate("""async () => {
+                const st = await import('/src/state.ts');
+                return { hidden: getComputedStyle(document.getElementById('event-popup')).display === 'none',
+                         eventOpen: st.eventOpen === false };
+            }""")
+            check('8b A on the option chooses Leave — popup closes (eventOpen=false)',
+                  closed.get('hidden') and closed.get('eventOpen'), f"closed={closed}")
 
             # [9] Death: the real path — every death funnels into combat.playerDeath
             #     (attack() hp<=0, starvation/poison/corruption). Call it with hp=0.
