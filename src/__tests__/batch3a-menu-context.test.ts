@@ -82,6 +82,11 @@ describe('closeActiveOverlay ladder (migrated from input.ts)', () => {
     expect(closeActiveOverlay()).toBe(true);
     expect(hideOverlay).toHaveBeenCalledWith('forge-overlay');
   });
+  it('codex tier mirrors records: .active → hideOverlay(codex-overlay)', () => {
+    document.body.innerHTML = `<div id="codex-overlay" class="overlay active"></div>`;
+    expect(closeActiveOverlay()).toBe(true);
+    expect(hideOverlay).toHaveBeenCalledWith('codex-overlay');
+  });
   it('never closes ending-choice even though it is .overlay.active', () => {
     document.body.innerHTML = `<div id="ending-choice" class="overlay active"></div>`;
     expect(closeActiveOverlay()).toBe(false);

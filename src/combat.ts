@@ -513,14 +513,23 @@ function presentCreatorChoice(p: Player): void {
   const rb = document.getElementById('btn-ending-refuse') as HTMLButtonElement;
   rb.disabled = !refuse;
   rb.style.opacity = refuse ? '1' : '0.4';
-  document.getElementById('ending-choice')!.style.display = 'flex';
+  // Batch3A: join the .overlay.active lifecycle like showOverlay does — the
+  // menu-context probe AND the .overlay{opacity:0}/.overlay.active{opacity:1}
+  // CSS both key off .active (bare display:'flex' left the panel at opacity:0).
+  const ec = document.getElementById('ending-choice')!;
+  ec.classList.add('active');
+  ec.style.display = 'flex';
 }
 
 // Resolve the Slay/Refuse choice → ending (title/body) + record achievement + victory screen.
 export function resolveEnding(choice: 'slay' | 'refuse'): void {
   if (!G) return;
   const p = G.player;
-  document.getElementById('ending-choice')!.style.display = 'none';
+  // Single hide site shared by both choices — drop .active with the display so
+  // the menu-context probe doesn't see a dead screen (mirrors hideOverlay).
+  const ec = document.getElementById('ending-choice')!;
+  ec.classList.remove('active');
+  ec.style.display = 'none';
   const id = endingForChoice(choice, p.corruption);
   const e = ENDINGS[id];
   checkAch(e.ach); // records the ending achievement (+ Steam)

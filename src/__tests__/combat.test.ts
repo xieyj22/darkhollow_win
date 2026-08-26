@@ -71,13 +71,14 @@ vi.mock('../talents.js', () => ({
 vi.mock('../steam.js', () => ({ unlockAchievement: () => {} }));
 vi.mock('../item-gen.js', () => ({ genEndlessGear: () => ({}), endlessLuckMult: () => 1 }));
 vi.mock('../endings.js', () => ({
-  ENDINGS: {},
+  // pyrrhic entry required by resolveEnding (ENDINGS[endingForChoice(...)].ach)
+  ENDINGS: { pyrrhic: { ach: 'ach_ending_pyrrhic', title: { en: 'T' }, body: { en: 'B' } } },
   endingForChoice: () => 'pyrrhic',
   canRefuse: () => true,
 }));
 // corruption.js stays REAL (pure module) so applyCorruption's addCorruption call mutates.
 
-import { playerDeath, playerVictory, applyCorruption } from '../combat.js';
+import { playerDeath, playerVictory, applyCorruption, resolveEnding } from '../combat.js';
 import { creditSoulEchoes } from '../meta.js';
 
 function fixtureG(): any {
@@ -156,5 +157,41 @@ describe('P0-5 playerVictory clears run save immediately', () => {
     localStorage.setItem('dh_save', JSON.stringify({ floor: 40 }));
     playerVictory();
     expect(localStorage.getItem('dh_save')).toBeNull();
+  });
+});
+
+// Batch3A T2 review Imp1: #ending-choice must join the .overlay.active lifecycle.
+// It has class="overlay" in index.html but was shown/hidden via bare inline display,
+// so it never gained .active — menu-context's .overlay.active probe saw nothing AND
+// the .overlay{opacity:0}/.overlay.active{opacity:1} CSS rendered the panel invisible.
+describe('Batch3A T2 review Imp1: ending-choice .active lifecycle', () => {
+  beforeEach(() => {
+    (globalThis as any).G = fixtureG();
+    document.body.innerHTML = DOM_HTML;
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it('playerVictory → presentCreatorChoice marks #ending-choice .overlay.active', () => {
+    playerVictory();
+    const ec = document.getElementById('ending-choice')!;
+    expect(ec.classList.contains('active')).toBe(true);
+    expect(ec.style.display).toBe('flex');
+  });
+
+  it("resolveEnding('slay') removes .active (probe won't see a dead screen)", () => {
+    playerVictory();
+    expect(document.getElementById('ending-choice')!.classList.contains('active')).toBe(true); // pre: add worked
+    resolveEnding('slay');
+    expect(document.getElementById('ending-choice')!.classList.contains('active')).toBe(false);
+    expect(document.getElementById('ending-choice')!.style.display).toBe('none');
+  });
+
+  it("resolveEnding('refuse') removes .active too", () => {
+    playerVictory();
+    expect(document.getElementById('ending-choice')!.classList.contains('active')).toBe(true); // pre: add worked
+    resolveEnding('refuse');
+    expect(document.getElementById('ending-choice')!.classList.contains('active')).toBe(false);
+    expect(document.getElementById('ending-choice')!.style.display).toBe('none');
   });
 });
