@@ -1,6 +1,6 @@
 // Batch3A T3: pollGamepad menu-state behavior — fake gamepad injection via a
 // stubbed navigator.getGamepads, real DOM buttons, edge-triggered presses.
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
 
 const mockState = vi.hoisted(() => ({
   G: { gameOver: false, player: { x: 5, y: 5 } } as any,
@@ -26,7 +26,7 @@ vi.mock('../panels.js', () => ({
 }));
 
 import { movePlayer } from '../player.js';
-import { pollGamepad } from '../input.js';
+import { pollGamepad, initInput } from '../input.js';
 
 // Mutable fake gamepad wired into navigator.getGamepads.
 const pad = vi.hoisted(() => ({
@@ -86,13 +86,16 @@ describe('menu state — focus navigation', () => {
     expect(document.getElementById('s')!.classList.contains('gp-focus')).toBe(true);
   });
 
-  it('A activates the focused element (click), never dispatches gameplay wait', () => {
+  it('A activates the focused element (click), never dispatches gameplay wait', async () => {
+    let clicked = false;
     document.body.innerHTML = `<div id="pause-overlay" class="overlay active">
       <button id="r">Resume</button></div>`;
-    press(12); press(0);
-    // .overlay.active + menuOpen=false → nothing closed; wait NOT dispatched
-    expect(mockState.G.gameOver).toBe(false);
-    expect(movePlayer).not.toHaveBeenCalled();
+    document.getElementById('r')!.addEventListener('click', () => { clicked = true; });
+    press(12);   // anchor Resume
+    press(0);    // A
+    expect(clicked).toBe(true);
+    const { doWait } = await import('../player.js');
+    expect(doWait).not.toHaveBeenCalled();
   });
 
   it('B in a panel calls menuBack (close ladder) instead of pickup', async () => {
@@ -126,16 +129,59 @@ describe('menu state — focus navigation', () => {
 
   it('gameOver with a visible death screen still navigates (menu branch precedes the gate)', () => {
     mockState.G.gameOver = true;
-    document.body.innerHTML = `<div id="death-screen" style="display:flex">
-      <button id="try">Try Again</button></div>`;
-    press(12);
-    expect(document.activeElement!.id).toBe('try');
-    mockState.G.gameOver = false;
+    try {
+      document.body.innerHTML = `<div id="death-screen" style="display:flex">
+        <button id="try">Try Again</button></div>`;
+      press(12);
+      expect(document.activeElement!.id).toBe('try');
+    } finally {
+      mockState.G.gameOver = false;   // never leak into the next test
+    }
   });
 
   it('gameplay state unchanged: no menu → D-pad still calls movePlayer', () => {
     document.body.innerHTML = `<div id="title-screen" style="display:none"></div>`;
     press(12);
     expect(movePlayer).toHaveBeenCalledWith(0, -1);
+  });
+});
+
+describe('ending-choice keyboard gate — Tab enclosed, all other keys gated', () => {
+  // Register the REAL keydown listener exactly once for the file (calling
+  // initInput per test would stack listeners and double-wrap Tab). This also
+  // starts the 60ms pollGamepad interval — harmless: the fake pad reports
+  // all-up and focus stays inside the popup, so no dispatch ever fires.
+  // This describe runs last, so the listener never touches earlier tests.
+  beforeAll(() => { initInput(); });
+
+  function key(k: string, shiftKey = false): KeyboardEvent {
+    return new KeyboardEvent('keydown', { key: k, shiftKey, bubbles: true, cancelable: true });
+  }
+
+  it('Tab wraps within #ending-choice — never escapes the popup', () => {
+    document.body.innerHTML = `<div id="ending-choice" class="overlay active">
+      <button id="slay">Slay</button><button id="refuse">Refuse</button></div>`;
+    const ec = document.getElementById('ending-choice')!;
+    // Last button + Tab → wraps to first, still inside the popup.
+    document.getElementById('refuse')!.focus();
+    document.dispatchEvent(key('Tab'));
+    expect(document.activeElement!.id).toBe('slay');
+    expect(ec.contains(document.activeElement)).toBe(true);
+    // First button + Shift+Tab → wraps to last.
+    document.dispatchEvent(key('Tab', true));
+    expect(document.activeElement!.id).toBe('refuse');
+    expect(ec.contains(document.activeElement)).toBe(true);
+  });
+
+  it('Enter is prevented and gameplay keys do not leak through the gate', () => {
+    document.body.innerHTML = `<div id="ending-choice" class="overlay active">
+      <button id="slay">Slay</button><button id="refuse">Refuse</button></div>`;
+    document.getElementById('slay')!.focus();
+    const ev = key('Enter');
+    document.dispatchEvent(ev);
+    expect(ev.defaultPrevented).toBe(true);
+    // Movement must NOT dispatch while the mandatory Slay/Refuse popup is up.
+    document.dispatchEvent(key('w'));
+    expect(movePlayer).not.toHaveBeenCalled();
   });
 });

@@ -60,10 +60,22 @@ export function initInput(): void {
 
     // Batch3A: ending-choice is a mandatory modal outside the open-flag
     // bookkeeping — without this gate gameplay keys (movement!) leak through
-    // while the Slay/Refuse popup is up. Only Tab (native focus trap) passes.
+    // while the Slay/Refuse popup is up. Tab stays TRAPPED in the popup
+    // (wrap-around cycle) — escaping to HUD controls the gate itself keeps
+    // unactivatable would strand the player outside the choice.
     const endingOv = document.getElementById('ending-choice');
     if (endingOv && endingOv.classList.contains('active')) {
-      if (e.key !== 'Tab') e.preventDefault();
+      if (e.key === 'Tab') {
+        // Same selector + visibility filter as the generic overlay trap below.
+        const foci = Array.from(endingOv.querySelectorAll<HTMLElement>('button,[tabindex="0"]'))
+          .filter(el => el.offsetParent !== null); // visible only
+        if (foci.length) {
+          const idx = foci.indexOf(document.activeElement as HTMLElement);
+          e.preventDefault();
+          (foci[e.shiftKey ? (idx <= 0 ? foci.length - 1 : idx - 1)
+                            : (idx === foci.length - 1 ? 0 : idx + 1)] as HTMLElement).focus();
+        }
+      } else { e.preventDefault(); }
       return;
     }
 
