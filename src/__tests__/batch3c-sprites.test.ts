@@ -31,6 +31,27 @@ describe('batch3c T2: talent real-data gate', () => {
   });
 });
 
+// NOTE(plan deviation): the plan/brief counted 31 achievements / 27 meta
+// upgrades; the shipped tables have 29 / 22 (same miscount pattern T2 hit on
+// the 64-node talent total). Gates assert the real totals so accidental row
+// loss also fails.
+describe('batch3c T3: achievement + forge real-data gates', () => {
+  it('every ACH_DEFS entry has tpl in TEMPLATES', () => {
+    expect(ACH_DEFS.length).toBe(29);
+    for (const a of ACH_DEFS) {
+      expect(a.tpl, `ach ${a.id} missing tpl`).toBeTruthy();
+      expect(TEMPLATES[a.tpl!], `ach ${a.id} tpl ${a.tpl} not in TEMPLATES`).toBeTruthy();
+    }
+  });
+  it('every META_UPGRADES entry has tpl in TEMPLATES', () => {
+    expect(META_UPGRADES.length).toBe(22);
+    for (const m of META_UPGRADES) {
+      expect(m.tpl, `meta ${m.id} missing tpl`).toBeTruthy();
+      expect(TEMPLATES[m.tpl!], `meta ${m.id} tpl ${m.tpl} not in TEMPLATES`).toBeTruthy();
+    }
+  });
+});
+
 describe('batch3c T1: theme templates present & single-hue letter discipline', () => {
   const SINGLE = new Set(['M', 'D', 'L', 'E', 'K', 'W', 'C', 'G', 'N', 'V']);
   it('every T_ template is 16x16 (shape guard covers) and single-hue ones only use buildPalette letters', () => {

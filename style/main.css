@@ -138,6 +138,7 @@ canvas#game-canvas{image-rendering:pixelated;transition:transform .05s,opacity .
 .ai{padding:6px 10px;margin:4px 0;border:1px solid var(--border-default);border-radius:var(--radius-sm);display:flex;align-items:center;gap:10px}
 .ai.u{border-color:#ffd70044;background:#ffd70008}.ai.l{opacity:.4}
 .ai .aic{font-size:1.5em}.ai .ain{color:var(--accent-gold);font-weight:bold}.ai .aid{color:var(--text-secondary);font-size:.85em}
+.aic .ach-ic{width:18px;height:18px;image-rendering:pixelated;vertical-align:middle}
 
 /* ===== Death Screen ===== */
 #death-screen,#victory-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:900;flex-direction:column;align-items:center;justify-content:center}
@@ -339,6 +340,7 @@ canvas.hb-icon{width:20px;height:20px}
 .forge-upgrade:hover{border-color:#4895ef44;background:#ffffff05}
 .forge-upgrade.maxed{border-color:#ffd70044;background:#ffd70008}
 .fu-icon{font-size:1.5em;min-width:30px;text-align:center}
+.fu-icon .fu-ic{width:20px;height:20px;image-rendering:pixelated;vertical-align:middle}
 .fu-info{flex:1;min-width:0}
 .fu-name{color:var(--text-bright);font-weight:bold;font-size:.95em}
 .fu-desc{color:var(--text-secondary);font-size:.8em;margin-top:2px}

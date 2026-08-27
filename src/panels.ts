@@ -276,6 +276,10 @@ function await_getClasses() {
 
 // --- Achievements ---
 
+// Batch3c T3: fallback hue for achievement defs without a per-def hue
+// (multi-hue THEME_PAL templates ignore it). Matches the plan's ach base.
+const ACH_DEFAULT_HUE = '#8a5de5';
+
 export function openAchievements(): void {
   setAchOpen(true);
   showOverlay('achievement-overlay');
@@ -296,9 +300,12 @@ function renderAch(): void {
     const u = G.player.achievements.has(a.id) || getMeta().achievements.includes(a.id);
     const d = document.createElement('div');
     d.className = `ai ${u ? 'u' : 'l'}`;
-    d.innerHTML = `<span class="aic">${a.icon}</span><div><div class="ain">${tx(a.n)}</div><div class="aid">${tx(a.d)}</div></div>`;
+    d.innerHTML = `<span class="aic"><canvas class="lic ach-ic" width="16" height="16" data-kind="${a.tpl || 'T_RUNE'}" data-color="${a.hue || ACH_DEFAULT_HUE}"></canvas></span><div><div class="ain">${tx(a.n)}</div><div class="aid">${tx(a.d)}</div></div>`;
     div.appendChild(d);
   }
+
+  // Batch3c T3: all rows are attached — paint their theme sprites in one pass.
+  div.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || ACH_DEFAULT_HUE));
 }
 
 // --- Talent panel ---

@@ -5,6 +5,7 @@ import { META_UPGRADES, ACH_DEFS, RELICS } from './data.js';
 import { snd } from './audio.js';
 import { t, tx } from './i18n.js';
 import { addMsg } from './messages.js';
+import { paintIcon } from './sprites.js';
 
 const META_KEY = 'dh_meta';
 
@@ -341,6 +342,11 @@ export function renderForge(): void {
   renderForgeContent();
 }
 
+// Batch3c T3: fallback hue for Forge upgrade defs without a per-def hue
+// (multi-hue THEME_PAL templates ignore it). Cyan base marks the soul-echo
+// meta-resource system.
+const META_DEFAULT_HUE = '#4ad6c0';
+
 function renderForgeContent(): void {
   const content = document.getElementById('forge-content');
   if (!content) return;
@@ -356,7 +362,7 @@ function renderForgeContent(): void {
     let dots = '';
     for (let i = 0; i < def.maxLevel; i++) dots += i < level ? '●' : '○';
     html += `<div class="forge-upgrade${maxed ? ' maxed' : ''}">
-      <div class="fu-icon">${def.icon}</div>
+      <div class="fu-icon"><canvas class="lic fu-ic" width="16" height="16" data-kind="${def.tpl || 'T_RUNE'}" data-color="${def.hue || META_DEFAULT_HUE}"></canvas></div>
       <div class="fu-info">
         <div class="fu-name">${tx(def.n)}</div>
         <div class="fu-desc">${tx(def.d)}</div>
@@ -370,6 +376,9 @@ function renderForgeContent(): void {
   }
   if (!upgrades.length) html = `<div style="color:#666;text-align:center;padding:20px">${t('mt.noUpgrades')}</div>`;
   content.innerHTML = html;
+
+  // Batch3c T3: paint the theme sprites now that the rows are in the DOM.
+  content.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || META_DEFAULT_HUE));
 
   // Bind buy buttons
   content.querySelectorAll('.fu-buy:not(.disabled)').forEach(btn => {

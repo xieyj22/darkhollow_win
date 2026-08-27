@@ -304,38 +304,43 @@ export const BOSSES: BossDef[] = [
 ];
 
 export const ACH_DEFS: AchievementDef[] = [
-  { id: 'first_kill', icon: '⚔', n: { en: 'First Blood', zh: '初见血' }, d: { en: 'Kill your first enemy', zh: '击杀第一个敌人' } },
-  { id: 'kill_10', icon: '💀', n: { en: 'Monster Slayer', zh: '怪物猎人' }, d: { en: 'Kill 10 enemies', zh: '击杀10个敌人' } },
-  { id: 'kill_50', icon: '☠️', n: { en: 'Massacre', zh: '屠杀者' }, d: { en: 'Kill 50 enemies', zh: '击杀50个敌人' } },
-  { id: 'kill_100', icon: '⚔', n: { en: 'Century Slayer', zh: '百人斩' }, d: { en: 'Kill 100 enemies', zh: '击杀100个敌人' } },
-  { id: 'kill_200', icon: '⚔', n: { en: 'Army Breaker', zh: '破军' }, d: { en: 'Kill 200 enemies', zh: '击杀200个敌人' } },
-  { id: 'boss_kill', icon: '👑', n: { en: 'Boss Slayer', zh: 'Boss杀手' }, d: { en: 'Defeat a boss', zh: '击败一个Boss' } },
-  { id: 'floor5', icon: '🗡️', n: { en: 'Deep Explorer', zh: '深层探索者' }, d: { en: 'Reach floor 5', zh: '到达第5层' } },
-  { id: 'floor15', icon: '🕳️', n: { en: 'Abyss Walker', zh: '深渊行者' }, d: { en: 'Reach floor 15', zh: '到达第15层' } },
-  { id: 'floor25', icon: '🐉', n: { en: 'Dragon Slayer', zh: '屠龙者' }, d: { en: 'Reach floor 25', zh: '到达第25层' } },
-  { id: 'floor30', icon: '🌀', n: { en: 'Abyssal Diver', zh: '深渊潜水者' }, d: { en: 'Reach floor 30', zh: '到达第30层' } },
-  { id: 'floor35', icon: '🌀', n: { en: 'Void Walker', zh: '虚空行者' }, d: { en: 'Reach floor 35', zh: '到达第35层' } },
-  { id: 'floor40', icon: '👑', n: { en: 'Sanctum Conqueror', zh: '圣殿征服者' }, d: { en: 'Reach floor 40', zh: '到达第40层' } },
-  { id: 'legendary', icon: '🌟', n: { en: 'Legendary Find', zh: '传说发现' }, d: { en: 'Find a legendary item', zh: '找到一件传说装备' } },
-  { id: 'streak5', icon: '🔥', n: { en: 'On Fire!', zh: '火力全开！' }, d: { en: '5 kill streak', zh: '5连杀' } },
-  { id: 'gold500', icon: '💰', n: { en: 'Rich', zh: '富翁' }, d: { en: 'Accumulate 500 gold', zh: '累积500金币' } },
-  { id: 'gold1000', icon: '💎', n: { en: 'Tycoon', zh: '大富翁' }, d: { en: 'Accumulate 1000 gold', zh: '累积1000金币' } },
-  { id: 'gold5000', icon: '👑', n: { en: "Dragon's Hoard", zh: '龙之宝库' }, d: { en: 'Accumulate 5000 gold', zh: '累积5000金币' } },
-  { id: 'lvl10', icon: '⭐', n: { en: 'Veteran', zh: '老兵' }, d: { en: 'Reach level 10', zh: '到达10级' } },
-  { id: 'lvl20', icon: '⭐⭐', n: { en: 'Elite', zh: '精英' }, d: { en: 'Reach level 20', zh: '到达20级' } },
-  { id: 'lvl30', icon: '⭐⭐⭐', n: { en: 'Legend', zh: '传奇' }, d: { en: 'Reach level 30', zh: '到达30级' } },
-  { id: 'win', icon: '🏆', n: { en: 'Champion', zh: '冠军' }, d: { en: 'Beat the game', zh: '通关游戏' } },
-  { id: 'creator_kill', icon: '🏆', n: { en: 'Godslayer', zh: '弑神者' }, d: { en: 'Defeat The Creator', zh: '击败创世者' } },
+  // Batch3c T3 tpl/hue routing: kill family = T_SWORD/T_SKULL with a
+  // red-brown gradient that deepens with the count (emoji skulls honored);
+  // boss/warden = crown/trophy gold; floor_* = T_BOOT greens; endless_* =
+  // T_SHADOW (THEME_PAL, no hue); gold = T_COIN; levels = T_STAR; endings
+  // follow their emoji semantics.
+  { id: 'first_kill', icon: '⚔', n: { en: 'First Blood', zh: '初见血' }, d: { en: 'Kill your first enemy', zh: '击杀第一个敌人' }, tpl: 'T_SWORD', hue: '#b85a4a' },
+  { id: 'kill_10', icon: '💀', n: { en: 'Monster Slayer', zh: '怪物猎人' }, d: { en: 'Kill 10 enemies', zh: '击杀10个敌人' }, tpl: 'T_SKULL', hue: '#b85a4a' },
+  { id: 'kill_50', icon: '☠️', n: { en: 'Massacre', zh: '屠杀者' }, d: { en: 'Kill 50 enemies', zh: '击杀50个敌人' }, tpl: 'T_SKULL', hue: '#8a3a2a' },
+  { id: 'kill_100', icon: '⚔', n: { en: 'Century Slayer', zh: '百人斩' }, d: { en: 'Kill 100 enemies', zh: '击杀100个敌人' }, tpl: 'T_SWORD', hue: '#a04434' },
+  { id: 'kill_200', icon: '⚔', n: { en: 'Army Breaker', zh: '破军' }, d: { en: 'Kill 200 enemies', zh: '击杀200个敌人' }, tpl: 'T_SWORD', hue: '#86342a' },
+  { id: 'boss_kill', icon: '👑', n: { en: 'Boss Slayer', zh: 'Boss杀手' }, d: { en: 'Defeat a boss', zh: '击败一个Boss' }, tpl: 'T_CROWN', hue: '#ffd54a' },
+  { id: 'floor5', icon: '🗡️', n: { en: 'Deep Explorer', zh: '深层探索者' }, d: { en: 'Reach floor 5', zh: '到达第5层' }, tpl: 'T_BOOT', hue: '#6cc46c' },
+  { id: 'floor15', icon: '🕳️', n: { en: 'Abyss Walker', zh: '深渊行者' }, d: { en: 'Reach floor 15', zh: '到达第15层' }, tpl: 'T_BOOT', hue: '#58b458' },
+  { id: 'floor25', icon: '🐉', n: { en: 'Dragon Slayer', zh: '屠龙者' }, d: { en: 'Reach floor 25', zh: '到达第25层' }, tpl: 'T_BOOT', hue: '#7ad47a' },
+  { id: 'floor30', icon: '🌀', n: { en: 'Abyssal Diver', zh: '深渊潜水者' }, d: { en: 'Reach floor 30', zh: '到达第30层' }, tpl: 'T_BOOT', hue: '#48a448' },
+  { id: 'floor35', icon: '🌀', n: { en: 'Void Walker', zh: '虚空行者' }, d: { en: 'Reach floor 35', zh: '到达第35层' }, tpl: 'T_BOOT', hue: '#86d486' },
+  { id: 'floor40', icon: '👑', n: { en: 'Sanctum Conqueror', zh: '圣殿征服者' }, d: { en: 'Reach floor 40', zh: '到达第40层' }, tpl: 'T_BOOT', hue: '#3a943a' },
+  { id: 'legendary', icon: '🌟', n: { en: 'Legendary Find', zh: '传说发现' }, d: { en: 'Find a legendary item', zh: '找到一件传说装备' }, tpl: 'T_STAR', hue: '#ffb347' },
+  { id: 'streak5', icon: '🔥', n: { en: 'On Fire!', zh: '火力全开！' }, d: { en: '5 kill streak', zh: '5连杀' }, tpl: 'T_FIRE' },
+  { id: 'gold500', icon: '💰', n: { en: 'Rich', zh: '富翁' }, d: { en: 'Accumulate 500 gold', zh: '累积500金币' }, tpl: 'T_COIN', hue: '#ffd54a' },
+  { id: 'gold1000', icon: '💎', n: { en: 'Tycoon', zh: '大富翁' }, d: { en: 'Accumulate 1000 gold', zh: '累积1000金币' }, tpl: 'T_COIN', hue: '#4ad6c0' },
+  { id: 'gold5000', icon: '👑', n: { en: "Dragon's Hoard", zh: '龙之宝库' }, d: { en: 'Accumulate 5000 gold', zh: '累积5000金币' }, tpl: 'T_COIN', hue: '#e8a83a' },
+  { id: 'lvl10', icon: '⭐', n: { en: 'Veteran', zh: '老兵' }, d: { en: 'Reach level 10', zh: '到达10级' }, tpl: 'T_STAR', hue: '#8a5de8' },
+  { id: 'lvl20', icon: '⭐⭐', n: { en: 'Elite', zh: '精英' }, d: { en: 'Reach level 20', zh: '到达20级' }, tpl: 'T_STAR', hue: '#a86ae8' },
+  { id: 'lvl30', icon: '⭐⭐⭐', n: { en: 'Legend', zh: '传奇' }, d: { en: 'Reach level 30', zh: '到达30级' }, tpl: 'T_STAR', hue: '#ffd54a' },
+  { id: 'win', icon: '🏆', n: { en: 'Champion', zh: '冠军' }, d: { en: 'Beat the game', zh: '通关游戏' }, tpl: 'T_TROPHY', hue: '#ffd54a' },
+  { id: 'creator_kill', icon: '🏆', n: { en: 'Godslayer', zh: '弑神者' }, d: { en: 'Defeat The Creator', zh: '击败创世者' }, tpl: 'T_TROPHY', hue: '#f0e8d0' },
   // Wave 6d: Endless milestones
-  { id: 'endless50', icon: '♾', n: { en: 'Abyss Delver', zh: '深渊掘进者' }, d: { en: 'Reach floor 50 in Endless', zh: '无尽模式到达50层' } },
-  { id: 'endless75', icon: '♾', n: { en: 'Void Walker', zh: '虚空行者' }, d: { en: 'Reach floor 75 in Endless', zh: '无尽模式到达75层' } },
-  { id: 'endless100', icon: '♾', n: { en: 'The Bottomless', zh: '无底之人' }, d: { en: 'Reach floor 100 in Endless', zh: '无尽模式到达100层' } },
+  { id: 'endless50', icon: '♾', n: { en: 'Abyss Delver', zh: '深渊掘进者' }, d: { en: 'Reach floor 50 in Endless', zh: '无尽模式到达50层' }, tpl: 'T_SHADOW' },
+  { id: 'endless75', icon: '♾', n: { en: 'Void Walker', zh: '虚空行者' }, d: { en: 'Reach floor 75 in Endless', zh: '无尽模式到达75层' }, tpl: 'T_SHADOW' },
+  { id: 'endless100', icon: '♾', n: { en: 'The Bottomless', zh: '无底之人' }, d: { en: 'Reach floor 100 in Endless', zh: '无尽模式到达100层' }, tpl: 'T_SHADOW' },
   // Playtest #9 Phase 2 — endings at the Creator
-  { id: 'end_pyrrhic', icon: '🏆', n: { en: 'Pyrrhic Victor', zh: '悲壮英雄' }, d: { en: 'Slay the Creator (low corruption)', zh: '击杀创世者(低腐化)' } },
-  { id: 'end_doom', icon: '💀', n: { en: 'Doombringer', zh: '末日使者' }, d: { en: 'Slay the Creator while deeply corrupted', zh: '高腐化下击杀创世者' } },
-  { id: 'end_guardian', icon: '🛡', n: { en: 'The Guardian', zh: '守誓者' }, d: { en: 'Refuse to slay the Creator', zh: '拒绝击杀创世者' } },
+  { id: 'end_pyrrhic', icon: '🏆', n: { en: 'Pyrrhic Victor', zh: '悲壮英雄' }, d: { en: 'Slay the Creator (low corruption)', zh: '击杀创世者(低腐化)' }, tpl: 'T_TROPHY', hue: '#d8b45a' },
+  { id: 'end_doom', icon: '💀', n: { en: 'Doombringer', zh: '末日使者' }, d: { en: 'Slay the Creator while deeply corrupted', zh: '高腐化下击杀创世者' }, tpl: 'T_SKULL', hue: '#9a5de8' },
+  { id: 'end_guardian', icon: '🛡', n: { en: 'The Guardian', zh: '守誓者' }, d: { en: 'Refuse to slay the Creator', zh: '拒绝击杀创世者' }, tpl: 'T_SHIELD', hue: '#6ab8e8' },
   // Playtest #9 Phase 3 — slew a Warden that was once you
-  { id: 'warden_self_slay', icon: '🗡', n: { en: 'Self-Slayer', zh: '弑前' }, d: { en: 'Slay a Warden that was once you', zh: '击杀一个曾是你的守渊人' } },
+  { id: 'warden_self_slay', icon: '🗡', n: { en: 'Self-Slayer', zh: '弑前' }, d: { en: 'Slay a Warden that was once you', zh: '击杀一个曾是你的守渊人' }, tpl: 'T_SWORD', hue: '#9a6ae0' },
 ];
 
 // ===== New Weapons =====
@@ -736,35 +741,41 @@ export const TALENT_TREES: TalentTree[] = [
 import type { MetaUpgradeDef } from './types.js';
 
 export const META_UPGRADES: MetaUpgradeDef[] = [
-  { id: 'start_hp', n: { en: 'Vitality', zh: '生命强化' }, d: { en: '+10 Max HP per level', zh: '每级+10最大HP' }, icon: '❤', maxLevel: 5, costs: [10, 15, 25, 40, 60], effect: 'start_hp', valuePerLevel: 10, category: 'stats' },
-  { id: 'start_mp', n: { en: 'Arcane Reserves', zh: '魔力储备' }, d: { en: '+5 Max MP per level', zh: '每级+5最大MP' }, icon: '💧', maxLevel: 3, costs: [10, 20, 35], effect: 'start_mp', valuePerLevel: 5, category: 'stats' },
-  { id: 'start_atk', n: { en: 'Martial Training', zh: '武技' }, d: { en: '+1 ATK per level', zh: '每级+1攻击' }, icon: '⚔', maxLevel: 3, costs: [15, 30, 50], effect: 'start_atk', valuePerLevel: 1, category: 'stats' },
-  { id: 'start_def', n: { en: 'Toughness', zh: '坚韧' }, d: { en: '+1 DEF per level', zh: '每级+1防御' }, icon: '🛡', maxLevel: 3, costs: [15, 30, 50], effect: 'start_def', valuePerLevel: 1, category: 'stats' },
-  { id: 'crit_bonus', n: { en: 'Keen Edge', zh: '锐锋' }, d: { en: '+3% crit chance per level', zh: '每级+3%暴击' }, icon: '🗡', maxLevel: 3, costs: [20, 35, 55], effect: 'crit_bonus', valuePerLevel: 3, category: 'stats' },
-  { id: 'dodge_bonus', n: { en: 'Nimble', zh: '灵巧' }, d: { en: '+2% dodge chance per level', zh: '每级+2%闪避' }, icon: '💨', maxLevel: 3, costs: [20, 35, 55], effect: 'dodge_bonus', valuePerLevel: 2, category: 'stats' },
-  { id: 'start_gold', n: { en: 'Inheritance', zh: '遗产' }, d: { en: '+15 starting gold per level', zh: '每级+15初始金币' }, icon: '💰', maxLevel: 3, costs: [10, 20, 35], effect: 'start_gold', valuePerLevel: 15, category: 'survival' },
-  { id: 'heal_bonus', n: { en: 'Regeneration', zh: '再生' }, d: { en: '+5% healing from all sources', zh: '所有治疗效果+5%' }, icon: '💚', maxLevel: 3, costs: [20, 40, 65], effect: 'heal_bonus', valuePerLevel: 5, category: 'survival' },
-  { id: 'start_food', n: { en: 'Well Fed', zh: '饱食' }, d: { en: '+20 starting hunger per level', zh: '每级+20初始饱食度' }, icon: '🍖', maxLevel: 2, costs: [10, 20], effect: 'start_food', valuePerLevel: 20, category: 'survival' },
-  { id: 'extra_talent', n: { en: 'Gifted', zh: '天赋' }, d: { en: '+1 bonus talent point at start', zh: '开局额外+1天赋点' }, icon: '🌟', maxLevel: 3, costs: [25, 50, 80], effect: 'extra_talent', valuePerLevel: 1, category: 'talent' },
-  { id: 'exp_bonus', n: { en: 'Wisdom', zh: '智慧' }, d: { en: '+10% experience gain', zh: '经验获取+10%' }, icon: '📖', maxLevel: 3, costs: [25, 45, 70], effect: 'exp_bonus', valuePerLevel: 10, category: 'talent' },
-  { id: 'fov_bonus', n: { en: 'Eagle Eye', zh: '鹰眼' }, d: { en: '+1 FOV radius per level', zh: '每级+1视野范围' }, icon: '👁', maxLevel: 2, costs: [20, 40], effect: 'fov_bonus', valuePerLevel: 1, category: 'utility' },
-  { id: 'inv_size', n: { en: 'Pack Mule', zh: '驮兽' }, d: { en: '+4 inventory slots per level', zh: '每级+4背包容量' }, icon: '🎒', maxLevel: 2, costs: [15, 30], effect: 'inv_size', valuePerLevel: 4, category: 'utility' },
-  { id: 'gold_bonus', n: { en: 'Greed', zh: '贪婪' }, d: { en: '+10% gold earned', zh: '金币获取+10%' }, icon: '💎', maxLevel: 3, costs: [15, 30, 50], effect: 'gold_bonus', valuePerLevel: 10, category: 'utility' },
-  { id: 'soul_bonus', n: { en: 'Soul Attunement', zh: '灵魂共鸣' }, d: { en: '+10% Soul Echoes earned', zh: '灵魂回响获取+10%' }, icon: '💀', maxLevel: 3, costs: [30, 60, 100], effect: 'soul_bonus', valuePerLevel: 10, category: 'utility' },
+  // Batch3c T3 tpl/hue routing: existing icon semantics migrate directly
+  // (❤→T_HEART, 💧→T_FLASK, ⚔→T_SWORD, 🛡→T_SHIELD, 🗡→T_SWORD orange, 💨→T_BOOT,
+  // 💰→T_COIN, 💚→T_HEART green, 🍖→T_MEAT, 🌟→T_STAR, 📖→T_BOOK, 👁→T_EYE,
+  // 🎒→T_BOOT brown, 💎→T_COIN cyan, 💀→T_SKULL); icons without a clear
+  // template fall back by category (utility→T_RUNE, endless→T_SHADOW). The
+  // cyan base #4ad6c0 marks soul-echo meta-resource entries.
+  { id: 'start_hp', n: { en: 'Vitality', zh: '生命强化' }, d: { en: '+10 Max HP per level', zh: '每级+10最大HP' }, icon: '❤', maxLevel: 5, costs: [10, 15, 25, 40, 60], effect: 'start_hp', valuePerLevel: 10, category: 'stats', tpl: 'T_HEART', hue: '#e05560' },
+  { id: 'start_mp', n: { en: 'Arcane Reserves', zh: '魔力储备' }, d: { en: '+5 Max MP per level', zh: '每级+5最大MP' }, icon: '💧', maxLevel: 3, costs: [10, 20, 35], effect: 'start_mp', valuePerLevel: 5, category: 'stats', tpl: 'T_FLASK', hue: '#5a8ad6' },
+  { id: 'start_atk', n: { en: 'Martial Training', zh: '武技' }, d: { en: '+1 ATK per level', zh: '每级+1攻击' }, icon: '⚔', maxLevel: 3, costs: [15, 30, 50], effect: 'start_atk', valuePerLevel: 1, category: 'stats', tpl: 'T_SWORD', hue: '#e05545' },
+  { id: 'start_def', n: { en: 'Toughness', zh: '坚韧' }, d: { en: '+1 DEF per level', zh: '每级+1防御' }, icon: '🛡', maxLevel: 3, costs: [15, 30, 50], effect: 'start_def', valuePerLevel: 1, category: 'stats', tpl: 'T_SHIELD', hue: '#6a8ad6' },
+  { id: 'crit_bonus', n: { en: 'Keen Edge', zh: '锐锋' }, d: { en: '+3% crit chance per level', zh: '每级+3%暴击' }, icon: '🗡', maxLevel: 3, costs: [20, 35, 55], effect: 'crit_bonus', valuePerLevel: 3, category: 'stats', tpl: 'T_SWORD', hue: '#ff9a3c' },
+  { id: 'dodge_bonus', n: { en: 'Nimble', zh: '灵巧' }, d: { en: '+2% dodge chance per level', zh: '每级+2%闪避' }, icon: '💨', maxLevel: 3, costs: [20, 35, 55], effect: 'dodge_bonus', valuePerLevel: 2, category: 'stats', tpl: 'T_BOOT', hue: '#6cc46c' },
+  { id: 'start_gold', n: { en: 'Inheritance', zh: '遗产' }, d: { en: '+15 starting gold per level', zh: '每级+15初始金币' }, icon: '💰', maxLevel: 3, costs: [10, 20, 35], effect: 'start_gold', valuePerLevel: 15, category: 'survival', tpl: 'T_COIN', hue: '#ffd54a' },
+  { id: 'heal_bonus', n: { en: 'Regeneration', zh: '再生' }, d: { en: '+5% healing from all sources', zh: '所有治疗效果+5%' }, icon: '💚', maxLevel: 3, costs: [20, 40, 65], effect: 'heal_bonus', valuePerLevel: 5, category: 'survival', tpl: 'T_HEART', hue: '#5ad46a' },
+  { id: 'start_food', n: { en: 'Well Fed', zh: '饱食' }, d: { en: '+20 starting hunger per level', zh: '每级+20初始饱食度' }, icon: '🍖', maxLevel: 2, costs: [10, 20], effect: 'start_food', valuePerLevel: 20, category: 'survival', tpl: 'T_MEAT', hue: '#c47a4a' },
+  { id: 'extra_talent', n: { en: 'Gifted', zh: '天赋' }, d: { en: '+1 bonus talent point at start', zh: '开局额外+1天赋点' }, icon: '🌟', maxLevel: 3, costs: [25, 50, 80], effect: 'extra_talent', valuePerLevel: 1, category: 'talent', tpl: 'T_STAR', hue: '#8a5de8' },
+  { id: 'exp_bonus', n: { en: 'Wisdom', zh: '智慧' }, d: { en: '+10% experience gain', zh: '经验获取+10%' }, icon: '📖', maxLevel: 3, costs: [25, 45, 70], effect: 'exp_bonus', valuePerLevel: 10, category: 'talent', tpl: 'T_BOOK', hue: '#c8a86a' },
+  { id: 'fov_bonus', n: { en: 'Eagle Eye', zh: '鹰眼' }, d: { en: '+1 FOV radius per level', zh: '每级+1视野范围' }, icon: '👁', maxLevel: 2, costs: [20, 40], effect: 'fov_bonus', valuePerLevel: 1, category: 'utility', tpl: 'T_EYE', hue: '#6ad4d4' },
+  { id: 'inv_size', n: { en: 'Pack Mule', zh: '驮兽' }, d: { en: '+4 inventory slots per level', zh: '每级+4背包容量' }, icon: '🎒', maxLevel: 2, costs: [15, 30], effect: 'inv_size', valuePerLevel: 4, category: 'utility', tpl: 'T_BOOT', hue: '#a8784a' },
+  { id: 'gold_bonus', n: { en: 'Greed', zh: '贪婪' }, d: { en: '+10% gold earned', zh: '金币获取+10%' }, icon: '💎', maxLevel: 3, costs: [15, 30, 50], effect: 'gold_bonus', valuePerLevel: 10, category: 'utility', tpl: 'T_COIN', hue: '#4ad6c0' },
+  { id: 'soul_bonus', n: { en: 'Soul Attunement', zh: '灵魂共鸣' }, d: { en: '+10% Soul Echoes earned', zh: '灵魂回响获取+10%' }, icon: '💀', maxLevel: 3, costs: [30, 60, 100], effect: 'soul_bonus', valuePerLevel: 10, category: 'utility', tpl: 'T_SKULL', hue: '#4ad6c0' },
   { id: 'start_relic', n: { en: 'Heirloom', zh: '传家宝' },
     d: { en: 'Start each run with a random rarity-1 relic', zh: '每局开局获得一个随机稀有度1圣物' },
     icon: '🏺', maxLevel: 1, costs: [40], effect: 'start_relic',
-    valuePerLevel: 1, category: 'utility' },
+    valuePerLevel: 1, category: 'utility', tpl: 'T_RUNE', hue: '#d8a84a' },
   { id: 'blood_pact', n: { en: 'Blood Pact', zh: '鲜血契约' },
     d: { en: '-10 max HP per level, +1 talent point per level', zh: '每级-10最大生命,+1天赋点' },
     icon: '🩸', maxLevel: 2, costs: [30, 60], effect: 'blood_pact',
-    valuePerLevel: 1, category: 'talent' },
+    valuePerLevel: 1, category: 'talent', tpl: 'T_FLASK', hue: '#c84040' },
   // Endless-only meta upgrades (Task 4): apply only in endless runs via applyMetaUpgrades gate.
-  { id: 'deep_start', n: { en: 'Deep Start', zh: '深度起跳' }, d: { en: 'Endless starts +5 floors/rank', zh: '无尽开局楼层+5/级' }, icon: '↓', maxLevel: 5, costs: [200, 400, 700, 1100, 1600], effect: 'deep_start', valuePerLevel: 5, category: 'endless' },
-  { id: 'void_resist', n: { en: 'Void Resist', zh: '虚空抗性' }, d: { en: '+10% all resist/rank (endless)', zh: '全抗+10%/级(无尽)' }, icon: '◈', maxLevel: 5, costs: [150, 300, 500, 800, 1200], effect: 'void_resist', valuePerLevel: 10, category: 'endless' },
-  { id: 'endless_luck', n: { en: 'Endless Luck', zh: '无尽幸运' }, d: { en: '+20% endless drop rate/rank', zh: '无尽掉率+20%/级' }, icon: '★', maxLevel: 5, costs: [200, 400, 700, 1100, 1600], effect: 'endless_luck', valuePerLevel: 20, category: 'endless' },
-  { id: 'corruption_ward', n: { en: 'Corruption Ward', zh: '腐化守护' }, d: { en: '-15% corruption/rank', zh: '腐化-15%/级' }, icon: '🜔', maxLevel: 5, costs: [150, 300, 500, 800, 1200], effect: 'corruption_ward', valuePerLevel: 15, category: 'endless' },
-  { id: 'endless_might', n: { en: 'Endless Might', zh: '无尽之力' }, d: { en: '+5% atk/spell/rank (endless)', zh: '攻击法强+5%/级(无尽)' }, icon: '⚔', maxLevel: 5, costs: [300, 600, 1000, 1500, 2200], effect: 'endless_might', valuePerLevel: 5, category: 'endless' },
+  { id: 'deep_start', n: { en: 'Deep Start', zh: '深度起跳' }, d: { en: 'Endless starts +5 floors/rank', zh: '无尽开局楼层+5/级' }, icon: '↓', maxLevel: 5, costs: [200, 400, 700, 1100, 1600], effect: 'deep_start', valuePerLevel: 5, category: 'endless', tpl: 'T_SHADOW' },
+  { id: 'void_resist', n: { en: 'Void Resist', zh: '虚空抗性' }, d: { en: '+10% all resist/rank (endless)', zh: '全抗+10%/级(无尽)' }, icon: '◈', maxLevel: 5, costs: [150, 300, 500, 800, 1200], effect: 'void_resist', valuePerLevel: 10, category: 'endless', tpl: 'T_SHADOW' },
+  { id: 'endless_luck', n: { en: 'Endless Luck', zh: '无尽幸运' }, d: { en: '+20% endless drop rate/rank', zh: '无尽掉率+20%/级' }, icon: '★', maxLevel: 5, costs: [200, 400, 700, 1100, 1600], effect: 'endless_luck', valuePerLevel: 20, category: 'endless', tpl: 'T_STAR', hue: '#ffd54a' },
+  { id: 'corruption_ward', n: { en: 'Corruption Ward', zh: '腐化守护' }, d: { en: '-15% corruption/rank', zh: '腐化-15%/级' }, icon: '🜔', maxLevel: 5, costs: [150, 300, 500, 800, 1200], effect: 'corruption_ward', valuePerLevel: 15, category: 'endless', tpl: 'T_SHADOW' },
+  { id: 'endless_might', n: { en: 'Endless Might', zh: '无尽之力' }, d: { en: '+5% atk/spell/rank (endless)', zh: '攻击法强+5%/级(无尽)' }, icon: '⚔', maxLevel: 5, costs: [300, 600, 1000, 1500, 2200], effect: 'endless_might', valuePerLevel: 5, category: 'endless', tpl: 'T_SWORD', hue: '#c8452c' },
 ];
 
 // ===== Endless-exclusive gear (F41+) — Task 1 =====
