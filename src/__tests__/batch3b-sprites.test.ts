@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { TEMPLATES, ENTITY_PAL, BOSS_PAL, pickItemTemplate } from '../sprites.js';
 import { makeEnemy } from '../enemy-factory.js';
 import { BOSSES } from '../data.js';
+import { EVENT_SITES } from '../event-sites.js';
 
 describe('batch3b routing foundation', () => {
   it('ENTITY_PAL exported and absorbs CHEST (multi-hue chest palette wired)', () => {
@@ -33,5 +34,24 @@ describe('batch3b boss templates (real-data gate)', () => {
   it('boss templates are pairwise distinct (no shared row arrays)', () => {
     const arrs = BOSSES.map(b => TEMPLATES[b.spriteKind!]);
     expect(new Set(arrs).size).toBe(9);
+  });
+});
+
+describe('batch3b event-site & merchant entities', () => {
+  it('every EVENT_SITES def has spriteKind resolving to template + ENTITY_PAL', () => {
+    expect(EVENT_SITES.length).toBe(8);
+    for (const s of EVENT_SITES) {
+      expect(TEMPLATES[s.spriteKind], s.id).toBeDefined();
+      expect(ENTITY_PAL[s.spriteKind], s.id).toBeDefined();
+    }
+  });
+  it('shared-silhouette aliases reference the same rows (altar pair + merchant trio)', () => {
+    expect(TEMPLATES['ES_ALTAR_GAMBLER']).toBe(TEMPLATES['ES_ALTAR_CURSED']);
+    expect(TEMPLATES['MERCHANT_TREASURE']).toBe(TEMPLATES['MERCHANT']);
+    expect(TEMPLATES['MERCHANT_ENDLESS']).toBe(TEMPLATES['MERCHANT']);
+  });
+  it('merchant trio gets three distinct ENTITY_PAL palettes', () => {
+    const ps = ['MERCHANT', 'MERCHANT_TREASURE', 'MERCHANT_ENDLESS'].map(k => JSON.stringify(ENTITY_PAL[k]));
+    expect(new Set(ps).size).toBe(3);
   });
 });

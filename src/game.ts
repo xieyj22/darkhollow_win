@@ -106,10 +106,10 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
       G!.items.push({ type: 'consumable', name: t(nameKey), ch, c, desc: '', x, y, rarity, npc, spriteKind } as Item);
     };
     if (Math.random() < 0.5) placeEntity('chest', '▣', '#daa520', 'gm.chest', 2, 'CHEST');
-    if (Math.random() < 0.35) placeEntity('merchant', '§', '#9b5de5', 'gm.merchant', 1);
-    if (floor % 5 === 0) placeEntity('treasure_merchant', '¤', '#ffd700', 'gm.treasureMerchant', 4);
+    if (Math.random() < 0.35) placeEntity('merchant', '§', '#9b5de5', 'gm.merchant', 1, 'MERCHANT');
+    if (floor % 5 === 0) placeEntity('treasure_merchant', '¤', '#ffd700', 'gm.treasureMerchant', 4, 'MERCHANT_TREASURE');
     // Endless F41+: endless_merchant every 3 floors (sells endless gear/rarity5 relics/purge/heal).
-    if (G!.endless && floor >= 41 && floor % 3 === 0) placeEntity('endless_merchant', '∞', '#9b5de5', 'enm.entityName', 5);
+    if (G!.endless && floor >= 41 && floor % 3 === 0) placeEntity('endless_merchant', '∞', '#9b5de5', 'enm.entityName', 5, 'MERCHANT_ENDLESS');
     // Batch2 ③: one random event site on ~28% of floors (F3+; main line & endless).
     if (floor >= 3 && Math.random() < 0.28) {
       const pool = eligibleEventSites(floor);
@@ -120,7 +120,7 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
           const rm = pick(rooms);
           const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
           if (G!.dungeon.map[y][x] !== TL.STAIR)
-            G!.items.push({ type: 'consumable', name: t('ev2.' + s.id + 'Title'), ch: s.ch, c: s.c, desc: '', x, y, rarity: 2, npc: 'event', eventId: s.id } as Item);
+            G!.items.push({ type: 'consumable', name: t('ev2.' + s.id + 'Title'), ch: s.ch, c: s.c, desc: '', x, y, rarity: 2, npc: 'event', eventId: s.id, spriteKind: s.spriteKind } as Item);
         }
       }
     }

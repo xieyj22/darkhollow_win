@@ -1574,7 +1574,171 @@ export const TEMPLATES: Record<string, Template> = {
     "...S.S.SS.S.S...",
     "..S...S..S...S..",
   ],
+
+  // ===== 批3B: event-site & merchant map entities (routed via
+  // EventSiteDef.spriteKind / placeEntity spriteKind → drawItemSprite).
+  // Fixed multi-hue palettes in ENTITY_PAL below; the altar pair and the
+  // merchant trio share silhouettes via post-literal aliases and differ
+  // ONLY by palette.
+  // ES_ALTAR_CURSED — 阶梯状石台+顶部悬浮供物宝石（红=诅咒 / 金=赌徒，同剪影异色）。
+  ES_ALTAR_CURSED: [
+    "................",
+    ".......R........",
+    "......RRR.......",
+    ".....KRWRK......",
+    "......KKK.......",
+    "....KKKKKKKK....",
+    "....KWSSSSSK....",
+    "...KKKKKKKKKK...",
+    "...KSSSSSSSSK...",
+    "...KDDDDDDDDK...",
+    "..KKKKKKKKKKKK..",
+    "..KSSSSSSSSSSK..",
+    "..KSDDDDDDDDSK..",
+    "..KKKKKKKKKKKK..",
+    "................",
+    "................",
+  ],
+  // ES_HOUSE — 坡顶小屋+双窗+暗门（诱捕NPC居所；窗内幽蓝光）。
+  ES_HOUSE: [
+    "................",
+    "................",
+    ".......KK.......",
+    "......KNNK......",
+    ".....KNNNNK.....",
+    "....KNNNNNNK....",
+    "...KNNNNNNNNK...",
+    "..KNNNNNNNNNNK..",
+    "..KDDDDDDDDDDK..",
+    "..KWBBWDDWBBWK..",
+    "..KWBBWDDWBBWK..",
+    "..KWWWWDDWWWWK..",
+    "..KWWWWDDWWWWK..",
+    "..KKKKKKKKKKKK..",
+    "................",
+    "................",
+  ],
+  // ES_COFFIN — 六角棺盖+高光刻十字+基座（石棺立像）。
+  ES_COFFIN: [
+    "................",
+    "................",
+    "......KKKK......",
+    ".....KNNNNK.....",
+    "....KNWWWWNK....",
+    "...KNWWWWWWNK...",
+    "...KNWWBBWWNK...",
+    "...KNWBBBBWNK...",
+    "...KNWWBBWWNK...",
+    "...KNWWWWWWNK...",
+    "...KNWWWWWWNK...",
+    "...KNDDDDDDNK...",
+    "..KNNNNNNNNNNK..",
+    "..KDDDDDDDDDDK..",
+    "................",
+    "................",
+  ],
+  // ES_POOL — 不规则血泊泼溅+上方飞溅滴点+W高光（贴地平摊）。
+  ES_POOL: [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    ".....R....R.....",
+    "................",
+    "....RR.....R....",
+    "...RRRR...RR....",
+    "..RRWRRRRRRRR...",
+    ".RRWRRRRRRRRRR..",
+    ".RRRRRRRRRRRRRR.",
+    "..RRRRRRRRRRRR..",
+    "...DDRDDRDDDD...",
+    "................",
+    "................",
+  ],
+  // ES_STELE — 竖长圆顶碑+三道金刻符文+基座（窄高剪影区别石棺）。
+  ES_STELE: [
+    "................",
+    "......KKKK......",
+    ".....KNNNNK.....",
+    "....KNYYYYNK....",
+    "....KNNNNNNK....",
+    "....KNYYYYNK....",
+    "....KNNNNNNK....",
+    "....KNYYYYNK....",
+    "....KNNNNNNK....",
+    "....KDNNNNDK....",
+    "....KDNNNNDK....",
+    "....KDDDDDDK....",
+    "...KKKKKKKKKK...",
+    "...KDDDDDDDDK...",
+    "...KKKKKKKKKK...",
+    "................",
+  ],
+  // ES_SEALED — 封印立方匣：紫晶箱体+满宽金色封印带+锁孔符点（区别木CHEST）。
+  ES_SEALED: [
+    "................",
+    "................",
+    "...KKKKKKKKKK...",
+    "...KWPPPPPPWK...",
+    "...KPPPPPPPPK...",
+    "...KPPPPPPPPK...",
+    "...KPPYYYYPPK...",
+    "...KPDYYYYDPK...",
+    "...KPPPPPPPPK...",
+    "...KPPPPYPPPK...",
+    "...KDPPPPPPDK...",
+    "...KDDDDDDDDK...",
+    "...KKKKKKKKKK...",
+    "................",
+    "................",
+    "................",
+  ],
+  // ES_WELL — 献祭井：俯视井口石圈+内里绿水+深水暗部+W波光。
+  ES_WELL: [
+    "................",
+    "................",
+    "................",
+    ".....KKKKKK.....",
+    "...KKNNNNNNKK...",
+    "..KNNKKKKKKNNK..",
+    "..KNNKGGGGKNNK..",
+    "..KNNKGWGGKNNK..",
+    "..KNNKGDGGKNNK..",
+    "..KNNKKKKKKNNK..",
+    "...KKNNNNNNKK...",
+    ".....KKKKKK.....",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // MERCHANT — 兜帽斗篷+M瞳+两侧背囊+胸前金货担（三商人同剪影：
+  // 普通紫袍 / 宝物金袍红瞳 / 虚空紫黑+品红瞳，仅 ENTITY_PAL 异色）。
+  MERCHANT: [
+    "................",
+    "......KKKK......",
+    ".....KPPPPK.....",
+    "....KPKKKKPK....",
+    "....KPKMMKPK....",
+    "....KPPPPPPK....",
+    "...KPPPPPPPPK...",
+    "..KWPPPPPPPPWK..",
+    "..WWPPPPPPPPWW..",
+    "..WWPPMMMMPPWW..",
+    "...WPPPPPPPPW...",
+    "...KPPPYYPPPK...",
+    "...KPDDDDDDPK...",
+    "...KKPPKKPPKK...",
+    ".....KK..KK.....",
+    "................",
+  ],
 };
+
+// 批3B: shared-silhouette aliases — same array reference, palette differs via ENTITY_PAL.
+TEMPLATES.ES_ALTAR_GAMBLER = TEMPLATES.ES_ALTAR_CURSED;
+TEMPLATES.MERCHANT_TREASURE = TEMPLATES.MERCHANT;
+TEMPLATES.MERCHANT_ENDLESS = TEMPLATES.MERCHANT;
 
 // Dev-time sanity: every template row must be exactly N(16) chars.
 for (const [k, tpl] of Object.entries(TEMPLATES)) {
@@ -1666,6 +1830,21 @@ const PORTAL_PAL_B: Record<string, string> = { M: '#b266ff', L: '#7df9ff', d: '#
 // entry keep the single-hue derived path (backward compatible).
 export const ENTITY_PAL: Record<string, Record<string, string>> = {
   CHEST: { K: '#140a0a', N: '#8a5a30', W: '#c89a5a', G: '#ffd54a' },
+  // 批3B: event sites + merchants. Letter sets match the paired template rows
+  // exactly (aliases reuse the base silhouette, so their palettes carry the
+  // SAME letter set — the shared ES_ALTAR/MERCHANT rows use R/M as the accent
+  // slot, mapped red/gold and violet/magenta respectively).
+  ES_ALTAR_CURSED:  { K: '#140a0a', S: '#6b4a4a', D: '#46303a', R: '#c0392b', W: '#e8d8d8' },
+  ES_ALTAR_GAMBLER: { K: '#140a0a', S: '#8a7a5a', D: '#5a4e3a', R: '#f39c12', W: '#f5efdf' },
+  ES_HOUSE:         { K: '#140a0a', N: '#6b4423', W: '#4a3728', B: '#7ec8e3', D: '#3a2a1e' },
+  ES_COFFIN:        { K: '#140a0a', N: '#5a5a66', W: '#95a5a6', D: '#3a3a44', B: '#c9c9d4' },
+  ES_POOL:          { K: '#140a0a', R: '#8b0000', D: '#5a0000', W: '#b83a3a' },
+  ES_STELE:         { K: '#140a0a', N: '#8a8a90', Y: '#daa520', D: '#5a5a60' },
+  ES_SEALED:        { K: '#140a0a', P: '#9b5de5', D: '#5a2f8a', Y: '#f0c94a', W: '#d8c2f0' },
+  ES_WELL:          { K: '#140a0a', N: '#6b6b70', G: '#06d6a0', D: '#04443c', W: '#b0e8d8' },
+  MERCHANT:         { K: '#140a0a', P: '#9b5de5', D: '#5a2f8a', W: '#e8e0f5', Y: '#ffd54a', M: '#d7a5f7' },
+  MERCHANT_TREASURE:{ K: '#140a0a', P: '#d4a017', D: '#8a6a10', W: '#fff5d0', Y: '#ffd700', M: '#e0393e' },
+  MERCHANT_ENDLESS: { K: '#0a0015', P: '#3a0d5c', D: '#240a44', W: '#b8a0d8', Y: '#7df9ff', M: '#ff2bd6' },
 };
 // 批3B: per-boss fixed palettes, keyed by BossDef.spriteKind. Every letter used
 // by the paired template above maps here (no silent transparent holes).
