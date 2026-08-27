@@ -1484,7 +1484,14 @@ const STAIR_PAL: Record<string, string> = {
 const DOOR_PAL: Record<string, string> = { K: '#140a0a', N: '#6b4423', D: '#4a2e17', G: '#ffd54a', W: '#8a5a30' };
 const PORTAL_PAL: Record<string, string> = { M: '#7df9ff', L: '#b266ff', d: '#3a0d5c', K: '#0a0015' };
 const PORTAL_PAL_B: Record<string, string> = { M: '#b266ff', L: '#7df9ff', d: '#3a0d5c', K: '#0a0015' };
-const CHEST_PAL: Record<string, string> = { K: '#140a0a', N: '#8a5a30', W: '#c89a5a', G: '#ffd54a' };
+// 批3B: fixed multi-hue palettes for map entities, keyed by spriteKind.
+// drawItemSprite prefers these over buildPalette(item.c); keys without an
+// entry keep the single-hue derived path (backward compatible).
+export const ENTITY_PAL: Record<string, Record<string, string>> = {
+  CHEST: { K: '#140a0a', N: '#8a5a30', W: '#c89a5a', G: '#ffd54a' },
+};
+// 批3B: per-boss fixed palettes, keyed by BossDef.spriteKind. Populated in T2.
+export const BOSS_PAL: Record<string, Record<string, string>> = {};
 
 // ===== Offscreen sprite cache (16×16, drawn once per template+palette signature) =====
 const spriteCache = new Map<string, HTMLCanvasElement>();
@@ -1587,9 +1594,13 @@ export function drawPortalSprite(c: CanvasRenderingContext2D, x: number, y: numb
   }
 }
 
-export function drawBossSprite(c: CanvasRenderingContext2D, x: number, y: number, color: string): void {
-  const sig = 'BOSS:' + color;
-  blitOutlined(c, x, y, getSprite(TEMPLATES.BOSS, buildPalette(color), sig), sig, 2);
+export function drawBossSprite(c: CanvasRenderingContext2D, x: number, y: number, color: string, spriteKind?: string): void {
+  // 批3B: per-boss template + fixed palette when routed; legacy saves / unknown
+  // kinds fall back to the shared BOSS silhouette + single-hue palette.
+  const sk = spriteKind && TEMPLATES[spriteKind] ? spriteKind : null;
+  const sig = sk || ('BOSS:' + color);
+  const pal = sk && BOSS_PAL[sk] ? BOSS_PAL[sk] : buildPalette(color);
+  blitOutlined(c, x, y, getSprite(sk ? TEMPLATES[sk] : TEMPLATES.BOSS, pal, sig), sig, 2);
 }
 
 function pickEnemyTemplate(e: Enemy): { tpl: Template; key: string } {
@@ -1701,7 +1712,8 @@ export function drawItemSprite(c: CanvasRenderingContext2D, x: number, y: number
   // sig uses `key` (not item.name) so the sprite cache stays bounded — and key
   // will carry subType routing in Task 5 when weapons/potions get variants.
   const sig = key + ':' + item.c;
-  blitOutlined(c, x, y, getSprite(tpl, buildPalette(item.c), sig), sig);
+  const pal = (item.spriteKind && ENTITY_PAL[item.spriteKind]) || buildPalette(item.c);
+  blitOutlined(c, x, y, getSprite(tpl, pal, sig), sig);
 }
 
 // Public helper: the TEMPLATES key an item maps to (W_SWORD / I_SHIELD / P_HEALTH ...).

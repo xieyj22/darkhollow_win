@@ -213,6 +213,8 @@ export interface EnemyDef {
   res?: Partial<Record<Element, number>>;
   tags?: string[];
   skill?: EnemySkill;
+  // 批3B: unique-model override — set on defs with a dedicated TEMPLATES entry.
+  spriteKind?: string;
 }
 
 export interface BossDef {
@@ -226,6 +228,8 @@ export interface BossDef {
   g: [number, number];
   fl: number;
   el?: Element;
+  // 批3B: unique-model override — set on defs with a dedicated TEMPLATES entry.
+  spriteKind?: string;
   // Batch2 ②: boss active skill — cast through the shared enemy-skill dispatch.
   // Priority gate in processEnemies lets bosses cast even at melee range.
   skill?: EnemySkill;
@@ -292,6 +296,8 @@ export interface Enemy {
   atkBuffVal?: number;
   tags?: string[];
   phasesTriggered?: Set<number>;
+  // 批3B: copied from def by makeEnemy; legacy saves lack it (fallback path).
+  spriteKind?: string;
 }
 
 // Shared shape for attack()'s attacker/defender — both Player and Enemy satisfy

@@ -119,7 +119,7 @@ export function drawEnemyLayer(c: CanvasRenderingContext2D): void {
     const bob = reducedMotion ? 0 : Math.sin(performance.now() / 350 + (e.x * 1.7 + e.y * 2.3));
 
     const ec = e.isAlly ? '#06d6a0' : e.c;
-    if (e.isBoss) drawBossSprite(c, sx, sy + bob, ec); else drawEnemySprite(c, sx, sy + bob, ec, e);
+    if (e.isBoss) drawBossSprite(c, sx, sy + bob, ec, e.spriteKind); else drawEnemySprite(c, sx, sy + bob, ec, e);
     if (e.el && e.el !== 'none') {
       c.font = `${Math.floor(TS / 3)}px ${FONT}`;
       c.fillStyle = EL_IND_COLOR[e.el] || '#fff';

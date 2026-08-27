@@ -13,6 +13,8 @@ export type EnemyBase = {
   hp: number; atk: number; def: number; exp: number; g: [number, number];
   el?: Element; res?: Partial<Record<Element, number>>; tags?: string[]; ai?: string;
   skill?: EnemySkill;
+  // 批3B: unique-model override — copied verbatim onto the instance (static key).
+  spriteKind?: string;
   phases?: BossDef['phases'];
   summon?: BossDef['summon'];
 };
@@ -43,6 +45,7 @@ export function makeEnemy(
   return {
     name: nameOverride ?? tx(base.n),
     ch: base.ch, c: base.c, x, y,
+    spriteKind: base.spriteKind,
     hp, maxHp: hp,
     atk: Math.floor(base.atk * fs * atkM),
     def: Math.floor((base.def + defAdd) * fs * defM),
