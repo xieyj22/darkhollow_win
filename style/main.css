@@ -323,6 +323,7 @@ canvas.hb-icon{width:20px;height:20px}
 .talent-cell.maxed{border-color:#ffd70088;background:#ffd70008;box-shadow:0 0 8px #ffd70022}
 .talent-cell.locked{opacity:.35}
 .tc-icon{font-size:1.4em;line-height:1}.tc-name{color:var(--text-bright);font-size:var(--fs-floor);font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.tc-dots{color:var(--accent-gold);font-size:var(--fs-floor);letter-spacing:1px}
+.tc-icon .tc-ic{width:20px;height:20px;image-rendering:pixelated;vertical-align:middle}
 #talent-header{color:var(--accent-green);font-size:14px;margin:8px 0 4px}
 
 /* ===== Meta Progression — The Forge ===== */

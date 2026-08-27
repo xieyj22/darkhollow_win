@@ -16,6 +16,21 @@ describe('batch3c T1: iconPalette routing', () => {
   });
 });
 
+// NOTE(plan deviation): the plan/brief counted 86 talent nodes; the shipped
+// TALENT_TREES has 4 trees x 16 = 64 (renderTalentPanel draws a 4x4 grid per
+// class). Gate asserts the real total so accidental node loss also fails.
+describe('batch3c T2: talent real-data gate', () => {
+  it('every talent node has tpl in TEMPLATES', () => {
+    let n = 0;
+    for (const tree of TALENT_TREES) for (const node of tree.nodes) {
+      expect(node.tpl, `talent ${node.id} missing tpl`).toBeTruthy();
+      expect(TEMPLATES[node.tpl!], `talent ${node.id} tpl ${node.tpl} not in TEMPLATES`).toBeTruthy();
+      n++;
+    }
+    expect(n).toBe(64);
+  });
+});
+
 describe('batch3c T1: theme templates present & single-hue letter discipline', () => {
   const SINGLE = new Set(['M', 'D', 'L', 'E', 'K', 'W', 'C', 'G', 'N', 'V']);
   it('every T_ template is 16x16 (shape guard covers) and single-hue ones only use buildPalette letters', () => {

@@ -303,6 +303,10 @@ function renderAch(): void {
 
 // --- Talent panel ---
 
+// Batch3c T2: fallback hue for talent nodes without a per-node hue (multi-hue
+// THEME_PAL templates ignore it). Matches the plan's talent hue-table default.
+const TALENT_DEFAULT_HUE = '#c9a227';
+
 export function openTalentPanel(): void {
   setTalentOpen(true);
   showOverlay('talent-overlay');
@@ -359,7 +363,7 @@ function renderTalentPanel(): void {
         dots += r < currentRank ? '●' : '○';
       }
 
-      cell.innerHTML = `<div class="tc-icon">${node.icon}</div><div class="tc-name">${name}</div><div class="tc-dots">${dots}</div>`;
+      cell.innerHTML = `<div class="tc-icon"><canvas class="lic tc-ic" width="16" height="16" data-kind="${node.tpl || 'T_RUNE'}" data-color="${node.hue || TALENT_DEFAULT_HUE}"></canvas></div><div class="tc-name">${name}</div><div class="tc-dots">${dots}</div>`;
       cell.title = `${name} (${currentRank}/${node.maxRank})\n${desc}`;
 
       if (canLearn) {
@@ -384,6 +388,9 @@ function renderTalentPanel(): void {
       div.appendChild(cell);
     }
   }
+
+  // Batch3c T2: all cells are attached — paint their theme sprites in one pass.
+  div.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || TALENT_DEFAULT_HUE));
 }
 
 // Expose functions for internal use via typed bridge registry
