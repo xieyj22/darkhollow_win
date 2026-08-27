@@ -1,6 +1,6 @@
 // 批3B: boss/entity sprite 路由地基守卫。
 import { describe, it, expect } from 'vitest';
-import { TEMPLATES, ENTITY_PAL, pickItemTemplate } from '../sprites.js';
+import { TEMPLATES, ENTITY_PAL, BOSS_PAL, pickItemTemplate } from '../sprites.js';
 import { makeEnemy } from '../enemy-factory.js';
 import { BOSSES } from '../data.js';
 
@@ -18,5 +18,20 @@ describe('batch3b routing foundation', () => {
   it('makeEnemy without spriteKind leaves instance field undefined', () => {
     const e = makeEnemy({ n: { en: 'X', zh: 'X' }, ch: 'x', c: '#fff', hp: 5, atk: 1, def: 0, exp: 1, g: [1, 2], ai: 'chase', mf: 1 } as never, 1, 1, 1);
     expect(e.spriteKind).toBeUndefined();
+  });
+});
+
+describe('batch3b boss templates (real-data gate)', () => {
+  it('every BOSSES def has a spriteKind that resolves to template + palette', () => {
+    expect(BOSSES.length).toBe(9);
+    for (const b of BOSSES) {
+      expect(b.spriteKind, b.n.en).toBeDefined();
+      expect(TEMPLATES[b.spriteKind!], b.n.en).toBeDefined();
+      expect(BOSS_PAL[b.spriteKind!], b.n.en).toBeDefined();
+    }
+  });
+  it('boss templates are pairwise distinct (no shared row arrays)', () => {
+    const arrs = BOSSES.map(b => TEMPLATES[b.spriteKind!]);
+    expect(new Set(arrs).size).toBe(9);
   });
 });
