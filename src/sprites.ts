@@ -2226,6 +2226,7 @@ export const BUFF_TPL: Record<string, { kind: string; color: string }> = {
   heal_bonus: { kind: 'T_HEART', color: '#7de89a' },
   gold: { kind: 'T_COIN', color: '#ffd54a' },
   food: { kind: 'T_MEAT', color: '#d69555' },
+  antidote: { kind: 'T_FLASK', color: '#80ed99' },
   torch: { kind: 'T_FIRE', color: '#ff9a3c' },
   invis: { kind: 'T_SHADOW', color: '#b8a0d8' },
   mapping: { kind: 'T_EYE', color: '#6ad4d4' },
