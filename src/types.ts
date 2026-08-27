@@ -362,6 +362,10 @@ export interface TalentNode {
   desc: I18nText;
   maxRank: number;
   icon: string;
+  /** Batch3c: T_ theme template key for panel sprite; undefined = legacy emoji icon. */
+  tpl?: string;
+  /** Batch3c: main hue for buildPalette; table default applies when absent. */
+  hue?: string;
   row: number;
   col: number;
   requires?: string[];
@@ -546,6 +550,10 @@ export interface GameState {
 export interface AchievementDef {
   id: string;
   icon: string;
+  /** Batch3c: T_ theme template key for panel sprite; undefined = legacy emoji icon. */
+  tpl?: string;
+  /** Batch3c: main hue for buildPalette; table default applies when absent. */
+  hue?: string;
   n: I18nText;
   d: I18nText;
 }
@@ -642,6 +650,10 @@ export interface MetaUpgradeDef {
   n: I18nText;
   d: I18nText;
   icon: string;
+  /** Batch3c: T_ theme template key for panel sprite; undefined = legacy emoji icon. */
+  tpl?: string;
+  /** Batch3c: main hue for buildPalette; table default applies when absent. */
+  hue?: string;
   maxLevel: number;
   costs: number[];
   effect: string;

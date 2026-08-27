@@ -1733,6 +1733,394 @@ export const TEMPLATES: Record<string, Template> = {
     ".....KK..KK.....",
     "................",
   ],
+
+  // ===== 批3c: T_ theme templates (talents/achievements/meta panels). =====
+  // Single-hue templates use buildPalette letters only (M/D/L/K/W/C/G/N/V) and
+  // get their color from def.hue via iconPalette(kind, color). The four
+  // multi-hue themes (T_FIRE/T_ICE/T_HOLY/T_SHADOW) have fixed THEME_PAL entries
+  // above — their rows may only use letters mapped there.
+  // T_SWORD — 斜置长剑：K 描边 M 刃身 L 刃脊高光，G 十字护手斜贯，K 柄尾。
+  T_SWORD: [
+    "................",
+    ".............K..",
+    "............KML.",
+    "...........KML..",
+    "..........KML...",
+    ".........KML....",
+    "........KML.....",
+    ".K.....KML......",
+    ".KG...KML.......",
+    "..KG.KML........",
+    "...KGML.........",
+    "....KG..........",
+    "...K.KG.........",
+    "..K...K.........",
+    "................",
+    "................",
+  ],
+  // T_HEART — 心形：双圆顶+锥形底，M 主体 L 左上高光，K 描边。
+  T_HEART: [
+    "................",
+    "................",
+    "...KK.....KK....",
+    "..KMMK...KMMK...",
+    ".KMLLLK.KMLLLK..",
+    ".KMLLLLKMLLLLK..",
+    ".KMLLLLLLLLLLK..",
+    ".KMMLLLLLLLLMK..",
+    "..KMMLLLLLLMK...",
+    "...KMMMMMMMK....",
+    "....KMMMMMK.....",
+    ".....KMMMK......",
+    "......KMK.......",
+    ".......K........",
+    "................",
+    "................",
+  ],
+  // T_COIN — 圆币：M 币身 L 左上高光竖条，K 描边。
+  T_COIN: [
+    "................",
+    "................",
+    ".....KKKKK......",
+    "....KMMMMMK.....",
+    "...KMLLMMMMK....",
+    "...KMLLMMMMMK...",
+    "..KMLLMMMMMMK...",
+    "..KMLLMMMMMMK...",
+    "..KMLLMMMMMMK...",
+    "...KMLLMMMMK....",
+    "...KMLLMMMMK....",
+    "....KMMMMMK.....",
+    ".....KKKKK......",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_SHIELD — 盾形：W 顶弧高光+D 中线纹章条，下收尖。
+  T_SHIELD: [
+    "................",
+    "....KKKKKKKK....",
+    "...KWWMMMMWWK...",
+    "...KWMMMMMMWK...",
+    "...KMMMDDMMMK...",
+    "...KMMMDDMMMK...",
+    "...KMMMDDMMMK...",
+    "...KMMMDDMMMK...",
+    "...KMMMDDMMMK...",
+    "...KMMMMMMMMK...",
+    "....KMMMMMMK....",
+    ".....KMMMMK.....",
+    "......KMMK......",
+    ".......KK.......",
+    "................",
+    "................",
+  ],
+  // T_STAR — 五角星实心+四向 L 短光芒线，L 刃面高光。
+  T_STAR: [
+    "................",
+    ".......KK.......",
+    "......KMMK......",
+    "......KMML......",
+    "......KMMK......",
+    "..L...KMMK...L..",
+    "..LK.KMMMMK.KL..",
+    "...KMMMMMMMMK...",
+    "...KMMMMMMMMK...",
+    "..KMMKMMMMKMMK..",
+    "..KMK..KK..KMK..",
+    "..KK........KK..",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_BOOK — 合拢侧视书：D 封面+W 书页层理线，G 书签线自顶垂出右侧。
+  T_BOOK: [
+    "................",
+    "................",
+    "..KKKKKKKKKKKG..",
+    "..KDDDDDDDDDKGG.",
+    ".KWWWWWWWWWWK.G.",
+    ".KWLWLWLWLWWK.G.",
+    ".KWLWLWLWLWWK.G.",
+    ".KWWWWWWWWWWK.G.",
+    ".KWLWLWLWLWWK.G.",
+    ".KWWWWWWWWWWK...",
+    "..KDDDDDDDDDK...",
+    "..KKKKKKKKKKK...",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_MEAT — 肉腿：M 火腿肉团 L 高光，N 骨柄下延双球骨节（区别 FD_MEAT 圆骨）。
+  T_MEAT: [
+    "................",
+    "................",
+    "......KKKKK.....",
+    ".....KMMMMMK....",
+    "....KMMMMMMMK...",
+    "....KMLMMMMMK...",
+    "....KMLMMMMMK...",
+    "....KMMMMMMMK...",
+    ".....KMMMMMK....",
+    "......KMMMK.....",
+    ".......KNNK.....",
+    ".......KNNK.....",
+    "......KNNNK.....",
+    ".....KNK.KNK....",
+    "................",
+    "................",
+  ],
+  // T_EYE — 横睑包裹眼形：K 睑弧+睫毛，M 眼体，W 瞳+L 高光。
+  T_EYE: [
+    "................",
+    "................",
+    "................",
+    "..K...K..K...K..",
+    "....KK....KK....",
+    "..KKMMMMMMMMKK..",
+    ".KMMMWWWWWWMMMK.",
+    "KMMMLWWWWWWWMMMK",
+    "KMMMLWWWWWWWMMMK",
+    ".KMMMWWWWWWMMMK.",
+    "..KKMMMMMMMMKK..",
+    "....KK....KK....",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_RUNE — 立石碑：C 石体 D 基座阴影，M 菱形十字符文刻痕居中。
+  T_RUNE: [
+    "................",
+    "..KKKKKKKKKKKK..",
+    "..KCCCCCCCCCCK..",
+    "..KCCCCCCCCCCK..",
+    "..KCCCMCCMCCCK..",
+    "..KCCCCMMCCCCK..",
+    "..KCCCCMMCCCCK..",
+    "..KCMCCCCCCMCK..",
+    "..KCCCCMMCCCCK..",
+    "..KCCCMCCMCCCK..",
+    "..KDDDDDDDDDDK..",
+    "..KDDDDDDDDDDK..",
+    "..KKKKKKKKKKKK..",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_WING — 左右对称双翼展开+中脊，L 羽尖高光，下缘分离羽尖。
+  T_WING: [
+    "................",
+    ".......KK.......",
+    "..KK...KK...KK..",
+    "..KMK.KMMK.KMK..",
+    "...KKKMMMMKKK...",
+    "..KMLKMMMMKLMK..",
+    ".KMMLMMMMMMLMMK.",
+    "KMMMMMMMMMMMMMMK",
+    ".KMMMMMMMMMMMMK.",
+    "..KKMMMMMMMMKK..",
+    "....KKKKKKKK....",
+    "......K..K......",
+    ".....K....K.....",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_BOOT — 侧视靴：靴筒+L 鞋带纹+右向靴头，D 鞋底+跟/趾 K 底钉。
+  T_BOOT: [
+    "................",
+    "....KKKKK.......",
+    "....KMMMMK......",
+    "....KMMMMK......",
+    "....KMLLMK......",
+    "....KMMMMK......",
+    "....KMMMMK......",
+    "....KMMMMKK.....",
+    "....KMMMMMMK....",
+    "....KMMMMMMMK...",
+    "...KKMMMMMMMMK..",
+    "...KDDDDDDDDDK..",
+    "...KKKKKKKKKKK..",
+    "....KK...KKK....",
+    "................",
+    "................",
+  ],
+  // T_STAFF — 竖杖：N 木杖+M 螺旋缠纹（列 6/7 交替），顶端 G 球+W glint，
+  // 区别 W_STAFF 的细 W 杆。
+  T_STAFF: [
+    "................",
+    ".....KKKK.......",
+    "....KGGWGK......",
+    "....KGGGGK......",
+    ".....KNNK.......",
+    ".....KNMK.......",
+    ".....KNNK.......",
+    ".....KMNK.......",
+    ".....KNNK.......",
+    ".....KNMK.......",
+    ".....KNNK.......",
+    ".....KMNK.......",
+    ".....KNNK.......",
+    "....KNNNNNK.....",
+    "....KKKKKKK.....",
+    "................",
+  ],
+  // T_CROWN — 三尖冠（侧尖+中尖）+M 冠体+G 双珠 L 中宝石+D 底环。
+  T_CROWN: [
+    "................",
+    "..K....KK....K..",
+    "..KK...KK...KK..",
+    "..KMK.KMMK.KMK..",
+    "..KMMMMMMMMMMK..",
+    "..KMGMMLLMMGMK..",
+    "..KMMMMMMMMMMK..",
+    "..KKKKKKKKKKKK..",
+    "...KDDDDDDDDK...",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_FLASK — 锥形瓶：N 软木塞+W 玻璃颈，M 液体 L 气泡，K 描边。
+  T_FLASK: [
+    "................",
+    "......KNK.......",
+    "......KNK.......",
+    "......KWK.......",
+    "......KWK.......",
+    ".....KKWKK......",
+    "....KWWWWWK.....",
+    "...KWWWWWWWK....",
+    "..KWMMMMMMMWK...",
+    "..KMMMMMMMMMK...",
+    "..KMLMMMMLMMK...",
+    "..KMMMMMLMMMK...",
+    "..KMMMMMMMMMK...",
+    "...KKKKKKKKK....",
+    "................",
+    "................",
+  ],
+  // T_TROPHY — 双耳奖杯：K 杯体+L glint+G 双饰钉，柱柄+展宽底座。
+  T_TROPHY: [
+    "................",
+    ".KK..........KK.",
+    ".KMK.KKKKKK.KMK.",
+    ".KMK.KMMMMK.KMK.",
+    ".KMMKKMLMMKKMMK.",
+    "..KKKMMMMMMKKK..",
+    "....KMGMMGK.....",
+    "....KMMMMMK.....",
+    ".....KKKKK......",
+    ".......KK.......",
+    ".......KK.......",
+    "......KKKK......",
+    "....KKKKKKKK....",
+    "....KKKKKKKK....",
+    "................",
+    "................",
+  ],
+  // T_SKULL — 颅骨：W 骨体+K 双眼窝+鼻孔+齿缝（区别 SKELETON 全身）。
+  T_SKULL: [
+    "................",
+    "....KKKKKKKK....",
+    "...KWWWWWWWWK...",
+    "..KWWWWWWWWWWK..",
+    "..KWWKKWWKKWWK..",
+    "..KWWKKWWKKWWK..",
+    "..KWWWWWWWWWWK..",
+    "...KWWWKKWWWK...",
+    "...KWWWWWWWWK...",
+    "....KWWKKWWK....",
+    "....KKKKKKKK....",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_FIRE — 跳动火苗（THEME_PAL.T_FIRE）：W 焰心+L 内焰+M 外焰+D 底座。
+  T_FIRE: [
+    "................",
+    ".......W........",
+    "......WLW.......",
+    "......WLL.......",
+    ".....MWLLW......",
+    ".....MLLLW......",
+    "....MMLLLMW.....",
+    "....MLLLLLMW....",
+    "...MMLLLLLLMW...",
+    "...MLLLLLLLMW...",
+    "..MMLLLLLLLLMW..",
+    "..MLLWWLLLLLMW..",
+    "..MLLWWLLLLLMW..",
+    "..MMLLLLLLLMMW..",
+    "...DMMMMMMMD....",
+    "....DDDDDDD.....",
+  ],
+  // T_ICE — 六向冰晶（THEME_PAL.T_ICE）：W 闪点臂尖+L 棱边+M 面+W 核。
+  T_ICE: [
+    "................",
+    ".......WW.......",
+    ".......LL.......",
+    "..W....MM....W..",
+    "...L...MM...L...",
+    "...LL..MM..LL...",
+    "....L.MMMM.L....",
+    "...LLMWWWWMLL...",
+    "...LLMWWWWMLL...",
+    "....L.MMMM.L....",
+    "...LL..MM..LL...",
+    "...L...MM...L...",
+    "..W....MM....W..",
+    ".......LL.......",
+    ".......WW.......",
+    "................",
+  ],
+  // T_HOLY — 光芒十字（THEME_PAL.T_HOLY）：W 核心+L 内晕+M 光束+四向 W 射线。
+  T_HOLY: [
+    "................",
+    ".......WW.......",
+    ".......LL.......",
+    "..W....LL....W..",
+    "...W...LL...W...",
+    ".......MM.......",
+    ".......MM.......",
+    "..MMMLLWWLLMMM..",
+    "..MMMMWWWWMMMM..",
+    ".......MM.......",
+    "...W...MM...W...",
+    "..W....LL....W..",
+    ".......WW.......",
+    "................",
+    "................",
+    "................",
+  ],
+  // T_SHADOW — 烟团轮廓（THEME_PAL.T_SHADOW）：M 烟缘+D 烟体+L 裂纹双眼，
+  // 顶/底须状拖尾+缺口=无实体感。
+  T_SHADOW: [
+    "................",
+    "......MM........",
+    ".....MMMM..M....",
+    "....MMMMM.......",
+    "...MMDDDMMM.....",
+    "..MMDDDDDDMM....",
+    "..MDDLDDLDDM....",
+    ".MMDDDDDDDDMM...",
+    ".MMDDDDDDDDMM...",
+    ".MDDDDDDDDDDM...",
+    "..MDDDDDDDDM....",
+    "..MMDDDDDDMM....",
+    "...MMM.MMMM.....",
+    "....MM...MM.....",
+    ".....M...M......",
+    "................",
+  ],
 };
 
 // 批3B: shared-silhouette aliases — same array reference, palette differs via ENTITY_PAL.
@@ -1816,10 +2204,21 @@ function buildPalette(main: string): Record<string, string> {
   };
 }
 
-// Stair uses fixed stone colors.
-const STAIR_PAL: Record<string, string> = {
-  K: '#3a4a5a', C: '#5a6a7a', W: '#9aaab8', L: '#b8c8d8', V: '#7ec8e3',
+// Batch3c theme palettes — fixed multi-hue themes. STAIR entry migrates the old
+// STAIR_PAL special case verbatim (iconPalette behavior-equivalent).
+export const THEME_PAL: Record<string, Record<string, string>> = {
+  STAIR: { K: '#3a4a5a', C: '#5a6a7a', W: '#9aaab8', L: '#b8c8d8', V: '#7ec8e3' },
+  T_FIRE: { K: '#1a0a04', M: '#ff5a1e', D: '#b83a0c', L: '#ffd54a', W: '#fff0c8' },
+  T_ICE: { K: '#0a1420', M: '#7ec8e3', D: '#3a6a8a', L: '#d8f4ff', W: '#ffffff' },
+  T_HOLY: { K: '#3a3210', M: '#ffe98a', D: '#c8a83a', L: '#fff8d8', W: '#ffffff' },
+  T_SHADOW: { K: '#0a0a14', M: '#5a3a7a', D: '#2a1a3a', L: '#9a5de8', W: '#d8c8f0' },
 };
+
+// Batch3c: palette resolution for panel icons — pure, testable without canvas.
+export function iconPalette(kind: string, color = '#cccccc'): Record<string, string> {
+  if (kind === 'WARRIOR' || kind === 'ROGUE' || kind === 'MAGE' || kind === 'PALADIN') return PLAYER_PAL;
+  return THEME_PAL[kind] || buildPalette(color);
+}
 
 // Batch2 ⑥ fixed terrain palettes.
 const DOOR_PAL: Record<string, string> = { K: '#140a0a', N: '#6b4423', D: '#4a2e17', G: '#ffd54a', W: '#8a5a30' };
@@ -1928,7 +2327,7 @@ export function drawPlayerSprite(c: CanvasRenderingContext2D, x: number, y: numb
 }
 
 export function drawStairSprite(c: CanvasRenderingContext2D, x: number, y: number): void {
-  blit(c, x, y, getSprite(TEMPLATES.STAIR, STAIR_PAL, 'STAIR'));
+  blit(c, x, y, getSprite(TEMPLATES.STAIR, THEME_PAL.STAIR, 'STAIR'));
 }
 
 export function drawTrapSprite(c: CanvasRenderingContext2D, x: number, y: number, color: string): void {
@@ -2109,10 +2508,7 @@ export function paintIcon(target: HTMLCanvasElement, kind: string, color = '#ccc
   const ctx = target.getContext('2d');
   if (!ctx) return;
   if (target.width !== 16) { target.width = 16; target.height = 16; }
-  let pal: Record<string, string>;
-  if (kind === 'STAIR') pal = STAIR_PAL;
-  else if (kind === 'WARRIOR' || kind === 'ROGUE' || kind === 'MAGE' || kind === 'PALADIN') pal = PLAYER_PAL;
-  else pal = buildPalette(color);
+  const pal = iconPalette(kind, color);
   const tpl = TEMPLATES[kind];
   if (!tpl) { ctx.clearRect(0, 0, 16, 16); return; }
   const sprite = getSprite(tpl, pal, 'ICON:' + kind + color);
