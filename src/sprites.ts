@@ -2214,6 +2214,32 @@ export const THEME_PAL: Record<string, Record<string, string>> = {
   T_SHADOW: { K: '#0a0a14', M: '#5a3a7a', D: '#2a1a3a', L: '#9a5de8', W: '#d8c8f0' },
 };
 
+// Batch3c: HUD buff row sprite routing (render.ts buff-list).
+export const BUFF_TPL: Record<string, { kind: string; color: string }> = {
+  str_buff: { kind: 'T_SWORD', color: '#e05545' },
+  def_buff: { kind: 'T_SHIELD', color: '#5a8ad6' },
+  shield: { kind: 'T_SHIELD', color: '#c8d4e8' },
+  maxhp: { kind: 'T_HEART', color: '#e05560' },
+  crit: { kind: 'T_SWORD', color: '#ff9a3c' },
+  dodge: { kind: 'T_BOOT', color: '#6cc46c' },
+  dodge_next: { kind: 'T_BOOT', color: '#a8e8a8' },
+  heal_bonus: { kind: 'T_HEART', color: '#7de89a' },
+  gold: { kind: 'T_COIN', color: '#ffd54a' },
+  food: { kind: 'T_MEAT', color: '#d69555' },
+  torch: { kind: 'T_FIRE', color: '#ff9a3c' },
+  invis: { kind: 'T_SHADOW', color: '#b8a0d8' },
+  mapping: { kind: 'T_EYE', color: '#6ad4d4' },
+  el_res_fire: { kind: 'T_SHIELD', color: '#ff6a3c' },
+  el_res_ice: { kind: 'T_SHIELD', color: '#6ac8ff' },
+  el_res_holy: { kind: 'T_SHIELD', color: '#ffe98a' },
+  el_dmg_fire: { kind: 'T_FIRE', color: '#ff5a2c' },
+  el_dmg_ice: { kind: 'T_ICE', color: '#5ad4ff' },
+  el_dmg_holy: { kind: 'T_HOLY', color: '#ffe98a' },
+  el_dmg_shadow: { kind: 'T_SHADOW', color: '#9a5de8' },
+  slow: { kind: 'T_ICE', color: '#7a8ae8' },
+};
+export const BUFF_TPL_FALLBACK: { kind: string; color: string } = { kind: 'T_RUNE', color: '#8a8a96' };
+
 // Batch3c: palette resolution for panel icons — pure, testable without canvas.
 export function iconPalette(kind: string, color = '#cccccc'): Record<string, string> {
   if (kind === 'WARRIOR' || kind === 'ROGUE' || kind === 'MAGE' || kind === 'PALADIN') return PLAYER_PAL;

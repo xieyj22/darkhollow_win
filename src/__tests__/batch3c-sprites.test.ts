@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TEMPLATES, THEME_PAL, iconPalette } from '../sprites.js';
+import { TEMPLATES, THEME_PAL, iconPalette, BUFF_TPL, BUFF_TPL_FALLBACK } from '../sprites.js';
 import { TALENT_TREES, ACH_DEFS, META_UPGRADES } from '../data.js';
 
 describe('batch3c T1: iconPalette routing', () => {
@@ -49,6 +49,19 @@ describe('batch3c T3: achievement + forge real-data gates', () => {
       expect(m.tpl, `meta ${m.id} missing tpl`).toBeTruthy();
       expect(TEMPLATES[m.tpl!], `meta ${m.id} tpl ${m.tpl} not in TEMPLATES`).toBeTruthy();
     }
+  });
+});
+
+// T4 gate (brief noted its own `BUFF_TPL.length ? ...` short-circuit typo —
+// the runnable form asserts the real key count instead).
+describe('batch3c T4: BUFF_TPL gate', () => {
+  it('every mapped buff kind exists in TEMPLATES, fallback too', () => {
+    expect(Object.keys(BUFF_TPL).length).toBeGreaterThanOrEqual(19);
+    for (const [type, bp] of Object.entries(BUFF_TPL)) {
+      expect(TEMPLATES[bp.kind], `buff ${type} kind ${bp.kind} not in TEMPLATES`).toBeTruthy();
+      expect(bp.color).toMatch(/^#[0-9a-f]{6}$/i);
+    }
+    expect(TEMPLATES[BUFF_TPL_FALLBACK.kind]).toBeTruthy();
   });
 });
 

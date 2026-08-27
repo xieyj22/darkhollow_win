@@ -6,7 +6,7 @@ import { clamp, dst, darken, darkenTinted } from './utils.js';
 import { RARITY_C, rareName, t, tMsg, tx } from './i18n.js';
 import { corruptionTier, TIER_LABEL, TIER_COLOR } from './corruption.js';
 import { AREAS, EQUIPMENT_SETS } from './data.js';
-import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite, drawDoorSprite, drawPortalSprite } from './sprites.js';
+import { drawPlayerSprite, drawEnemySprite, drawBossSprite, drawItemSprite, drawStairSprite, drawTrapSprite, drawFountainSprite, drawShrineSprite, drawDoorSprite, drawPortalSprite, paintIcon, BUFF_TPL, BUFF_TPL_FALLBACK } from './sprites.js';
 import type { Enemy } from './types.js';
 import { captureSnapshot } from './particles.js';
 import { bridge } from './bridge.js';
@@ -466,23 +466,26 @@ export function updateUI(): void {
   };
   eqN('eq-weapon', p.eq.weapon); eqN('eq-armor', p.eq.armor); eqN('eq-accessory', p.eq.accessory); eqN('eq-accessory2', p.eq.accessory2);
 
-  // Buffs
+  // Buffs — batch3c: leading pixel-icon canvas per row, painted in one pass below.
   const bd = $('buff-list')!;
   bd.innerHTML = '';
   for (const b of p.buffs) {
     const s = document.createElement('div'); s.className = b.type === 'slow' ? 'buff neg' : 'buff';
-    s.textContent = `${b.name}(${b.turns}t)${b.value ? '+' + b.value : ''}`; bd.appendChild(s);
+    const bp = BUFF_TPL[b.type] || BUFF_TPL_FALLBACK;
+    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="${bp.kind}" data-color="${bp.color}"></canvas><span>${b.name}(${b.turns}t)${b.value ? '+' + b.value : ''}</span>`;
+    bd.appendChild(s);
   }
   if (p.poisonTurns > 0) {
     const s = document.createElement('div'); s.className = 'buff neg';
-    s.textContent = tMsg('rd.poison', String(p.poisonTurns), String(p.poisonDmg));
+    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_FLASK" data-color="#7de84a"></canvas><span>${tMsg('rd.poison', String(p.poisonTurns), String(p.poisonDmg))}</span>`;
     bd.appendChild(s);
   }
   if (p.slowed > 0) {
     const s = document.createElement('div'); s.className = 'buff neg';
-    s.textContent = `🐌 ${t('rd.slowed')}(${p.slowed}t)`;
+    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_ICE" data-color="#7a8ae8"></canvas><span>${t('rd.slowed')}(${p.slowed}t)</span>`;
     bd.appendChild(s);
   }
+  bd.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || '#8a8a96'));
 
   // Set bonuses display
   const setIds = Object.keys(p.setBonusActive || {});
