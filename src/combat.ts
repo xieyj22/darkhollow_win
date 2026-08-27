@@ -389,7 +389,14 @@ export function applyCorruption(n: number): void {
   if (G.endless && n > 0 && Math.random() < (1 - corruptionWardMult())) n -= 1;
   const r = addCorruption(p, n);
   if (r.maxed) { wardenDeath(); return; }
-  if (r.crossed && r.after !== 'clean') {
+  if (r.crossed && r.after === 'clean') {
+    // 批3B: dropping all the way back to Clean is the cleanse payoff — its own
+    // message + green flt + aura (no shake; relief, not violence).
+    addMsg(t('cb.tierClean'), 'md');
+    flt(p.x, p.y, tx(TIER_LABEL.clean).toUpperCase(), '#80ed99');
+    fxAura(p.x, p.y, '#80ed99', 1.4);
+    recalc(); // clean tier mods are all zeros, but keep the symmetric recalc
+  } else if (r.crossed) {
     queueMechanicIntro('corruption');
     const label = tx(TIER_LABEL[r.after]);
     if (n < 0) {

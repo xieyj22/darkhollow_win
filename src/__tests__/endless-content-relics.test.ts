@@ -28,7 +28,7 @@ vi.mock('../utils.js', () => ({
 }));
 vi.mock('../audio.js', () => ({ snd: () => {}, setBgmScene: () => {} }));
 vi.mock('../effects.js', () => ({ flt: () => {}, shake: () => {} }));
-vi.mock('../fx.js', () => ({ fxFlash: () => {}, fxBurst: () => {} }));
+vi.mock('../fx.js', () => ({ fxFlash: () => {}, fxBurst: () => {}, fxAura: () => {} }));
 vi.mock('../messages.js', () => ({ addMsg: () => {} }));
 vi.mock('../enemies.js', () => ({
   processBossPhase: () => {},
