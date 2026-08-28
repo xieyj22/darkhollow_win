@@ -472,17 +472,17 @@ export function updateUI(): void {
   for (const b of p.buffs) {
     const s = document.createElement('div'); s.className = b.type === 'slow' ? 'buff neg' : 'buff';
     const bp = BUFF_TPL[b.type] || BUFF_TPL_FALLBACK;
-    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="${bp.kind}" data-color="${bp.color}"></canvas><span>${b.name}(${b.turns}t)${b.value ? '+' + b.value : ''}</span>`;
+    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="${bp.kind}" data-color="${bp.color}" aria-hidden="true"></canvas><span>${b.name}(${b.turns}t)${b.value ? '+' + b.value : ''}</span>`;
     bd.appendChild(s);
   }
   if (p.poisonTurns > 0) {
     const s = document.createElement('div'); s.className = 'buff neg';
-    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_FLASK" data-color="#7de84a"></canvas><span>${tMsg('rd.poison', String(p.poisonTurns), String(p.poisonDmg))}</span>`;
+    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_FLASK" data-color="#7de84a" aria-hidden="true"></canvas><span>${tMsg('rd.poison', String(p.poisonTurns), String(p.poisonDmg))}</span>`;
     bd.appendChild(s);
   }
   if (p.slowed > 0) {
     const s = document.createElement('div'); s.className = 'buff neg';
-    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_ICE" data-color="#7a8ae8"></canvas><span>${t('rd.slowed')}(${p.slowed}t)</span>`;
+    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_ICE" data-color="#7a8ae8" aria-hidden="true"></canvas><span>${t('rd.slowed')}(${p.slowed}t)</span>`;
     bd.appendChild(s);
   }
   bd.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || '#8a8a96'));

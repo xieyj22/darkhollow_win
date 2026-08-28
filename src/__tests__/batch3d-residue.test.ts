@@ -86,3 +86,31 @@ describe('batch3d T3: title 📋 -> T_BOOK, keys ⌨ -> T_KEY', () => {
     expect(html).toContain('up.keys'); // header label survives
   });
 });
+
+// Batch3d T4: every decorative icon-canvas emission is hidden from AT.
+// Two layers: a source-discipline gate over all emit sites (catches sites no
+// unit test drives), and a DOM gate proving the attribute survives rendering.
+import { readFileSync } from 'node:fs';
+
+describe('batch3d T4: decorative canvases are aria-hidden', () => {
+  const SRC_FILES = ['meta.ts', 'ui-panels.ts', 'panels.ts', 'render.ts', 'items.ts', 'item-intro.ts'];
+  it('every <canvas ...> emission in source carries aria-hidden="true"', () => {
+    for (const f of SRC_FILES) {
+      const text = readFileSync(new URL('../' + f, import.meta.url), 'utf8');
+      const tags = text.match(/<canvas[^>]*>/g) ?? [];
+      expect(tags.length, `${f}: no canvas tags found (file moved?)`).toBeGreaterThan(0);
+      for (const tag of tags) {
+        expect(tag.includes('aria-hidden="true"'), `${f}: ${tag.slice(0, 70)}… missing aria-hidden`).toBe(true);
+      }
+    }
+  });
+  it('driven renders put aria-hidden on every canvas in the DOM', () => {
+    document.body.innerHTML = '<div id="forge-se-count"></div><div id="forge-tabs"></div><div id="forge-content"></div><div id="title-stats"></div><div id="keys-panel"></div>';
+    renderForge();
+    renderTitleStats();
+    renderKeyHints();
+    const canvases = document.querySelectorAll('canvas');
+    expect(canvases.length).toBeGreaterThan(0);
+    canvases.forEach(cv => expect(cv.getAttribute('aria-hidden'), 'canvas without aria-hidden in DOM').toBe('true'));
+  });
+});

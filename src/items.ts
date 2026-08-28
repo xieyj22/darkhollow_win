@@ -285,7 +285,7 @@ export function renderHotbar(): void {
         html += `<div class="hb-slot empty"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:#555">·</span></div>`;
         continue;
       }
-      html += `<div class="hb-slot" tabindex="0" role="button" style="border-color:${RARITY_C[item.rarity]}44" data-qs="${i}" title="${item.name}: ${item.desc}"><span class="hb-key">${i + 1}</span><canvas class="lic hb-icon" width="16" height="16" data-slot="${i}"></canvas><span class="hb-sub" style="color:${RARITY_C[item.rarity]}">${item.name}</span></div>`;
+      html += `<div class="hb-slot" tabindex="0" role="button" style="border-color:${RARITY_C[item.rarity]}44" data-qs="${i}" title="${item.name}: ${item.desc}"><span class="hb-key">${i + 1}</span><canvas class="lic hb-icon" width="16" height="16" data-slot="${i}" aria-hidden="true"></canvas><span class="hb-sub" style="color:${RARITY_C[item.rarity]}">${item.name}</span></div>`;
     } else {
       html += `<div class="hb-slot empty" data-qs="${i}"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:#555">·</span></div>`;
     }

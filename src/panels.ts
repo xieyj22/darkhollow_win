@@ -50,7 +50,7 @@ function renderInv(): void {
       if (!def) continue;
       const row = document.createElement('div');
       row.className = `ii rc${def.rarity}`;
-      row.innerHTML = `<span style="display:flex;gap:6px;align-items:center;flex:1"><canvas class="lic" width="16" height="16" data-relic="${rid}" style="image-rendering:pixelated"></canvas><span style="color:${RARITY_C[def.rarity]}">${tx(def.n)}</span></span><span class="id">${tx(def.d)}</span>`;
+      row.innerHTML = `<span style="display:flex;gap:6px;align-items:center;flex:1"><canvas class="lic" width="16" height="16" data-relic="${rid}" style="image-rendering:pixelated" aria-hidden="true"></canvas><span style="color:${RARITY_C[def.rarity]}">${tx(def.n)}</span></span><span class="id">${tx(def.d)}</span>`;
       rsec.appendChild(row);
     }
     div.appendChild(rsec);
@@ -81,7 +81,7 @@ function renderInv(): void {
       const name = document.createElement('span');
       name.style.cssText = 'display:flex;align-items:center;gap:5px;flex:1;min-width:0';
       const idx = p.inv.indexOf(it);
-      name.innerHTML = `<span class="ik">[${idx + 1}]</span><canvas class="lic" width="16" height="16" data-idx="${idx}"></canvas><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}${qsTag}</span>`;
+      name.innerHTML = `<span class="ik">[${idx + 1}]</span><canvas class="lic" width="16" height="16" data-idx="${idx}" aria-hidden="true"></canvas><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}${qsTag}</span>`;
       const desc = document.createElement('span');
       desc.className = 'id'; desc.textContent = it.desc; desc.style.cssText = 'margin:0 8px;text-align:right;flex-shrink:0';
       const acts = document.createElement('span');
@@ -133,7 +133,7 @@ function renderInv(): void {
     }
     div.appendChild(sec);
   }
-  // Paint pixel sprites into every <canvas class="lic"> in the inventory.
+  // Paint pixel sprites into every canvas.lic element in the inventory.
   // Done once at the end (after all rows are in the DOM) so each canvas has its
   // final parent; idx maps back to p.inv for the live Item (color stays in sync).
   // Relic rows carry data-relic (the relic id) instead of data-idx.
@@ -164,7 +164,7 @@ export function closeHelp(): void {
 function renderHelp(): void {
   const div = document.getElementById('help-body')!;
   // sprite icon cell — matches in-game pixel art exactly
-  const ic = (kind: string, color: string) => `<td><canvas class="hic" width="16" height="16" data-kind="${kind}" data-color="${color}"></canvas></td>`;
+  const ic = (kind: string, color: string) => `<td><canvas class="hic" width="16" height="16" data-kind="${kind}" data-color="${color}" aria-hidden="true"></canvas></td>`;
   div.innerHTML = `
   <h3 style="color:#e63946;margin-top:10px">${t('pn.objective')}</h3>
   <p style="color:#aaa;line-height:1.6;padding:4px 0">${t('pn.objectiveDesc')}</p>
@@ -300,7 +300,7 @@ function renderAch(): void {
     const u = G.player.achievements.has(a.id) || getMeta().achievements.includes(a.id);
     const d = document.createElement('div');
     d.className = `ai ${u ? 'u' : 'l'}`;
-    d.innerHTML = `<span class="aic"><canvas class="lic ach-ic" width="16" height="16" data-kind="${a.tpl || 'T_RUNE'}" data-color="${a.hue || ACH_DEFAULT_HUE}"></canvas></span><div><div class="ain">${tx(a.n)}</div><div class="aid">${tx(a.d)}</div></div>`;
+    d.innerHTML = `<span class="aic"><canvas class="lic ach-ic" width="16" height="16" data-kind="${a.tpl || 'T_RUNE'}" data-color="${a.hue || ACH_DEFAULT_HUE}" aria-hidden="true"></canvas></span><div><div class="ain">${tx(a.n)}</div><div class="aid">${tx(a.d)}</div></div>`;
     div.appendChild(d);
   }
 
@@ -370,7 +370,7 @@ function renderTalentPanel(): void {
         dots += r < currentRank ? '●' : '○';
       }
 
-      cell.innerHTML = `<div class="tc-icon"><canvas class="lic tc-ic" width="16" height="16" data-kind="${node.tpl || 'T_RUNE'}" data-color="${node.hue || TALENT_DEFAULT_HUE}"></canvas></div><div class="tc-name">${name}</div><div class="tc-dots">${dots}</div>`;
+      cell.innerHTML = `<div class="tc-icon"><canvas class="lic tc-ic" width="16" height="16" data-kind="${node.tpl || 'T_RUNE'}" data-color="${node.hue || TALENT_DEFAULT_HUE}" aria-hidden="true"></canvas></div><div class="tc-name">${name}</div><div class="tc-dots">${dots}</div>`;
       cell.title = `${name} (${currentRank}/${node.maxRank})\n${desc}`;
 
       if (canLearn) {

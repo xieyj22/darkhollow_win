@@ -63,7 +63,7 @@ function renderLegend(): void {
   const panel = document.getElementById('legend-panel')!;
   panel.innerHTML = `<div class="legend-items">` +
     charItems.map(i => `<div class="legend-item"><span class="ls" style="color:${i.c}">${i.ch}</span><span class="ld">${i.t}</span></div>`).join('') +
-    spr.map(([k, c, t]) => `<div class="legend-item"><canvas class="lic" width="16" height="16" data-kind="${k}" data-color="${c}"></canvas><span class="ld">${t}</span></div>`).join('') +
+    spr.map(([k, c, t]) => `<div class="legend-item"><canvas class="lic" width="16" height="16" data-kind="${k}" data-color="${c}" aria-hidden="true"></canvas><span class="ld">${t}</span></div>`).join('') +
     `</div>`;
   panel.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'GOBLIN', cv.dataset.color || '#ccc'));
 }
@@ -87,7 +87,7 @@ export function renderKeyHints(): void {
     { k: 'L', t: t('up.lang') }, { k: 'M', t: t('up.mute') },
   ];
   document.getElementById('keys-panel')!.innerHTML =
-    `<div class="keys-hdr"><span><canvas class="lic keys-ic" width="16" height="16" data-kind="T_KEY" data-color="#aebfd6"></canvas> ${t('up.keys')}</span><button class="keys-x" onclick="document.getElementById('keys-panel').style.display='none';document.getElementById('keys-toggle').style.display='block'">✕</button></div><div class="keys-g">${pairs.map(p => `<span class="kk">${p.k}</span><span class="kd">${p.t}</span>`).join('')}</div>`;
+    `<div class="keys-hdr"><span><canvas class="lic keys-ic" width="16" height="16" data-kind="T_KEY" data-color="#aebfd6" aria-hidden="true"></canvas> ${t('up.keys')}</span><button class="keys-x" onclick="document.getElementById('keys-panel').style.display='none';document.getElementById('keys-toggle').style.display='block'">✕</button></div><div class="keys-g">${pairs.map(p => `<span class="kk">${p.k}</span><span class="kd">${p.t}</span>`).join('')}</div>`;
   document.querySelectorAll<HTMLCanvasElement>('#keys-panel canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || '#aebfd6'));
 }
 
@@ -330,7 +330,7 @@ function renderItemSection(): string {
       const name = has ? tx(d.n) : t('codex.itemLocked');
       // Discovered rows get a pixel-sprite canvas (painted in renderCodex);
       // locked rows show nothing — keeps the 🔒 feel without an empty canvas.
-      const icon = has && d.id ? `<canvas class="lic codex-icon" width="16" height="16" data-type="${type}" data-id="${d.id}" style="vertical-align:middle;margin-right:6px;image-rendering:pixelated"></canvas>` : '';
+      const icon = has && d.id ? `<canvas class="lic codex-icon" width="16" height="16" data-type="${type}" data-id="${d.id}" style="vertical-align:middle;margin-right:6px;image-rendering:pixelated" aria-hidden="true"></canvas>` : '';
       return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#ffd700' : '#333'};background:rgba(255,255,255,.02)">${icon}<span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
     }).join('');
     if (rows) html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${label}</div>${rows}`;
@@ -339,7 +339,7 @@ function renderItemSection(): string {
   const rrows = RELICS.map(r => {
     const has = disc.has('relic:' + r.id);
     const name = has ? tx(r.n) : t('codex.itemLocked');
-    const icon = has ? `<canvas class="lic codex-icon" width="16" height="16" data-type="relic" data-id="${r.id}" style="vertical-align:middle;margin-right:6px;image-rendering:pixelated"></canvas>` : '';
+    const icon = has ? `<canvas class="lic codex-icon" width="16" height="16" data-type="relic" data-id="${r.id}" style="vertical-align:middle;margin-right:6px;image-rendering:pixelated" aria-hidden="true"></canvas>` : '';
     return `<div style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)">${icon}<span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
   }).join('');
   html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${t('intro.relicTag')}</div>${rrows}`;

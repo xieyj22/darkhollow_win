@@ -327,7 +327,7 @@ export function renderForge(): void {
       { id: 'endless', kind: 'T_INFINITY', color: '#b266ff', label: t('mt.catEndless') },
     ];
     tabsEl.innerHTML = categories.map(c =>
-      `<button class="forge-tab${c.id === forgeActiveTab ? ' active' : ''}" data-tab="${c.id}"><canvas class="lic ft-ic" width="16" height="16" data-kind="${c.kind}" data-color="${c.color}"></canvas> ${c.label}</button>`
+      `<button class="forge-tab${c.id === forgeActiveTab ? ' active' : ''}" data-tab="${c.id}"><canvas class="lic ft-ic" width="16" height="16" data-kind="${c.kind}" data-color="${c.color}" aria-hidden="true"></canvas> ${c.label}</button>`
     ).join('');
     tabsEl.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || META_DEFAULT_HUE));
     tabsEl.querySelectorAll('.forge-tab').forEach(btn => {
@@ -363,7 +363,7 @@ function renderForgeContent(): void {
     let dots = '';
     for (let i = 0; i < def.maxLevel; i++) dots += i < level ? '●' : '○';
     html += `<div class="forge-upgrade${maxed ? ' maxed' : ''}">
-      <div class="fu-icon"><canvas class="lic fu-ic" width="16" height="16" data-kind="${def.tpl || 'T_RUNE'}" data-color="${def.hue || META_DEFAULT_HUE}"></canvas></div>
+      <div class="fu-icon"><canvas class="lic fu-ic" width="16" height="16" data-kind="${def.tpl || 'T_RUNE'}" data-color="${def.hue || META_DEFAULT_HUE}" aria-hidden="true"></canvas></div>
       <div class="fu-info">
         <div class="fu-name">${tx(def.n)}</div>
         <div class="fu-desc">${tx(def.d)}</div>
@@ -406,7 +406,7 @@ export function renderTitleStats(): void {
     `<span class="ts-item">🏔 ${t('mt.best')}: F${s.bestFloor}</span>` +
     `<span class="ts-item">🏆 ${t('mt.wins')}: ${s.wins}</span>` +
     `<span class="ts-item">💀 ${t('mt.totalKills')}: ${s.totalKills}</span>` +
-    `<span class="ts-item"><canvas class="lic ts-ic" width="16" height="16" data-kind="T_BOOK" data-color="#8a5de5"></canvas> ${t('mt.achv')}: ${meta.achievements.length}/${ACH_DEFS.length}</span>`;
+    `<span class="ts-item"><canvas class="lic ts-ic" width="16" height="16" data-kind="T_BOOK" data-color="#8a5de5" aria-hidden="true"></canvas> ${t('mt.achv')}: ${meta.achievements.length}/${ACH_DEFS.length}</span>`;
   el.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || '#8a5de5'));
 }
 
