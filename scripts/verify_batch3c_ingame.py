@@ -487,6 +487,10 @@ def main():
         legacy = [e for e in ('\N{CROSSED SWORDS}', '\N{HEAVY BLACK HEART}',
                               '\N{GLOWING STAR}', '\N{WRENCH}', '\N{PERMANENT PAPER SIGN}')
                   if e in gt['html']]
+        # NOTE: this list is deliberately hardcoded (NOT runtime-extracted from
+        # data.ts like the other emoji gates) because these five glyphs lived
+        # in meta.ts/ui-panels.ts source, not in data.ts tables. Do not
+        # "consistency-fix" it into a weaker data.ts-driven gate.
         check('F1 forge tab bar: zero legacy emoji', not legacy, f"hits={legacy}")
         icons_ok('F2[forge-tabs]', gt['ics'])
         page.evaluate("document.getElementById('forge-overlay').style.display = 'none'")
@@ -508,6 +512,11 @@ def main():
               f"kinds={[ic['kind'] for ic in kp['ics']]}")
         icons_ok('F6[keys]', kp['ics'])
 
+        # Belt-and-suspenders (review rec): open the inventory once so its
+        # icon canvases (data-idx / data-relic rows) join the in-DOM aria
+        # sweep instead of relying on the source gate alone.
+        page.evaluate("async () => { const p = await import('/src/panels.ts'); p.openInventory(); }")
+        page.wait_for_timeout(120)
         aria = page.evaluate("""() => {
             const all = Array.from(document.querySelectorAll('canvas.lic, canvas.hic'));
             return { total: all.length,

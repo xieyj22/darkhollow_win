@@ -348,6 +348,10 @@ export function renderForge(): void {
 // meta-resource system.
 const META_DEFAULT_HUE = '#4ad6c0';
 
+// Title-stats achv line (batch3d T3): the achievements-panel family hue, so
+// the title glyph reads as part of that system.
+const ACHV_HUE = '#8a5de5';
+
 function renderForgeContent(): void {
   const content = document.getElementById('forge-content');
   if (!content) return;
@@ -406,8 +410,8 @@ export function renderTitleStats(): void {
     `<span class="ts-item">🏔 ${t('mt.best')}: F${s.bestFloor}</span>` +
     `<span class="ts-item">🏆 ${t('mt.wins')}: ${s.wins}</span>` +
     `<span class="ts-item">💀 ${t('mt.totalKills')}: ${s.totalKills}</span>` +
-    `<span class="ts-item"><canvas class="lic ts-ic" width="16" height="16" data-kind="T_BOOK" data-color="#8a5de5" aria-hidden="true"></canvas> ${t('mt.achv')}: ${meta.achievements.length}/${ACH_DEFS.length}</span>`;
-  el.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || '#8a5de5'));
+    `<span class="ts-item"><canvas class="lic ts-ic" width="16" height="16" data-kind="T_BOOK" data-color="${ACHV_HUE}" aria-hidden="true"></canvas> ${t('mt.achv')}: ${meta.achievements.length}/${ACH_DEFS.length}</span>`;
+  el.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || ACHV_HUE));
 }
 
 // ===== Echo Breakdown Display =====
