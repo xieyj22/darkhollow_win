@@ -105,6 +105,8 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:var(--font-
 .eq-grid .eq{padding:1px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .buff-list{padding:2px 0}.buff{color:var(--accent-green);font-size:var(--fs-base)}.buff.neg{color:var(--accent-red)}
 .buff .buff-ic, .buff.neg .buff-ic { width: 14px; height: 14px; image-rendering: pixelated; vertical-align: -2px; margin-right: 3px; }
+.ts-item .ts-ic { width: 15px; height: 15px; image-rendering: pixelated; vertical-align: -2px; margin-right: 3px; }
+.keys-hdr .keys-ic { width: 15px; height: 15px; image-rendering: pixelated; vertical-align: -2px; margin-right: 4px; }
 
 /* ===== Right Panel ===== */
 #right-panel{flex:1;display:flex;flex-direction:column;min-width:0}

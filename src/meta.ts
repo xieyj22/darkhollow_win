@@ -406,7 +406,8 @@ export function renderTitleStats(): void {
     `<span class="ts-item">🏔 ${t('mt.best')}: F${s.bestFloor}</span>` +
     `<span class="ts-item">🏆 ${t('mt.wins')}: ${s.wins}</span>` +
     `<span class="ts-item">💀 ${t('mt.totalKills')}: ${s.totalKills}</span>` +
-    `<span class="ts-item">📋 ${t('mt.achv')}: ${meta.achievements.length}/${ACH_DEFS.length}</span>`;
+    `<span class="ts-item"><canvas class="lic ts-ic" width="16" height="16" data-kind="T_BOOK" data-color="#8a5de5"></canvas> ${t('mt.achv')}: ${meta.achievements.length}/${ACH_DEFS.length}</span>`;
+  el.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || '#8a5de5'));
 }
 
 // ===== Echo Breakdown Display =====

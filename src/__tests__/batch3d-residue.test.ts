@@ -7,7 +7,8 @@ vi.mock('../audio.js', () => ({ snd: () => {} }));
 vi.mock('../messages.js', () => ({ addMsg: () => {} }));
 
 import { TEMPLATES, THEME_PAL } from '../sprites.js';
-import { renderForge } from '../meta.js';
+import { renderForge, renderTitleStats } from '../meta.js';
+import { renderKeyHints } from '../ui-panels.js';
 
 // Batch3d T1: two new single-hue templates. They must live on the
 // buildPalette(color) path (NOT in THEME_PAL) so the emitter's hue
@@ -33,7 +34,7 @@ describe('batch3d T1: T_INFINITY & T_KEY templates', () => {
 });
 
 beforeEach(() => {
-  document.body.innerHTML = '<div id="forge-se-count"></div><div id="forge-tabs"></div><div id="forge-content"></div>';
+  document.body.innerHTML = '<div id="forge-se-count"></div><div id="forge-tabs"></div><div id="forge-content"></div><div id="title-stats"></div>';
   localStorage.clear();
   localStorage.setItem('dh_meta', JSON.stringify({
     version: 1, soulEchoes: 0, totalSpent: 0, upgrades: {}, achievements: [],
@@ -58,5 +59,30 @@ describe('batch3d T2: forge tab bar sprites', () => {
       expect(html.includes(e), `legacy emoji ${e} still in forge tabs`).toBe(false);
     }
     expect(tabs[0].textContent).toContain('mt.catStats'); // label survives for nav
+  });
+});
+
+// Batch3d T3: the two ledger-scoped emoji residues outside the three panels.
+// Title scope is ONLY the 📋 achievement line — 💀 price tags and the other
+// title-stat glyphs are batch-out by design.
+describe('batch3d T3: title 📋 -> T_BOOK, keys ⌨ -> T_KEY', () => {
+  it('renderTitleStats swaps the achievement-line 📋 for a T_BOOK canvas, other glyph lines untouched', () => {
+    renderTitleStats();
+    const html = document.getElementById('title-stats')!.innerHTML;
+    expect(html.includes('📋'), 'legacy 📋 still in title stats').toBe(false);
+    const cv = document.querySelector('#title-stats canvas[data-kind="T_BOOK"]') as HTMLCanvasElement | null;
+    expect(cv, 'T_BOOK canvas missing on achv line').toBeTruthy();
+    expect((cv!.dataset.color || '').toLowerCase()).toBe('#8a5de5');
+    expect(html).toContain('mt.achv'); // stat text survives
+    expect(html).toContain('💀');      // price-tag glyphs stay (design)
+  });
+  it('renderKeyHints swaps the header ⌨ for a T_KEY canvas', () => {
+    document.body.innerHTML = '<div id="keys-panel"></div>';
+    renderKeyHints();
+    const html = document.getElementById('keys-panel')!.innerHTML;
+    expect(html.includes('⌨'), 'legacy ⌨ still in keys header').toBe(false);
+    const cv = document.querySelector('#keys-panel canvas[data-kind="T_KEY"]') as HTMLCanvasElement | null;
+    expect(cv, 'T_KEY canvas missing in keys header').toBeTruthy();
+    expect(html).toContain('up.keys'); // header label survives
   });
 });

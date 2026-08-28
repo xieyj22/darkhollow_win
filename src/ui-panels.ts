@@ -77,7 +77,7 @@ export function toggleKeys(): void {
   if (newVis) renderKeyHints();
 }
 
-function renderKeyHints(): void {
+export function renderKeyHints(): void {
   const pairs = [
     { k: 'WASD', t: t('up.move') }, { k: '1-9', t: t('up.quickItem') },
     { k: 'G', t: t('up.pickup') }, { k: '>', t: t('up.descend') },
@@ -87,7 +87,8 @@ function renderKeyHints(): void {
     { k: 'L', t: t('up.lang') }, { k: 'M', t: t('up.mute') },
   ];
   document.getElementById('keys-panel')!.innerHTML =
-    `<div class="keys-hdr"><span>⌨ ${t('up.keys')}</span><button class="keys-x" onclick="document.getElementById('keys-panel').style.display='none';document.getElementById('keys-toggle').style.display='block'">✕</button></div><div class="keys-g">${pairs.map(p => `<span class="kk">${p.k}</span><span class="kd">${p.t}</span>`).join('')}</div>`;
+    `<div class="keys-hdr"><span><canvas class="lic keys-ic" width="16" height="16" data-kind="T_KEY" data-color="#aebfd6"></canvas> ${t('up.keys')}</span><button class="keys-x" onclick="document.getElementById('keys-panel').style.display='none';document.getElementById('keys-toggle').style.display='block'">✕</button></div><div class="keys-g">${pairs.map(p => `<span class="kk">${p.k}</span><span class="kd">${p.t}</span>`).join('')}</div>`;
+  document.querySelectorAll<HTMLCanvasElement>('#keys-panel canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || '#aebfd6'));
 }
 
 // ===== Tooltip =====
