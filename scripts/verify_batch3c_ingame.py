@@ -15,9 +15,15 @@
 #   E  emoji residue gate: the ACTUAL icon: values from data.ts's three tables
 #      (extracted at runtime by regex — never a hand-typed sample list) are
 #      absent from the respective panel innerHTML; 🐌 absent from #buff-list
-#   F  batch3B regression: one boss sprite still renders via BOSS_PAL
+#   F  batch3B regression: one boss sprite still renders via BOSS_PAL;
+#      E3 HARDENED: the boss tile must also differ from a floor-only
+#      baseline snapshot of the SAME tile (batch3d — the painted/colors
+#      floors alone were hollow: bare floor is already 100% opaque)
 #   G  0 console errors for the whole session (favicon 404 whitelisted,
 #      console + response double handler)
+#   H  batch3d residue sites: forge tab bar (5 ft-ic sprites, zero legacy
+#      emoji), title stats (T_BOOK, no 📋), keys header (T_KEY, no ⌨),
+#      every in-DOM canvas.lic/hic carries aria-hidden
 # Counts are the controller-verified ground truth (64/29/22 — the plan's
 # 86/31/27 were spec miscounts).
 # Run: npm run dev -- --port 5173 --strictPort (FRESH server), then:
@@ -44,6 +50,7 @@ FORGE_TABS = ['stats', 'survival', 'talent', 'utility', 'endless']
 MIN_PAINTED_PX = 20         # opaque pixels (of 256) required per panel icon
 MIN_COLORS = 3              # unique RGB values among painted pixels
 MIN_DIFF_PX = 8             # changed pixels required to call two icons distinct
+MIN_BOSS_DIFF_PX = 100      # boss tile vs floor-only baseline (batch3d E3)
 TOL = 30                    # per-pixel channel-sum tolerance (anti-alias headroom)
 
 results = []
@@ -215,18 +222,28 @@ BOSS_SNAP_JS = """async (kind) => {
     if (st.G.player.explored) st.G.player.explored[y][x] = true;
     const bd = d.BOSSES.find(b => b.spriteKind === kind);
     if (!bd) return { error: 'no BOSSES def for ' + kind };
-    st.G.enemies = [fac.makeEnemy(bd, x, y, 1, { isBoss: true })];
     const cvs = document.getElementById('game-canvas');
     const ctx = cvs.getContext('2d');
+    const snap = () => {
+        const sx = (x - st.G.vx) * cfg.TS, sy = (y - st.G.vy) * cfg.TS;
+        const t = document.createElement('canvas');
+        t.width = cfg.TS; t.height = cfg.TS;
+        t.getContext('2d').drawImage(cvs, sx, sy, cfg.TS, cfg.TS, 0, 0, cfg.TS, cfg.TS);
+        return t.toDataURL('image/png');
+    };
+    // baseline pass: enemies list is still empty -> the tile shows floor only
     r.render();
     r.drawEnemyLayer(ctx);
     r.drawPlayerLayer(ctx);
-    const sx = (x - st.G.vx) * cfg.TS, sy = (y - st.G.vy) * cfg.TS;
-    const t = document.createElement('canvas');
-    t.width = cfg.TS; t.height = cfg.TS;
-    t.getContext('2d').drawImage(cvs, sx, sy, cfg.TS, cfg.TS, 0, 0, cfg.TS, cfg.TS);
+    const floorUrl = snap();
+    // boss pass: identical draw sequence, ONLY the boss added
+    st.G.enemies = [fac.makeEnemy(bd, x, y, 1, { isBoss: true })];
+    r.render();
+    r.drawEnemyLayer(ctx);
+    r.drawPlayerLayer(ctx);
+    const bossUrl = snap();
     pt.startParticles();          // resume the normal rAF loop
-    return { url: t.toDataURL('image/png') };
+    return { url: bossUrl, floor_url: floorUrl };
 }"""
 
 
@@ -240,6 +257,13 @@ def grab(page, sel):
 def icons_ok(tag, ics):
     """Assert every canvas is painted + shows every palette letter of its
     template (template-aware multi-hue floor); returns [index]->image."""
+    if not ics:
+        # Zero canvases would otherwise sail through the loops below and then
+        # crash on min([]) — a broken selector must fail LOUDLY and NAMED
+        # (batch3d hardening, ledger F3), not as a ValueError traceback.
+        check(f'{tag} icon canvases found (0 = selector/wiring broke)', False,
+              'grabbed 0 canvas.lic icons for this container')
+        return []
     imgs, bad_paint, bad_color = [], [], []
     for i, ic in enumerate(ics):
         img = load_rgba(ic['url'])
@@ -441,7 +465,58 @@ def main():
         check('E1 boss tile non-trivially painted', painted >= 100,
               f"painted={painted}px of {boss.size[0] * boss.size[1]}, unique_colors={colors}")
         check('E2 boss tile multi-hue (BOSS_PAL)', colors >= 4, f"unique_colors={colors}")
+        # batch3d E3: E1/E2 floors are hollow on their own (bare floor is
+        # already fully opaque) — the boss tile must differ from a floor-only
+        # snapshot of the SAME tile taken with the SAME draw sequence.
+        floor_base = load_rgba(shot['floor_url'])
+        n, mean = px_diff(boss, floor_base)
+        check(f'E3 boss tile differs from floor-only baseline (>= {MIN_BOSS_DIFF_PX} px)',
+              n >= MIN_BOSS_DIFF_PX, f"diff_px={n} mean={mean:.2f}")
         upscale(boss, 10).save(os.path.join(OUT, 'boss_B_GOBLIN_KING.png'))
+
+        # ============ F: batch3d residue sites — forge tabs / title / keys ============
+        print('[F] batch3d residue: forge tab bar / title stats / keys header / aria')
+        page.evaluate("document.getElementById('forge-overlay').style.display = 'block'")
+        page.evaluate("async () => { const m = await import('/src/meta.ts'); m.renderForge(); }")
+        page.wait_for_timeout(120)
+        gt = grab(page, '#forge-tabs')
+        tab_kinds = [ic['kind'] for ic in gt['ics']]
+        check('F0 forge tab bar: 5 canvas.ft-ic in mapped order',
+              tab_kinds == ['T_SWORD', 'T_HEART', 'T_STAR', 'T_RUNE', 'T_INFINITY'],
+              f"kinds={tab_kinds}")
+        legacy = [e for e in ('\N{CROSSED SWORDS}', '\N{HEAVY BLACK HEART}',
+                              '\N{GLOWING STAR}', '\N{WRENCH}', '\N{PERMANENT PAPER SIGN}')
+                  if e in gt['html']]
+        check('F1 forge tab bar: zero legacy emoji', not legacy, f"hits={legacy}")
+        icons_ok('F2[forge-tabs]', gt['ics'])
+        page.evaluate("document.getElementById('forge-overlay').style.display = 'none'")
+        page.wait_for_timeout(120)
+
+        ts = grab(page, '#title-stats')
+        check('F3 title stats: T_BOOK canvas present, no legacy clipboard glyph',
+              any(ic['kind'] == 'T_BOOK' for ic in ts['ics'])
+              and '\N{CLIPBOARD}' not in ts['html'],
+              f"kinds={[ic['kind'] for ic in ts['ics']]}")
+        icons_ok('F4[title-stats]', ts['ics'])
+
+        page.evaluate("async () => { const up = await import('/src/ui-panels.ts'); up.renderKeyHints(); }")
+        page.wait_for_timeout(120)
+        kp = grab(page, '#keys-panel')
+        check('F5 keys header: T_KEY canvas present, no legacy keyboard glyph',
+              any(ic['kind'] == 'T_KEY' for ic in kp['ics'])
+              and '\N{KEYBOARD}' not in kp['html'],
+              f"kinds={[ic['kind'] for ic in kp['ics']]}")
+        icons_ok('F6[keys]', kp['ics'])
+
+        aria = page.evaluate("""() => {
+            const all = Array.from(document.querySelectorAll('canvas.lic, canvas.hic'));
+            return { total: all.length,
+                     bad: all.filter(c => c.getAttribute('aria-hidden') !== 'true')
+                             .map(c => (c.className || '') + '[' + (c.dataset.kind || c.dataset.idx || '?') + ']') };
+        }""")
+        check('F7 every in-DOM canvas.lic/hic carries aria-hidden="true"',
+              aria['total'] > 0 and not aria['bad'],
+              f"total={aria['total']} bad={aria['bad'][:6]}")
 
         browser.close()
 
