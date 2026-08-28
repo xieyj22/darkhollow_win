@@ -320,15 +320,16 @@ export function renderForge(): void {
   const tabsEl = document.getElementById('forge-tabs');
   if (tabsEl) {
     const categories = [
-      { id: 'stats', icon: '⚔', label: t('mt.catStats') },
-      { id: 'survival', icon: '❤', label: t('mt.catSurvival') },
-      { id: 'talent', icon: '🌟', label: t('mt.catTalent') },
-      { id: 'utility', icon: '🔧', label: t('mt.catUtility') },
-      { id: 'endless', icon: '♾', label: t('mt.catEndless') },
+      { id: 'stats', kind: 'T_SWORD', color: '#e05545', label: t('mt.catStats') },
+      { id: 'survival', kind: 'T_HEART', color: '#80ed99', label: t('mt.catSurvival') },
+      { id: 'talent', kind: 'T_STAR', color: '#ffd700', label: t('mt.catTalent') },
+      { id: 'utility', kind: 'T_RUNE', color: '#4ad6c0', label: t('mt.catUtility') },
+      { id: 'endless', kind: 'T_INFINITY', color: '#b266ff', label: t('mt.catEndless') },
     ];
     tabsEl.innerHTML = categories.map(c =>
-      `<button class="forge-tab${c.id === forgeActiveTab ? ' active' : ''}" data-tab="${c.id}">${c.icon} ${c.label}</button>`
+      `<button class="forge-tab${c.id === forgeActiveTab ? ' active' : ''}" data-tab="${c.id}"><canvas class="lic ft-ic" width="16" height="16" data-kind="${c.kind}" data-color="${c.color}"></canvas> ${c.label}</button>`
     ).join('');
+    tabsEl.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || META_DEFAULT_HUE));
     tabsEl.querySelectorAll('.forge-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         forgeActiveTab = (btn as HTMLElement).dataset.tab || 'stats';
