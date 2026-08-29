@@ -34,7 +34,7 @@ def check(name, ok, detail=''):
 
 
 FAKE_PAD = """
-window.__pad = { buttons: Array.from({length: 17}, () => ({ pressed: false })), axes: [0, 0] };
+window.__pad = { buttons: Array.from({length: 17}, () => ({ pressed: false })), axes: [0, 0], mapping: 'standard' };
 Object.defineProperty(navigator, 'getGamepads', { value: () => [window.__pad] });
 """
 

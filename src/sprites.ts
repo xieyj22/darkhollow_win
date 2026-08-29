@@ -2565,6 +2565,8 @@ export function drawItemSprite(c: CanvasRenderingContext2D, x: number, y: number
   // 批4: when the palette is the FIXED ENTITY_PAL, item.c never reaches the
   // image — the cache sig is then the bare key, so every CHEST / event site /
   // merchant of a kind shares ONE cached sprite instead of one per color.
+  // (Invariant: ENTITY_PAL keys must also exist in TEMPLATES — key === spriteKind
+  // depends on that dual membership.)
   const sig = (item.spriteKind && ENTITY_PAL[item.spriteKind]) ? key : key + ':' + item.c;
   const pal = (item.spriteKind && ENTITY_PAL[item.spriteKind]) || buildPalette(item.c);
   blitOutlined(c, x, y, getSprite(tpl, pal, sig), sig);
