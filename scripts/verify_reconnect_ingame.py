@@ -65,6 +65,13 @@ def main():
             const cfg = await import('/src/config.ts');
             st.G.dungeon.map[st.G.player.y][st.G.player.x + 1] = cfg.TL.FOUNTAIN;
         }""", state['x'])
+        # Batch2 #4: the first corruption gain queues the corruption mechanic-intro
+        # card, whose overlay correctly gates gameplay input. Close it via its ✕
+        # button before the real keypress (ESC would open the pause menu instead
+        # if no intro were showing, gating the keypress a second way).
+        if page.evaluate("() => { const el = document.getElementById('item-intro-overlay'); return el && el.classList.contains('active'); }"):
+            page.click('#btn-close-intro')
+            page.wait_for_timeout(200)
         page.keyboard.press('ArrowRight')
         page.wait_for_timeout(400)
         after = page.evaluate("""async () => {
