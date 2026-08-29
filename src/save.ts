@@ -39,6 +39,7 @@ function buildSave(): string {
     enemies: serializeEnemies(g.enemies), items: g.items, traps: g.traps,
     msgs: g.msgs.slice(-20), qs, endless: g.endless === true,
     wardenCd: g.wardenCd ?? 0,
+    eventFlags: g.eventFlags || {},
   });
 }
 
@@ -71,6 +72,7 @@ export function loadGame(): void {
       // keeps the F40-victory gate closed. Old saves without it default to Normal.
       endless: s.endless === true,
       wardenCd: Math.max(2, s.wardenCd ?? 0),
+      eventFlags: s.eventFlags || {},
     };
 
     // Fix Set deserialization — achievements may be an array after JSON parse

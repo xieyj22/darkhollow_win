@@ -35,6 +35,7 @@ export function initGame(ri: number, ci: number, endless = false): void {
     branchMode: false, branchReturn: null,
     endless,
     wardenCd: rng(4, 6),
+    eventFlags: {},
   };
   setGameState(gameState);
   enterFloor(startFloor);

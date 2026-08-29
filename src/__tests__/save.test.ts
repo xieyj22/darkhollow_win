@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('../state.js', () => ({
   get G(): unknown { return (globalThis as { G?: unknown }).G; },
   lang: 'en',
-  setGameState: () => {},
+  setGameState: (g: unknown) => { (globalThis as { G?: unknown }).G = g; },
 }));
 vi.mock('../i18n.js', () => ({ t: (k: string) => k }));
 vi.mock('../messages.js', () => ({ addMsg: () => {} }));
@@ -16,7 +16,7 @@ vi.mock('../dungeon.js', () => ({ updatePlayerFOV: () => {} }));
 vi.mock('../audio.js', () => ({ snd: () => {} }));
 vi.mock('../bridge.js', () => ({ bridge: {} }));
 
-import { autoSave, saveGame } from '../save.js';
+import { autoSave, saveGame, loadGame } from '../save.js';
 
 function fixtureG(branch = false): any {
   return {
@@ -53,5 +53,39 @@ describe('P0-1 branch (秘境) never overwrites main-line save', () => {
     const saved = localStorage.getItem('dh_save');
     expect(saved).not.toBeNull();
     expect(saved).not.toBe('MAINLINE_SNAPSHOT');
+  });
+});
+
+// 批4 P1: eventFlags (once-per-run event sites) must survive save/load.
+
+describe('批4 P1: eventFlags persists through save/load', () => {
+  beforeEach(() => {
+    localStorage.clear(); vi.clearAllMocks();
+    // loadGame touches these three DOM nodes directly (save.ts:137-140).
+    document.body.innerHTML = '<div id="title-screen"></div><div id="game-container"></div><div id="log-panel"></div>';
+  });
+
+  it('buildSave writes eventFlags into the save JSON', () => {
+    (globalThis as any).G = { ...fixtureG(false), eventFlags: { cursed_altar: true, sealed_box: true } };
+    autoSave();
+    const s = JSON.parse(localStorage.getItem('dh_save')!);
+    expect(s.eventFlags).toEqual({ cursed_altar: true, sealed_box: true });
+  });
+
+  it('loadGame restores eventFlags into the new GameState', () => {
+    (globalThis as any).G = { ...fixtureG(false), eventFlags: { cursed_altar: true } };
+    autoSave();
+    loadGame();
+    expect((globalThis as any).G.eventFlags).toEqual({ cursed_altar: true });
+  });
+
+  it('old save without eventFlags loads to {} (not undefined)', () => {
+    (globalThis as any).G = fixtureG(false);
+    autoSave();
+    const s = JSON.parse(localStorage.getItem('dh_save')!);
+    delete s.eventFlags;   // simulate a pre-batch4 save
+    localStorage.setItem('dh_save', JSON.stringify(s));
+    loadGame();
+    expect((globalThis as any).G.eventFlags).toEqual({});
   });
 });

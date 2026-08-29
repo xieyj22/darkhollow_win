@@ -588,6 +588,7 @@ export interface SaveData {
   qs: number[];
   endless?: boolean;
   wardenCd?: number;
+  eventFlags?: Record<string, boolean>;
 }
 
 // --- Meta Progression ---
