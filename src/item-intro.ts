@@ -6,7 +6,7 @@ import { introOpen, setIntroOpen, introEnabled } from './state.js';
 import { discoverItem, discoverMechanic } from './meta.js';
 import { showOverlay, hideOverlay } from './ui-panels.js';
 import { t, tx, rareName, RARITY_C } from './i18n.js';
-import { paintItemIcon, paintRelicIcon } from './sprites.js';
+import { paintItemIcon, paintRelicIcon, paintIcon } from './sprites.js';
 import {
   ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS,
   ALL_CONSUMABLES, FOODS, ENDLESS_GEAR, RELICS,
@@ -16,10 +16,11 @@ type IntroTarget = { kind: 'item'; item: Item } | { kind: 'relic'; id: string } 
 const queue: IntroTarget[] = [];
 
 // Batch2 ④: first-encounter mechanic tutorials (corruption/warden/fungal).
-const MECHANIC_CARDS: Record<string, { sym: string; col: string; tk: string; bk: string }> = {
-  corruption: { sym: '🟪', col: '#b583f6', tk: 'intro.mcCorruptionTitle', bk: 'intro.mcCorruptionBody' },
-  warden:     { sym: '👁', col: '#9a2be2', tk: 'intro.mcWardenTitle',     bk: 'intro.mcWardenBody' },
-  fungal:     { sym: '🍄', col: '#06d6a0', tk: 'intro.mcFungalTitle',     bk: 'intro.mcFungalBody' },
+// 批4: emoji sym → pixel sprite (tpl+hue); col 保留驱动标题/正文色。
+const MECHANIC_CARDS: Record<string, { tpl: string; hue: string; col: string; tk: string; bk: string }> = {
+  corruption: { tpl: 'T_SHADOW',   hue: '#b583f6', col: '#b583f6', tk: 'intro.mcCorruptionTitle', bk: 'intro.mcCorruptionBody' },
+  warden:     { tpl: 'T_EYE',      hue: '#9a2be2', col: '#9a2be2', tk: 'intro.mcWardenTitle',     bk: 'intro.mcWardenBody' },
+  fungal:     { tpl: 'T_MUSHROOM', hue: '#06d6a0', col: '#06d6a0', tk: 'intro.mcFungalTitle',     bk: 'intro.mcFungalBody' },
 };
 
 // Reverse-lookup a catalog def by type + id to read its flavor (and name for relics).
@@ -71,11 +72,14 @@ function showNext(): void {
   const target = queue.shift();
   if (!target) { hideOverlay('item-intro-overlay'); setIntroOpen(false); return; }
   document.getElementById('item-intro-content')!.innerHTML = renderCard(target);
-  // Paint the pixel sprite into the card's canvas (item OR relic branch).
+  // Paint the pixel sprite into the card's canvas (item OR relic OR mechanic branch).
   const cv = document.querySelector<HTMLCanvasElement>('#item-intro-content canvas.lic');
   if (cv) {
     if (target.kind === 'item') paintItemIcon(cv, target.item);
-    else {
+    else if (target.kind === 'mechanic') {
+      const mc = MECHANIC_CARDS[target.id];
+      if (mc) paintIcon(cv, mc.tpl, mc.hue);
+    } else {
       const rdef = RELICS.find(r => r.id === target.id);
       if (rdef) paintRelicIcon(cv, rdef);
     }
@@ -111,7 +115,7 @@ function renderCard(target: IntroTarget): string {
     if (!mc) return '';
     return `
       <div style="text-align:center;margin-bottom:8px">
-        <div style="font-size:2.2em;color:${mc.col};margin-top:4px">${mc.sym}</div>
+        <canvas class="lic" width="16" height="16" style="image-rendering:pixelated;width:48px;height:48px;vertical-align:middle;background:${mc.hue}22;border:1px solid ${mc.hue};border-radius:4px;padding:4px" aria-hidden="true"></canvas>
         <div style="color:${mc.col};font-size:1.3em;font-weight:700;margin-top:4px">${t(mc.tk)}</div>
         <div style="color:#ffd700;font-size:.8em;margin-top:4px">✦ ${t('intro.firstDiscover')}</div>
       </div>

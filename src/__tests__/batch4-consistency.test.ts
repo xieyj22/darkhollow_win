@@ -13,4 +13,10 @@ describe('批4 source gates', () => {
       expect(text).not.toContain("unlockLore('relic:");
     }
   });
+  it('teleport float text is i18n-driven (no hardcoded CJK in items.ts)', () => {
+    const f = 'items.ts';
+    const text = readFileSync(new URL('../' + f, import.meta.url), 'utf8');
+    expect(text).not.toContain('⚡传送');
+    expect(text).toContain("t('ig.teleport')");
+  });
 });

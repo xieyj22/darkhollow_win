@@ -65,6 +65,15 @@ describe('batch3c T4: BUFF_TPL gate', () => {
   });
 });
 
+describe('批4: T_MUSHROOM template (fungal mechanic card)', () => {
+  it('exists and is a valid 16×16 grid', () => {
+    const tpl = TEMPLATES.T_MUSHROOM;
+    expect(tpl).toBeTruthy();
+    expect(tpl!.length).toBe(16);
+    tpl!.forEach(row => expect(row.length, row).toBe(16));
+  });
+});
+
 describe('batch3c T1: theme templates present & single-hue letter discipline', () => {
   const SINGLE = new Set(['M', 'D', 'L', 'E', 'K', 'W', 'C', 'G', 'N', 'V']);
   it('every T_ template is 16x16 (shape guard covers) and single-hue ones only use buildPalette letters', () => {

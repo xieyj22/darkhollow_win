@@ -80,7 +80,7 @@ export function useItem(idx: number): void {
         const { rm } = pick(pool);
         p.x = rm.cx; p.y = rm.cy;
         addMsg(t('it.teleported'), 'mi');
-        fxFlash(p.x, p.y, '#9b5de5', 1.4); flt(p.x, p.y, '⚡传送', '#9b5de5');
+        fxFlash(p.x, p.y, '#9b5de5', 1.4); flt(p.x, p.y, '⚡' + t('ig.teleport'), '#9b5de5');
         break;
       }
       case 'mapping': for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) p.explored[y][x] = true; fxAura(p.x, p.y, '#ffd700', 2); addMsg(t('it.mapRevealed'), 'mi'); break;

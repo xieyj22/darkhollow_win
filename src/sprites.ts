@@ -2159,6 +2159,26 @@ export const TEMPLATES: Record<string, Template> = {
     ".....M...M......",
     "................",
   ],
+  // T_MUSHROOM — 真菌教学卡（批4）：M 菌盖+W 浅斑+D 菌褶，W/N 菌柄。
+  // 刻意不进 THEME_PAL：单 hue 走 buildPalette('#06d6a0')（同 T_INFINITY/T_KEY 理由）。
+  T_MUSHROOM: [
+    "................",
+    ".....MMMM.......",
+    "...MMMMMMMM.....",
+    "..MMWWMMMMMD....",
+    ".MMWWMMMMMMMD...",
+    ".MWWMMMMMMMMDD..",
+    "MMMMMMMMMMMMDDM.",
+    "MMMDMMMMMMMDDDM.",
+    ".MDDDDDDDDDDDD..",
+    "......WWN.......",
+    "......WWN.......",
+    "......WWN.......",
+    ".....WWWN.......",
+    ".....WWWN.......",
+    "....WWWWWN......",
+    "................",
+  ],
 };
 
 // 批3B: shared-silhouette aliases — same array reference, palette differs via ENTITY_PAL.
