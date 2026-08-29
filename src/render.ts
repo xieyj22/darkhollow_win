@@ -196,6 +196,35 @@ function getScanlineOverlay(w: number, h: number): HTMLCanvasElement {
   return scanlineCanvas;
 }
 
+// 批5 T3: cached vignette overlay. The player is always centered (no edge
+// clamp), so the radial gradient depends only on canvas size — paint it once
+// offscreen and drawImage per frame instead of createRadialGradient + a
+// full-rect gradient fill every render. Keys on ALL of {w,h,cx,cy}: if the
+// centering ever changes to follow the player off-center, the cache
+// self-invalidates instead of freezing a wrong overlay. Returns null when no
+// 2d ctx exists (happy-dom) — caller then skips the draw.
+let vignetteCanvas: HTMLCanvasElement | null = null;
+let vignetteKey = '';
+function getVignette(w: number, h: number, cx: number, cy: number): HTMLCanvasElement | null {
+  const key = `${w}|${h}|${cx}|${cy}`;
+  if (vignetteCanvas && vignetteKey === key) return vignetteCanvas;
+  const cv = document.createElement('canvas');
+  cv.width = w;
+  cv.height = h;
+  const vc = cv.getContext('2d');
+  if (!vc) { vignetteCanvas = null; vignetteKey = ''; return null; }
+  const vMaxR = Math.max(8, Math.max(w, h) * 0.7);
+  const g = vc.createRadialGradient(cx, cy, vMaxR * 0.3, cx, cy, vMaxR);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(0.6, 'rgba(0,0,0,0.15)');
+  g.addColorStop(1, 'rgba(0,0,0,0.55)');
+  vc.fillStyle = g;
+  vc.fillRect(0, 0, w, h);
+  vignetteCanvas = cv;
+  vignetteKey = key;
+  return cv;
+}
+
 export function resizeCanvas(): void {
   const c = document.getElementById('game-canvas') as HTMLCanvasElement;
   const mc = document.getElementById('minimap-canvas') as HTMLCanvasElement;
@@ -214,6 +243,8 @@ export function resizeCanvas(): void {
   c.height = Math.floor((area.clientHeight - 20) / TS) * TS;
   // Invalidate cached scanline overlay since canvas size changed
   scanlineCanvas = null;
+  vignetteCanvas = null;
+  vignetteKey = '';
   glowCache.clear();
   // Invalidate minimap cache (canvas size or zoom may have changed)
   minimapCanvas = null;
@@ -342,14 +373,10 @@ export function render(): void {
   // Player screen position (used by vignette)
   const px = (G.player.x - G.vx) * TS, py = (G.player.y - G.vy) * TS;
 
-  // Vignette overlay
+  // Vignette overlay (批5 T3: cached offscreen — one drawImage per frame)
   const vCx = px + TS / 2, vCy = py + TS / 2;
-  const vMaxR = Math.max(8, Math.max(cvs.width, cvs.height) * 0.7);
-  const vGrad = c.createRadialGradient(vCx, vCy, vMaxR * 0.3, vCx, vCy, vMaxR);
-  vGrad.addColorStop(0, 'rgba(0,0,0,0)');
-  vGrad.addColorStop(0.6, 'rgba(0,0,0,0.15)');
-  vGrad.addColorStop(1, 'rgba(0,0,0,0.55)');
-  c.fillStyle = vGrad; c.fillRect(0, 0, cvs.width, cvs.height);
+  const vig = getVignette(cvs.width, cvs.height, vCx, vCy);
+  if (vig) c.drawImage(vig, 0, 0);
 
   // Warm tint overlay
   c.fillStyle = 'rgba(20,10,0,0.03)'; c.fillRect(0, 0, cvs.width, cvs.height);
