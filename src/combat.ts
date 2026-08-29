@@ -588,7 +588,12 @@ export function grantKillRewards(e: Enemy): void {
   addMsg(tMsg('cb.enemyDefeated', e.name, String(bonusExp(e.exp))), 'mc');
   if (e.isBoss) {
     G.player.bossesKilledThisRun++;
-    unlockLore('boss:' + G.floor);
+    // 批4: boss codex is main-line only — endless F45+ scaled bosses and hollow
+    // branch kills used to write boss:<floor> ids that have no LORE_ENTRIES row.
+    if (!G.branchMode && !G.endless) unlockLore('boss:' + G.floor);
+    // 批4: the F40 Creator kill (normal AND endless — both really slay him)
+    // unlocks the previously dead-locked world:creator codex entry.
+    if (G.floor === FINAL && !G.branchMode) unlockLore('world:creator');
     checkAch('boss_kill');
     if (G.floor === FINAL && !G.branchMode && !G.endless) { playerVictory(); return; }
     if (G.floor === FINAL && G.endless)

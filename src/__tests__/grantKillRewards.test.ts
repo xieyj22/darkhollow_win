@@ -73,6 +73,10 @@ vi.mock('../talents.js', () => ({
 // steam.ts exports unlockAchievement (not checkAch — that's combat-internal).
 vi.mock('../steam.js', () => ({ unlockAchievement: () => {} }));
 
+// 批4: F40-normal kill reaches playerVictory → presentCreatorChoice — keep the
+// endings chain mocked like every other combat dependency in this file.
+vi.mock('../endings.js', () => ({ canRefuse: () => true, endingForChoice: () => 'slay', ENDINGS: {} }));
+
 import { grantKillRewards } from '../combat.js';
 import type { Enemy } from '../types.js';
 
@@ -153,5 +157,47 @@ describe('grantKillRewards — warden + boss lore', () => {
     (globalThis as any).G.floor = 5;
     grantKillRewards(fixtureEnemy({ isBoss: true }));
     expect(unlockLore).toHaveBeenCalledWith('boss:5');
+  });
+});
+
+describe('grantKillRewards — 批4 lore 三连', () => {
+  beforeEach(() => {
+    (globalThis as any).G = fixtureG();
+    (globalThis as any).G.player.relics = [];
+    vi.clearAllMocks();
+  });
+
+  it('boss lore is main-line only: endless F45 kill writes no boss: id', () => {
+    const G = (globalThis as any).G;
+    G.endless = true; G.floor = 45;
+    grantKillRewards(fixtureEnemy({ isBoss: true }));
+    expect(unlockLore).not.toHaveBeenCalledWith('boss:45');
+  });
+
+  it('boss lore: branch-mode kill writes no boss:<entry-floor> id', () => {
+    const G = (globalThis as any).G;
+    G.branchMode = true; G.floor = 10;
+    grantKillRewards(fixtureEnemy({ isBoss: true }));
+    expect(unlockLore).not.toHaveBeenCalled();
+  });
+
+  it('F40 Creator kill unlocks world:creator (endless variant — no victory path)', () => {
+    const G = (globalThis as any).G;
+    G.endless = true; G.floor = 40;
+    grantKillRewards(fixtureEnemy({ isBoss: true }));
+    expect(unlockLore).toHaveBeenCalledWith('world:creator');
+  });
+
+  it('F40 normal kill unlocks world:creator before playerVictory runs', () => {
+    const G = (globalThis as any).G;
+    G.floor = 40;
+    G.player.corruption = 0;
+    // playerVictory → presentCreatorChoice touches these DOM nodes (combat.ts:516-528).
+    document.body.innerHTML =
+      '<div id="ending-choice"></div><div id="ending-title"></div><div id="ending-desc"></div>' +
+      '<button id="btn-ending-refuse"></button>';
+    grantKillRewards(fixtureEnemy({ isBoss: true }));
+    expect(unlockLore).toHaveBeenCalledWith('world:creator');
+    expect(unlockLore).toHaveBeenCalledWith('boss:40');
   });
 });

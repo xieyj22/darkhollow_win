@@ -6,7 +6,7 @@
 import type { Player, Enemy } from './types.js';
 import { G, lang } from './state.js';
 import { RELICS } from './data.js';
-import { unlockLore, getMeta } from './meta.js';
+import { getMeta } from './meta.js';
 import { queueRelicIntro } from './item-intro.js';
 import { addMsg } from './messages.js';
 import { flt } from './effects.js';
@@ -171,7 +171,6 @@ export function grantRelic(id: string, x: number, y: number): void {
   const def = RELICS.find(r => r.id === id);
   if (!def) return;
   p.relics.push(id);
-  unlockLore('relic:' + id);
   queueRelicIntro(id);
   _recalc?.();
   const name = tx(def.n);
