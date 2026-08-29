@@ -34,6 +34,7 @@ import { updateLangUI, toggleLang, toggleSound, updateSoundBtn, applyAudioUI, mi
 import { applyAll } from './settings.js';
 import { toggleLegend, toggleObjective, toggleKeys, initTooltip, initFocusTooltips, showOverlay, hideOverlay, openPause, closePause, renderRecords, renderCodex } from './ui-panels.js';
 import { closeItemIntro } from './item-intro.js';
+import { clearTransientUi } from './menu-context.js';
 import { showCharSelect } from './char-select.js';
 
 // ===== Wire up late-bound dependencies =====
@@ -125,6 +126,7 @@ function startNewGame(): void {
 }
 
 function returnToTitle(): void {
+  clearTransientUi();   // 批4: quit-to-title — drop intro queue + close any open overlay
   document.getElementById('death-screen')!.style.display = 'none';
   document.getElementById('victory-screen')!.style.display = 'none';
   document.getElementById('game-container')!.style.display = 'none';
@@ -144,7 +146,7 @@ function bindButtons(): void {
   };
 
   on('btn-new', startNewGame);
-  on('btn-cont', loadGame);
+  on('btn-cont', () => { clearTransientUi(); loadGame(); });
   on('btn-forge', () => { showOverlay('forge-overlay'); renderForge(); });
   on('btn-help', () => { setHelpOpen(true); showOverlay('help-overlay'); bridge.renderHelp?.(); });
   on('lang-btn', toggleLang);

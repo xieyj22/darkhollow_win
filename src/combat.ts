@@ -22,7 +22,7 @@ import {
 } from './talents.js';
 import { genEndlessGear, endlessLuckMult } from './item-gen.js';
 import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy, corruptionWardMult } from './meta.js';
-import { queueMechanicIntro } from './item-intro.js';
+import { queueMechanicIntro, resetIntros } from './item-intro.js';
 
 // Late-bound dependency to break circular import with items.ts
 let _genItem: ((floor: number) => any) | null = null;
@@ -426,6 +426,7 @@ function wardenDeath(): void {
 export function playerDeath(killer: string): void {
   if (!G || G.gameOver) return;
   G.gameOver = true;
+  resetIntros();   // 批4: the death screen takes over — drop any queued intro cards
   addMsg(tMsg('cb.slainBy', killer), 'md');
   snd('death'); setBgmScene('death');
 
@@ -481,6 +482,7 @@ export function playerDeath(killer: string): void {
 export function playerVictory(): void {
   if (!G) return;
   G.gameOver = true; G.won = true;
+  resetIntros();   // 批4: the victory/ending flow takes over — drop any queued intro cards
   addMsg(t('loreVictory'), 'ml'); snd('victory'); setBgmScene('victory'); checkAch('win');
   checkAch('creator_kill');
 

@@ -9,10 +9,13 @@ const mockState = vi.hoisted(() => ({
   eventActions: [] as Array<() => void>, menuOpen: false, introOpen: false,
 }));
 vi.mock('../state.js', () => mockState);
-vi.mock('../events.js', () => ({ closeEvent: vi.fn() }));
+// 批4: closers flip their own open flag (the real ones do — the bounded ladder
+// in clearTransientUi relies on it), so the mocks must too or the ladder can
+// never walk past rung 1 under test.
+vi.mock('../events.js', () => ({ closeEvent: vi.fn(() => { mockState.eventOpen = false; }) }));
 vi.mock('../ui-panels.js', () => ({ hideOverlay: vi.fn() }));
 vi.mock('../bridge.js', () => ({ bridge: { closeOptions: vi.fn(), openPause: vi.fn(), closePause: vi.fn() } }));
-vi.mock('../item-intro.js', () => ({ closeItemIntro: vi.fn() }));
+vi.mock('../item-intro.js', () => ({ closeItemIntro: vi.fn(), resetIntros: vi.fn(() => { mockState.introOpen = false; }) }));
 vi.mock('../panels.js', () => ({
   closeInventory: vi.fn(), closeSkillPanel: vi.fn(), closeAchievements: vi.fn(),
   closeTalentPanel: vi.fn(), closeHelp: vi.fn(),
@@ -21,6 +24,7 @@ vi.mock('../panels.js', () => ({
 import { activeMenuContext, menuBack, closeActiveOverlay } from '../menu-context.js';
 import { hideOverlay } from '../ui-panels.js';
 import { closeEvent } from '../events.js';
+import { resetIntros } from '../item-intro.js';
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -90,5 +94,24 @@ describe('closeActiveOverlay ladder (migrated from input.ts)', () => {
   it('never closes ending-choice even though it is .overlay.active', () => {
     document.body.innerHTML = `<div id="ending-choice" class="overlay active"></div>`;
     expect(closeActiveOverlay()).toBe(false);
+  });
+});
+
+import { clearTransientUi } from '../menu-context.js';
+
+describe('批4 clearTransientUi', () => {
+  it('flushes the intro queue, then walks the close ladder to the last overlay', () => {
+    mockState.introOpen = true; mockState.eventOpen = true;
+    document.body.innerHTML = `<div id="records-overlay" class="overlay active"></div>`;
+    clearTransientUi();
+    expect(resetIntros).toHaveBeenCalledTimes(1);
+    expect(closeEvent).toHaveBeenCalled();                       // eventOpen rung
+    expect(hideOverlay).toHaveBeenCalledWith('records-overlay'); // ladder tail rung
+  });
+  it('no-op when nothing is open (no infinite loop, no closers called)', () => {
+    document.body.innerHTML = '';
+    expect(() => clearTransientUi()).not.toThrow();
+    expect(closeEvent).not.toHaveBeenCalled();
+    expect(hideOverlay).not.toHaveBeenCalled();
   });
 });

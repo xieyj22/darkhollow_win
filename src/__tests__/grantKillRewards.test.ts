@@ -76,6 +76,9 @@ vi.mock('../steam.js', () => ({ unlockAchievement: () => {} }));
 // 批4: F40-normal kill reaches playerVictory → presentCreatorChoice — keep the
 // endings chain mocked like every other combat dependency in this file.
 vi.mock('../endings.js', () => ({ canRefuse: () => true, endingForChoice: () => 'slay', ENDINGS: {} }));
+// 批4: playerVictory now calls resetIntros — the real one hits setIntroOpen,
+// which this file's state.js mock doesn't provide.
+vi.mock('../item-intro.js', () => ({ queueMechanicIntro: vi.fn(), queueRelicIntro: vi.fn(), resetIntros: vi.fn() }));
 
 import { grantKillRewards } from '../combat.js';
 import type { Enemy } from '../types.js';

@@ -1,5 +1,5 @@
 // Ambient particle system — area-themed atmospheric particles
-import { G, reducedMotion, menuOpen, invOpen, skillOpen, talentOpen, achOpen, helpOpen, eventOpen } from './state.js';
+import { G, reducedMotion, menuOpen, invOpen, skillOpen, talentOpen, achOpen, helpOpen, eventOpen, introOpen } from './state.js';
 import { TS } from './config.js';
 import { AREAS } from './data.js';
 import { drawFx, clearFx } from './fx.js';
@@ -96,6 +96,7 @@ function tick(): void {
   // (keep the rAF heartbeat to detect when it closes). Cuts idle desktop CPU/battery.
   const optOv = document.getElementById('options-overlay');
   if (menuOpen || invOpen || skillOpen || talentOpen || achOpen || helpOpen || eventOpen
+      || introOpen || G.gameOver || G.won
       || !!optOv?.classList.contains('active')) {
     animFrame = requestAnimationFrame(tick);
     return;

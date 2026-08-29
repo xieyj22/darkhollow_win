@@ -76,6 +76,9 @@ vi.mock('../endings.js', () => ({
   endingForChoice: () => 'pyrrhic',
   canRefuse: () => true,
 }));
+// 批4: playerDeath/playerVictory now call resetIntros — the real one hits
+// setIntroOpen, which this file's state.js mock doesn't provide.
+vi.mock('../item-intro.js', () => ({ queueMechanicIntro: vi.fn(), queueRelicIntro: vi.fn(), resetIntros: vi.fn() }));
 // corruption.js stays REAL (pure module) so applyCorruption's addCorruption call mutates.
 
 import { playerDeath, playerVictory, applyCorruption, resolveEnding } from '../combat.js';

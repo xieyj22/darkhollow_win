@@ -92,6 +92,15 @@ export function closeItemIntro(): void {
   setIntroOpen(false);
 }
 
+// 批4: hard clear — unlike closeItemIntro (which ADVANCES to the next queued
+// card), this drops the whole queue. Used when leaving the game context
+// (quit-to-title, Continue) or when a settlement screen takes over.
+export function resetIntros(): void {
+  queue.length = 0;
+  hideOverlay('item-intro-overlay');
+  setIntroOpen(false);
+}
+
 function statRow(label: string, val: string | number, color = '#ccc'): string {
   return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #1c1c1c"><span style="color:#888">${label}</span><span style="color:${color};font-weight:700">${val}</span></div>`;
 }

@@ -9,7 +9,7 @@ import { invOpen, helpOpen, skillOpen, achOpen, talentOpen, eventOpen, menuOpen,
 import { closeEvent } from './events.js';
 import { hideOverlay } from './ui-panels.js';
 import { bridge } from './bridge.js';
-import { closeItemIntro } from './item-intro.js';
+import { closeItemIntro, resetIntros } from './item-intro.js';
 import { closeInventory, closeSkillPanel, closeAchievements, closeTalentPanel, closeHelp } from './panels.js';
 
 export function closeActiveOverlay(): boolean {
@@ -31,6 +31,14 @@ export function closeActiveOverlay(): boolean {
     if (el && el.classList.contains('active')) { hideOverlay(id); return true; }
   }
   return false;
+}
+
+// 批4: full transient-UI reset for context switches (quit-to-title / Continue).
+// resetIntros first (closeItemIntro would just advance the queue), then walk the
+// ladder. Bounded: each rung must clear its own flag; 12 ≥ ladder depth.
+export function clearTransientUi(): void {
+  resetIntros();
+  for (let i = 0; i < 12 && closeActiveOverlay(); i++) { /* ladder closes one rung per call */ }
 }
 
 function visible(id: string): HTMLElement | null {
