@@ -27,11 +27,16 @@ vi.mock('../panels.js', () => ({
 
 import { movePlayer } from '../player.js';
 import { pollGamepad, initInput } from '../input.js';
+import { hideOverlay } from '../ui-panels.js';
+import { bridge } from '../bridge.js';
 
 // Mutable fake gamepad wired into navigator.getGamepads.
+// 批4: `mapping: 'standard'` — pollGamepad only honors standard-mapping pads
+// now, so the fixture must present itself as one (a real browser Gamepad does).
 const pad = vi.hoisted(() => ({
   buttons: Array.from({ length: 17 }, () => ({ pressed: false })),
   axes: [0, 0] as number[],
+  mapping: 'standard',
 }));
 beforeEach(() => {
   vi.clearAllMocks();
@@ -183,5 +188,45 @@ describe('ending-choice keyboard gate — Tab enclosed, all other keys gated', (
     // Movement must NOT dispatch while the mandatory Slay/Refuse popup is up.
     document.dispatchEvent(key('w'));
     expect(movePlayer).not.toHaveBeenCalled();
+  });
+});
+
+// 批4: pollGamepad must only honor standard-mapping pads. Browsers report null
+// slots for disconnected pads and some legacy DirectInput pads expose scrambled
+// layouts — reading pads[0] blindly dispatches garbage from either.
+// Gameplay-state DOM (hidden title-screen, same as the gameplay test above) so
+// held axes dispatch movePlayer — that is the observable the first case pins.
+describe('批4: standard-mapping gamepad filter', () => {
+  it('ignores a non-standard pad entirely (axes held → no dispatch)', () => {
+    document.body.innerHTML = '<div id="title-screen" style="display:none"></div>';
+    const bad = { buttons: Array.from({ length: 17 }, () => ({ pressed: false })), axes: [1, 0], mapping: 'dinput' };
+    (navigator as any).getGamepads = () => [bad];
+    pollGamepad();
+    expect(movePlayer).not.toHaveBeenCalled();
+  });
+  it('skips null entries: first standard pad wins', () => {
+    document.body.innerHTML = '<div id="title-screen" style="display:none"></div>';
+    (navigator as any).getGamepads = () => [null, pad];
+    pad.axes = [1, 0];
+    pollGamepad();
+    expect(movePlayer).toHaveBeenCalled();
+    pad.axes = [0, 0];
+  });
+});
+
+// 批4: keyboard ESC closes records/codex overlays — parity with gamepad B,
+// which closes them via closeActiveOverlay's tail. The keydown listener is the
+// one the ending-choice describe above already registered via initInput().
+describe('批4: keyboard ESC closes records/codex (parity with gamepad B)', () => {
+  it('records-overlay active → ESC hides it, does not open pause', () => {
+    document.body.innerHTML = '<div id="records-overlay" class="overlay active"></div>';
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(hideOverlay).toHaveBeenCalledWith('records-overlay');
+    expect(bridge.openPause).not.toHaveBeenCalled();
+  });
+  it('nothing open → ESC still opens pause (regression guard)', () => {
+    document.body.innerHTML = '';
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(bridge.openPause).toHaveBeenCalled();
   });
 });

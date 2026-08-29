@@ -19,4 +19,9 @@ describe('批4 source gates', () => {
     expect(text).not.toContain('⚡传送');
     expect(text).toContain("t('ig.teleport')");
   });
+  it('ENTITY_PAL entities share one cache sig per template (bare key when palette is fixed)', () => {
+    const f = 'sprites.ts';
+    const text = readFileSync(new URL('../' + f, import.meta.url), 'utf8');
+    expect(text).toContain("ENTITY_PAL[item.spriteKind]) ? key : key + ':' + item.c");
+  });
 });

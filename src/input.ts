@@ -181,10 +181,16 @@ export function initInput(): void {
     const forgeEl = document.getElementById('forge-overlay');
     if (forgeEl && getComputedStyle(forgeEl).display !== 'none') { if (keyToAction(e) === 'overlay_close') { hideOverlay('forge-overlay'); e.preventDefault(); } return; }
 
-    // overlay_close (ESC) opens the in-game pause menu when no other overlay is open.
-    // (Options/pause are intercepted earlier, so reaching here means nothing else is open.)
-    // Positioned BEFORE the `!G` guard — ESC can open pause even when no game is active.
-    if (keyToAction(e) === 'overlay_close') { bridge.openPause?.(); e.preventDefault(); return; }
+    // overlay_close (ESC): records/codex are shown via showOverlay but have no
+    // open-flag rung above — close them first (title screen included, where
+    // openPause is a G=null no-op), else fall through to the pause menu.
+    if (keyToAction(e) === 'overlay_close') {
+      for (const id of ['records-overlay', 'codex-overlay']) {
+        const el = document.getElementById(id);
+        if (el?.classList.contains('active')) { hideOverlay(id); e.preventDefault(); return; }
+      }
+      bridge.openPause?.(); e.preventDefault(); return;
+    }
 
     if (!G) return;
 
@@ -277,7 +283,7 @@ let gpMoveCd = 0;
 // navigator.getGamepads and call pollGamepad() directly to simulate edges.
 export function pollGamepad(): void {
   const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-  const gp = pads && pads[0];
+  const gp = pads.find(p => p && p.mapping === 'standard');
   if (!gp) return;
   const btn = (i: number) => !!(gp!.buttons[i] && gp!.buttons[i].pressed);
   const edge = (i: number) => btn(i) && !gpPrevBtn[i];

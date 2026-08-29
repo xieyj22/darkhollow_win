@@ -2562,7 +2562,10 @@ export function drawItemSprite(c: CanvasRenderingContext2D, x: number, y: number
   // Sprite visuals depend only on template (type+ef → key) + palette (color).
   // sig uses `key` (not item.name) so the sprite cache stays bounded — and key
   // will carry subType routing in Task 5 when weapons/potions get variants.
-  const sig = key + ':' + item.c;
+  // 批4: when the palette is the FIXED ENTITY_PAL, item.c never reaches the
+  // image — the cache sig is then the bare key, so every CHEST / event site /
+  // merchant of a kind shares ONE cached sprite instead of one per color.
+  const sig = (item.spriteKind && ENTITY_PAL[item.spriteKind]) ? key : key + ':' + item.c;
   const pal = (item.spriteKind && ENTITY_PAL[item.spriteKind]) || buildPalette(item.c);
   blitOutlined(c, x, y, getSprite(tpl, pal, sig), sig);
 }
