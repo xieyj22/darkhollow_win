@@ -16,6 +16,8 @@
 // as `{ keys, buttons }`. On first load (no stored data) defaults are used.
 // `resetKeybinds()` restores defaults and re-persists.
 
+import { scheduleProfileSync } from './cloud-sync.js';
+
 // ===== Action enum =====
 //
 // Every rebindable gameplay action. `pause` is gamepad-only (keyboard has no
@@ -262,6 +264,7 @@ interface StoredKeybinds {
 export function saveKeybinds(): void {
   const data: StoredKeybinds = { keys: currentKeys, buttons: currentButtons };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  scheduleProfileSync();
 }
 
 /**

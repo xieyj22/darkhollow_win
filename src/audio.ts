@@ -5,6 +5,7 @@
 // All volume prefs persist to localStorage.
 
 import { bridge } from './bridge.js';
+import { scheduleProfileSync } from './cloud-sync.js';
 
 // ===== Persisted volume prefs =====
 function loadVol(key: string, dflt: number): number {
@@ -50,14 +51,14 @@ function applyVolumes(): void {
   sfxGain.gain.setTargetAtTime(sfxVol, t, 0.04);
 }
 
-export function setMasterVol(v: number): void { masterVol = clamp01(v); localStorage.setItem('dh_vol_master', String(masterVol)); applyVolumes(); }
-export function setMusicVol(v: number): void { musicVol = clamp01(v); localStorage.setItem('dh_vol_music', String(musicVol)); applyVolumes(); }
-export function setSfxVol(v: number): void { sfxVol = clamp01(v); localStorage.setItem('dh_vol_sfx', String(sfxVol)); applyVolumes(); }
+export function setMasterVol(v: number): void { masterVol = clamp01(v); localStorage.setItem('dh_vol_master', String(masterVol)); applyVolumes(); scheduleProfileSync(); }
+export function setMusicVol(v: number): void { musicVol = clamp01(v); localStorage.setItem('dh_vol_music', String(musicVol)); applyVolumes(); scheduleProfileSync(); }
+export function setSfxVol(v: number): void { sfxVol = clamp01(v); localStorage.setItem('dh_vol_sfx', String(sfxVol)); applyVolumes(); scheduleProfileSync(); }
 export function getMasterVol(): number { return masterVol; }
 export function getMusicVol(): number { return musicVol; }
 export function getSfxVol(): number { return sfxVol; }
 export function isMuted(): boolean { return muted; }
-export function setMutedState(m: boolean): void { muted = m; localStorage.setItem('dh_muted', m ? '1' : '0'); applyVolumes(); }
+export function setMutedState(m: boolean): void { muted = m; localStorage.setItem('dh_muted', m ? '1' : '0'); applyVolumes(); scheduleProfileSync(); }
 
 // ===== SFX — oscillator bank, routed through sfxGain =====
 export function snd(type: string): void {

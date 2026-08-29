@@ -21,11 +21,14 @@ const SAVE_KEY = 'dh_save';
 
 // Write to localStorage (always, synchronous) and mirror to a file under Electron
 // (async, fire-and-forget). The file copy survives app-storage clears and is what
-// Steam Cloud will sync once wired — localStorage remains the fast synchronous store.
+// Steam Cloud syncs — localStorage remains the fast synchronous store. On a
+// successful file write we stamp dh_save_ts (mtime-style epoch ms): the startup
+// mirror in cloud-sync.ts lets the file win only when its mtime is NEWER than
+// this stamp, so a crash between the two writes keeps the newer localStorage.
 function persistSave(data: string): void {
   try { localStorage.setItem(SAVE_KEY, data); } catch { /* quota / private mode */ }
   const dh = (window as any).dh;
-  if (dh?.saveFile) { try { dh.saveFile(data); } catch { /* ignore */ } }
+  if (dh?.saveFile) { try { Promise.resolve(dh.saveFile(data)).then(ok => { if (ok) localStorage.setItem('dh_save_ts', String(Date.now())); }).catch(() => {}); } catch { /* ignore */ } }
 }
 
 function buildSave(): string {

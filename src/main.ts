@@ -1,3 +1,8 @@
+// Steam Cloud mirror — MUST stay the first import: it runs a sendSync read-back
+// of the mirrored files into localStorage at module-evaluation time, which has
+// to land BEFORE state.ts/audio.ts read their persisted keys below.
+import './cloud-sync.js';
+
 // Localized fonts — replaces the Google Fonts @import so the game runs fully offline.
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';

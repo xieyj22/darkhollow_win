@@ -6,6 +6,7 @@ import { snd } from './audio.js';
 import { t, tx } from './i18n.js';
 import { addMsg } from './messages.js';
 import { paintIcon } from './sprites.js';
+import { scheduleProfileSync } from './cloud-sync.js';
 
 const META_KEY = 'dh_meta';
 
@@ -55,6 +56,7 @@ export function getMeta(): MetaSave {
 
 export function saveMeta(m: MetaSave): void {
   localStorage.setItem(META_KEY, JSON.stringify(m));
+  scheduleProfileSync();
 }
 
 // Record a finished run: push to recent history (newest first, cap 20); endless

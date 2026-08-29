@@ -1,6 +1,7 @@
 // Combat system — attack, level up, death, victory
 import type { Enemy, Combatant, Element, Item, SoulEchoBreakdown, Player } from './types.js';
 import { G, lang } from './state.js';
+import { clearCloudSave } from './cloud-sync.js';
 import { FINAL } from './config.js';
 import { rng, dst } from './utils.js';
 import { snd, setBgmScene } from './audio.js';
@@ -476,7 +477,7 @@ export function playerDeath(killer: string): void {
       `${t('cb.survivedLabel')} ${G.player.turns} ${t('cb.turnsLabel')}`;
   }
   renderEchoBreakdown('death-echoes', echoes);
-  localStorage.removeItem('dh_save');
+  clearCloudSave();
 }
 
 export function playerVictory(): void {
@@ -500,7 +501,7 @@ export function playerVictory(): void {
   // Run is over the moment the Creator falls — clear the save NOW (mirrors
   // playerDeath). Deferring to resolveEnding left a window where force-quitting on
   // the Slay/Refuse screen → Continue → re-kill the Creator → double echoes/history.
-  localStorage.removeItem('dh_save');
+  clearCloudSave();
 
   // Phase 2: present the Creator choice (Slay / Refuse) instead of straight to victory-screen.
   _pendingEchoes = echoes;
@@ -554,7 +555,7 @@ export function resolveEnding(choice: 'slay' | 'refuse'): void {
     `${t('cb.corruptionLabel')} ${p.corruption}`;
   if (_pendingEchoes) renderEchoBreakdown('vic-echoes', _pendingEchoes);
   _pendingEchoes = null;
-  localStorage.removeItem('dh_save');
+  clearCloudSave();
 }
 
 export function checkAch(id: string): void {
