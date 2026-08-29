@@ -167,6 +167,22 @@ const ELITE_GLOW_STOPS: Record<string, [number, string][]> = Object.fromEntries(
   Object.entries(EL_COLORS).map(([el, rgb]) => [el, [[0, `rgba(${rgb},0.12)`], [1, `rgba(${rgb},0)`]] as [number, string][]]),
 );
 
+// 批5 T2: buff-icon canvas pool. Rebuilt buff rows reuse the already-painted
+// canvas node for a given (kind,color) instead of allocating a fresh one every
+// updateUI — icon pixels depend only on kind+color, so a pooled node is always
+// correct. The pool holds one node per key (bounded by distinct BUFF_TPL keys
+// + poison/slow ≈ 24) and nodes survive list wipes because the Map keeps them
+// referenced (a detached canvas keeps its bitmap).
+const buffIconPool = new Map<string, HTMLCanvasElement>();
+
+// 批5 T2: signature of everything the buff-list segment renders — buff rows
+// (type/name/value/turns), poison/slowed rows, set-bonus text rows and the
+// empty state, including the RENDERED i18n strings so a language switch with
+// identical counts still rebuilds. updateUI runs every turn; while holding a
+// movement key the segment rebuilt ~17-24 fresh canvases per update of pure
+// DOM/GC churn. Unchanged signature → skip the whole segment.
+let buffListSig = '';
+
 // Pre-rendered scanline overlay (avoids 300+ fillRect calls per frame)
 let scanlineCanvas: HTMLCanvasElement | null = null;
 function getScanlineOverlay(w: number, h: number): HTMLCanvasElement {
@@ -466,46 +482,78 @@ export function updateUI(): void {
   };
   eqN('eq-weapon', p.eq.weapon); eqN('eq-armor', p.eq.armor); eqN('eq-accessory', p.eq.accessory); eqN('eq-accessory2', p.eq.accessory2);
 
-  // Buffs — batch3c: leading pixel-icon canvas per row, painted in one pass below.
-  const bd = $('buff-list')!;
-  bd.innerHTML = '';
-  for (const b of p.buffs) {
-    const s = document.createElement('div'); s.className = b.type === 'slow' ? 'buff neg' : 'buff';
-    const bp = BUFF_TPL[b.type] || BUFF_TPL_FALLBACK;
-    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="${bp.kind}" data-color="${bp.color}" aria-hidden="true"></canvas><span>${b.name}(${b.turns}t)${b.value ? '+' + b.value : ''}</span>`;
-    bd.appendChild(s);
-  }
-  if (p.poisonTurns > 0) {
-    const s = document.createElement('div'); s.className = 'buff neg';
-    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_FLASK" data-color="#7de84a" aria-hidden="true"></canvas><span>${tMsg('rd.poison', String(p.poisonTurns), String(p.poisonDmg))}</span>`;
-    bd.appendChild(s);
-  }
-  if (p.slowed > 0) {
-    const s = document.createElement('div'); s.className = 'buff neg';
-    s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_ICE" data-color="#7a8ae8" aria-hidden="true"></canvas><span>${t('rd.slowed')}(${p.slowed}t)</span>`;
-    bd.appendChild(s);
-  }
-  bd.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => paintIcon(cv, cv.dataset.kind || 'T_RUNE', cv.dataset.color || '#8a8a96'));
-
-  // Set bonuses display
+  // Buffs — batch3c: leading pixel-icon canvas per row (pooled, 批5 T2).
+  // Set-bonus texts are precomputed once so they feed both the signature and
+  // the rows (same rendered strings, no duplicate lookups).
   const setIds = Object.keys(p.setBonusActive || {});
+  const setRows: string[] = [];
   for (const setId of setIds) {
     const count = p.setBonusActive[setId] || 0;
     if (count < 2) continue;
     const setDef = EQUIPMENT_SETS.find(s => s.id === setId);
     if (!setDef) continue;
     for (const bonus of setDef.bonuses) {
-      if (count >= bonus.required) {
-        const s = document.createElement('div'); s.className = 'buff';
-        const bName = tx(setDef.n);
-        const bDesc = tx(bonus.desc);
-        s.textContent = `${bName}(${count}): ${bDesc}`; bd.appendChild(s);
-      }
+      if (count >= bonus.required) setRows.push(`${tx(setDef.n)}(${count}): ${tx(bonus.desc)}`);
     }
   }
+  const emptyState = !p.buffs.length && p.poisonTurns <= 0 && p.slowed <= 0 && setIds.every(id => (p.setBonusActive[id] || 0) < 2);
 
-  if (!p.buffs.length && p.poisonTurns <= 0 && p.slowed <= 0 && setIds.every(id => (p.setBonusActive[id] || 0) < 2)) {
-    bd.innerHTML = '<div style="color:#555">' + t('rd.none') + '</div>';
+  // 批5 T2: signature early-out — covers buff rows, poison/slowed, set bonuses
+  // and the empty state, rendered i18n strings included (language switches
+  // rebuild even when every count is identical).
+  const sig =
+    p.buffs.map(b => `b|${b.type}|${b.name}|${b.value}|${b.turns}`).join('\n') +
+    (p.poisonTurns > 0 ? `\np|${p.poisonTurns}|${p.poisonDmg}|${tMsg('rd.poison', String(p.poisonTurns), String(p.poisonDmg))}` : '') +
+    (p.slowed > 0 ? `\ns|${p.slowed}|${t('rd.slowed')}` : '') +
+    `\n#${setRows.join('\n')}` +
+    (emptyState ? '#' + t('rd.none') : '');
+  const bd = $('buff-list')!;
+  if (sig !== buffListSig) {
+    buffListSig = sig;
+    bd.innerHTML = '';
+    // 批5 T2: adopt pooled icon canvases per row. `used` guards duplicate
+    // (kind,color) rows within one rebuild — a DOM node can only live in one
+    // place, so the second occurrence keeps its freshly painted canvas.
+    const used = new Set<string>();
+    const adoptIcons = (row: HTMLElement): void => {
+      row.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => {
+        const kind = cv.dataset.kind || 'T_RUNE', color = cv.dataset.color || '#8a8a96';
+        const key = kind + '|' + color;
+        const pooled = !used.has(key) ? buffIconPool.get(key) : undefined;
+        if (pooled) { cv.replaceWith(pooled); used.add(key); return; }
+        paintIcon(cv, kind, color);
+        if (!used.has(key)) { buffIconPool.set(key, cv); used.add(key); }
+      });
+    };
+    for (const b of p.buffs) {
+      const s = document.createElement('div'); s.className = b.type === 'slow' ? 'buff neg' : 'buff';
+      const bp = BUFF_TPL[b.type] || BUFF_TPL_FALLBACK;
+      s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="${bp.kind}" data-color="${bp.color}" aria-hidden="true"></canvas><span>${b.name}(${b.turns}t)${b.value ? '+' + b.value : ''}</span>`;
+      adoptIcons(s);
+      bd.appendChild(s);
+    }
+    if (p.poisonTurns > 0) {
+      const s = document.createElement('div'); s.className = 'buff neg';
+      s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_FLASK" data-color="#7de84a" aria-hidden="true"></canvas><span>${tMsg('rd.poison', String(p.poisonTurns), String(p.poisonDmg))}</span>`;
+      adoptIcons(s);
+      bd.appendChild(s);
+    }
+    if (p.slowed > 0) {
+      const s = document.createElement('div'); s.className = 'buff neg';
+      s.innerHTML = `<canvas class="lic buff-ic" width="16" height="16" data-kind="T_ICE" data-color="#7a8ae8" aria-hidden="true"></canvas><span>${t('rd.slowed')}(${p.slowed}t)</span>`;
+      adoptIcons(s);
+      bd.appendChild(s);
+    }
+
+    // Set bonuses display
+    for (const txt of setRows) {
+      const s = document.createElement('div'); s.className = 'buff';
+      s.textContent = txt; bd.appendChild(s);
+    }
+
+    if (emptyState) {
+      bd.innerHTML = '<div style="color:#555">' + t('rd.none') + '</div>';
+    }
   }
 
   // Floor label with area name. Inside a branch, show the biome name instead of
