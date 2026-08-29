@@ -154,7 +154,10 @@ def main():
               len(console_errors) == errs_before,
               f"errors_before={errs_before} after={len(console_errors)}")
         check('2g #event-popup stays hidden (no phantom event window)',
-              page.evaluate("(() => { const el = document.getElementById('event-popup'); return !el || el.offsetParent === null; })()"))
+              # The popup is position:fixed (style/main.css), where offsetParent
+              # is ALWAYS null regardless of visibility — probe the computed
+              # display instead; its show/hide mechanism is display-based.
+              page.evaluate("(() => { const el = document.getElementById('event-popup'); return !!el && getComputedStyle(el).display === 'none'; })()"))
 
         # ============ 3: death screen not covered by intro ============
         print('[3] playerDeath: queued intro card does not cover the death screen')
