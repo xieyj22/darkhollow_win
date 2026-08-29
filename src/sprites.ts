@@ -2390,16 +2390,49 @@ function blit(c: CanvasRenderingContext2D, x: number, y: number, sprite: HTMLCan
   c.imageSmoothingEnabled = prev;
 }
 
-// Blit with a dark outline: stamp the silhouette at ±thickness on all 8(ish)
-// neighbor offsets, then the real sprite. Pixel-art readability on busy tiles.
-function blitOutlined(c: CanvasRenderingContext2D, x: number, y: number, sprite: HTMLCanvasElement, sig: string, thickness = 1): void {
+// 批5: pre-baked outlined sprites, keyed by sig+thickness (Boss t=2 never
+// collides with t=1). The bake canvas is at TS resolution — (TS+2t)² (24×24
+// normal, 26×26 Boss) — NOT the 16px grid scaled up (that would give a 1.33px
+// ring, not pixel-equivalent). It replicates the exact integer-offset stamp
+// sequence blitOutlined used to run per frame, so one drawImage per blit is
+// pixel-identical: the old stamps drew the silhouette at round(x+dx), and for
+// integer dx, round(x+dx) === round(x)+dx — the bake holds that same union of
+// stamps with origin round(x)-t, so the single (TS+2t)² drawImage at
+// round(x)-t maps 1:1 (no scaling) onto what the loop produced.
+const outlinedCache = new Map<string, HTMLCanvasElement>();
+export function outlinedKey(sig: string, thickness: number): string {
+  return sig + ':' + thickness;
+}
+function getOutlined(sig: string, sprite: HTMLCanvasElement, thickness: number): HTMLCanvasElement {
+  const key = outlinedKey(sig, thickness);
+  const cached = outlinedCache.get(key);
+  if (cached) return cached;
+  const size = TS + 2 * thickness;
+  const cv = document.createElement('canvas');
+  cv.width = size; cv.height = size;
+  const cc = cv.getContext('2d')!;
+  cc.imageSmoothingEnabled = false;
   const sil = getSilhouette(sig, sprite);
-  const prev = c.imageSmoothingEnabled;
-  c.imageSmoothingEnabled = false;
   for (let dy = -thickness; dy <= thickness; dy++)
     for (let dx = -thickness; dx <= thickness; dx++)
-      if (dx !== 0 || dy !== 0) c.drawImage(sil, Math.round(x + dx), Math.round(y + dy), TS, TS);
-  c.drawImage(sprite, Math.round(x), Math.round(y), TS, TS);
+      if (dx !== 0 || dy !== 0) cc.drawImage(sil, thickness + dx, thickness + dy, TS, TS);
+  cc.drawImage(sprite, thickness, thickness, TS, TS);
+  outlinedCache.set(key, cv);
+  return cv;
+}
+// Test-only accessor: cache size must stay bounded by distinct (sig, thickness).
+export function outlinedCacheSize(): number {
+  return outlinedCache.size;
+}
+
+// Blit with a dark outline: draw the pre-baked (TS+2t)² outlined variant —
+// ONE drawImage instead of the old 8(24 for t=2) silhouette stamps + sprite.
+// Pixel-art readability on busy tiles, unchanged pixels (see getOutlined).
+function blitOutlined(c: CanvasRenderingContext2D, x: number, y: number, sprite: HTMLCanvasElement, sig: string, thickness = 1): void {
+  const pre = getOutlined(sig, sprite, thickness);
+  const prev = c.imageSmoothingEnabled;
+  c.imageSmoothingEnabled = false;
+  c.drawImage(pre, Math.round(x) - thickness, Math.round(y) - thickness, TS + 2 * thickness, TS + 2 * thickness);
   c.imageSmoothingEnabled = prev;
 }
 
