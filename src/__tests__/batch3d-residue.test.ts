@@ -113,17 +113,22 @@ describe('batch3d T4: decorative canvases are aria-hidden', () => {
     expect(canvases.length).toBeGreaterThan(0);
     canvases.forEach(cv => expect(cv.getAttribute('aria-hidden'), 'canvas without aria-hidden in DOM').toBe('true'));
   });
-  // 批4 (batch3D M5 defer): the static decorative canvas in index.html. Scoped to
-  // the title-particles canvas — game-canvas / minimap-canvas are live viewports,
-  // not decorative icons, and are deliberately outside this gate. Read uses the
-  // `'…' + name` dynamic form (see batch4-consistency.test.ts) so Vite leaves the
-  // URL alone instead of rewriting it to a dev-server http:// path.
-  it('index.html decorative canvases (title-particles) carry aria-hidden', () => {
+  // 批4 (batch3D M5 defer + final-review rider): every STATIC decorative canvas
+  // in index.html must be aria-hidden. Live viewports (game-canvas /
+  // minimap-canvas) are allowlisted — they are render targets, not icons.
+  // Scanning ALL canvas tags (not just title-particles) keeps class-of-defect
+  // coverage: a future decorative canvas added without aria-hidden fails here.
+  // Read uses the `'…' + name` dynamic form (see batch4-consistency.test.ts) so
+  // Vite leaves the URL alone instead of rewriting it to a dev-server http:// path.
+  it('index.html static canvases carry aria-hidden (live viewports allowlisted)', () => {
     const f = 'index.html';
     const text = readFileSync(new URL('../../' + f, import.meta.url), 'utf8');
-    const tags = text.match(/<canvas[^>]*title-particles[^>]*>/g) ?? [];
-    expect(tags.length, 'index.html title-particles canvas (file moved?)').toBeGreaterThan(0);
-    for (const tag of tags) {
+    const tags = text.match(/<canvas[^>]*>/g) ?? [];
+    expect(tags.length, 'index.html canvas tags (file moved?)').toBeGreaterThan(0);
+    const VIEWPORTS = ['game-canvas', 'minimap-canvas'];
+    const decorative = tags.filter(tag => !VIEWPORTS.some(id => tag.includes(`id="${id}"`)));
+    expect(decorative.length, 'no decorative canvas left to gate (all allowlisted?)').toBeGreaterThan(0);
+    for (const tag of decorative) {
       expect(tag.includes('aria-hidden="true"'), `${tag.slice(0, 70)}… missing aria-hidden`).toBe(true);
     }
   });
