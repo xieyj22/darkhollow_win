@@ -201,7 +201,11 @@ function getScanlineOverlay(w: number, h: number): HTMLCanvasElement {
 // offscreen and drawImage per frame instead of createRadialGradient + a
 // full-rect gradient fill every render. Keys on ALL of {w,h,cx,cy}: if the
 // centering ever changes to follow the player off-center, the cache
-// self-invalidates instead of freezing a wrong overlay. Returns null when no
+// self-invalidates instead of freezing a wrong overlay. NOTE (batch5 review):
+// if that ever DOES happen, self-invalidation is correctness-only — a fresh
+// full-canvas gradient + allocation per frame is WORSE than no cache, so the
+// cache must then be reworked (e.g. center-fixed gradient larger than the
+// canvas, translated per frame), not merely re-keyed. Returns null when no
 // 2d ctx exists (happy-dom) — caller then skips the draw.
 let vignetteCanvas: HTMLCanvasElement | null = null;
 let vignetteKey = '';
