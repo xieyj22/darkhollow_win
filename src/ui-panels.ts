@@ -220,20 +220,27 @@ export function closePause(): void {
 export function renderRecords(): void {
   const m = getMeta();
   const cls = (i: number) => { const c = CLASSES[i]; return c ? tx(c.name) : '?'; };
+  // 批7: MM-DD short date (— for legacy ts-less rows); rows are keyboard-focusable
+  // listitems whose title feeds the focus tooltip (initFocusTooltips).
+  const fmtDate = (ts: number) => {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
   const row = (cols: string[], color = '#ccc') =>
-    `<div style="display:flex;gap:8px;padding:3px 6px;border-bottom:1px solid #1c1c1c;color:${color};font-size:.88em">${cols.map(c => `<span style="flex:1">${c}</span>`).join('')}</div>`;
+    `<div class="rrow" tabindex="0" role="listitem" title="${cols.join(' · ')}" style="display:flex;gap:8px;padding:3px 6px;border-bottom:1px solid #1c1c1c;color:${color};font-size:.88em">${cols.map(c => `<span style="flex:1">${c}</span>`).join('')}</div>`;
   const hdr = (cols: string[]) => row(cols, '#777');
   const hist = m.runHistory.length
-    ? m.runHistory.map(r => row([r.mode === 'endless' ? '♾' : '◐', cls(r.classIdx), `F${r.floor}`, `${r.kills}${t('up.killUnit')}`, r.result === 'win' ? '🏆' : '💀'], r.result === 'win' ? '#ffd700' : '#e63946')).join('')
+    ? m.runHistory.map(r => row([r.mode === 'endless' ? '♾' : '◐', cls(r.classIdx), `F${r.floor}`, `${r.kills}${t('up.killUnit')}`, fmtDate(r.ts), r.result === 'win' ? '🏆' : '💀'], r.result === 'win' ? '#ffd700' : '#e63946')).join('')
     : `<div style="color:#555;padding:8px">${t('up.noRuns')}</div>`;
   const lb = m.endlessLeaderboard.length
-    ? m.endlessLeaderboard.map((r, i) => row([`#${i + 1}`, cls(r.classIdx), `F${r.floor}`, `${r.kills}${t('up.killUnit')}`], i === 0 ? '#ffd700' : '#999')).join('')
+    ? m.endlessLeaderboard.map((r, i) => row([`#${i + 1}`, cls(r.classIdx), `F${r.floor}`, `${r.kills}${t('up.killUnit')}`, fmtDate(r.ts)], i === 0 ? '#ffd700' : '#999')).join('')
     : `<div style="color:#555;padding:8px">${t('up.noEndlessRuns')}</div>`;
   (document.getElementById('records-content')!).innerHTML =
     `<div style="color:#888;margin:6px 2px;font-size:.95em">🕐 ${t('up.recentRuns')}</div>` +
-    hdr([t('up.mode'), t('up.class'), t('up.floorHdr'), t('up.kills'), t('up.result')]) + hist +
+    hdr([t('up.mode'), t('up.class'), t('up.floorHdr'), t('up.kills'), t('up.date'), t('up.result')]) + hist +
     `<div style="color:#888;margin:14px 2px 6px;font-size:.95em">♾ ${t('up.endlessLeaderboard')}</div>` +
-    hdr([t('up.rank'), t('up.class'), t('up.deepest'), t('up.kills')]) + lb;
+    hdr([t('up.rank'), t('up.class'), t('up.deepest'), t('up.kills'), t('up.date')]) + lb;
   (document.getElementById('records-title')!).textContent = t('up.records');
 }
 
