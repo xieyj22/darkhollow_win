@@ -5,9 +5,18 @@ const path = require('path');
 const fs = require('fs');
 
 const SAVE_FILE = 'darkhollow-save.json';
+const PROFILE_FILE = 'darkhollow-profile.json';
 
 function savePath() {
   return path.join(app.getPath('userData'), SAVE_FILE);
+}
+// 批6: mirror snapshot with mtime for the "file wins unless stamp newer" rule.
+function readSnap(file) {
+  try {
+    const p = path.join(app.getPath('userData'), file);
+    if (!fs.existsSync(p)) return null;
+    return { data: fs.readFileSync(p, 'utf8'), mtime: fs.statSync(p).mtimeMs };
+  } catch { return null; }
 }
 
 function createWindow() {
@@ -37,6 +46,15 @@ ipcMain.handle('dh:save', (_e, data) => {
 });
 ipcMain.handle('dh:load', () => {
   try { return fs.existsSync(savePath()) ? fs.readFileSync(savePath(), 'utf8') : null; } catch { return null; }
+});
+// 批6: one synchronous round-trip feeding BOTH mirrors into localStorage
+// before the renderer's ES modules evaluate (state.ts reads at import time).
+ipcMain.on('dh:loadSync', (e) => { e.returnValue = { save: readSnap(SAVE_FILE), profile: readSnap(PROFILE_FILE) }; });
+ipcMain.handle('dh:saveProfile', (_e, data) => {
+  try { fs.writeFileSync(path.join(app.getPath('userData'), PROFILE_FILE), data, 'utf8'); return true; } catch { return false; }
+});
+ipcMain.handle('dh:delete', (_e) => {
+  try { const p = savePath(); if (fs.existsSync(p)) fs.unlinkSync(p); return true; } catch { return false; }
 });
 ipcMain.handle('dh:fullscreen', () => {
   const win = BrowserWindow.getFocusedWindow();

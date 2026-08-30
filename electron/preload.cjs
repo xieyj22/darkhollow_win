@@ -7,6 +7,10 @@ contextBridge.exposeInMainWorld('dh', {
   isElectron: true,
   saveFile: (data) => ipcRenderer.invoke('dh:save', data),
   loadFile: () => ipcRenderer.invoke('dh:load'),
+  // 批6 cloud mirror: sync boot read (both files + mtime), profile write, save delete.
+  loadFileSync: () => ipcRenderer.sendSync('dh:loadSync'),
+  saveProfile: (data) => ipcRenderer.invoke('dh:saveProfile', data),
+  deleteSave: () => ipcRenderer.invoke('dh:delete'),
   toggleFullscreen: () => ipcRenderer.invoke('dh:fullscreen'),
   unlockAchievement: (id) => ipcRenderer.invoke('dh:unlock', id),
 });
