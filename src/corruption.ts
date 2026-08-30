@@ -42,7 +42,7 @@ export function corruptionMods(c: number): CorruptionMods {
 export const TIER_LABEL: Record<Tier, I18nText> = {
   clean:     { en: 'Clean',     zh: '清醒' },
   touched:   { en: 'Touched',   zh: '动摇' },
-  corrupted: { en: 'Corrupted', zh: '侵蚀' },
+  corrupted: { en: 'Corrupted', zh: '腐化' },   // 批7: 术语统一——机制名全库为「腐化」
   mutated:   { en: 'Mutated',   zh: '变异' },
   warden:    { en: 'Warden',    zh: '守渊人' },
 };

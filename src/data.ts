@@ -729,7 +729,7 @@ export const TALENT_TREES: TalentTree[] = [
       { id: 'p_sanctuary', n: { en: 'Sanctuary', zh: '庇护所' }, desc: { en: 'Immune to fear/stun', zh: '免疫恐惧和眩晕' }, maxRank: 1, icon: '🏛', row: 2, col: 1, requires: ['p_blessed_endurance'], effect: 'cc_immune', valuePerRank: 1, tpl: 'T_SHIELD', hue: '#4a6ac6' },
       { id: 'p_holy_nova', n: { en: 'Holy Nova', zh: '神圣新星' }, desc: { en: 'Skill also heals nearby', zh: '技能同时治疗附近友方' }, maxRank: 1, icon: '💫', row: 2, col: 2, requires: ['p_consecrate'], effect: 'skill_aoe_heal', valuePerRank: 1, tpl: 'T_STAR', hue: '#e8c84a' },
       { id: 'p_smite', n: { en: 'Smite', zh: '圣击' }, desc: { en: 'Skill dmg +40%', zh: '技能伤害+40%' }, maxRank: 1, icon: '🔨', row: 2, col: 3, requires: ['p_judgment'], effect: 'skill_dmg_up', valuePerRank: 40, tpl: 'T_SWORD', hue: '#ffd54a' },
-      { id: 'p_champion', n: { en: 'Champion of Light', zh: '光明之冠' }, desc: { en: '+3 ATK, +3 DEF', zh: '+3攻击, +3防御' }, maxRank: 1, icon: '👑', row: 3, col: 0, requires: ['p_lay_on_hands'], effect: 'atk', valuePerRank: 3, tpl: 'T_CROWN', hue: '#e8c84a' },
+      { id: 'p_champion', n: { en: 'Champion of Light', zh: '光明之冠' }, desc: { en: '+3 ATK, +3 DEF', zh: '+3攻击， +3防御' }, maxRank: 1, icon: '👑', row: 3, col: 0, requires: ['p_lay_on_hands'], effect: 'atk', valuePerRank: 3, tpl: 'T_CROWN', hue: '#e8c84a' },
       { id: 'p_intervention', n: { en: 'Divine Intervention', zh: '神圣干预' }, desc: { en: 'Revive to 50% HP once/run', zh: '每局自动复活至50%HP一次' }, maxRank: 1, icon: '👼', row: 3, col: 1, requires: ['p_sanctuary'], effect: 'auto_revive', valuePerRank: 50, tpl: 'T_WING', hue: '#f0e8c0' },
       { id: 'p_angelic_wrath', n: { en: 'Angelic Wrath', zh: '天使之怒' }, desc: { en: 'Holy dmg on every attack', zh: '每次攻击附加神圣伤害' }, maxRank: 1, icon: '⚡', row: 3, col: 2, requires: ['p_holy_nova'], effect: 'holy_on_hit', valuePerRank: 1, tpl: 'T_HOLY' },
       { id: 'p_resurrection', n: { en: 'Resurrection', zh: '复活' }, desc: { en: 'Auto-revive to 100% once', zh: '自动复活至满血一次' }, maxRank: 1, icon: '🌟', row: 3, col: 3, requires: ['p_smite', 'p_intervention'], effect: 'full_revive', valuePerRank: 100, tpl: 'T_STAR', hue: '#ffd54a' },
@@ -767,7 +767,7 @@ export const META_UPGRADES: MetaUpgradeDef[] = [
     icon: '🏺', maxLevel: 1, costs: [40], effect: 'start_relic',
     valuePerLevel: 1, category: 'utility', tpl: 'T_RUNE', hue: '#d8a84a' },
   { id: 'blood_pact', n: { en: 'Blood Pact', zh: '鲜血契约' },
-    d: { en: '-10 max HP per level, +1 talent point per level', zh: '每级-10最大生命,+1天赋点' },
+    d: { en: '-10 max HP per level, +1 talent point per level', zh: '每级-10最大生命，+1天赋点' },
     icon: '🩸', maxLevel: 2, costs: [30, 60], effect: 'blood_pact',
     valuePerLevel: 1, category: 'talent', tpl: 'T_FLASK', hue: '#c84040' },
   // Endless-only meta upgrades (Task 4): apply only in endless runs via applyMetaUpgrades gate.
