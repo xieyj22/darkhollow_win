@@ -82,11 +82,12 @@ export function initInput(): void {
     // F11 toggles real (windowed) fullscreen under Electron; browsers handle their own.
     // (Meta key — stays hardcoded, not routed through the action map.)
     if (e.key === 'F11' && (window as any).dh?.toggleFullscreen) { e.preventDefault(); (window as any).dh.toggleFullscreen(); }
-    if (G && G.gameOver && !invOpen && !helpOpen && !skillOpen && !achOpen && !talentOpen && !eventOpen && !menuOpen && !introOpen) return;
-
     // 批7: keyboard parity with gamepad menu nav — inside any open overlay context,
     // vertical action/arrows run linear focus; horizontal runs spatial (a focused
     // range steps instead, mirroring the gamepad rule). Text fields/selects opt out.
+    // 批8: sits ABOVE the gameOver early-return — activeMenuContext() also covers the
+    // death/victory screens, so keyboard arrows reach Try Again / Title Screen there
+    // (pollGamepad's menu branch ignores gameOver; now the keyboard matches).
     const kmenu = activeMenuContext();
     if (kmenu) {
       const tgt = e.target as HTMLElement | null;
@@ -103,6 +104,8 @@ export function initInput(): void {
         }
       }
     }
+
+    if (G && G.gameOver && !invOpen && !helpOpen && !skillOpen && !achOpen && !talentOpen && !eventOpen && !menuOpen && !introOpen) return;
 
     // Focus trap: when an overlay is open, let Tab cycle only within it (don't swallow it).
     if (e.key === 'Tab') {
