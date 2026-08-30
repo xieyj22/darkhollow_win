@@ -299,6 +299,9 @@ export function dispatchGamepadAction(a: Action, overlay: boolean): void {
 // Edge-triggered buttons + a move repeat cooldown so holding a direction steps tile-by-tile.
 let gpPrevBtn: boolean[] = [];
 let gpMoveCd = 0;
+// 批7: held-direction slider repeat (D-pad long-press on a focused range input).
+let gpSlideDir: -1 | 0 | 1 = 0;
+let gpSlideCd = 0;
 // Exported (batch3a T3) as the test injection point: tests stub
 // navigator.getGamepads and call pollGamepad() directly to simulate edges.
 export function pollGamepad(): void {
@@ -381,6 +384,25 @@ export function pollGamepad(): void {
         if (menuOpen) bridge.closePause?.();
         else if (G && !G.gameOver) bridge.openPause?.();
       }
+    }
+    // 批7: slider long-press — while a range input is focused and the user's bound
+    // left/right direction is HELD, repeat stepRange after an initial ~360ms delay
+    // then every ~120ms (poll ≈ 60ms ⇒ cds 6 / 2). The edge loop above already did
+    // the first step via menuMoveFocus, so a fresh press only arms the timer.
+    const ae = document.activeElement as HTMLElement | null;
+    const onRange = !!(ae && menu.contains(ae) && ae instanceof HTMLInputElement && ae.type === 'range');
+    if (!onRange) { gpSlideDir = 0; gpSlideCd = 0; }
+    else {
+      let held: -1 | 0 | 1 = 0;
+      for (let i = 0; i < gp.buttons.length; i++) {
+        if (!(gp.buttons[i] && gp.buttons[i].pressed)) continue;
+        const a = buttonToAction(i);
+        if (a === 'move_left') held = -1;
+        else if (a === 'move_right') held = 1;
+      }
+      if (held === 0 || held !== gpSlideDir) { gpSlideDir = held; gpSlideCd = held === 0 ? 0 : 6; }
+      else if (gpSlideCd > 0) gpSlideCd--;
+      else { stepRange(ae as HTMLInputElement, held); gpSlideCd = 2; }
     }
   } else if (G && !G.gameOver) {
     // ---- gameplay dispatch (pre-batch3A behavior, unchanged) ----
