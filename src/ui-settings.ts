@@ -48,6 +48,15 @@ export function updateLangUI(): void {
   $('opt-title')!.textContent = t('optionsTitle');
   $('btn-options')!.textContent = '⚙ ' + t('options');
   $('btn-options-title')!.textContent = t('options');
+  $('talent-title')!.textContent = t('ui.talents');
+  // 批7: dialog labels follow the language sweep — ✕ buttons get a name,
+  // panels get an aria-label mirroring their (already-swept) heading.
+  document.querySelectorAll<HTMLElement>('.close-btn').forEach(b => b.setAttribute('aria-label', t('ui.close')));
+  document.querySelectorAll<HTMLElement>('.overlay .panel').forEach(p => {
+    const h = p.querySelector('h1, h2, h3');
+    const label = h?.textContent?.trim() || '';
+    if (label) p.setAttribute('aria-label', label);
+  });
   if (document.getElementById('options-overlay')?.classList.contains('active')) renderOptions();
   if (G) updateUI();
 }

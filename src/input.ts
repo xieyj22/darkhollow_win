@@ -84,6 +84,26 @@ export function initInput(): void {
     if (e.key === 'F11' && (window as any).dh?.toggleFullscreen) { e.preventDefault(); (window as any).dh.toggleFullscreen(); }
     if (G && G.gameOver && !invOpen && !helpOpen && !skillOpen && !achOpen && !talentOpen && !eventOpen && !menuOpen && !introOpen) return;
 
+    // 批7: keyboard parity with gamepad menu nav — inside any open overlay context,
+    // vertical action/arrows run linear focus; horizontal runs spatial (a focused
+    // range steps instead, mirroring the gamepad rule). Text fields/selects opt out.
+    const kmenu = activeMenuContext();
+    if (kmenu) {
+      const tgt = e.target as HTMLElement | null;
+      const inTextField = !!tgt && (tgt.tagName === 'SELECT' || tgt.isContentEditable ||
+        (tgt instanceof HTMLInputElement && tgt.type !== 'range'));
+      if (!inTextField) {
+        const act = keyToAction(e);
+        if (e.key === 'ArrowUp' || act === 'move_up') { seqFocus(kmenu, -1); e.preventDefault(); return; }
+        if (e.key === 'ArrowDown' || act === 'move_down') { seqFocus(kmenu, 1); e.preventDefault(); return; }
+        if (e.key === 'ArrowLeft' || act === 'move_left' || e.key === 'ArrowRight' || act === 'move_right') {
+          const dir: -1 | 1 = (e.key === 'ArrowLeft' || act === 'move_left') ? -1 : 1;
+          menuMoveFocus(kmenu, dir, 0);   // range-focused → stepRange inside (gamepad rule)
+          e.preventDefault(); return;
+        }
+      }
+    }
+
     // Focus trap: when an overlay is open, let Tab cycle only within it (don't swallow it).
     if (e.key === 'Tab') {
       const openOv = document.querySelector<HTMLElement>('.overlay.active');

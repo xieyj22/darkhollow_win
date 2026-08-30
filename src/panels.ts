@@ -169,20 +169,20 @@ function renderHelp(): void {
   <h3 style="color:#e63946;margin-top:10px">${t('pn.objective')}</h3>
   <p style="color:#aaa;line-height:1.6;padding:4px 0">${t('pn.objectiveDesc')}</p>
   <h3 style="color:#e63946;margin-top:10px">${t('pn.controls')}</h3>
-  <table><tr><td>WASD / ${t('pn.arrows')}</td><td>${t('pn.moveAttack')}</td></tr>
-  <tr><td>G</td><td>${t('pn.pickup')}</td></tr>
-  <tr><td>&gt; / .</td><td>${t('pn.descendStairs')}</td></tr>
-  <tr><td>1-9</td><td>${t('pn.quickbar')}</td></tr>
-  <tr><td>K</td><td>${t('pn.openSkill')}</td></tr>
-  <tr><td>N</td><td>${t('pn.openTalent')}</td></tr>
-  <tr><td>T</td><td>${t('pn.viewAch')}</td></tr>
-  <tr><td>B</td><td>${t('pn.toggleInv')}</td></tr>
-  <tr><td>Q</td><td>${t('pn.quaff')}</td></tr>
-  <tr><td>R</td><td>${t('pn.readScroll')}</td></tr>
-  <tr><td>F / Space</td><td>${t('pn.wait')}</td></tr>
-  <tr><td>Ctrl+S</td><td>${t('pn.save')}</td></tr>
-  <tr><td>M</td><td>${t('pn.toggleSound')}</td></tr>
-  <tr><td>L</td><td>${t('pn.switchLang')}</td></tr></table>
+  <table><tr tabindex="0"><td>WASD / ${t('pn.arrows')}</td><td>${t('pn.moveAttack')}</td></tr>
+  <tr tabindex="0"><td>G</td><td>${t('pn.pickup')}</td></tr>
+  <tr tabindex="0"><td>&gt; / .</td><td>${t('pn.descendStairs')}</td></tr>
+  <tr tabindex="0"><td>1-9</td><td>${t('pn.quickbar')}</td></tr>
+  <tr tabindex="0"><td>K</td><td>${t('pn.openSkill')}</td></tr>
+  <tr tabindex="0"><td>N</td><td>${t('pn.openTalent')}</td></tr>
+  <tr tabindex="0"><td>T</td><td>${t('pn.viewAch')}</td></tr>
+  <tr tabindex="0"><td>B</td><td>${t('pn.toggleInv')}</td></tr>
+  <tr tabindex="0"><td>Q</td><td>${t('pn.quaff')}</td></tr>
+  <tr tabindex="0"><td>R</td><td>${t('pn.readScroll')}</td></tr>
+  <tr tabindex="0"><td>F / Space</td><td>${t('pn.wait')}</td></tr>
+  <tr tabindex="0"><td>Ctrl+S</td><td>${t('pn.save')}</td></tr>
+  <tr tabindex="0"><td>M</td><td>${t('pn.toggleSound')}</td></tr>
+  <tr tabindex="0"><td>L</td><td>${t('pn.switchLang')}</td></tr></table>
   <h3 style="color:#e63946;margin-top:10px">${t('pn.elements')}</h3>
   <p style="color:#aaa;line-height:1.6;padding:4px 0">${t('pn.elementsDesc')}</p>
   <h3 style="color:#e63946;margin-top:10px">${t('pn.potions')}</h3>
