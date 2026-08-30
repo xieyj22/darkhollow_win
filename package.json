@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "electron:preview": "npm run build && electron .",
-    "dist": "npm run build && electron-builder --win portable",
+    "dist": "npm run build && electron-builder --win nsis dir",
+    "dist:portable": "npm run build && electron-builder --win portable",
     "gen:icon": "node scripts/gen-icon.mjs"
   },
   "build": {
@@ -23,18 +24,33 @@
     },
     "files": [
       "dist/**/*",
-      "electron/**/*"
+      "electron/**/*",
+      "node_modules/steamworks.js/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/steamworks.js/**"
     ],
     "win": {
       "icon": "build/icon.ico",
       "target": [
         {
-          "target": "portable",
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "dir",
           "arch": [
             "x64"
           ]
         }
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName} Setup ${version}.${ext}"
     }
   },
   "devDependencies": {
@@ -47,5 +63,8 @@
     "typescript": "^5.7.0",
     "vite": "^6.0.0",
     "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "steamworks.js": "^0.4.0"
   }
 }

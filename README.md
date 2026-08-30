@@ -41,3 +41,25 @@ TypeScript 5 · Vite 6 · Canvas 2D · Electron 42 · electron-builder 26 · Web
 ## License
 
 MIT。
+
+## 上架 Steam(代码侧已就绪)
+
+**dev 测试三步**(拿到 AppID 后):
+
+1. 根目录放 `steam_appid.txt`(内容=AppID 数字;**不进仓库不进包**——build files 白名单天然排除)。
+2. Steam 客户端在线登录。
+3. `npm run electron:preview` → 成就直通 Steam(Trophy 弹出),云存档经 userData 目录自动同步。
+
+**后台录入清单**:
+
+- **成就**:33 个,API Name 照抄 `src/data.ts` 的 `ACH_DEFS` snake_case id(first_kill … inferno_blade,见下方全表)。
+- **Steam Auto-Cloud**:勾选并配 userData 目录(Windows: `%APPDATA%/darkhollow` 下的 `darkhollow-save.json` + `darkhollow-profile.json` 两文件即镜像)。
+- **depot 内容**:用 `npm run dist` 的产物 `release/win-unpacked`(nsis 安装器仅供线下分发,Steam 走 dir 产物)。
+- **打包**:`npm run dist` = nsis + dir 双产物;`npm run dist:portable` 保留旧单文件形态。
+
+```
+first_kill kill_10 kill_50 kill_100 kill_200 boss_kill floor5 floor15 floor25
+floor30 floor35 floor40 legendary streak5 gold500 gold1000 gold5000 lvl10 lvl20
+lvl30 win creator_kill endless50 endless75 endless100 end_pyrrhic end_doom
+end_guardian warden_self_slay bronze_spear claymore crystal_wand inferno_blade
+```

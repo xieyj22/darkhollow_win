@@ -81,7 +81,12 @@ ipcMain.handle('dh:unlock', (_e, id) => {
 });
 
 app.whenReady().then(() => {
-  try { if (steamworks) steamworks.init(); } catch { /* Steam not running / no AppID */ }
+  if (steamworks) {
+    try {
+      // steamworks.js init() returns false when Steam isn't running / no AppID.
+      if (!steamworks.init()) { console.warn('[steam] init failed (Steam not running / no steam_appid.txt) — achievements local-only'); steamworks = null; }
+    } catch (e) { console.warn('[steam] init threw:', e && e.message, '— achievements local-only'); steamworks = null; }
+  }
   Menu.setApplicationMenu(null); // hide default menu bar; the game has its own UI
   createWindow();
 
