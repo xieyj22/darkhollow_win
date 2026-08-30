@@ -87,7 +87,9 @@ export function initInput(): void {
     // range steps instead, mirroring the gamepad rule). Text fields/selects opt out.
     // 批8: sits ABOVE the gameOver early-return — activeMenuContext() also covers the
     // death/victory screens, so keyboard arrows reach Try Again / Title Screen there
-    // (pollGamepad's menu branch ignores gameOver; now the keyboard matches).
+    // (pollGamepad's menu branch ignores gameOver; now the keyboard matches). Same
+    // rung also covers char-select-after-death (G stays dead until onStart's
+    // initGame — arrows were dead there but alive from title; now consistent).
     const kmenu = activeMenuContext();
     if (kmenu) {
       const tgt = e.target as HTMLElement | null;
