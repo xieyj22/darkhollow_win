@@ -22,10 +22,20 @@ interface FileSnap { data: string; mtime: number }
 // File newer than stamp therefore means another machine's Steam Cloud copy
 // (take it); a crash between the two writes leaves the file at its OLD mtime
 // == last stamp → comparison is false → the newer localStorage stands.
-function applySnap(key: string, snap: FileSnap | null | undefined): void {
-  if (!snap?.data) return;
-  const stamp = Number(localStorage.getItem(key === 'dh_save' ? 'dh_save_ts' : 'dh_profile_ts') || 0);
-  if (snap.mtime > stamp) localStorage.setItem(key, snap.data);
+function applySaveSnap(snap: FileSnap | null | undefined): void {
+  if (!snap?.data) return;    // absent, or a delete tombstone (empty) — nothing to take
+  // Truncation guard (review I2): a crash mid-writeFileSync leaves a corrupt
+  // file with a fresh mtime — never let it clobber a good local save.
+  try { JSON.parse(snap.data); } catch { return; }
+  const stamp = Number(localStorage.getItem('dh_save_ts') || 0);
+  // Upgrade guard (review I2, deliberately NARROW): a pre-batch6 machine that
+  // last quit at a death/victory screen has dh_meta, NO dh_save (the old clear
+  // only touched localStorage) and no stamps — letting the unstamped file win
+  // would resurrect the finished run and double-credit echoes. Only fires when
+  // localStorage holds no save: healthy upgraders and consume-only machines
+  // (which keep a restored copy but no stamp) still take newer cloud pushes.
+  if (stamp === 0 && localStorage.getItem('dh_save') === null && localStorage.getItem('dh_meta') !== null) return;
+  if (snap.mtime > stamp) localStorage.setItem('dh_save', snap.data);
 }
 
 export function initCloudSync(): void {
@@ -33,7 +43,10 @@ export function initCloudSync(): void {
   if (!dh?.loadFileSync) return;                     // browser / dev server
   try {
     const snap = dh.loadFileSync() as { save?: FileSnap | null; profile?: FileSnap | null };
-    applySnap('dh_save', snap?.save);
+    // Restore deliberately does NOT write stamps back: re-applying identical
+    // content on later boots is idempotent, and the first local write
+    // establishes the stamps (review M7 — documented deviation from the spec sketch).
+    applySaveSnap(snap?.save);
     if (snap?.profile?.data) {
       const p = JSON.parse(snap.profile.data) as { v?: number; kv?: Record<string, string> };
       if (p?.kv) {

@@ -75,7 +75,6 @@ CI 影响（Explore 评估）：tsc（include 只有 src）/vite build（rendere
 |---|---|---|
 | cloud-sync 回读规则 | 文件赢/印记赢/浏览器跳过/坏 JSON 兜底/15 key+meta+keybinds 全量写回 | 单测（happy-dom mock `window.dh.loadFileSync` 返回各 fixture；cloud-sync 纯逻辑零 DOM） |
 | persistProfile/scheduleProfileSync | 组装形状/debounce 合并/beforeunload flush/saveMeta 挂钩后 profile 落盘 | 单测（fake timers） |
-| save 回读 | btn-cont async 预热：文件 mtime 新→覆盖；印记新→保 localStorage；无文件→直通 | 单测（mock dh.loadFile） |
 | 清档 delete | 三清档点调 deleteSave + 印记删除 | 单测（combat 侧已有 mock 惯例，grep 三处 run 既有测试加断言） |
 | preload/main IPC | 5 channel 形状（{data,mtime}/unlink 守卫/sendSync 同步性） | main.cjs 无 electron 难单测——**出包冒烟覆盖**（下行）+ code review |
 | 打包 | `npm run dist` 出 nsis+dir；`release/win-unpacked/resources/app.asar.unpacked/node_modules/steamworks.js` 存在；安装器可运行；**存档连续性冒烟**（批6 新增：打包版起→开局存档→杀进程重启→Continue 档在） | 本地脚本化冒烟（沿用 1.4.0 打包+MainWindowTitle 轮询法，portable 换 nsis/dir 后窗口仍 ~10s） |

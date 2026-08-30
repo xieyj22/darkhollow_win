@@ -54,7 +54,11 @@ ipcMain.handle('dh:saveProfile', (_e, data) => {
   try { fs.writeFileSync(path.join(app.getPath('userData'), PROFILE_FILE), data, 'utf8'); return true; } catch { return false; }
 });
 ipcMain.handle('dh:delete', (_e) => {
-  try { const p = savePath(); if (fs.existsSync(p)) fs.unlinkSync(p); return true; } catch { return false; }
+  // Tombstone, not unlink (review I3): an empty file is a no-restore for
+  // applySaveSnap's !data guard even though readSnap still reports it — so a
+  // failed/lost delete can't resurrect a just-cleared run, and Steam Auto-Cloud
+  // propagates the tombstone to other machines too.
+  try { fs.writeFileSync(savePath(), '', 'utf8'); return true; } catch { return false; }
 });
 ipcMain.handle('dh:fullscreen', () => {
   const win = BrowserWindow.getFocusedWindow();
@@ -83,8 +87,10 @@ ipcMain.handle('dh:unlock', (_e, id) => {
 app.whenReady().then(() => {
   if (steamworks) {
     try {
-      // steamworks.js init() returns false when Steam isn't running / no AppID.
-      if (!steamworks.init()) { console.warn('[steam] init failed (Steam not running / no steam_appid.txt) — achievements local-only'); steamworks = null; }
+      // steamworks.js 0.4.0 init() THROWS when Steam isn't running / no AppID —
+      // the catch below is the real degrade path; the false-return branch stays
+      // as belt-and-braces for future API variance.
+      if (!steamworks.init()) { console.warn('[steam] init returned false (Steam not running / no steam_appid.txt) — achievements local-only'); steamworks = null; }
     } catch (e) { console.warn('[steam] init threw:', e && e.message, '— achievements local-only'); steamworks = null; }
   }
   Menu.setApplicationMenu(null); // hide default menu bar; the game has its own UI

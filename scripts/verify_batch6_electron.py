@@ -216,22 +216,30 @@ def main():
         # ---- S3 clear channel ------------------------------------------------------
         # clearCloudSave()'s exact operations (its combat routing is unit-covered in T1;
         # the no-save Continue click is deliberately skipped — loadGame() alert()s).
+        # deleteSave writes a TOMBSTONE (empty file), not unlink: readSnap still
+        # reports the file but its data is '' → applySaveSnap's !data guard makes it
+        # a no-restore (review I3).
         page.evaluate("localStorage.removeItem('dh_save');"
                       "localStorage.removeItem('dh_save_ts');"
                       "window.dh.deleteSave()")
         snap3 = page.evaluate('window.dh.loadFileSync()')
-        check('S3a save file deleted via channel', (snap3 or {}).get('save') is None)
+        check('S3a save file tombstoned via channel (no restorable data)',
+              not ((snap3 or {}).get('save') or {}).get('data'))
         browser.close()
         kill()
         out_f.close()
         browser, page = boot(pw, 'S3')
         save3 = page.evaluate("localStorage.getItem('dh_save')")
         snap3b = page.evaluate('window.dh.loadFileSync()')
-        check('S3b relaunch restores nothing (Continue unavailable)',
-              save3 is None and (snap3b or {}).get('save') is None,
-              f'ls={save3!r} file={(snap3b or {}).get("save")}')
+        check('S3b relaunch restores nothing (no restorable save → Continue dead-ends)',
+              save3 is None and not ((snap3b or {}).get('save') or {}).get('data'),
+              f'ls={save3!r}')
 
         # ---- S4 steamworks degrade + console hygiene --------------------------------
+        # Direct IPC call proves the main-side handler stays alive under degrade;
+        # the renderer's LOCAL persistence (persistAchievement→saveMeta→dh_meta)
+        # is intentionally not driven here — it needs a real in-game kill, which
+        # the dev-server + unit suites already cover (review M5, documented skip).
         ok_unlock = page.evaluate("window.dh.unlockAchievement('first_kill')")
         check('S4a unlock IPC alive under degrade', ok_unlock is True, repr(ok_unlock))
         browser.close()

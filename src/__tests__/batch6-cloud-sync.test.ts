@@ -107,3 +107,45 @@ describe('persistSave stamps dh_save_ts on successful file write (source gate)',
     expect(text).toContain("dh_save_ts");
   });
 });
+
+// 批6 review I2/I3 riders: boot-read edge cases the first pass missed.
+describe('initCloudSync upgrade + corruption guards (review riders)', () => {
+  it('pre-batch6 machine that died (dh_meta present, no dh_save, no stamps) → finished-run file NOT resurrected', async () => {
+    localStorage.setItem('dh_meta', '{"soulEchoes":5}');
+    (window as any).dh = { loadFileSync: () => ({
+      // The finished run the old build's death screen left in the file
+      // (old clear only removed localStorage — no file channel existed).
+      save: { data: '{"floor":9}', mtime: 9000 },
+      profile: { data: JSON.stringify({ v: 1, kv: {} }), mtime: 1 },
+    }) };
+    await import('../cloud-sync.js');
+    expect(localStorage.getItem('dh_save')).toBeNull();   // dead stays dead — no double-echo
+  });
+  it('consume-only machine (restored dh_save present, no stamp) → newer cloud file still wins', async () => {
+    localStorage.setItem('dh_save', '{"floor":2}');
+    localStorage.setItem('dh_meta', '{}');    // restored by an earlier boot's profile apply
+    (window as any).dh = { loadFileSync: () => ({
+      save: { data: '{"floor":7}', mtime: 9000 },
+      profile: { data: JSON.stringify({ v: 1, kv: {} }), mtime: 1 },
+    }) };
+    await import('../cloud-sync.js');
+    expect(localStorage.getItem('dh_save')).toBe('{"floor":7}');
+  });
+  it('truncated/corrupt save file (fresh mtime, no stamp) → does not clobber a good local save', async () => {
+    localStorage.setItem('dh_save', '{"floor":9}');
+    (window as any).dh = { loadFileSync: () => ({
+      save: { data: '{"floor":3', mtime: 9000 },   // crash mid-writeFileSync
+      profile: null,
+    }) };
+    await import('../cloud-sync.js');
+    expect(localStorage.getItem('dh_save')).toBe('{"floor":9}');
+  });
+  it('tombstone (empty data, fresh mtime) → no restore (I3 delete channel)', async () => {
+    (window as any).dh = { loadFileSync: () => ({
+      save: { data: '', mtime: 9000 },
+      profile: null,
+    }) };
+    await import('../cloud-sync.js');
+    expect(localStorage.getItem('dh_save')).toBeNull();
+  });
+});
