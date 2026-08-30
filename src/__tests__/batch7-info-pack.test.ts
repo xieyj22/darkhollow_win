@@ -44,12 +44,12 @@ describe('records date column (批7 C4)', () => {
     saveMeta(m);                       // getMeta() re-parses localStorage — seed must persist
     renderRecords();
     const rows = [...document.querySelectorAll('#records-content .rrow')] as HTMLElement[];
-    expect(rows.length).toBeGreaterThanOrEqual(3);      // header + 2 data rows
-    expect(rows[1].textContent).toContain('—');         // data row 1 (legacy ts:0)
-    expect(rows[2].textContent).toMatch(/08-30/);       // data row 2
-    expect(rows[1].getAttribute('tabindex')).toBe('0');
-    expect(rows[1].getAttribute('role')).toBe('listitem');
-    expect(rows[1].getAttribute('title')).toBeTruthy();
+    expect(rows.length).toBeGreaterThanOrEqual(2);      // header is NOT a .rrow (review I1)
+    expect(rows[0].textContent).toContain('—');         // data row 1 (legacy ts:0)
+    expect(rows[1].textContent).toMatch(/08-30/);       // data row 2
+    expect(rows[0].getAttribute('tabindex')).toBe('0');
+    expect(rows[0].getAttribute('role')).toBe('listitem');
+    expect(rows[0].getAttribute('title')).toBeTruthy();
   });
   it('endless leaderboard also gains the date column', () => {
     const m = getMeta();

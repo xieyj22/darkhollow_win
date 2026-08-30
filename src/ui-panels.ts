@@ -13,6 +13,11 @@ import { LORE_ENTRIES, LORE_CATS } from './lore.js';
 import { bridge } from './bridge.js';
 import { clearGpFocus } from './focus-nav.js';
 
+// 批7 review M2: attribute-context escaping for the new title="…" tooltips —
+// escHtml + quotes, so a future copy line with quoted speech can't break out.
+const escAttr = (s: string): string =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 // ===== Legend toggle =====
 export function toggleLegend(): void {
   const newVis = !legendVisible;
@@ -228,8 +233,11 @@ export function renderRecords(): void {
     return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
   const row = (cols: string[], color = '#ccc') =>
-    `<div class="rrow" tabindex="0" role="listitem" title="${cols.join(' · ')}" style="display:flex;gap:8px;padding:3px 6px;border-bottom:1px solid #1c1c1c;color:${color};font-size:.88em">${cols.map(c => `<span style="flex:1">${c}</span>`).join('')}</div>`;
-  const hdr = (cols: string[]) => row(cols, '#777');
+    `<div class="rrow" tabindex="0" role="listitem" title="${cols.map(c => escAttr(c)).join(' · ')}" style="display:flex;gap:8px;padding:3px 6px;border-bottom:1px solid #1c1c1c;color:${color};font-size:.88em">${cols.map(c => `<span style="flex:1">${c}</span>`).join('')}</div>`;
+  // 批7 review I1: the header row is presentation — NOT a listitem, not focusable,
+  // no tooltip (data rows above carry the list semantics).
+  const hdr = (cols: string[]) =>
+    `<div style="display:flex;gap:8px;padding:3px 6px;border-bottom:1px solid #1c1c1c;color:#777;font-size:.88em">${cols.map(c => `<span style="flex:1">${c}</span>`).join('')}</div>`;
   const hist = m.runHistory.length
     ? m.runHistory.map(r => row([r.mode === 'endless' ? '♾' : '◐', cls(r.classIdx), `F${r.floor}`, `${r.kills}${t('up.killUnit')}`, fmtDate(r.ts), r.result === 'win' ? '🏆' : '💀'], r.result === 'win' ? '#ffd700' : '#e63946')).join('')
     : `<div style="color:#555;padding:8px">${t('up.noRuns')}</div>`;
@@ -297,7 +305,7 @@ function renderLoreSection(): string {
       const name = has ? tx(e.n) : '🔒 ???';
       const body = has ? tx(e.body) : t('up.notDiscovered');
       // 批7: focusable listitem + title → keyboard arrows & focus tooltip work here too.
-      return `<div tabindex="0" role="listitem" title="${name}: ${body}" style="padding:8px 10px;margin:4px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)"><div style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</div><div style="color:${has ? '#999' : '#444'};font-size:.9em;margin-top:3px">${body}</div></div>`;
+      return `<div tabindex="0" role="listitem" title="${escAttr(name)}: ${escAttr(body)}" style="padding:8px 10px;margin:4px 0;border-left:3px solid ${has ? '#9a2be2' : '#333'};background:rgba(255,255,255,.02)"><div style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</div><div style="color:${has ? '#999' : '#444'};font-size:.9em;margin-top:3px">${body}</div></div>`;
     }).join('');
     return rows ? `<div style="color:#8888aa;margin:14px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${tx(cat.label)}</div>${rows}` : '';
   }).join('') || `<div style="color:#555;padding:12px">${t('up.noEntries')}</div>`;
@@ -339,7 +347,7 @@ function renderItemSection(): string {
       // Discovered rows get a pixel-sprite canvas (painted in renderCodex);
       // locked rows show nothing — keeps the 🔒 feel without an empty canvas.
       const icon = has && d.id ? `<canvas class="lic codex-icon" width="16" height="16" data-type="${type}" data-id="${d.id}" style="vertical-align:middle;margin-right:6px;image-rendering:pixelated" aria-hidden="true"></canvas>` : '';
-      return `<div tabindex="0" role="listitem" title="${label}: ${name}" style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#ffd700' : '#333'};background:rgba(255,255,255,.02)">${icon}<span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
+      return `<div tabindex="0" role="listitem" title="${escAttr(label)}: ${escAttr(name)}" style="padding:6px 10px;margin:3px 0;border-left:3px solid ${has ? '#ffd700' : '#333'};background:rgba(255,255,255,.02)">${icon}<span style="color:${has ? '#ddd' : '#555'};font-weight:700">${name}</span></div>`;
     }).join('');
     if (rows) html += `<div style="color:#8888aa;margin:12px 2px 4px;font-size:.95em;border-bottom:1px solid #222;padding-bottom:3px">${label}</div>${rows}`;
   }

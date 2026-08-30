@@ -54,9 +54,11 @@ def main():
     with sync_playwright() as pw:
         browser = pw.chromium.launch(channel='chrome')
         page = browser.new_page(viewport={'width': 1280, 'height': 800})
-        page.on('console', lambda m: console_errors.append(m.text) if m.type == 'error' and '/favicon' not in m.text else None)
+        # Chrome's favicon fetch often bypasses the response event — the URL
+        # lives on the console message's location (review M7: whitelist there).
+        page.on('console', lambda m: console_errors.append(m.text) if m.type == 'error' and '/favicon' not in ((m.location or {}).get('url') or '') else None)
         page.on('pageerror', lambda e: console_errors.append(str(e)))
-        page.on('response', lambda r: http_404s.append(r.url) if r.status == 404 else None)
+        page.on('response', lambda r: http_404s.append(r.url) if r.status == 404 else None)   # secondary evidence
         page.on('dialog', lambda d: d.accept())
         # Fake gamepad injection (verify_gamepad_ingame.py pattern): mutable
         # window.__pad picked up by pollGamepad's 60ms interval.
@@ -79,7 +81,6 @@ def main():
         page.evaluate("async () => { (await import('/src/combat.ts')).playerDeath('冒烟杀手', 'trap'); }")
         page.wait_for_timeout(300)
         line = page.evaluate("document.querySelector('#death-epitaph .ep-line')?.textContent || ''")
-        floor = page.evaluate("(await import('/src/state.ts')).G.floor") if False else None
         check('S1a epitaph line carries killer', '冒烟杀手' in line, line[:60])
         in_lib = page.evaluate("""async () => {
           const i18n = await import('/src/i18n.ts');
@@ -139,16 +140,16 @@ def main():
         page.wait_for_timeout(120)   # rAF → .active
         dates = page.evaluate("""(() => {
           const rows = [...document.querySelectorAll('#records-content .rrow')];
-          return { legacy: rows[1].textContent.includes('—'),
-                   today: /\\d{2}-\\d{2}/.test(rows[2].textContent),
-                   focusable: rows[1].getAttribute('tabindex') === '0' };
+          return { legacy: rows[0].textContent.includes('—'),
+                   today: /\\d{2}-\\d{2}/.test(rows[1].textContent),
+                   focusable: rows[0].getAttribute('tabindex') === '0' };
         })()""")
         check('S4a date column renders —/MM-DD + tabindex', dates['legacy'] and dates['today'] and dates['focusable'], str(dates))
-        page.evaluate("document.querySelectorAll('#records-content .rrow')[1].focus()")
+        page.evaluate("document.querySelectorAll('#records-content .rrow')[0].focus()")
         page.keyboard.press('ArrowDown')
-        moved_down = page.evaluate("document.activeElement === document.querySelectorAll('#records-content .rrow')[2]")
+        moved_down = page.evaluate("document.activeElement === document.querySelectorAll('#records-content .rrow')[1]")
         page.keyboard.press('ArrowUp')
-        moved_up = page.evaluate("document.activeElement === document.querySelectorAll('#records-content .rrow')[1]")
+        moved_up = page.evaluate("document.activeElement === document.querySelectorAll('#records-content .rrow')[0]")
         check('S4b real ArrowDown/Up walks the rows', moved_down and moved_up, f'down={moved_down} up={moved_up}')
         page.evaluate("async () => { (await import('/src/ui-panels.ts')).hideOverlay('records-overlay'); }")
 
@@ -195,7 +196,7 @@ def main():
     bad = [r for r in results if not r[1]]
     print(f"\n{len(results) - len(bad)}/{len(results)} checks passed"
           + (' — ALL GREEN' if not bad else ''))
-    favicon_only = all('favicon' in u for u in http_404s)
+    favicon_only = bool(http_404s) and all('favicon' in u for u in http_404s)
     ce = [] if (favicon_only and not [e for e in console_errors if 'Failed to load resource' not in e]) else [e for e in console_errors if '/favicon' not in e]
     print(f"Console errors: {len(ce)}")
     for e in ce[:5]:

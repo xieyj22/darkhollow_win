@@ -1,5 +1,5 @@
 // 批7 T4: static dialog semantics + keyboard linear focus in overlays.
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { initGame } from '../game.js';
 
@@ -9,6 +9,10 @@ const DOM_HTML = `
 `;
 
 beforeEach(() => { localStorage.clear(); document.body.innerHTML = DOM_HTML; initGame(0, 0, false); });
+
+// initInput has no idempotence guard (review M3: each call adds another document
+// keydown listener + poll interval) — attach ONCE for the whole file.
+beforeAll(async () => { const { initInput } = await import('../input.js'); initInput(); });
 
 describe('static dialog semantics (批7 B5/B4)', () => {
   it('every static overlay panel is role=dialog + aria-modal', async () => {
@@ -29,8 +33,6 @@ describe('static dialog semantics (批7 B5/B4)', () => {
 
 describe('keyboard linear focus in overlays (批7 B1)', () => {
   it('ArrowDown/ArrowUp move focus between record rows', async () => {
-    const { initInput } = await import('../input.js');
-    initInput();
     const { showOverlay, renderRecords } = await import('../ui-panels.js');
     const { getMeta, saveMeta } = await import('../meta.js');
     const m = getMeta();
@@ -43,15 +45,13 @@ describe('keyboard linear focus in overlays (批7 B1)', () => {
     // happy-dom quirk (批3A): offsetParent is null for everything, which
     // focusablesIn's visibility filter would read as invisible — stub it.
     for (const r of rows) Object.defineProperty(r, 'offsetParent', { get: () => document.body, configurable: true });
-    rows[1].focus();   // first DATA row (rows[0] is the header)
+    rows[0].focus();   // header is no longer a .rrow (review I1) — rows[0] is the first data row
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    expect(document.activeElement).toBe(rows[2]);
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
     expect(document.activeElement).toBe(rows[1]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(document.activeElement).toBe(rows[0]);
   });
   it('arrows outside any overlay never hijack (gameplay dispatch untouched)', async () => {
-    const { initInput } = await import('../input.js');
-    initInput();
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     expect(document.activeElement).toBe(document.body);   // no overlay → no focus move
   });

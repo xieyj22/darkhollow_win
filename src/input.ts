@@ -387,8 +387,8 @@ export function pollGamepad(): void {
     }
     // 批7: slider long-press — while a range input is focused and the user's bound
     // left/right direction is HELD, repeat stepRange after an initial ~360ms delay
-    // then every ~120ms (poll ≈ 60ms ⇒ cds 6 / 2). The edge loop above already did
-    // the first step via menuMoveFocus, so a fresh press only arms the timer.
+    // then every ~120ms (poll ≈ 60ms ⇒ cds 5 / 1; review M1). The edge loop above
+    // already did the first step via menuMoveFocus, so a fresh press only arms the timer.
     const ae = document.activeElement as HTMLElement | null;
     const onRange = !!(ae && menu.contains(ae) && ae instanceof HTMLInputElement && ae.type === 'range');
     if (!onRange) { gpSlideDir = 0; gpSlideCd = 0; }
@@ -400,9 +400,9 @@ export function pollGamepad(): void {
         if (a === 'move_left') held = -1;
         else if (a === 'move_right') held = 1;
       }
-      if (held === 0 || held !== gpSlideDir) { gpSlideDir = held; gpSlideCd = held === 0 ? 0 : 6; }
+      if (held === 0 || held !== gpSlideDir) { gpSlideDir = held; gpSlideCd = held === 0 ? 0 : 5; }
       else if (gpSlideCd > 0) gpSlideCd--;
-      else { stepRange(ae as HTMLInputElement, held); gpSlideCd = 2; }
+      else { stepRange(ae as HTMLInputElement, held); gpSlideCd = 1; }
     }
   } else if (G && !G.gameOver) {
     // ---- gameplay dispatch (pre-batch3A behavior, unchanged) ----
@@ -426,6 +426,9 @@ export function pollGamepad(): void {
   }
   if (gpMoveCd > 0) gpMoveCd--;
   gpPrevBtn = gp.buttons.map(b => !!(b && b.pressed));
+  // No menu context this poll — drop any stale slide-repeat state (review M8:
+  // holding a direction across overlay close/reopen must not skip the delay).
+  if (!menu) { gpSlideDir = 0; gpSlideCd = 0; }
 }
 
 // Batch3A: directional focus move within a menu context. A focused range input
