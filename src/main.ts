@@ -67,6 +67,7 @@ bridge.updateUI = updateUI;
 bridge.render = render;
 bridge.markMinimapDirty = markMinimapDirty;
 bridge.toggleLang = toggleLang;
+bridge.closeEvent = closeEvent;
 bridge.toggleSound = toggleSound;
 bridge.updateSoundBtn = updateSoundBtn;
 bridge.updateLangUI = updateLangUI;

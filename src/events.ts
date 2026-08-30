@@ -118,7 +118,7 @@ export function checkTraps(): void {
     if (trap.dmg > 0) {
       G.player.hp -= trap.dmg; flt(G.player.x, G.player.y, `-${trap.dmg}`, '#f4845f'); snd('trap'); shake();
       addMsg(`${tx(trap.n)} -${trap.dmg}!`, 'mt');
-      if (G.player.hp <= 0) { playerDeath(tx(trap.n)); return; }
+      if (G.player.hp <= 0) { playerDeath(tx(trap.n), 'trap'); return; }
     }
     if (trap.ef === 'poison_dot') {
       if (!G.player.buffs.some(b => b.type === 'antidote')) {
@@ -195,7 +195,7 @@ export function checkTiles(): void {
     G.player.hp -= dmg;
     addMsg(tMsg('ev.lavaBurns', String(dmg)), 'mt');
     flt(G.player.x, G.player.y, `-${dmg}`, '#ff4500'); snd('trap'); shake();
-    if (G.player.hp <= 0) { playerDeath(t('ev.lava')); return; }
+    if (G.player.hp <= 0) { playerDeath(t('ev.lava'), 'trap'); return; }
   }
   // ABYSS_WATER — slows player (set slowed counter)
   if (tile === TL.ABYSS_WATER) {

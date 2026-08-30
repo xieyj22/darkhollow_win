@@ -1,6 +1,6 @@
 // Combat system — attack, level up, death, victory
 import type { Enemy, Combatant, Element, Item, SoulEchoBreakdown, Player } from './types.js';
-import { G, lang } from './state.js';
+import { G, lang, eventOpen } from './state.js';
 import { clearCloudSave } from './cloud-sync.js';
 import { FINAL } from './config.js';
 import { rng, dst } from './utils.js';
@@ -24,6 +24,11 @@ import {
 import { genEndlessGear, endlessLuckMult } from './item-gen.js';
 import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy, corruptionWardMult } from './meta.js';
 import { queueMechanicIntro, resetIntros } from './item-intro.js';
+import { buildEpitaph, quoteFlavor, type DeathCause } from './epitaph.js';
+import { bridge } from './bridge.js';
+
+// 批7: minimal HTML escaper for i18n-derived strings rendered via innerHTML.
+const escHtml = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // Late-bound dependency to break circular import with items.ts
 let _genItem: ((floor: number) => any) | null = null;
@@ -421,13 +426,14 @@ function wardenDeath(): void {
   const nm = tMsg('cb.className', p.raceName, p.clsName);
   recordWardenLegacy(nm, p.ci, p.ri, G.floor);
   addMsg(t('cb.wardenJoin'), 'md');
-  playerDeath(t('cb.becameWarden'));
+  playerDeath(t('cb.becameWarden'), 'warden');
 }
 
-export function playerDeath(killer: string): void {
+export function playerDeath(killer: string, cause: DeathCause = 'combat'): void {
   if (!G || G.gameOver) return;
   G.gameOver = true;
   resetIntros();   // 批4: the death screen takes over — drop any queued intro cards
+  if (eventOpen) bridge.closeEvent?.();   // 批7 D: an event popup must not outlive the player
   addMsg(tMsg('cb.slainBy', killer), 'md');
   snd('death'); setBgmScene('death');
 
@@ -476,6 +482,17 @@ export function playerDeath(killer: string): void {
       `${G.player.kills} ${t('cb.enemiesSlain')} · ${G.player.gold} ${t('cb.goldLabel')}<br>` +
       `${t('cb.survivedLabel')} ${G.player.turns} ${t('cb.turnsLabel')}`;
   }
+  // 批7 A: epitaph (template + quoted flavor) + the fallen-wardens roll.
+  const ep = buildEpitaph(cause, killer, G.floor, p.turns);
+  document.getElementById('death-epitaph')!.innerHTML =
+    `<div class="ep-line">${escHtml(ep.template)}</div>` +
+    `<div class="ep-flavor">${quoteFlavor(escHtml(ep.flavor))}</div>`;
+  const wardens = getMeta().wardens || [];
+  document.getElementById('death-wardens')!.innerHTML = wardens.length
+    ? `<div class="epw-title">${t('ep.fallen')}</div>` +
+      wardens.slice(0, 5).map(w => `<span class="epw-row">${escHtml(w.name)} F${w.floor}</span>`).join('') +
+      (wardens.length > 5 ? `<span class="epw-row">+${wardens.length - 5}</span>` : '')
+    : '';
   renderEchoBreakdown('death-echoes', echoes);
   clearCloudSave();
 }

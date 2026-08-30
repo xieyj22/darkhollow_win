@@ -19,6 +19,7 @@ export const bridge: {
   // late-bound UI/render fns (main.ts 定义后设)
   render?: VoidFn; updateUI?: VoidFn; recalc?: VoidFn; markMinimapDirty?: VoidFn;
   renderInv?: VoidFn; renderHotbar?: VoidFn; renderHelp?: VoidFn; renderOptions?: VoidFn;
+  closeEvent?: VoidFn;   // 批7: combat→events would cycle; death clears an open event popup via this slot
   openPause?: VoidFn; closePause?: VoidFn; closeOptions?: VoidFn; openSellInv?: VoidFn;
   toggleLang?: VoidFn; toggleSound?: VoidFn; updateLangUI?: VoidFn; updateSoundBtn?: VoidFn;
   initAudio?: VoidFn;

@@ -427,3 +427,10 @@ body.hc .mc-btn,body.hc #keys-toggle{background:#1a1a2e}
 body.hc .hb-slot{background:#20203a}
 body.hc .hb-slot:hover{background:#2a1a2e}
 body.hc .hb-slot.empty:hover{background:#1a1a2e}
+
+/* 批7: death epitaph + fallen wardens */
+.death-epitaph{margin-top:12px;max-width:560px;color:#9a8ec8;font-style:italic;line-height:1.7}
+.death-epitaph .ep-flavor{margin-top:4px;color:#7d735f}
+.death-wardens{margin-top:10px;font-size:.85em;color:#667}
+.death-wardens .epw-title{color:#889;margin-bottom:4px}
+.death-wardens .epw-row{display:inline-block;margin:2px 10px 2px 0;color:#756f8f}

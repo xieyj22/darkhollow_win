@@ -46,7 +46,7 @@ export function useItem(idx: number): void {
       case 'str_buff': p.buffs.push({ name: t('it.strengthBuff'), type: 'str_buff', value: item.val || 0, turns: item.dur || 30 }); addMsg(tMsg('it.atkGain', String(item.val || 0), String(item.dur || 30)), 'mi'); fxAura(p.x, p.y, '#ff6b6b'); break;
       case 'def_buff': p.buffs.push({ name: t('it.ironSkin'), type: 'def_buff', value: item.val || 0, turns: item.dur || 30 }); addMsg(tMsg('it.defGain', String(item.val || 0), String(item.dur || 30)), 'mi'); fxAura(p.x, p.y, '#8d99ae'); break;
       case 'restore': p.hp = p.maxHp; p.mp = p.maxMp; addMsg(t('it.fullyRestored'), 'mh'); flt(p.x, p.y, 'FULL', '#ffd700'); snd('heal'); break;
-      case 'poison': p.hp -= item.val || 0; addMsg(tMsg('it.poisonHit', String(item.val)), 'mc'); flt(p.x, p.y, `-${item.val}`, '#32cd32'); snd('trap'); if (p.hp <= 0) playerDeath(t('it.poisonCause')); break;
+      case 'poison': p.hp -= item.val || 0; addMsg(tMsg('it.poisonHit', String(item.val)), 'mc'); flt(p.x, p.y, `-${item.val}`, '#32cd32'); snd('trap'); if (p.hp <= 0) playerDeath(t('it.poisonCause'), 'poison'); break;
       case 'el_res_fire': p.buffs.push({ name: t('it.fireResist'), type: 'el_res_fire', value: item.val || 50, turns: item.dur || 30 }); addMsg(t('it.fireResistUp'), 'mi'); fxAura(p.x, p.y, '#ff7a45'); break;
       case 'el_res_ice': p.buffs.push({ name: t('it.iceResist'), type: 'el_res_ice', value: item.val || 50, turns: item.dur || 30 }); addMsg(t('it.iceResistUp'), 'mi'); fxAura(p.x, p.y, '#7ec8e3'); break;
     }

@@ -43,7 +43,7 @@ export function endTurn(): void {
       flt(G.player.x, G.player.y, `-${dmg}`, '#f4845f');
       if (G.player.hp <= 0) {
         if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
-        else { playerDeath(t('tn.starve')); updateUI(); render(); return; }
+        else { playerDeath(t('tn.starve'), 'starve'); updateUI(); render(); return; }
       }
     }
   }
@@ -64,7 +64,7 @@ export function endTurn(): void {
     flt(G.player.x, G.player.y, `-${actualPoisonDmg}`, '#32cd32');
     if (G.player.hp <= 0) {
       if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
-      else { playerDeath(t('tn.poison')); updateUI(); render(); return; }
+      else { playerDeath(t('tn.poison'), 'poison'); updateUI(); render(); return; }
     }
   }
 
@@ -75,7 +75,7 @@ export function endTurn(): void {
     flt(G.player.x, G.player.y, `-${cm.perTurnHp}`, '#9a2be2');
     if (G.player.hp <= 0) {
       if (onPlayerDeath() || relicOnDeath()) { /* revived */ }
-      else { playerDeath(t('tn.corruption')); updateUI(); render(); return; }
+      else { playerDeath(t('tn.corruption'), 'corruption'); updateUI(); render(); return; }
     }
   }
 
@@ -104,6 +104,7 @@ export function endTurn(): void {
 }
 
 // Late-bound playerDeath to avoid importing combat.ts circularly
-let _playerDeath: ((killer: string) => void) | null = null;
-export function setPlayerDeathFn(fn: (killer: string) => void): void { _playerDeath = fn; }
-function playerDeath(killer: string) { if (_playerDeath) _playerDeath(killer); }
+// (批7: cause routes to the epitaph flavor class — signature widened with the default.)
+let _playerDeath: ((killer: string, cause?: import('./epitaph.js').DeathCause) => void) | null = null;
+export function setPlayerDeathFn(fn: (killer: string, cause?: import('./epitaph.js').DeathCause) => void): void { _playerDeath = fn; }
+function playerDeath(killer: string, cause?: import('./epitaph.js').DeathCause) { if (_playerDeath) _playerDeath(killer, cause); }

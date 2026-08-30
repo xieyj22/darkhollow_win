@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 vi.mock('../state.js', () => ({
   get G(): unknown { return (globalThis as { G?: unknown }).G; },
   lang: 'en',
+  eventOpen: false,   // 批7: combat reads it to clear a residue event popup at death
   setGameState: () => {},
 }));
 vi.mock('../config.js', () => ({ FINAL: 40 }));
@@ -100,6 +101,7 @@ function fixtureG(): any {
 
 const DOM_HTML = `
   <div id="death-screen"></div><div id="death-stats"></div>
+  <div id="death-epitaph"></div><div id="death-wardens"></div>
   <div id="ending-title"></div><div id="ending-desc"></div>
   <button id="btn-ending-refuse"></button><div id="ending-choice"></div>
   <div id="victory-screen"></div><div id="vic-stats"></div>
