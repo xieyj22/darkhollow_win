@@ -10,7 +10,9 @@
 #      the pre-fix npc branch never picked up non-NPC items on that tile) —
 #      then REAL movePlayer() onto it -> event popup opens; gold increased
 #      (pile picked up) AND entity still in G.items (sweep spares NPCs); ESC ->
-#      closed; walk away + back -> popup opens again (re-interactable shop).
+#      closed; walk away + back -> popup opens again (re-interactable shop);
+#      rider: live pickupItem() ('g') on the merchant keeps it in G.items AND
+#      picks co-located non-gold loot (gold is auto-pickup-only by design).
 #   S2 售卖收口 (sell-mode scoping): from the open merchant popup press [2]
 #      (eventActions digit -> merchantSell -> bridge.openSellInv) -> inventory
 #      overlay active + sellMode true (live `export let` read) + hint rendered;
@@ -141,6 +143,37 @@ def main():
         page.wait_for_timeout(120)
         again = page.evaluate("document.getElementById('event-popup').style.display")
         check('S1d walk away + back re-opens the shop (re-interactable)', again == 'block', again)
+        # Final-review rider: the 'g' path (pickupItem) must respect merchant
+        # persistence too — pre-rider it deleted ANY npc by identity and its
+        # early return also stranded co-located loot (the F1 shape). Gold is
+        # excluded from this path by design (`type !== 'gold'` filter), so the
+        # co-located loot probe is a potion.
+        page.keyboard.press('Escape')   # start from a closed popup, as a player would
+        page.wait_for_timeout(80)
+        gpath = page.evaluate("""(async () => {
+          const st = await import('/src/state.ts');
+          const meta = await import('/src/meta.ts');
+          const g = st.G, p = g.player;
+          // Pre-discover the probe item: the real pickup path routes through
+          // queueItemIntro, whose first-pickup card sets introOpen — which
+          // swallows every key except ESC/b and would starve S2's [2] press.
+          // discoverItem-once = the "already discovered -> no card" branch.
+          meta.discoverItem('potion:冒烟拾取药剂');
+          const pot = { type: 'potion', name: '冒烟拾取药剂', ch: '!', c: '#e05555',
+                        desc: 'battery junk', rarity: 1, ef: 'heal', x: p.x, y: p.y };
+          pot.__bt9p = 'p1';
+          g.items.push(pot);   // co-located non-NPC loot under the merchant
+          const { pickupItem } = await import('/src/player.ts');
+          pickupItem();
+          return { merchant: g.items.some(i => i.__bt9m === 'm1'),
+                   potionGone: !g.items.some(i => i.__bt9p === 'p1'),
+                   invHas: p.inv.some(i => i.__bt9p === 'p1'),
+                   pop: document.getElementById('event-popup').style.display };
+        })()""")
+        check("S1e 'g' on the merchant: popup opens, merchant survives, co-located loot picked",
+              gpath['merchant'] and gpath['potionGone'] and gpath['invHas'] and gpath['pop'] == 'block', str(gpath))
+        # S1e's pickupItem re-opened the merchant popup — exactly the state S2
+        # expects when it presses [2], so it is deliberately left open.
 
         # ---- S2  售卖收口 -----------------------------------------------------------
         prep = page.evaluate("""async () => {

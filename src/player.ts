@@ -140,8 +140,17 @@ export function pickupItem(): void {
   if (!itemsHere.length) { addMsg(t('nothingHere'), 'mi'); return; }
   // A map entity underfoot (e.g. stepped on via teleport): trigger rather than grab.
   const npcEntity = itemsHere.find(i => i.npc);
-  if (npcEntity) { g.items = g.items.filter(i => i !== npcEntity); triggerNpc(npcEntity); return; }
-  for (const it of itemsHere) { g.items = g.items.filter(i => i !== it); addItemWithOverflow(it); }
+  const loot = itemsHere.filter(i => !i.npc);
+  // Final-review rider: mirror movePlayer — co-located non-NPC loot is picked
+  // up BEFORE triggerNpc (so freshly spawned chest loot isn't removed with it;
+  // identity-based removal, no tile sweep needed on this path).
+  for (const it of loot) { g.items = g.items.filter(i => i !== it); addItemWithOverflow(it); }
+  if (npcEntity) {
+    // Batch9 ④: merchants persist on the map — only chests/event sites are consumed.
+    if (!npcPersists(npcEntity.npc)) g.items = g.items.filter(i => i !== npcEntity);
+    triggerNpc(npcEntity);
+    return;
+  }
   if (_endTurn) _endTurn();
 }
 

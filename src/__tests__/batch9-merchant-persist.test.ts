@@ -42,6 +42,25 @@ describe('批9 ④ npcPersists', () => {
     expect(trig).toBeGreaterThan(-1);
     expect(sweep).toBeLessThan(trig);
   });
+  it("终审 rider：pickupItem('g') 同样尊重商人常驻（source-gate）", () => {
+    // Final-review rider: the 'g'-path removed ANY npc by identity with no
+    // npcPersists guard — standing on a merchant after closing its popup and
+    // pressing 'g' permanently deleted the "persists all floor" merchant, and
+    // its early return also stranded co-located loot (the F1 shape). Must
+    // mirror movePlayer: guarded removal + loot pickup before the trigger.
+    const f = 'player.ts';
+    const text = readFileSync(new URL('../' + f, import.meta.url), 'utf8');
+    // Guarded removal — lowercase `g.items` is pickupItem's local alias, unique
+    // to this call site (movePlayer uses G.items). Byte-assert the final form.
+    expect(text).toContain('if (!npcPersists(npcEntity.npc)) g.items = g.items.filter(i => i !== npcEntity)');
+    // Co-located non-NPC loot is picked BEFORE the npc consume/trigger — same
+    // ordering discipline as movePlayer (identity removal, no tile sweep).
+    const lootLoop = text.indexOf('for (const it of loot) { g.items = g.items.filter(i => i !== it); addItemWithOverflow(it); }');
+    const guard = text.indexOf('if (!npcPersists(npcEntity.npc)) g.items');
+    expect(lootLoop).toBeGreaterThan(-1);
+    expect(guard).toBeGreaterThan(-1);
+    expect(lootLoop).toBeLessThan(guard);
+  });
   it('宝藏库存只 roll 一次，售罄有文案（source-gate）', () => {
     const f = 'events.ts';
     const text = readFileSync(new URL('../' + f, import.meta.url), 'utf8');
