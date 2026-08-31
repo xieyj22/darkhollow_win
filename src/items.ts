@@ -270,6 +270,11 @@ export function quickRead(): void {
 
 // --- Hotbar ---
 
+// Attribute-context escaping for aria-label="name: desc" (same shape as the
+// private helper in ui-panels.ts — batch7 M2 pattern; i18n.ts exports none).
+const escAttr = (s: string): string =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 export function renderHotbar(): void {
   if (!G) return;
   const hb = document.getElementById('hotbar');
@@ -285,12 +290,12 @@ export function renderHotbar(): void {
         html += `<div class="hb-slot empty"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:#555">·</span></div>`;
         continue;
       }
-      html += `<div class="hb-slot" tabindex="0" role="button" style="border-color:${RARITY_C[item.rarity]}44" data-qs="${i}" title="${item.name}: ${item.desc}"><span class="hb-key">${i + 1}</span><canvas class="lic hb-icon" width="16" height="16" data-slot="${i}" aria-hidden="true"></canvas><span class="hb-sub" style="color:${RARITY_C[item.rarity]}">${item.name}</span></div>`;
+      html += `<div class="hb-slot" tabindex="0" role="button" style="border-color:${RARITY_C[item.rarity]}44" data-qs="${i}" aria-label="${escAttr(item.name)}: ${escAttr(item.desc)}"><span class="hb-key">${i + 1}</span><canvas class="lic hb-icon" width="16" height="16" data-slot="${i}" aria-hidden="true"></canvas><span class="hb-sub" style="color:${RARITY_C[item.rarity]}">${item.name}</span></div>`;
     } else {
       html += `<div class="hb-slot empty" data-qs="${i}"><span class="hb-key">${i + 1}</span><span class="hb-icon" style="color:#555">·</span></div>`;
     }
   }
-  hb.innerHTML = html;
+  hb.innerHTML = `<div id="hb-name" aria-hidden="true"></div>` + html;
   // Paint pixel sprites into each occupied slot's canvas (empty slots show "·").
   hb.querySelectorAll<HTMLCanvasElement>('canvas.lic').forEach(cv => {
     const slot = +(cv.dataset.slot || 0);
@@ -309,6 +314,19 @@ export function renderHotbar(): void {
       if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); handler(); }
     });
   });
+  // Persistent name plate: shows the focused slot's full item name (4-char CJK
+  // names no longer rely on the clipped .hb-sub). Listens on the container so
+  // it survives the innerHTML re-render above; the immediate call restores the
+  // label when the re-render swallowed focus (document.activeElement).
+  const namebar = hb.querySelector('#hb-name') as HTMLElement;
+  const setNamebar = () => {
+    const active = document.activeElement as HTMLElement | null;
+    const qs = active?.closest?.('.hb-slot')?.getAttribute('data-qs');
+    const item = qs != null ? p.quickSlots[+qs] : null;
+    namebar.textContent = item ? item.name : '';
+  };
+  hb.addEventListener('focusin', setNamebar);
+  setNamebar(); // innerHTML 重渲染吞焦点后，从 activeElement 恢复
 }
 
 export function useQuickSlot(slotIdx: number): void {
