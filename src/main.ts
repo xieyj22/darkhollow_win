@@ -41,6 +41,7 @@ import { toggleLegend, toggleObjective, toggleKeys, initTooltip, initFocusToolti
 import { closeItemIntro } from './item-intro.js';
 import { clearTransientUi } from './menu-context.js';
 import { showCharSelect } from './char-select.js';
+import { closeInventory } from './panels.js';
 
 // ===== Wire up late-bound dependencies =====
 setCombatGenItem(genItem);
@@ -157,7 +158,7 @@ function bindButtons(): void {
   on('btn-help', () => { setHelpOpen(true); showOverlay('help-overlay'); bridge.renderHelp?.(); });
   on('lang-btn', toggleLang);
 
-  on('btn-close-inv', () => { setInvOpen(false); hideOverlay('inventory-overlay'); });
+  on('btn-close-inv', () => { closeInventory(); });
   on('btn-close-help', () => { setHelpOpen(false); hideOverlay('help-overlay'); });
   on('btn-close-skill', () => { setSkillOpen(false); hideOverlay('skill-overlay'); });
   on('btn-close-ach', () => { setAchOpen(false); hideOverlay('achievement-overlay'); });

@@ -16,12 +16,14 @@ import { bridge } from './bridge.js';
 export let sellMode = false;       // when true, clicking an item sells it for gold (point 3)
 let assignTarget: any = null; // item currently expanding the quick-slot picker (point 9)
 
-export function openInventory(): void {
+export function openInventory(opts?: { sell?: boolean }): void {
+  // 批9 ⑥: 售卖态只在"从商人入口打开"时成立，任何普通重开都归位。
+  sellMode = !!opts?.sell;
   setInvOpen(true);
   showOverlay('inventory-overlay');
   renderInv();
 }
-function openInventorySell(): void { sellMode = true; openInventory(); }
+function openInventorySell(): void { openInventory({ sell: true }); }
 export function closeInventory(): void {
   setInvOpen(false);
   sellMode = false;
