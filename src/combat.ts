@@ -22,7 +22,7 @@ import {
   getCritMultiplier, getManaShieldReduction,
 } from './talents.js';
 import { genEndlessGear, endlessLuckMult } from './item-gen.js';
-import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy, corruptionWardMult } from './meta.js';
+import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBreakdown, bonusGold, bonusExp, getMeta, creditSoulEchoes, recordRun, unlockLore, recordWardenLegacy, corruptionWardMult, recordEcho, pickKeepsake } from './meta.js';
 import { queueMechanicIntro, resetIntros } from './item-intro.js';
 import { buildEpitaph, quoteFlavor, type DeathCause } from './epitaph.js';
 import { bridge } from './bridge.js';
@@ -487,6 +487,12 @@ export function playerDeath(killer: string, cause: DeathCause = 'combat'): void 
   document.getElementById('death-epitaph')!.innerHTML =
     `<div class="ep-line">${escHtml(ep.template)}</div>` +
     `<div class="ep-flavor">${quoteFlavor(escHtml(ep.flavor))}</div>`;
+  // Batch10 B1: persist the death snapshot — later runs may meet this echo on the map.
+  recordEcho({
+    cause, killer, floor: G.floor, turns: p.turns, classIdx: p.ci,
+    corruption: p.corruption, keepsake: pickKeepsake(p),
+    epitaph: { template: ep.template, flavor: ep.flavor }, ts: Date.now(),
+  });
   const wardens = getMeta().wardens || [];
   document.getElementById('death-wardens')!.innerHTML = wardens.length
     ? `<div class="epw-title">${t('ep.fallen')}</div>` +

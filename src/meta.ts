@@ -1,5 +1,5 @@
 // Meta progression system — Soul Echoes, The Forge, persistent achievements, run stats
-import type { MetaSave, MetaStats, SoulEchoBreakdown, Player, RunRecord } from './types.js';
+import type { MetaSave, MetaStats, SoulEchoBreakdown, Player, RunRecord, Item, EchoRecord } from './types.js';
 import { lang } from './state.js';
 import { META_UPGRADES, ACH_DEFS, RELICS } from './data.js';
 import { snd } from './audio.js';
@@ -48,6 +48,7 @@ export function getMeta(): MetaSave {
       if (!m.discoveredItems) m.discoveredItems = [];
       if (!m.seenMechanics) m.seenMechanics = [];
       if (!m.wardens) m.wardens = [];
+      if (!m.echoes) m.echoes = [];
       return m;
     }
   } catch { /* fall through */ }
@@ -71,6 +72,24 @@ export function recordRun(rec: RunRecord): void {
     if (m.endlessLeaderboard.length > 10) m.endlessLeaderboard.length = 10;
   }
   saveMeta(m);
+}
+
+// Batch10 B1: persist a death snapshot — later runs may meet this echo on the
+// map. Newest first, cap 10 (mirrors recordRun / recordWardenLegacy).
+export function recordEcho(rec: EchoRecord): void {
+  const m = getMeta();
+  if (!m.echoes) m.echoes = [];
+  m.echoes.unshift(rec);
+  if (m.echoes.length > 10) m.echoes.length = 10;
+  saveMeta(m);
+}
+
+// Highest-rarity item across inventory + equipped slots — the run's keepsake.
+// Equipment lives under p.eq (types.ts Equipment) — p.eq.weapon, not p.weapon.
+export function pickKeepsake(p: Player): Item | null {
+  const pool = [...(p.inv || []), p.eq?.weapon, p.eq?.armor, p.eq?.accessory].filter(Boolean) as Item[];
+  if (!pool.length) return null;
+  return pool.reduce((best, it) => (it.rarity > best.rarity ? it : best), pool[0]);
 }
 
 // ===== Soul Echo Calculation =====

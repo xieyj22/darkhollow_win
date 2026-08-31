@@ -616,6 +616,15 @@ export interface EndlessRecord {
 // Future runs' spawnWarden draws these to name the Warden "formerly <name>".
 export interface WardenLegacy { name: string; cls: number; race: number; floor: number; ts: number; }
 
+// Batch10 B: death snapshot that can resurface as a map echo in later runs.
+export interface EchoRecord {
+  cause: import('./epitaph.js').DeathCause;
+  killer: string; floor: number; turns: number; classIdx: number; corruption: number;
+  keepsake: Item | null;             // full JSON snapshot (survives dh_save/dh_meta round-trips)
+  epitaph: { template: string; flavor: string };
+  ts: number;
+}
+
 export interface MetaSave {
   version: number;
   soulEchoes: number;
@@ -629,6 +638,7 @@ export interface MetaSave {
   discoveredItems: string[];
   seenMechanics: string[];
   wardens: WardenLegacy[];
+  echoes?: EchoRecord[];
 }
 
 export interface MetaStats {

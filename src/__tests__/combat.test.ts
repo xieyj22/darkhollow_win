@@ -34,6 +34,9 @@ vi.mock('../meta.js', () => ({
   unlockLore: () => {},
   recordWardenLegacy: () => {},
   corruptionWardMult: () => 0.5,
+  // 批10 B1: playerDeath now persists the death echo + picks a keepsake.
+  recordEcho: () => {},
+  pickKeepsake: () => null,
 }));
 vi.mock('../warden.js', () => ({
   pickWardenRelic: () => null,
