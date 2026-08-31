@@ -84,10 +84,11 @@ export function recordEcho(rec: EchoRecord): void {
   saveMeta(m);
 }
 
-// Highest-rarity item across inventory + equipped slots — the run's keepsake.
-// Equipment lives under p.eq (types.ts Equipment) — p.eq.weapon, not p.weapon.
+// Highest-rarity item across inventory + all four equipped slots — the run's
+// keepsake. Equipment lives under p.eq (types.ts Equipment) — p.eq.weapon, not
+// p.weapon; accessory2 rides last so strict `>` keeps ties on the earlier slot.
 export function pickKeepsake(p: Player): Item | null {
-  const pool = [...(p.inv || []), p.eq?.weapon, p.eq?.armor, p.eq?.accessory].filter(Boolean) as Item[];
+  const pool = [...(p.inv || []), p.eq?.weapon, p.eq?.armor, p.eq?.accessory, p.eq?.accessory2].filter(Boolean) as Item[];
   if (!pool.length) return null;
   return pool.reduce((best, it) => (it.rarity > best.rarity ? it : best), pool[0]);
 }

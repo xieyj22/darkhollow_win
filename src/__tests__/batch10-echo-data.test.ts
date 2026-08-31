@@ -38,6 +38,11 @@ describe('批10 B1 pickKeepsake', () => {
     const p: any = { inv: [it1, it3], eq: { weapon: { rarity: 2 }, armor: null, accessory: null } };
     expect(pickKeepsake(p)).toBe(it3);
   });
+  it('accessory2 也计入（真最大）', () => {
+    const it4 = { rarity: 4 } as any;
+    const p: any = { inv: [it1, it3], eq: { weapon: { rarity: 2 }, armor: null, accessory: null, accessory2: it4 } };
+    expect(pickKeepsake(p)).toBe(it4);
+  });
   it('全空返回 null', () => {
     expect(pickKeepsake({ inv: [], eq: { weapon: null, armor: null, accessory: null } } as any)).toBeNull();
   });
