@@ -275,6 +275,18 @@ export function quickRead(): void {
 const escAttr = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+// Sync the persistent name plate from the CURRENT focused slot. Everything is
+// late-bound (querySelector / activeElement / live G import) so one long-lived
+// listener stays correct across innerHTML re-renders AND across new games —
+// capturing a render-time `p` here would serve the previous run's quickSlots.
+const syncNameplate = (hb: HTMLElement): void => {
+  const nb = hb.querySelector('#hb-name');
+  const active = document.activeElement as HTMLElement | null;
+  const qs = active?.closest?.('.hb-slot')?.getAttribute('data-qs');
+  const item = qs != null ? G?.player.quickSlots[+qs] : null;
+  if (nb) nb.textContent = item ? item.name : '';
+};
+
 export function renderHotbar(): void {
   if (!G) return;
   const hb = document.getElementById('hotbar');
@@ -315,18 +327,15 @@ export function renderHotbar(): void {
     });
   });
   // Persistent name plate: shows the focused slot's full item name (4-char CJK
-  // names no longer rely on the clipped .hb-sub). Listens on the container so
-  // it survives the innerHTML re-render above; the immediate call restores the
-  // label when the re-render swallowed focus (document.activeElement).
-  const namebar = hb.querySelector('#hb-name') as HTMLElement;
-  const setNamebar = () => {
-    const active = document.activeElement as HTMLElement | null;
-    const qs = active?.closest?.('.hb-slot')?.getAttribute('data-qs');
-    const item = qs != null ? p.quickSlots[+qs] : null;
-    namebar.textContent = item ? item.name : '';
-  };
-  hb.addEventListener('focusin', setNamebar);
-  setNamebar(); // innerHTML 重渲染吞焦点后，从 activeElement 恢复
+  // names no longer rely on the clipped .hb-sub). The focusin listener is bound
+  // ONCE per #hotbar container (data-flag guard; renderHotbar re-runs on every
+  // turn/action — an unguarded bind would accumulate one closure per render),
+  // and the handler late-binds all state via syncNameplate above.
+  if (!hb.dataset.hbNameBound) {
+    hb.dataset.hbNameBound = '1';
+    hb.addEventListener('focusin', () => syncNameplate(hb));
+  }
+  syncNameplate(hb); // innerHTML 重渲染吞焦点后，从 activeElement 恢复
 }
 
 export function useQuickSlot(slotIdx: number): void {

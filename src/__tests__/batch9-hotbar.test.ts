@@ -46,4 +46,19 @@ describe('批9 ① hotbar', () => {
     slot.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     expect(document.getElementById('hb-name')!.textContent).toContain('生命药水');
   });
+  it('focusin 监听只绑一次：双渲染不重复累积（review fix 回归锁）', () => {
+    const hb = document.getElementById('hotbar')!;
+    const spy = vi.spyOn(hb, 'addEventListener');
+    renderHotbar();
+    renderHotbar();
+    // 守卫旗标在位（data-* 属性，非 id/class，不违反 DOM 约束）
+    expect(hb.dataset.hbNameBound).toBe('1');
+    // 两次渲染对容器只允许注册一次 focusin 监听（防逐渲染累积）
+    expect(spy.mock.calls.filter(c => c[0] === 'focusin')).toHaveLength(1);
+    // 单监听行为仍正确：焦点联动走真实容器委托路径
+    const slot = document.querySelector('.hb-slot') as HTMLElement;
+    slot.focus();
+    slot.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(document.getElementById('hb-name')!.textContent).toContain('生命药水');
+  });
 });
