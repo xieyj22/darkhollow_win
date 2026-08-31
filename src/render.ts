@@ -241,8 +241,8 @@ export function resizeCanvas(): void {
   // Also set state.ts refs so effects.ts (flt/shake) can access canvas
   setCanvas(c);
   setMiniCanvas(mc);
-  mc.width = MW * 3;
-  mc.height = MH * 3;
+  mc.width = MW * minimapScale;
+  mc.height = MH * minimapScale;
   c.width = Math.floor((area.clientWidth - 20) / TS) * TS;
   c.height = Math.floor((area.clientHeight - 20) / TS) * TS;
   // Invalidate cached scanline overlay since canvas size changed
