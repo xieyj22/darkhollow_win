@@ -2159,6 +2159,26 @@ export const TEMPLATES: Record<string, Template> = {
     ".....M...M......",
     "................",
   ],
+  // T_ECHO — 回响：D 残影轮廓内 W 微光核（双目+心核）+L 顶点星芒（批10 回响实体）。
+  // 刻意不进 THEME_PAL：单 hue 走 buildPalette('#9d8df1')（实体 c，同 T_MUSHROOM/T_KEY 理由）。
+  T_ECHO: [
+    "................",
+    ".......L........",
+    "......L.L.......",
+    ".....DDDDDD.....",
+    "....DDDDDDDD....",
+    "...DDDDDDDDDD...",
+    "..DDWWDDDDWWDD..",
+    "..DDWWDDDDWWDD..",
+    "..DDDDDDDDDDDD..",
+    "..DDDDWWWWDDDD..",
+    "..DDDWWWWWWDDD..",
+    "..DDDWWWWWWDDD..",
+    "..DDDDWWWWDDDD..",
+    "..DDDDDDDDDDDD..",
+    "...D.DD.DD.D....",
+    "................",
+  ],
   // T_MUSHROOM — 真菌教学卡（批4）：M 菌盖+W 浅斑+D 菌褶，W/N 菌柄。
   // 刻意不进 THEME_PAL：单 hue 走 buildPalette('#06d6a0')（同 T_INFINITY/T_KEY 理由）。
   T_MUSHROOM: [
@@ -2185,6 +2205,9 @@ export const TEMPLATES: Record<string, Template> = {
 TEMPLATES.ES_ALTAR_GAMBLER = TEMPLATES.ES_ALTAR_CURSED;
 TEMPLATES.MERCHANT_TREASURE = TEMPLATES.MERCHANT;
 TEMPLATES.MERCHANT_ENDLESS = TEMPLATES.MERCHANT;
+// 批10 B: spriteKind 'ECHO'（game.ts 实体）→ T_ECHO 模板别名。同引用、
+// 不进 ENTITY_PAL——drawItemSprite 落到 buildPalette(item.c='#9d8df1') 单 hue 路径。
+TEMPLATES.ECHO = TEMPLATES.T_ECHO;
 
 // Dev-time sanity: every template row must be exactly N(16) chars.
 for (const [k, tpl] of Object.entries(TEMPLATES)) {

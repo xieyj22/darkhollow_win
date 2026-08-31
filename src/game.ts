@@ -111,6 +111,21 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     if (floor % 5 === 0) placeEntity('treasure_merchant', '¤', '#ffd700', 'gm.treasureMerchant', 4, 'MERCHANT_TREASURE');
     // Endless F41+: endless_merchant every 3 floors (sells endless gear/rarity5 relics/purge/heal).
     if (G!.endless && floor >= 41 && floor % 3 === 0) placeEntity('endless_merchant', '∞', '#9b5de5', 'enm.entityName', 5, 'MERCHANT_ENDLESS');
+    // Batch10 B: echo of a past run's death — 35% per floor (F2+), snapshot
+    // embedded (NOT a meta index — the cap rotates and would drift across saves).
+    if (floor >= 2 && Math.random() < 0.35) {
+      const pool = getMeta().echoes || [];
+      if (pool.length) {
+        const rec = pick(pool);
+        const rooms = G!.dungeon.rooms.slice(1); // never in the start room
+        if (rooms.length) {
+          const rm = pick(rooms);
+          const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
+          if (G!.dungeon.map[y][x] !== TL.STAIR)
+            G!.items.push({ type: 'consumable', name: t('ev.echoTitle'), ch: 'Ω', c: '#9d8df1', desc: '', x, y, rarity: 2, npc: 'echo', echo: rec, spriteKind: 'ECHO' } as Item);
+        }
+      }
+    }
     // Batch2 ③: one random event site on ~28% of floors (F3+; main line & endless).
     if (floor >= 3 && Math.random() < 0.28) {
       const pool = eligibleEventSites(floor);

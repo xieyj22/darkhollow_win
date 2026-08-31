@@ -11,6 +11,8 @@ import { bridge } from './bridge.js';
 import { addMsg } from './messages.js';
 import { genItem, genWeapon, genArmor, genAcc, addItemWithOverflow, itemToGold } from './items.js';
 import { recalc, playerDeath, applyCorruption } from './combat.js';
+import { addCorruption } from './corruption.js';
+import { creditSoulEchoes } from './meta.js';
 import { genEndlessGear } from './item-gen.js';
 import { grantRelic, hasRelic } from './relics.js';
 import { RELICS, ENEMIES } from './data.js';
@@ -30,6 +32,10 @@ export function merchantPrice(): number {
   if (!G) return 30;
   return 30 + (G.floor - 1) * 8 + Math.floor(G.player.turns / 12) * 3;
 }
+
+// Same escape combat.ts uses for the death screen — the echo popup injects the
+// saved epitaph (localStorage text) into innerHTML, so it must not break out.
+const escHtml = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export function showEvent(type: string): void {
   const popup = document.getElementById('event-popup')!;
@@ -267,6 +273,7 @@ export function triggerNpc(entity: Item): void {
   else if (entity.npc === 'merchant') showEvent('merchant');
   else if (entity.npc === 'treasure_merchant') openTreasureMerchant(entity);
   else if (entity.npc === 'endless_merchant') openEndlessMerchant(entity);
+  else if (entity.npc === 'echo' && entity.echo) openEchoEvent(entity);
   else if (entity.npc === 'event' && entity.eventId) showEventSite(entity);
 }
 
@@ -436,6 +443,42 @@ function buyEndless(entity: Item, idx: number): void {
   }
   updateUI(); render();
   openEndlessMerchant(entity);
+}
+
+// --- Batch10 B: echo of a past run's death (three-way choice) ---
+
+export function openEchoEvent(entity: Item): void {
+  if (!G) return;
+  const p = G.player, rec = entity.echo!;
+  const popup = document.getElementById('event-popup')!;
+  document.getElementById('ev-title')!.textContent = t('ev.echoTitle');
+  document.getElementById('ev-desc')!.innerHTML =
+    `<div class="ep-line">${escHtml(rec.epitaph.template)}</div><div class="ep-flavor">${escHtml(rec.epitaph.flavor)}</div>`;
+  const hasK = !!rec.keepsake;
+  document.getElementById('ev-buttons')!.innerHTML =
+    `<button class="evb" data-ea="0">[1] ${hasK ? tMsg('ev.echoLoot', String(rec.keepsake!.name)) : t('ev.echoLootEmpty')}</button>` +
+    `<button class="evb" data-ea="1">[2] ${t('ev.echoPurify')}</button>` +
+    `<button class="evb" data-ea="2">[3] ${t('ev.echoInherit')}</button>`;
+  const actions: Array<() => void> = [
+    () => {   // 掠夺：吃进腐化，取遗物；无遗物降级为残渣
+      if (rec.keepsake) { addCorruption(p, 10); addItemWithOverflow(rec.keepsake); }
+      else { addCorruption(p, 5); p.gold += 50; }
+      addMsg(t('ev.echoLootDone'), 'mi'); closeEvent(); updateUI();
+    },
+    () => {   // 超度：负向走正门（修正链对负增量本就不作用），回血 40%
+      applyCorruption(-10);
+      p.hp = Math.min(p.maxHp, p.hp + Math.floor(p.maxHp * 0.4));
+      addMsg(t('ev.echoPurifyDone'), 'mi'); closeEvent(); updateUI();
+    },
+    () => {   // 继承：灵魂入账 meta 货币
+      creditSoulEchoes(30);
+      addMsg(t('ev.echoInheritDone'), 'mi'); closeEvent(); updateUI();
+    },
+  ];
+  setEventOpen(true);
+  setEventActions(actions);
+  _bindEventBtns(actions);
+  popup.style.display = 'block';
 }
 
 // --- Batch2 ③: random event sites (8 low-frequency map events) ---

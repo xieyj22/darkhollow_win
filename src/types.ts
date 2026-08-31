@@ -189,9 +189,12 @@ export interface Item {
   set?: string;
   // map entity marker — when set, this "item" is not picked up; stepping on it
   // triggers its associated event instead. Used for chests/merchants on the map.
-  npc?: 'merchant' | 'chest' | 'treasure_merchant' | 'endless_merchant' | 'fountain' | 'shrine' | 'event';
+  npc?: 'merchant' | 'chest' | 'treasure_merchant' | 'endless_merchant' | 'fountain' | 'shrine' | 'event' | 'echo';
   // merchant stock for treasure merchant (list of pre-rolled item refs to buy)
   stock?: Item[];
+  // Batch10 B: the death snapshot this echo entity carries (npc === 'echo') —
+  // embedded at spawn time, NOT a meta index (the cap rotates, indexes drift).
+  echo?: EchoRecord;
   // event-site id (npc === 'event') — which random event this entity triggers.
   eventId?: string;
 }
