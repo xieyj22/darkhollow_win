@@ -6,7 +6,7 @@ import { TS, MW, MH, TL } from './config.js';
 import { dst } from './utils.js';
 import { RARITY_C, rareName, t, tx } from './i18n.js';
 import { paintIcon, paintItemIcon, paintRelicIcon, catalogSpriteColor } from './sprites.js';
-import type { ItemType } from './types.js';
+import type { Enemy, Item, Trap, ItemType } from './types.js';
 import { getMeta } from './meta.js';
 import { CLASSES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCROLLS, ALL_CONSUMABLES, FOODS, ENDLESS_GEAR, RELICS } from './data.js';
 import { LORE_ENTRIES, LORE_CATS } from './lore.js';
@@ -97,6 +97,38 @@ export function renderKeyHints(): void {
 }
 
 // ===== Tooltip =====
+// Batch9 ⑧: per-turn target validation state. ttTile caches the tile coords a
+// shown canvas tooltip came from (so validateTooltip can re-derive the target
+// without a mouse move); ttFocusEl remembers the element a focus tooltip is
+// anchored to (so re-renders that swallow it silently are detected).
+let ttTile: { mx: number; my: number } | null = null;
+let ttFocusEl: HTMLElement | null = null;
+
+// Batch9 ⑧: the enemy/item/trap/tile lookup chain shared by showTooltip and
+// validateTooltip. Returns null when nothing showable is at (mx, my) — the
+// same condition that used to be the else-branch hide. A tile hit
+// (fountain/shrine/stairs) counts as a target for as long as the tile exists.
+type TtHit = { enemy: Enemy | null; item: Item | null; trap: Trap | null; tile: number | null };
+function findTtTarget(mx: number, my: number): TtHit | null {
+  if (!G) return null;
+  const g = G; // narrow type for closure
+  const enemy = g.enemies.find(en => en.x === mx && en.y === my && g.player.visible?.[my]?.[mx]) || null;
+  const item = g.items.find(it => it.x === mx && it.y === my && g.player.visible?.[my]?.[mx] && dst(g.player.x, g.player.y, it.x, it.y) <= 3) || null;
+  const trap = g.traps ? g.traps.find(tr => tr.x === mx && tr.y === my && !tr.triggered && !tr.hidden && g.player.visible?.[my]?.[mx]) || null : null;
+  const tile = mx >= 0 && mx < MW && my >= 0 && my < MH ? g.dungeon.map[my][mx] : null;
+  if (!enemy && !item && !trap && tile !== TL.FOUNTAIN && tile !== TL.SHRINE && tile !== TL.STAIR) return null;
+  return { enemy, item, trap, tile };
+}
+
+// Batch9 ⑧: hide tooltips whose target vanished (keyboard kills/walk-aways,
+// and innerHTML re-renders that silently swallow focus without focusout).
+export function validateTooltip(): void {
+  const tt = document.getElementById('tooltip');
+  if (!tt || tt.style.display === 'none') return;
+  if (ttFocusEl && !document.contains(ttFocusEl)) { tt.style.display = 'none'; tt.innerHTML = ''; return; }
+  if (ttTile && G && !findTtTarget(ttTile.mx, ttTile.my)) { tt.style.display = 'none'; tt.style.borderColor = ''; }
+}
+
 export function initTooltip(): void {
   const gameCanvas = document.getElementById('game-canvas')!;
   const tt = document.getElementById('tooltip')!;
@@ -110,10 +142,11 @@ export function initTooltip(): void {
     const effectiveTS = cvs ? rect.width / (cvs.width / TS) : TS;
     const mx = Math.floor((e.clientX - rect.left) / effectiveTS) + g.vx;
     const my = Math.floor((e.clientY - rect.top) / effectiveTS) + g.vy;
-    const enemy = g.enemies.find(en => en.x === mx && en.y === my && g.player.visible?.[my]?.[mx]);
-    const item = g.items.find(it => it.x === mx && it.y === my && g.player.visible?.[my]?.[mx] && dst(g.player.x, g.player.y, it.x, it.y) <= 3);
-    const trap = g.traps ? g.traps.find(tr => tr.x === mx && tr.y === my && !tr.triggered && !tr.hidden && g.player.visible?.[my]?.[mx]) : null;
-    const tile = mx >= 0 && mx < MW && my >= 0 && my < MH ? g.dungeon.map[my][mx] : null;
+    const hit = findTtTarget(mx, my);
+    if (!hit) { tt.style.display = 'none'; tt.style.borderColor = ''; ttTile = null; return; }
+    ttTile = { mx, my }; // Batch9 ⑧: remember where this tooltip came from
+    ttFocusEl = null;    // …and claim ownership: a canvas tooltip is not focus-anchored
+    const { enemy, item, trap, tile } = hit;
     if (enemy) {
       tt.style.display = 'block'; tt.style.left = (e.clientX + 15) + 'px'; tt.style.top = (e.clientY + 15) + 'px';
       tt.style.borderColor = enemy.c + '66';
@@ -138,9 +171,6 @@ export function initTooltip(): void {
       tt.style.display = 'block'; tt.style.left = (e.clientX + 15) + 'px'; tt.style.top = (e.clientY + 15) + 'px';
       tt.style.borderColor = '#7ec8e344';
       tt.innerHTML = `<div class="ttn" style="color:#7ec8e3">◆ ${t('up.stairsDown')}</div><div class="ttd">${t('up.pressDescend')}</div>`;
-    } else {
-      tt.style.display = 'none';
-      tt.style.borderColor = '';
     }
   };
 
@@ -154,6 +184,32 @@ export function initTooltip(): void {
     if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
     tt.style.display = 'none';
     tt.style.borderColor = '';
+  });
+
+  // Batch9 ⑧: DOM-delegated custom tooltips for hotbar / inventory. Task 5
+  // removed the native `title` from hotbar slots (OS-delayed, double popup);
+  // this delegation takes over — instant on mouseover, no debounce (the
+  // 250ms canvas debounce above stays: sweeping the map ≠ hovering a slot).
+  const bindDom = (root: HTMLElement | null, resolve: (el: HTMLElement) => { name: string; desc: string; color: string } | null) => {
+    if (!root) return;
+    root.addEventListener('mouseover', (e) => {
+      const hit = resolve(e.target as HTMLElement);
+      if (!hit) return;
+      tt.innerHTML = `<div class="ttn" style="color:${hit.color}">◆ ${hit.name}</div><div class="ttd">${hit.desc}</div>`;
+      tt.style.display = 'block'; tt.style.left = (e.clientX + 15) + 'px'; tt.style.top = (e.clientY + 15) + 'px';
+      ttTile = null; ttFocusEl = null; // ownership: this tooltip is neither tile- nor focus-anchored
+    });
+    root.addEventListener('mouseleave', () => { tt.style.display = 'none'; tt.innerHTML = ''; });
+  };
+  bindDom(document.getElementById('hotbar'), (el) => {
+    const qs = el.closest?.('.hb-slot')?.getAttribute('data-qs');
+    const item = qs != null && G ? G.player.quickSlots[+qs] : null;
+    return item ? { name: item.name, desc: item.desc, color: RARITY_C[item.rarity] } : null;
+  });
+  bindDom(document.getElementById('inv-content'), (el) => {
+    const idxAttr = el.closest?.('.ii')?.querySelector('canvas[data-idx]')?.getAttribute('data-idx');
+    const item = idxAttr != null && G ? G.player.inv[+idxAttr] : null;
+    return item ? { name: item.name, desc: item.desc, color: RARITY_C[item.rarity] } : null;
   });
 }
 
@@ -174,10 +230,13 @@ export function initFocusTooltips(): void {
     const r = el.getBoundingClientRect();
     tt.style.left = Math.max(4, Math.min(window.innerWidth - 230, r.left)) + 'px';
     tt.style.top = (r.bottom + 90 > window.innerHeight ? Math.max(4, r.top - 90) : r.bottom + 8) + 'px';
+    ttFocusEl = el; // Batch9 ⑧: remember the anchor for per-turn validation
+    ttTile = null;  // …and drop any stale canvas-anchor (ownership switch)
   });
   document.addEventListener('focusout', () => {
     tt.style.display = 'none';
     tt.innerHTML = '';
+    ttFocusEl = null;
   });
 }
 

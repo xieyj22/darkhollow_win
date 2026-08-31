@@ -18,6 +18,7 @@ export const bridge: {
   talentTrees: TalentTree[];
   // late-bound UI/render fns (main.ts 定义后设)
   render?: VoidFn; updateUI?: VoidFn; recalc?: VoidFn; markMinimapDirty?: VoidFn;
+  validateTooltip?: VoidFn; // 批9 ⑧: updateUI 每回合校验 tooltip 目标是否还在
   renderInv?: VoidFn; renderHotbar?: VoidFn; renderHelp?: VoidFn; renderOptions?: VoidFn;
   closeEvent?: VoidFn;   // 批7: combat→events would cycle; death clears an open event popup via this slot
   openPause?: VoidFn; closePause?: VoidFn; closeOptions?: VoidFn; openSellInv?: VoidFn;

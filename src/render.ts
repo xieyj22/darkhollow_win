@@ -612,6 +612,10 @@ export function updateUI(): void {
   // renderHotbar is imported from items — call via late binding
   if (bridge.renderHotbar) bridge.renderHotbar();
   updateSoundBtn();
+  // 批9 ⑧: per-turn tooltip validation — a tooltip whose target died / walked
+  // away / was picked up (or whose focused element got re-rendered away) dies
+  // with it, even when the mouse never moves again.
+  bridge.validateTooltip?.();
 }
 
 function renderObjective(): void {

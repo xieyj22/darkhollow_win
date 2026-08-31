@@ -8,7 +8,7 @@ import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';
 
 // Main entry point — wires all modules together
-import { G, setGameState, setLang, lang, setUiZoom, uiZoom, setMinimapScale, minimapScale, setLegendVisible, legendVisible, setKeysVisible, keysVisible, setInvOpen, setHelpOpen, setSkillOpen, setAchOpen, setTalentOpen, setSafeZone, safeZone, setReducedMotion, reducedMotion, setMenuOpen } from './state.js';
+import { G, setGameState, setLang, lang, setUiZoom, uiZoom, setMinimapScale, minimapScale, setLegendVisible, legendVisible, setKeysVisible, keysVisible, setHelpOpen, setSkillOpen, setAchOpen, setTalentOpen, setSafeZone, safeZone, setReducedMotion, reducedMotion, setMenuOpen } from './state.js';
 import { MH, MW, FOV, MAX_INV, FINAL, TL, TS } from './config.js';
 import { rng, pick, clamp, dst, darken } from './utils.js';
 import { L, t, tMsg, rareName, itemName, tx, RARITY_C } from './i18n.js';
@@ -37,7 +37,7 @@ import { openOptions, closeOptions, renderOptions, applyOptionsUI } from './opti
 import { bridge } from './bridge.js';
 import { updateLangUI, toggleLang, toggleSound, updateSoundBtn, applyAudioUI, minimapZoom } from './ui-settings.js';
 import { applyAll } from './settings.js';
-import { toggleLegend, toggleObjective, toggleKeys, initTooltip, initFocusTooltips, showOverlay, hideOverlay, openPause, closePause, renderRecords, renderCodex } from './ui-panels.js';
+import { toggleLegend, toggleObjective, toggleKeys, initTooltip, initFocusTooltips, validateTooltip, showOverlay, hideOverlay, openPause, closePause, renderRecords, renderCodex } from './ui-panels.js';
 import { closeItemIntro } from './item-intro.js';
 import { clearTransientUi } from './menu-context.js';
 import { showCharSelect } from './char-select.js';
@@ -65,6 +65,7 @@ bridge.talentTrees = TALENT_TREES;
 bridge.recalc = recalc;
 bridge.renderHotbar = renderHotbar;
 bridge.updateUI = updateUI;
+bridge.validateTooltip = validateTooltip; // 批9 ⑧: per-turn tooltip target validation
 bridge.render = render;
 bridge.markMinimapDirty = markMinimapDirty;
 bridge.toggleLang = toggleLang;
