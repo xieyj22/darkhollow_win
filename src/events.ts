@@ -303,6 +303,10 @@ function rollTreasureStock(): Item[] {
   return stock;
 }
 
+// 批10 A2 review fix: input.ts 的数字键只解析单键 1-9（input.ts:149-150）——第
+// 10+ 个动作没有对应按键，标签照印 [10]/[11] 是不可按的假提示，超过 9 时省略前缀。
+const keyTag = (n: number): string => (n <= 9 ? `[${n}] ` : '');
+
 export function openTreasureMerchant(entity: Item): void {
   if (!G) return;
   // Batch9 ④: merchants persist — the stock is rolled exactly once per entity;
@@ -323,7 +327,7 @@ export function openTreasureMerchant(entity: Item): void {
     const a = actions.length;
     const btn = document.createElement('button');
     btn.className = 'evb';
-    btn.innerHTML = `[${a + 1}] ${it.ch} ${it.name} <span class="ek">-${price}💰</span>`;
+    btn.innerHTML = `${keyTag(a + 1)}${it.ch} ${it.name} <span class="ek">-${price}💰</span>`;
     btn.title = it.desc;
     actions.push(() => buyTreasure(entity, i));
     btns.appendChild(btn);
@@ -331,7 +335,7 @@ export function openTreasureMerchant(entity: Item): void {
     // buyTreasure 的失败提示，见 payCorruption 分支）。
     const cbtn = document.createElement('button');
     cbtn.className = 'evb';
-    cbtn.innerHTML = `[${a + 2}] ${it.ch} ${it.name} <span class="ek">-🩸${cPrice}</span>`;
+    cbtn.innerHTML = `${keyTag(a + 2)}${it.ch} ${it.name} <span class="ek">-🩸${cPrice}</span>`;
     cbtn.title = t('ev.corruptPay') + (canC ? '' : ' — ' + t('ev.tooCorrupted'));
     if (!canC) { cbtn.disabled = true; cbtn.style.opacity = '.45'; }
     actions.push(() => buyTreasure(entity, i, 'corruption'));
@@ -340,7 +344,7 @@ export function openTreasureMerchant(entity: Item): void {
   const leaveIdx = actions.length;
   const leaveBtn = document.createElement('button');
   leaveBtn.className = 'evb';
-  leaveBtn.textContent = `[${leaveIdx + 1}] ${t('merchantLeave')}`;
+  leaveBtn.textContent = `${keyTag(leaveIdx + 1)}${t('merchantLeave')}`;
   actions.push(closeEvent);
   btns.appendChild(leaveBtn);
 
@@ -419,7 +423,7 @@ export function openEndlessMerchant(entity: Item): void {
     const a = actions.length;
     const btn = document.createElement('button');
     btn.className = 'evb';
-    btn.innerHTML = `[${a + 1}] ${e.ch} ${e.label} <span class="ek">-${e.price}💰</span>`;
+    btn.innerHTML = `${keyTag(a + 1)}${e.ch} ${e.label} <span class="ek">-${e.price}💰</span>`;
     btn.title = e.desc;
     actions.push(() => buyEndless(entity, i));
     btns.appendChild(btn);
@@ -428,7 +432,7 @@ export function openEndlessMerchant(entity: Item): void {
     const canC = canPayCorruption(G!.player.corruption, cPrice);
     const cbtn = document.createElement('button');
     cbtn.className = 'evb';
-    cbtn.innerHTML = `[${a + 2}] ${e.ch} ${e.label} <span class="ek">-🩸${cPrice}</span>`;
+    cbtn.innerHTML = `${keyTag(a + 2)}${e.ch} ${e.label} <span class="ek">-🩸${cPrice}</span>`;
     cbtn.title = t('ev.corruptPay') + (canC ? '' : ' — ' + t('ev.tooCorrupted'));
     if (!canC) { cbtn.disabled = true; cbtn.style.opacity = '.45'; }
     actions.push(() => buyEndless(entity, i, 'corruption'));
@@ -436,7 +440,7 @@ export function openEndlessMerchant(entity: Item): void {
   });
   const leaveBtn = document.createElement('button');
   leaveBtn.className = 'evb';
-  leaveBtn.textContent = `[${actions.length + 1}] ${t('merchantLeave')}`;
+  leaveBtn.textContent = `${keyTag(actions.length + 1)}${t('merchantLeave')}`;
   actions.push(closeEvent);
   btns.appendChild(leaveBtn);
   setEventOpen(true);

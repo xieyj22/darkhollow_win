@@ -67,5 +67,7 @@ describe('批10 A2 腐化购买（行为桩）', () => {
     const e = readFileSync(new URL('../' + f, import.meta.url), 'utf8');
     expect(e).toContain('payCorruption(G.player, cPrice)');
     expect(e).toContain("t('ev.tooCorrupted')");
+    // review fix: 数字键只到 9（input.ts:149-150）——第 10+ 个动作不得印 [10]/[11] 假按键前缀。
+    expect(e).toContain('<= 9 ? `[');
   });
 });
