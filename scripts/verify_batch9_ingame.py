@@ -3,11 +3,14 @@
 # and reach the SAME live module instances the game loop uses (batch2/3B/3C/4/5/
 # 7-proven harness; same-instance ESM injection dodges the HMR '?t=' second-
 # instance trap). Zero console errors enforced (favicon 404 whitelisted).
-# Six assertion groups over the batch's seven review-gated fixes:
+# Seven assertion groups over the batch's seven review-gated fixes + the
+# final-review riders:
 #   S1 商人常驻 (merchant persists): place a merchant entity adjacent via the
-#      live G, REAL movePlayer() onto it -> event popup opens; ESC -> closed;
-#      entity still in G.items (identity tag); walk away + back -> popup opens
-#      again (re-interactable shop).
+#      live G — WITH a gold pile co-located on its tile (final-review F1 net:
+#      the pre-fix npc branch never picked up non-NPC items on that tile) —
+#      then REAL movePlayer() onto it -> event popup opens; gold increased
+#      (pile picked up) AND entity still in G.items (sweep spares NPCs); ESC ->
+#      closed; walk away + back -> popup opens again (re-interactable shop).
 #   S2 售卖收口 (sell-mode scoping): from the open merchant popup press [2]
 #      (eventActions digit -> merchantSell -> bridge.openSellInv) -> inventory
 #      overlay active + sellMode true (live `export let` read) + hint rendered;
@@ -25,9 +28,16 @@
 #      AND a direct resizeCanvas() -> minimap-canvas.width === 70*5; descend
 #      two floors (teleport to stairs + real descendStairs) -> still 350 after
 #      each transition (zoom survives floor change).
-#   S6 宝藏价格: G.floor pinned to 5 -> live treasurePrice({rarity:3/4}) ===
-#      460 / 920; a crafted treasure merchant (pre-seeded r3+r4 stock) renders
-#      its buy buttons with exactly -460💰 / -920💰.
+#   S6 宝藏价格 + 售罄: G.floor pinned to 5 -> live treasurePrice({rarity:3/4})
+#      === 460 / 920; a crafted treasure merchant (pre-seeded r3+r4 stock)
+#      renders its buy buttons with exactly -460💰 / -920💰; final-review F2:
+#      an entity with stock:[] shows the sold-out desc + exactly 1 (leave)
+#      button, and a second triggerNpc keeps the SAME empty stock array (no
+#      re-roll).
+#   S7 移动端视口 (final-review F3): viewport 400x800 -> .hb-slot computed
+#      max-width <= 54px, #hotbar scrollWidth <= clientWidth + 2 (no
+#      horizontal overflow), hotbar height > slot height after a re-render
+#      (flex-wrap rows accommodated, not clipped); restore 1280x800.
 # Screenshots: smoke_out/batch9/{sell_mode,inv_normal,hud_final}.png
 # Run: npm run dev -- --port 5173 --strictPort (FRESH server), then:
 #      python scripts/verify_batch9_ingame.py
@@ -93,7 +103,14 @@ def main():
                           x, y, rarity: 1, npc: 'merchant', spriteKind: 'MERCHANT' };
             ent.__bt9m = 'm1';   // identity tag on the LIVE object
             g.items.push(ent);
-            return { dx, dy };
+            // Final-review F1 net: a gold pile co-located on the merchant tile.
+            // Pre-fix the npc branch skipped the pickup loop entirely, so this
+            // pile (and any enemy death-drop on the tile) would strand there.
+            const pile = { type: 'gold', name: '冒烟金币堆', ch: '$', c: '#ffd700', desc: '',
+                           x, y, rarity: 0, value: 123 };
+            pile.__bt9g = 'g1';
+            g.items.push(pile);
+            return { dx, dy, gold: g.player.gold };
           }
           return null;
         }""")
@@ -105,6 +122,14 @@ def main():
           return { disp: pop.style.display, title: document.getElementById('ev-title').textContent };
         })()""")
         check('S1b stepping on the merchant opens the shop popup', opened['disp'] == 'block' and bool(opened['title'].strip()), str(opened))
+        picked = page.evaluate("""(async () => {
+          const { G } = await import('/src/state.ts');
+          return { gold: G.player.gold, merchant: G.items.some(i => i.__bt9m === 'm1'),
+                   pile: G.items.some(i => i.__bt9g === 'g1') };
+        })()""")
+        check('S1b2 co-located gold picked up while the merchant survives the sweep',
+              picked['gold'] > placed['gold'] and picked['merchant'] and not picked['pile'],
+              f"gold {placed['gold']} -> {picked['gold']}, merchant={picked['merchant']}, pileLeft={picked['pile']}")
         page.keyboard.press('Escape')
         page.wait_for_timeout(80)
         closed = page.evaluate("document.getElementById('event-popup').style.display")
@@ -282,8 +307,53 @@ def main():
         check('S6a treasurePrice(F5) === 460 / 920', tp['p3'] == 460 and tp['p4'] == 920, f"r3={tp['p3']} r4={tp['p4']}")
         btn_txt = ' | '.join(tp['btns'])
         check('S6b treasure merchant UI prices are exactly -460💰 / -920💰', '-460💰' in btn_txt and '-920💰' in btn_txt, btn_txt[:110])
+        # Final-review F2: behavioral net for the soldOut branch (desc swap, single
+        # leave button, stock rolled exactly once — empty array is truthy so
+        # `if (!entity.stock)` must NOT re-roll it on repeat visits).
+        so = page.evaluate("""(async () => {
+          const st = await import('/src/state.ts');
+          const ev = await import('/src/events.ts');
+          const ent = { type: 'consumable', name: '售罄宝藏商人', ch: '¤', c: '#ffd700', desc: '',
+                        x: st.G.player.x, y: st.G.player.y, rarity: 4,
+                        npc: 'treasure_merchant', stock: [] };
+          ev.triggerNpc(ent);
+          const first = { desc: document.getElementById('ev-desc').textContent,
+                          btns: document.querySelectorAll('#ev-buttons .evb').length,
+                          stock: ent.stock };
+          ev.triggerNpc(ent);   // second visit — must keep the SAME stock
+          return { desc: first.desc, btns: first.btns,
+                   desc2: document.getElementById('ev-desc').textContent,
+                   btns2: document.querySelectorAll('#ev-buttons .evb').length,
+                   sameStock: ent.stock === first.stock };
+        })()""")
+        so_desc = so['desc'] or ''
+        check('S6c sold-out merchant shows the sold-out copy + leave button only',
+              (('售罄' in so_desc) or ('Sold out' in so_desc)) and so['btns'] == 1,
+              f"btns={so['btns']} desc={so_desc[:40]}")
+        check('S6d second triggerNpc keeps the SAME empty stock (no re-roll)',
+              so['sameStock'] and so['btns2'] == 1 and so['desc'] == so['desc2'],
+              f"sameStock={so['sameStock']} btns={so['btns']}->{so['btns2']}")
         page.keyboard.press('Escape')
         page.wait_for_timeout(120)
+
+        # ---- S7  移动端视口 (final-review F3) ---------------------------------------
+        page.set_viewport_size({'width': 400, 'height': 800})
+        page.wait_for_timeout(250)   # media queries apply synchronously; debounce settle
+        mob = page.evaluate("""(async () => {
+          const items = await import('/src/items.ts');
+          items.renderHotbar();   // re-render at the narrow width
+          const hb = document.getElementById('hotbar');
+          const slot = document.querySelector('.hb-slot');
+          const rows = new Set([...document.querySelectorAll('.hb-slot')].map(s => s.offsetTop)).size;
+          return { maxW: parseFloat(getComputedStyle(slot).maxWidth),
+                   sw: hb.scrollWidth, cw: hb.clientWidth,
+                   hbH: hb.offsetHeight, slotH: slot.offsetHeight, rows };
+        })()""")
+        check('S7a 400px viewport: .hb-slot computed max-width <= 54px', mob['maxW'] <= 54, f"maxWidth={mob['maxW']}px")
+        check('S7b #hotbar has no horizontal overflow (scrollWidth <= clientWidth + 2)', mob['sw'] <= mob['cw'] + 2, f"sw={mob['sw']} cw={mob['cw']}")
+        check('S7c hotbar height accommodates its rows (hbH > slot height, no clipping)', mob['hbH'] > mob['slotH'], f"hb={mob['hbH']}px slot={mob['slotH']}px rows={mob['rows']}")
+        page.set_viewport_size({'width': 1280, 'height': 800})
+        page.wait_for_timeout(450)   # let the 320ms-debounced resizeCanvas repaint before the shot
 
         # ---- final HUD shot ---------------------------------------------------------
         page.screenshot(path=os.path.join(OUT, 'hud_final.png'))

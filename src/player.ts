@@ -93,18 +93,27 @@ export function movePlayer(dx: number, dy: number): void {
   const itemsHere = G.items.filter(i => i.x === nx && i.y === ny);
   if (itemsHere.length) {
     const npcEntity = itemsHere.find(i => i.npc);
+    const loot = itemsHere.filter(i => !i.npc);
+    // Pick up co-located loot BEFORE triggering the NPC: chestOpen spawns its
+    // loot onto this very tile, and a later sweep would delete it.
+    if (loot.length) {
+      // Final-review fix: non-NPC items sharing the stepped tile with an NPC
+      // (dropped while standing on the merchant, an enemy dying there…) ride
+      // along through the same pickup loop. The tile sweep spares NPCs — the
+      // `!i.npc` guard keeps the persisting merchant from being deleted with
+      // the pile it happens to sit under.
+      G.items = G.items.filter(i => !i.npc ? (i.x !== nx || i.y !== ny) : true);
+      // Batch2 ⑧: pickup flash on the grabbed tile.
+      fxFlash(nx, ny, '#ffd700', 0.9);
+      for (const it of loot) {
+        if (it.type === 'gold') { const g = bonusGold(it.value || 0); G.player.gold += g; addMsg(tMsg('pl.pickupGold', String(g)), 'mp'); snd('pickup'); }
+        else addItemWithOverflow(it);
+      }
+    }
     if (npcEntity) {
       // Batch9 ④: merchants persist on the map — only chests/event sites are consumed.
       if (!npcPersists(npcEntity.npc)) G.items = G.items.filter(i => i !== npcEntity);
       triggerNpc(npcEntity);
-    } else {
-      G.items = G.items.filter(i => i.x !== nx || i.y !== ny);
-      // Batch2 ⑧: pickup flash on the grabbed tile.
-      fxFlash(nx, ny, '#ffd700', 0.9);
-      for (const it of itemsHere) {
-        if (it.type === 'gold') { const g = bonusGold(it.value || 0); G.player.gold += g; addMsg(tMsg('pl.pickupGold', String(g)), 'mp'); snd('pickup'); }
-        else addItemWithOverflow(it);
-      }
     }
   }
 

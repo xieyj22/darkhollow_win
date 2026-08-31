@@ -70,7 +70,9 @@ export function closeEvent(): void {
   setEventOpen(false);
   setEventActions([]);
   document.getElementById('event-popup')!.style.display = 'none';
-  if (G) render(); // refresh the snapshot so consumed map entities (merchant/chest) disappear immediately
+  // Batch9 ④: chests/event sites are consumed and vanish at once; merchants
+  // persist all floor — the re-render keeps the map snapshot truthful either way.
+  if (G) render();
 }
 
 function merchantBuy(): void {
