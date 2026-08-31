@@ -324,7 +324,7 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "ev.treasureTitle": { en: "💰 Treasure Merchant", zh: "💰 宝藏商人" },
   "ev.treasureDesc": { en: "Rare treasures — pricey, but only available here.", zh: "神秘商人摆出稀世珍宝，价格不菲，但件件精品（仅此有售）……" },
   "ev.boughtTreasure": { en: "Bought {}! (-{}💰)", zh: "购买 {}！（-{}💰）" },
-  "ev.treasureSoldOut": { en: "The treasure merchant sells out and vanishes.", zh: "宝藏商人售罄，悄然离去。" },
+  "ev.treasureSoldOut": { en: "Sold out — nothing left but the lantern's glow.", zh: "售罄——只剩提灯的光了。" },
   "ig.atkPlus": { en: "ATK +{}", zh: "攻击+{}" },
   "ig.defPlus": { en: "DEF +{}", zh: "防御+{}" },
   "ig.accStats": { en: "ATK+{} DEF+{} HP+{}", zh: "攻击+{} 防御+{} HP+{}" },

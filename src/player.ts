@@ -13,6 +13,7 @@ import { t, tMsg, tx } from './i18n.js';
 import { attack, applyCorruption } from './combat.js';
 import { addItemWithOverflow } from './items.js';
 import { checkTraps, checkTiles, triggerNpc } from './events.js';
+import { npcPersists } from './npc-rules.js';
 import { applyMetaUpgrades, bonusGold } from './meta.js';
 
 let _endTurn: (() => void) | null = null;
@@ -93,8 +94,8 @@ export function movePlayer(dx: number, dy: number): void {
   if (itemsHere.length) {
     const npcEntity = itemsHere.find(i => i.npc);
     if (npcEntity) {
-      // Step on a map entity (chest/merchant): trigger its event, remove only it.
-      G.items = G.items.filter(i => i !== npcEntity);
+      // Batch9 ④: merchants persist on the map — only chests/event sites are consumed.
+      if (!npcPersists(npcEntity.npc)) G.items = G.items.filter(i => i !== npcEntity);
       triggerNpc(npcEntity);
     } else {
       G.items = G.items.filter(i => i.x !== nx || i.y !== ny);

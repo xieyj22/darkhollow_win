@@ -293,14 +293,18 @@ function rollTreasureStock(): Item[] {
 
 export function openTreasureMerchant(entity: Item): void {
   if (!G) return;
-  if (!entity.stock || entity.stock.length === 0) entity.stock = rollTreasureStock();
+  // Batch9 ④: merchants persist — the stock is rolled exactly once per entity;
+  // a bought-out merchant keeps its (empty) stock instead of re-rolling.
+  if (!entity.stock) entity.stock = rollTreasureStock();
   const popup = document.getElementById('event-popup')!;
+  // Sold out: swap the desc for the sold-out line, render only the leave button.
+  const soldOut = entity.stock.length === 0;
   document.getElementById('ev-title')!.textContent = t('ev.treasureTitle');
-  document.getElementById('ev-desc')!.textContent = t('ev.treasureDesc');
+  document.getElementById('ev-desc')!.textContent = soldOut ? t('ev.treasureSoldOut') : t('ev.treasureDesc');
   const btns = document.getElementById('ev-buttons')!;
   btns.innerHTML = '';
   const actions: Array<() => void> = [];
-  entity.stock.forEach((it, i) => {
+  if (!soldOut) entity.stock.forEach((it, i) => {
     const price = treasurePrice(it);
     const btn = document.createElement('button');
     btn.className = 'evb';
