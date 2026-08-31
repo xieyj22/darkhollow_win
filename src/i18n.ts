@@ -325,6 +325,9 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "ev.treasureDesc": { en: "Rare treasures — pricey, but only available here.", zh: "神秘商人摆出稀世珍宝，价格不菲，但件件精品（仅此有售）……" },
   "ev.boughtTreasure": { en: "Bought {}! (-{}💰)", zh: "购买 {}！（-{}💰）" },
   "ev.treasureSoldOut": { en: "Sold out — nothing left but the lantern's glow.", zh: "售罄——只剩提灯的光了。" },
+  // Batch10 A2: dual price tags — corruption as a second currency at the premium shops.
+  "ev.corruptPay": { en: "Pay in corruption", zh: "以腐化支付" },
+  "ev.tooCorrupted": { en: "Your body cannot hold more corruption.", zh: "你的身体已容不下更多腐化。" },
   // Batch10 B: echo of a past run's death — loot/purify/inherit three-way choice.
   "ev.echoTitle": { en: "Echo of the Fallen", zh: "回响" },
   "ev.echoLoot": { en: "Loot the keepsake ({}) (+10🩸)", zh: "掠夺遗物（{}）(+10🩸)" },

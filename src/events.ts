@@ -13,6 +13,7 @@ import { genItem, genWeapon, genArmor, genAcc, addItemWithOverflow, itemToGold }
 import { recalc, playerDeath, applyCorruption } from './combat.js';
 import { addCorruption } from './corruption.js';
 import { creditSoulEchoes } from './meta.js';
+import { corruptionPriceOf, canPayCorruption, payCorruption } from './cost.js';
 import { genEndlessGear } from './item-gen.js';
 import { grantRelic, hasRelic } from './relics.js';
 import { RELICS, ENEMIES } from './data.js';
@@ -317,14 +318,26 @@ export function openTreasureMerchant(entity: Item): void {
   const actions: Array<() => void> = [];
   if (!soldOut) entity.stock.forEach((it, i) => {
     const price = treasurePrice(it);
+    const cPrice = corruptionPriceOf(price);
+    const canC = canPayCorruption(G!.player.corruption, cPrice);
+    const a = actions.length;
     const btn = document.createElement('button');
     btn.className = 'evb';
-    btn.innerHTML = `[${i + 1}] ${it.ch} ${it.name} <span class="ek">-${price}💰</span>`;
+    btn.innerHTML = `[${a + 1}] ${it.ch} ${it.name} <span class="ek">-${price}💰</span>`;
     btn.title = it.desc;
     actions.push(() => buyTreasure(entity, i));
     btns.appendChild(btn);
+    // 批10 A2: 第二价签 — 以腐化支付（95 硬线外禁用置灰；键盘数字仍触发
+    // buyTreasure 的失败提示，见 payCorruption 分支）。
+    const cbtn = document.createElement('button');
+    cbtn.className = 'evb';
+    cbtn.innerHTML = `[${a + 2}] ${it.ch} ${it.name} <span class="ek">-🩸${cPrice}</span>`;
+    cbtn.title = t('ev.corruptPay') + (canC ? '' : ' — ' + t('ev.tooCorrupted'));
+    if (!canC) { cbtn.disabled = true; cbtn.style.opacity = '.45'; }
+    actions.push(() => buyTreasure(entity, i, 'corruption'));
+    btns.appendChild(cbtn);
   });
-  const leaveIdx = entity.stock.length;
+  const leaveIdx = actions.length;
   const leaveBtn = document.createElement('button');
   leaveBtn.className = 'evb';
   leaveBtn.textContent = `[${leaveIdx + 1}] ${t('merchantLeave')}`;
@@ -337,13 +350,18 @@ export function openTreasureMerchant(entity: Item): void {
   popup.style.display = 'block';
 }
 
-function buyTreasure(entity: Item, idx: number): void {
+function buyTreasure(entity: Item, idx: number, pay: 'gold' | 'corruption' = 'gold'): void {
   if (!G || !entity.stock) return;
   const it = entity.stock[idx];
   if (!it) return;
   const price = treasurePrice(it);
-  if (G.player.gold < price) { addMsg(t('merchantNoGold'), 'mi'); return; }
-  G.player.gold -= price;
+  if (pay === 'corruption') {
+    const cPrice = corruptionPriceOf(price);
+    if (!payCorruption(G.player, cPrice)) { addMsg(t('ev.tooCorrupted'), 'mi'); return; }
+  } else {
+    if (G.player.gold < price) { addMsg(t('merchantNoGold'), 'mi'); return; }
+    G.player.gold -= price;
+  }
   addMsg(tMsg('ev.boughtTreasure', String(it.name), String(price)), 'me');
   addItemWithOverflow(it);
   entity.stock.splice(idx, 1);
@@ -397,16 +415,28 @@ export function openEndlessMerchant(entity: Item): void {
   btns.innerHTML = '';
   const actions: Array<() => void> = [];
   entries.forEach((e, i) => {
+    // 批10 A2: gear/relic 条目双价签（金币或吃进腐化）；purge/heal 维持金币单键。
+    const a = actions.length;
     const btn = document.createElement('button');
     btn.className = 'evb';
-    btn.innerHTML = `[${i + 1}] ${e.ch} ${e.label} <span class="ek">-${e.price}💰</span>`;
+    btn.innerHTML = `[${a + 1}] ${e.ch} ${e.label} <span class="ek">-${e.price}💰</span>`;
     btn.title = e.desc;
     actions.push(() => buyEndless(entity, i));
     btns.appendChild(btn);
+    if (e.kind !== 'gear' && e.kind !== 'relic') return;
+    const cPrice = corruptionPriceOf(e.price);
+    const canC = canPayCorruption(G!.player.corruption, cPrice);
+    const cbtn = document.createElement('button');
+    cbtn.className = 'evb';
+    cbtn.innerHTML = `[${a + 2}] ${e.ch} ${e.label} <span class="ek">-🩸${cPrice}</span>`;
+    cbtn.title = t('ev.corruptPay') + (canC ? '' : ' — ' + t('ev.tooCorrupted'));
+    if (!canC) { cbtn.disabled = true; cbtn.style.opacity = '.45'; }
+    actions.push(() => buyEndless(entity, i, 'corruption'));
+    btns.appendChild(cbtn);
   });
   const leaveBtn = document.createElement('button');
   leaveBtn.className = 'evb';
-  leaveBtn.textContent = `[${entries.length + 1}] ${t('merchantLeave')}`;
+  leaveBtn.textContent = `[${actions.length + 1}] ${t('merchantLeave')}`;
   actions.push(closeEvent);
   btns.appendChild(leaveBtn);
   setEventOpen(true);
@@ -415,13 +445,19 @@ export function openEndlessMerchant(entity: Item): void {
   popup.style.display = 'block';
 }
 
-function buyEndless(entity: Item, idx: number): void {
+function buyEndless(entity: Item, idx: number, pay: 'gold' | 'corruption' = 'gold'): void {
   if (!G || !entity.stock) return;
   const entries = entity.stock as unknown as EndlessStockEntry[];
   const e = entries[idx];
   if (!e) return;
-  if (G.player.gold < e.price) { addMsg(t('merchantNoGold'), 'mi'); return; }
-  G.player.gold -= e.price;
+  // 批10 A2: 腐化支付只对 gear/relic 生效（purge/heal 恒走金币分支）。
+  if (pay === 'corruption' && (e.kind === 'gear' || e.kind === 'relic')) {
+    const cPrice = corruptionPriceOf(e.price);
+    if (!payCorruption(G.player, cPrice)) { addMsg(t('ev.tooCorrupted'), 'mi'); return; }
+  } else {
+    if (G.player.gold < e.price) { addMsg(t('merchantNoGold'), 'mi'); return; }
+    G.player.gold -= e.price;
+  }
   if (e.kind === 'gear' && e.item) {
     addItemWithOverflow(e.item);
     addMsg(tMsg('enm.boughtGear', String(e.item.name), String(e.price)), 'me');
