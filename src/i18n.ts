@@ -108,6 +108,12 @@ export const L: Record<string, I18nText | I18nText[]> = {
   'ev2.wellPaid': { en: 'The well drinks {} HP. Your corruption recedes.', zh: '井饮下了 {} 点生命。你的腐化退去了。' },
   'ev2.wellTooWeak': { en: 'You are too weak to bleed for the well.', zh: '你虚弱得无法为井献血。' },
   shrineBuff: { en: 'The shrine bestows a powerful blessing!', zh: '神殿赐予了你强大的祝福！' },
+  // Batch10 A3: shrine two-way choice (clean blessing / dark pact)
+  'sh.choice': { en: 'The shrine hums. Light, or the deep?', zh: '神龛低鸣。要光，还是深渊？' },
+  'sh.cleanBless': { en: 'Clean blessing', zh: '洁净祈福' },
+  'sh.darkPact': { en: 'Dark pact (doubled)', zh: '暗黑契约（双倍）' },
+  'sh.darkDone': { en: 'Power floods in — and something darker follows.', zh: '力量涌入——还有更暗的东西跟了进来。' },
+  'sh.darkFallback': { en: 'Your body refused the darkness; the clean blessing remains.', zh: '身体拒绝了黑暗，洁净祝福犹在。' },
   loreIntro: { en: 'You descend into the Depths of Darkhollow...', zh: '你踏入了暗渊深处……' },
   loreTip1: { en: 'Find the stairs (>) to go deeper. Survive!', zh: '找到楼梯(>)深入地牢。活下去！' },
   loreTip2: { en: 'Beware of traps (^) and manage your hunger.', zh: '小心陷阱(^)，注意管理饥饿度。' },

@@ -181,22 +181,47 @@ export function checkTiles(): void {
     }
   }
   if (tile === TL.SHRINE) {
-    // Batch2 ⑨: 20% powerful blessing (revives the dead shrineBuff key).
-    if (Math.random() < 0.2) {
-      G.player.baseAtk += 2; G.player.baseDef += 2;
-      G.player.baseMaxHp += 10; G.player.maxHp += 10; G.player.hp += 10;
-      addMsg(t('shrineBuff'), 'ml');
-      recalc(); snd('levelup'); fxAura(G.player.x, G.player.y, '#ffd700', 2);
+    // Batch10 A3: corrupted players keep the classic cleanse shrine; clean
+    // players now choose — a clean blessing, or a dark pact (+15🩸, doubled).
+    if (G.player.corruption > 0) {
+      // 既有净化路径（原样保留，含消息/地块消耗；内层 guard 随原实现逐字
+      // 保留——在外层分支内恒真，仅为回归锚不做改写）。
+      const b = rng(1, 3);
+      if (b === 1) { G.player.baseAtk += rng(1, 2); addMsg(t('ev.shrineAtk'), 'ml'); }
+      else if (b === 2) { G.player.baseDef += rng(1, 2); addMsg(t('ev.shrineDef'), 'ml'); }
+      else { G.player.maxHp += rng(5, 10); G.player.baseMaxHp += rng(5, 10); G.player.hp += rng(5, 10); addMsg(t('ev.shrineHp'), 'ml'); }
+      if (G.player.corruption > 0) { applyCorruption(-20); addMsg(t('ev.shrinePurify'), 'md'); }
+      recalc(); snd('levelup'); flt(G.player.x, G.player.y, '+STAT', '#ffd700');
       G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
+    } else {
+      // Batch10 A3: the shrine offers a choice — clean blessing, or a dark pact.
+      const popup = document.getElementById('event-popup')!;
+      document.getElementById('ev-title')!.textContent = t('up.ancientShrine');
+      document.getElementById('ev-desc')!.textContent = t('sh.choice');
+      document.getElementById('ev-buttons')!.innerHTML =
+        `<button class="evb" data-ea="0">[1] ${t('sh.cleanBless')}</button>` +
+        `<button class="evb" data-ea="1">[2] ${t('sh.darkPact')} (+15🩸)</button>`;
+      const bless = (atk: number, def: number, hp: number, aura: string) => {
+        G!.player.baseAtk += atk; G!.player.baseDef += def;
+        G!.player.baseMaxHp += hp; G!.player.maxHp += hp; G!.player.hp += hp;
+        recalc(); snd('levelup'); fxAura(G!.player.x, G!.player.y, aura, 2);
+        G!.dungeon.map[G!.player.y][G!.player.x] = TL.FLOOR;
+      };
+      const actions: Array<() => void> = [
+        () => { bless(2, 2, 10, '#ffd700'); addMsg(t('shrineBuff'), 'ml'); closeEvent(); updateUI(); },
+        () => {
+          // 暗黑契约：+15🩸 换双倍祝福；余量不足（95 硬线）回落洁净祝福。
+          if (payCorruption(G!.player, 15)) { bless(4, 4, 20, '#9d8df1'); addMsg(t('sh.darkDone'), 'ml'); }
+          else { bless(2, 2, 10, '#ffd700'); addMsg(t('sh.darkFallback'), 'mi'); }
+          closeEvent(); updateUI();
+        },
+      ];
+      setEventOpen(true);
+      setEventActions(actions);
+      _bindEventBtns(actions);
+      popup.style.display = 'block';
       return;
     }
-    const b = rng(1, 3);
-    if (b === 1) { G.player.baseAtk += rng(1, 2); addMsg(t('ev.shrineAtk'), 'ml'); }
-    else if (b === 2) { G.player.baseDef += rng(1, 2); addMsg(t('ev.shrineDef'), 'ml'); }
-    else { G.player.maxHp += rng(5, 10); G.player.baseMaxHp += rng(5, 10); G.player.hp += rng(5, 10); addMsg(t('ev.shrineHp'), 'ml'); }
-    if (G.player.corruption > 0) { applyCorruption(-20); addMsg(t('ev.shrinePurify'), 'md'); }
-    recalc(); snd('levelup'); flt(G.player.x, G.player.y, '+STAT', '#ffd700');
-    G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
   }
   // LAVA — deals damage when stepped on
   if (tile === TL.LAVA) {
