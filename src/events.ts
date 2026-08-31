@@ -270,9 +270,11 @@ export function triggerNpc(entity: Item): void {
 
 // --- Treasure merchant (point 11): expensive shop-only powerful gear ---
 
-function treasurePrice(it: Item): number {
-  const base = [150, 320, 640, 1200, 2400][it.rarity] || 150;
-  return base + (G ? G.floor * 18 : 0);
+export function treasurePrice(it: Item): number {
+  // 批9 ⑦: realigned to the gold curve (piles ≈ 50+15×floor per floor) — r3/r4
+  // were 1200/2400+18f, unreachable before F15. Dead r0-2 branches kept as-is.
+  const base = [150, 320, 640, 420, 880][it.rarity] || 150;
+  return base + (G ? G.floor * 8 : 0);
 }
 
 function rollTreasureStock(): Item[] {
