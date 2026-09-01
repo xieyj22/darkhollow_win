@@ -13,6 +13,23 @@ export function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
 }
 
+// 批11 C: single home for the escapers previously copy-pasted four times
+// (combat.ts / events.ts escHtml; items.ts / ui-panels.ts escAttr). The two are
+// deliberately NOT merged into one name — they have different semantics:
+// escHtml is the minimal text-node escaper; escAttr additionally escapes
+// quotes for double-quoted attribute contexts (title="…" / aria-label="…").
+
+// Minimal HTML escaper for i18n-derived strings rendered via innerHTML (批7).
+export function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Attribute-context escaper: escHtml + quotes, so a future copy line with
+// quoted speech can't break out of a title="…" / aria-label="…" value.
+export function escAttr(s: string): string {
+  return escHtml(s).replace(/"/g, '&quot;');
+}
+
 export function dst(x1: number, y1: number, x2: number, y2: number): number {
   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 }

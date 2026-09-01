@@ -2,7 +2,7 @@
 import type { Trap, Item } from './types.js';
 import { G, lang, eventOpen, eventActions, setEventOpen, setEventActions } from './state.js';
 import { MH, MW, TL } from './config.js';
-import { rng, pick, dst } from './utils.js';
+import { rng, pick, dst, escHtml } from './utils.js';
 import { snd } from './audio.js';
 import { flt, shake } from './effects.js';
 import { fxAura } from './fx.js';
@@ -33,10 +33,6 @@ export function merchantPrice(): number {
   if (!G) return 30;
   return 30 + (G.floor - 1) * 8 + Math.floor(G.player.turns / 12) * 3;
 }
-
-// Same escape combat.ts uses for the death screen — the echo popup injects the
-// saved epitaph (localStorage text) into innerHTML, so it must not break out.
-const escHtml = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export function showEvent(type: string): void {
   const popup = document.getElementById('event-popup')!;
@@ -195,6 +191,10 @@ export function checkTiles(): void {
       G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
     } else {
       // Batch10 A3: the shrine offers a choice — clean blessing, or a dark pact.
+      // 批11 D1: closing the popup WITHOUT choosing (ESC/overlay_close →
+      // closeEvent) consumes nothing — the tile stays SHRINE and is re-steppable
+      // (deliberate, same no-consume-on-leave precedent as the batch9 ④ merchants);
+      // only the two choices consume it (bless() writes FLOOR).
       const popup = document.getElementById('event-popup')!;
       document.getElementById('ev-title')!.textContent = t('up.ancientShrine');
       document.getElementById('ev-desc')!.textContent = t('sh.choice');
@@ -522,6 +522,8 @@ export function openEchoEvent(entity: Item): void {
   const popup = document.getElementById('event-popup')!;
   document.getElementById('ev-title')!.textContent = t('ev.echoTitle');
   document.getElementById('ev-desc')!.innerHTML =
+    // Same escape combat.ts uses for the death screen — the echo popup injects the
+    // saved epitaph (localStorage text) into innerHTML, so it must not break out.
     `<div class="ep-line">${escHtml(rec.epitaph.template)}</div><div class="ep-flavor">${escHtml(rec.epitaph.flavor)}</div>`;
   const hasK = !!rec.keepsake;
   document.getElementById('ev-buttons')!.innerHTML =

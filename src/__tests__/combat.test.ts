@@ -9,7 +9,12 @@ vi.mock('../state.js', () => ({
   setGameState: () => {},
 }));
 vi.mock('../config.js', () => ({ FINAL: 40 }));
-vi.mock('../utils.js', () => ({ rng: () => 0, dst: () => 1 }));
+// 批11 C: escHtml moved into utils.ts — spread the real module (same pattern as
+// batch9-hotbar.test.ts) so the death-epitaph render keeps the real escaper.
+vi.mock('../utils.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../utils.js')>();
+  return { ...actual, rng: () => 0, dst: () => 1 };
+});
 vi.mock('../audio.js', () => ({ snd: () => {}, setBgmScene: () => {} }));
 vi.mock('../effects.js', () => ({ flt: () => {}, shake: () => {} }));
 vi.mock('../fx.js', () => ({ fxFlash: () => {}, fxBurst: () => {} }));

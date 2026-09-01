@@ -125,16 +125,16 @@ canvas#game-canvas{image-rendering:pixelated;transition:transform .05s,opacity .
 .panel{background:linear-gradient(180deg,#1c1c30 0%,#16162a 100%);border:1px solid var(--border-bright);border-top:2px solid var(--accent-red);padding:22px;min-width:500px;max-width:620px;max-height:80vh;overflow-y:auto;border-radius:var(--radius-md);zoom:var(--ui-zoom,1);box-shadow:var(--shadow-panel),0 0 40px rgba(0,0,0,0.8),0 0 1px rgba(230,57,70,0.15)}
 .panel h2{color:var(--accent-red);margin-bottom:12px;font-size:1.4em;letter-spacing:2px;text-shadow:0 0 10px #e6394633}
 .is{margin:10px 0}.is h4{color:var(--text-secondary);margin-bottom:6px;font-size:var(--fs-sm);letter-spacing:.05em;border-bottom:1px solid var(--border-default);padding-bottom:3px}
-.ii{padding:5px 8px;margin:2px 0;cursor:pointer;border:1px solid transparent;border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center;transition:all .15s}
+.ii{padding:5px 8px;margin:2px 0;cursor:pointer;border:1px solid transparent;border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center}
 .ii:hover{border-color:var(--accent-red-dim);background:#ffffff08}
 .ii .id{color:var(--text-secondary);font-size:var(--fs-base)}.ii .ik{color:#e6394688;font-size:var(--fs-sm);min-width:20px}
 .rc0{color:#c0c0c0}.rc1{color:var(--accent-green);border-left:2px solid var(--accent-green)}.rc2{color:var(--accent-blue);border-left:3px solid var(--accent-blue)}.rc3{color:var(--accent-purple);border-left:4px solid var(--accent-purple)}.rc4{color:var(--accent-gold);border:2px solid var(--accent-gold);text-shadow:0 0 6px #ffd70044;background:linear-gradient(110deg,transparent 30%,rgba(255,215,0,0.04) 50%,transparent 70%);background-size:200% 100%;animation:legendary-shimmer 3s ease-in-out infinite}
 @keyframes legendary-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.close-btn{float:right;background:none;border:1px solid var(--accent-red);color:var(--accent-red);padding:4px 12px;cursor:pointer;font-family:inherit;border-radius:var(--radius-sm);transition:all .15s}
+.close-btn{float:right;background:none;border:1px solid var(--accent-red);color:var(--accent-red);padding:4px 12px;cursor:pointer;font-family:inherit;border-radius:var(--radius-sm)}
 .close-btn:hover{background:#e6394622;box-shadow:var(--shadow-glow-red)}
 #help-panel{min-width:400px}#help-panel table{width:100%;border-collapse:collapse;margin:10px 0}
 #help-panel td{padding:3px 8px}#help-panel td:first-child{color:var(--accent-red);white-space:nowrap}
-.sk-row{padding:8px;margin:4px 0;border:1px solid var(--border-default);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
+.sk-row{padding:8px;margin:4px 0;border:1px solid var(--border-default);border-radius:var(--radius-sm);cursor:pointer}
 .sk-row:hover{border-color:#4895ef88;background:#ffffff05}
 .sk-row .skn{color:var(--accent-blue);font-weight:bold}.sk-row .skc{color:var(--accent-gold);font-size:.85em}
 .sk-row .skd{color:var(--text-secondary);font-size:.85em;margin-top:3px}.sk-row .skcd{color:var(--accent-red);font-size:.85em}
@@ -279,7 +279,7 @@ canvas.lic,canvas.hic{width:22px;height:22px;image-rendering:pixelated;vertical-
 #sidebar-footer{border-top:1px solid var(--border-default);margin-top:6px;padding-top:6px;display:flex;flex-direction:column;gap:4px}
 .sb-frow{display:flex;gap:6px}
 .sb-frow .sb-btn{flex:1}
-.sb-btn{flex:1;background:var(--bg-card);border:1px solid var(--border-default);color:var(--text-secondary);padding:5px 0;min-height:44px;cursor:pointer;font-family:inherit;font-size:var(--fs-sm);border-radius:var(--radius-sm);text-align:center;transition:all .15s}
+.sb-btn{flex:1;background:var(--bg-card);border:1px solid var(--border-default);color:var(--text-secondary);padding:5px 0;min-height:44px;cursor:pointer;font-family:inherit;font-size:var(--fs-sm);border-radius:var(--radius-sm);text-align:center}
 .sb-btn:hover{border-color:var(--accent-red-dim);color:var(--accent-red)}
 .sb-btn.active{color:var(--accent-green);border-color:#06d6a044}
 .sb-options{background:#e6394615!important;border-color:var(--accent-red)!important;color:var(--accent-red)!important;font-weight:bold}
@@ -437,9 +437,23 @@ body.hc .hb-slot.empty:hover{background:#1a1a2e}
 .death-wardens .epw-row{display:inline-block;margin:2px 10px 2px 0;color:#756f8f}
 
 /* ===== 批9: UI 温和精修 — unified control feedback ===== */
+/* 批11 E: the four legacy rules .ii/.sk-row/.sb-btn/.close-btn carried an
+      unconditional `transition:all .15s` — for system reduced-motion users they
+      kept animating (the ③ gate below only swaps transitions when the system
+      allows motion). Moved under the same gate; duration/easing untouched, the
+      animated properties (colors/borders) stay unconditional in their rules.
+      Placed BEFORE ③ so .sb-btn/.close-btn (also listed in ③) still end up with
+      ③'s token transition by source order, exactly as before. */
+@media (prefers-reduced-motion: no-preference){
+  .ii,.sk-row,.sb-btn,.close-btn{transition:all .15s}
+}
 /* ③ One fast token transition for the button family. Wrapped in prefers-reduced-motion:
-      no-preference so system-pref users keep the pre-existing static states (or the
-      body.reduced-motion sweep above, which wins on specificity for its targets).
+      no-preference — matching systems get this token list (it wins by source order
+      over a selector's own transition). System reduced-motion users go static only
+      where a rule was moved under the gate (批11 E block above); legacy
+      `transition:all .15s` rules still outside it (e.g. .evb, .hb-slot, .talent-cell,
+      .forge-upgrade, .toggle .track) keep animating for them. The body.reduced-motion
+      sweep above covers the manual toggle for its targets.
       .menu-btn is deliberately excluded — its hover animates transform via transition:all .3s. */
 @media (prefers-reduced-motion: no-preference){
   .sb-btn,.mc-btn,#keys-toggle,#opt-reset,.kb-rebind,.kb-reset,.forge-tab,.close-btn,.evb,.fu-buy,.tb,#lang-btn,.seg button,.inv-act{

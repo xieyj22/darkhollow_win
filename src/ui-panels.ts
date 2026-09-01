@@ -3,7 +3,7 @@
 // Pure relocation — function bodies verbatim.
 import { G, lang, legendVisible, setLegendVisible, keysVisible, setKeysVisible, setMenuOpen } from './state.js';
 import { TS, MW, MH, TL } from './config.js';
-import { dst } from './utils.js';
+import { dst, escAttr } from './utils.js';
 import { RARITY_C, rareName, t, tx } from './i18n.js';
 import { paintIcon, paintItemIcon, paintRelicIcon, catalogSpriteColor } from './sprites.js';
 import type { Enemy, Item, Trap, ItemType } from './types.js';
@@ -12,11 +12,6 @@ import { CLASSES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ALL_POTIONS, ALL_SCR
 import { LORE_ENTRIES, LORE_CATS } from './lore.js';
 import { bridge } from './bridge.js';
 import { clearGpFocus } from './focus-nav.js';
-
-// 批7 review M2: attribute-context escaping for the new title="…" tooltips —
-// escHtml + quotes, so a future copy line with quoted speech can't break out.
-const escAttr = (s: string): string =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // ===== Legend toggle =====
 export function toggleLegend(): void {

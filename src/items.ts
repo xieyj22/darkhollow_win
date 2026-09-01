@@ -2,7 +2,7 @@
 import type { Item } from './types.js';
 import { G, lang } from './state.js';
 import { MH, MW, TL, getMaxInv, getMaxConsInv, getGearInvMax } from './config.js';
-import { rng, pick, dst, clamp } from './utils.js';
+import { rng, pick, dst, clamp, escAttr } from './utils.js';
 import { snd } from './audio.js';
 import { flt, shake, burstSmoke } from './effects.js';
 import { fxBeam, fxBolt, fxBurst, fxFlash, fxAura } from './fx.js';
@@ -269,11 +269,6 @@ export function quickRead(): void {
 }
 
 // --- Hotbar ---
-
-// Attribute-context escaping for aria-label="name: desc" (same shape as the
-// private helper in ui-panels.ts — batch7 M2 pattern; i18n.ts exports none).
-const escAttr = (s: string): string =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // Sync the persistent name plate from the CURRENT focused slot. Everything is
 // late-bound (querySelector / activeElement / live G import) so one long-lived

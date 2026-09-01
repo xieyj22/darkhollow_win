@@ -3,7 +3,7 @@ import type { Enemy, Combatant, Element, Item, SoulEchoBreakdown, Player } from 
 import { G, lang, eventOpen } from './state.js';
 import { clearCloudSave } from './cloud-sync.js';
 import { FINAL } from './config.js';
-import { rng, dst } from './utils.js';
+import { rng, dst, escHtml } from './utils.js';
 import { snd, setBgmScene } from './audio.js';
 import { flt, shake } from './effects.js';
 import { fxFlash, fxBurst, fxAura } from './fx.js';
@@ -26,9 +26,6 @@ import { calculateSoulEchoes, updateRunStats, persistAchievement, renderEchoBrea
 import { queueMechanicIntro, resetIntros } from './item-intro.js';
 import { buildEpitaph, quoteFlavor, type DeathCause } from './epitaph.js';
 import { bridge } from './bridge.js';
-
-// 批7: minimal HTML escaper for i18n-derived strings rendered via innerHTML.
-const escHtml = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // Late-bound dependency to break circular import with items.ts
 let _genItem: ((floor: number) => any) | null = null;

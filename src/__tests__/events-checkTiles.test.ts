@@ -69,9 +69,11 @@ describe('② fountain cleanses corruption', () => {
 
 describe('② shrine cleanses corruption', () => {
   it('corruption>0: blessing fires + applyCorruption(-20)', () => {
-    // Pin the roll ABOVE the batch2 ⑨ 20% powerful-blessing gate so this test
-    // exercises the classic 3-way roll path deterministically (an unpinned run
-    // flakes ~20%: the blessing branch returns early, skipping the -20 cleanse).
+    // Determinism: the 3-way blessing roll is pinned by the preamble's utils
+    // mock (rng() => 1 → the atk branch fires and always reaches the -20
+    // cleanse). The Math.random spy below is a leftover from the long-removed
+    // 20% powerful-blessing gate — nothing on this path reads it anymore; kept
+    // as a harmless belt-and-braces pin.
     const roll = vi.spyOn(Math, 'random').mockReturnValue(0.5);
     (globalThis as any).G = mkG(TL.SHRINE, 30);
     checkTiles();
