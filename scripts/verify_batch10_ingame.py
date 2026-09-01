@@ -3,7 +3,7 @@
 # server so page.evaluate can `import('/src/*.ts')` and reach the SAME live
 # module instances the game loop uses (same-instance ESM injection dodges the
 # HMR '?t=' second-instance trap). Zero console errors enforced (favicon 404
-# whitelisted). Four independently try/except'd assertion groups:
+# whitelisted). Six independently try/except'd assertion groups:
 #   G1 回响全环 (echo full loop): recordEcho a crafted snapshot (keepsake
 #      included) into dh_meta → real enterFloor(2) looping until the 35% gate
 #      fires NATURALLY (bounded 20 rolls; deterministic fallback pushes an
@@ -24,7 +24,24 @@
 #   G4 支付封锁 (payment block): corruption 85 → the r4 🩸 button (cost 20)
 #      is disabled + opacity .45 while the 💰 leg stays enabled; cost.ts leaf
 #      assertions (corruptionPriceOf(920)=20, 95-boundary inclusive).
-# Screenshots: smoke_out/batch10/{echo_popup,dual_shop}.png
+#   G5 无尽商人双腿 (endless merchant dual-price legs, batch11 F): crafted
+#      endless trader at floor 5 (stock pre-seeded → no re-roll) renders 11
+#      buttons — gear×3 + relic each a 💰/🩸 pair (🩸 9,9,9,22 per cost.ts),
+#      purge/heal gold-only single legs, leave with NO [11] prefix (keyTag
+#      drops numbering past 9); first gear 🩸 leg: corruption +9, gold
+#      unchanged, live ev.boughtCorrupt message (batch11 A), pair spliced
+#      (11 → 9 buttons); relic 💰 leg regression: gold -1000, corruption
+#      untouched; Leave closes the shop.
+#   G6 真死亡回响闭环 (real-death echo closed loop, batch11 F): REAL
+#      playerDeath on a live run (injected r4 weapon beats the r0 filler
+#      through pickKeepsake's real path) → recordEcho snapshot lands in
+#      dh_meta (newest first; cause/killer/floor/classIdx/corruption/ts/
+#      epitaph all captured); then the pool is trimmed to that record, a
+#      fresh run via the death screen's Try Again draws it at F2 (35% gate,
+#      bounded rolls + deterministic push fallback — G1 crib) and the popup
+#      carries this death's epitaph with the killer's name — the loop
+#      closes. The pre-G6 pool is restored afterwards (re-runnable).
+# Screenshots: smoke_out/batch10/{echo_popup,dual_shop,endless_shop}.png
 # Run: npm run dev -- --port 5173 --strictPort (FRESH server), then:
 #      python scripts/verify_batch10_ingame.py
 import io
@@ -87,6 +104,27 @@ def click_btn(page, selector):
         print(f"  (real click on {selector} failed -> DOM click fallback: {type(e).__name__}: {str(e)[:110]})")
         page.evaluate("sel => { const b = document.querySelector(sel); if (!b) throw new Error('no button: ' + sel); b.click(); }", selector)
         page.wait_for_timeout(60)
+
+
+# Quit the current run to the title screen through the REAL pause menu (ESC →
+# quit → confirm() auto-accepted by the dialog handler), so a following group
+# can start_game a fresh run (G4 leaves the event popup open + a live run).
+def quit_to_title(page):
+    close_popup(page)
+    page.keyboard.press('Escape')   # nothing open now -> input.ts falls through to openPause
+    page.wait_for_timeout(150)
+    click_btn(page, '#btn-pause-quit')
+    page.wait_for_timeout(400)
+    assert page.evaluate("document.getElementById('title-screen').style.display") == 'flex', 'did not return to title'
+
+
+# playerDeath leaves the death screen up — its Try Again button is the real-UI
+# entry into the char select (#btn-new sits on the hidden title screen behind).
+def restart_from_death(page):
+    click_btn(page, '#btn-try-again')
+    page.click('#start-btn')
+    page.wait_for_timeout(700)
+    assert page.evaluate("document.getElementById('game-container').style.display") == 'flex', 'game did not restart'
 
 
 # Push a fresh echo entity next to the player via the same literal shape
@@ -457,6 +495,228 @@ def main():
                   f"cBtn(dis={blocked['cBtn']['dis']}, op={blocked['cBtn']['op']}, txt={blocked['cBtn']['txt'][:36]}) goldBtn(dis={blocked['goldBtn']['dis']})")
 
         group(page, 'G4 支付封锁', g4)
+
+        # ---- G5  无尽商人双腿 -------------------------------------------------------
+        def g5():
+            quit_to_title(page)   # G4 leaves a live run + open popup -> fresh run
+            start_game(page)
+            prep = page.evaluate("""async () => {
+              const st = await import('/src/state.ts');
+              const ev = await import('/src/events.ts');
+              const meta = await import('/src/meta.ts');
+              const { t, tx } = await import('/src/i18n.ts');
+              const { RELICS } = await import('/src/data.ts');
+              st.G.floor = 5;   // pin: gear 5*80=400 -> 🩸9, relic 5*200=1000 -> 🩸22 (cost.ts leaf)
+              st.G.player.corruption = 0;
+              st.G.player.gold = 5000;
+              const mk = (name) => ({ type: 'weapon', name, ch: '↯', c: '#f4845f', desc: '+12 攻击',
+                                      rarity: 5, atk: 12, x: 0, y: 0 });
+              const g1 = mk('冒烟虚空刃·甲'), g2 = mk('冒烟虚空刃·乙'), g3 = mk('冒烟虚空刃·丙');
+              // pre-discover -> no first-pickup intro card over the shop (G2 crib)
+              meta.discoverItem('weapon:冒烟虚空刃·甲'); meta.discoverItem('weapon:冒烟虚空刃·乙');
+              meta.discoverItem('weapon:冒烟虚空刃·丙'); meta.discoverItem('relic:void_heart');
+              const rdef = RELICS.find(r => r.id === 'void_heart');
+              const stock = [
+                { kind: 'gear', item: g1, price: 400, label: g1.name, desc: g1.desc, ch: g1.ch },
+                { kind: 'gear', item: g2, price: 400, label: g2.name, desc: g2.desc, ch: g2.ch },
+                { kind: 'gear', item: g3, price: 400, label: g3.name, desc: g3.desc, ch: g3.ch },
+                { kind: 'relic', relicId: 'void_heart', price: 1000, label: rdef ? tx(rdef.n) : '虚空之心', desc: '', ch: rdef ? rdef.ch : '♥' },
+                { kind: 'purge', price: 200, label: '净化腐化', desc: '', ch: '🜔' },
+                { kind: 'heal', price: 150, label: '完全治疗', desc: '', ch: '❤' },
+              ];
+              const ent = { type: 'consumable', name: t('enm.entityName'), ch: '∞', c: '#9b5de5', desc: '',
+                            x: st.G.player.x, y: st.G.player.y, rarity: 5, npc: 'endless_merchant',
+                            spriteKind: 'MERCHANT_ENDLESS', stock };
+              window.__bt11shop = ent;
+              ev.triggerNpc(ent);   // stock pre-seeded -> no rollEndlessStock re-roll
+              return { btns: [...document.querySelectorAll('#ev-buttons .evb')].map(b => ({ txt: b.textContent, dis: b.disabled })),
+                       c: st.G.player.corruption, gold: st.G.player.gold,
+                       disp: document.getElementById('event-popup').style.display };
+            }""")
+            if not prep or prep.get('disp') != 'block':
+                check('G5 seed/endless shop opens', False, str(prep)[:200])
+                return
+            txt = [b['txt'] or '' for b in prep['btns']]
+            # pairs: g1/g2/g3 (400💰 / 🩸9) then relic (1000💰 / 🩸22), in DOM order
+            pairs_ok = all(f'-{p}💰' in txt[2 * i] and f'-🩸{c}' in txt[2 * i + 1]
+                           for i, (p, c) in enumerate([(400, 9), (400, 9), (400, 9), (1000, 22)]))
+            services_ok = '-200💰' in txt[8] and '🩸' not in txt[8] and '-150💰' in txt[9] and '🩸' not in txt[9]
+            check('G5a full stock: 11 buttons, gear×3+relic dual-leg pairs (🩸 9,9,9,22), purge/heal gold-only, leave without [11] prefix',
+                  len(prep['btns']) == 11 and pairs_ok and services_ok and '[11]' not in txt[10]
+                  and not any(b['dis'] for b in prep['btns']),
+                  ' | '.join(txt)[:150])
+            page.screenshot(path=os.path.join(OUT, 'endless_shop.png'))
+            # 🩸 leg of the FIRST gear (button 2): corruption +9, gold untouched,
+            # success message = live ev.boughtCorrupt (batch11 A), one PAIR spliced.
+            pre = page.evaluate("(async () => { const { G } = await import('/src/state.ts'); return { c: G.player.corruption, gold: G.player.gold, msgs: G.msgs.length }; })()")
+            click_btn(page, '#ev-buttons .evb:nth-child(2)')
+            page.wait_for_timeout(150)
+            bought = page.evaluate("""async () => {
+              const st = await import('/src/state.ts');
+              const i18n = await import('/src/i18n.ts');
+              const p = st.G.player;
+              return { c: p.corruption, gold: p.gold,
+                       held: p.inv.some(i => i.name === '冒烟虚空刃·甲') || Object.values(p.eq || {}).some(i => i && i.name === '冒烟虚空刃·甲'),
+                       msgs: st.G.msgs.slice(%d).map(m => m.text),
+                       expect: i18n.tMsg('ev.boughtCorrupt', '9'),
+                       stock: window.__bt11shop.stock.length,
+                       btns: document.querySelectorAll('#ev-buttons .evb').length,
+                       disp: document.getElementById('event-popup').style.display };
+            }""" % pre['msgs'])
+            check('G5b gear 🩸 leg: corruption +9, gold unchanged, boughtCorrupt message, pair spliced (11 -> 9 buttons)',
+                  bought['c'] == 9 and bought['gold'] == 5000 and bought['expect'] in bought['msgs']
+                  and bought['stock'] == 5 and bought['btns'] == 9 and bought['disp'] == 'block' and bought['held'],
+                  f"c={bought['c']} gold={bought['gold']} stock={bought['stock']} btns={bought['btns']} msgs={bought['msgs'][:2]}")
+            # relic 💰 leg (button 5 after the re-render): gold -1000, corruption untouched.
+            click_btn(page, '#ev-buttons .evb:nth-child(5)')
+            page.wait_for_timeout(150)
+            gold_leg = page.evaluate("""(async () => {
+              const st = await import('/src/state.ts');
+              const p = st.G.player;
+              return { c: p.corruption, gold: p.gold, relic: (p.relics || []).includes('void_heart'),
+                       stock: window.__bt11shop.stock.length,
+                       btns: document.querySelectorAll('#ev-buttons .evb').length,
+                       disp: document.getElementById('event-popup').style.display };
+            })()""")
+            check('G5c relic 💰 leg regression: gold -1000, corruption untouched, relic granted',
+                  gold_leg['gold'] == 4000 and gold_leg['c'] == 9 and gold_leg['relic']
+                  and gold_leg['stock'] == 4 and gold_leg['disp'] == 'block',
+                  f"gold 5000 -> {gold_leg['gold']} c={gold_leg['c']} relic={gold_leg['relic']} stock={gold_leg['stock']} btns={gold_leg['btns']}")
+            click_btn(page, '#ev-buttons .evb:nth-child(%d)' % gold_leg['btns'])   # Leave
+            page.wait_for_timeout(150)
+            closed = page.evaluate("document.getElementById('event-popup').style.display")
+            check('G5 teardown Leave closes the endless shop (no dangling state)',
+                  closed == 'none', f"disp={closed}")
+
+        group(page, 'G5 无尽商人双腿', g5)
+
+        # ---- G6  真死亡回响闭环 -----------------------------------------------------
+        def g6():
+            quit_to_title(page)   # fresh run: playerDeath must fire on a real, live one
+            start_game(page)
+            death = page.evaluate("""async () => {
+              const st = await import('/src/state.ts');
+              const meta = await import('/src/meta.ts');
+              const combat = await import('/src/combat.ts');
+              const g = st.G, p = g.player;
+              const before = (meta.getMeta().echoes || []).slice();   // pool snapshot — restored at the end
+              window.__bt11pool = before;
+              // Keepsake rig: r4 weapon + r0 filler -> pickKeepsake deterministically
+              // picks the weapon through the REAL death path (pool = inv + eq slots).
+              p.inv.push({ type: 'weapon', name: '验尸剑', ch: '†', c: '#ffd700', desc: 'battery keepsake (high)',
+                           rarity: 4, atk: 9, x: 0, y: 0 });
+              p.inv.push({ type: 'armor', name: '验尸布袍', ch: '[', c: '#9b9b9b', desc: 'battery keepsake (low)',
+                           rarity: 0, def: 1, x: 0, y: 0 });
+              p.corruption = 33;   // distinctive: the record must snapshot the live value
+              const pre = { floor: g.floor, ci: p.ci, c: p.corruption, turns: p.turns };
+              combat.playerDeath('闭环验证者', 'combat');   // the REAL death path (combat.ts:429)
+              const m = JSON.parse(localStorage.getItem('dh_meta') || '{}');
+              return { pre, beforeLen: before.length, before0: before[0] || null,
+                       rec: (m.echoes || [])[0] || null, next: (m.echoes || [])[1] || null,
+                       nowMs: Date.now(), deathScreen: document.getElementById('death-screen').style.display };
+            }""")
+            if not death or not death.get('rec'):
+                check('G6 real playerDeath wrote an echo record', False, str(death)[:200])
+                return
+            rec, pre = death['rec'], death['pre']
+            ep = rec.get('epitaph') or {}
+            newest_ok = death['beforeLen'] == 0 or death['next'] == death['before0']
+            check('G6a real playerDeath -> recordEcho to dh_meta: newest first (echoes[0]), cause/killer/floor/classIdx/corruption snapshot, ts fresh, epitaph filled',
+                  rec.get('cause') == 'combat' and rec.get('killer') == '闭环验证者'
+                  and rec.get('floor') == pre['floor'] and rec.get('classIdx') == pre['ci']
+                  and rec.get('corruption') == pre['c'] and abs(death['nowMs'] - rec.get('ts', 0)) < 120000
+                  and isinstance(ep.get('template'), str) and ep.get('template')
+                  and isinstance(ep.get('flavor'), str) and ep.get('flavor')
+                  and newest_ok and death['deathScreen'] == 'flex',
+                  f"killer={rec.get('killer')} floor={rec.get('floor')}/{pre['floor']} ci={rec.get('classIdx')}/{pre['ci']} "
+                  f"c={rec.get('corruption')}/{pre['c']} tsΔ={death['nowMs'] - rec.get('ts', 0)}ms beforeLen={death['beforeLen']}")
+            ks = rec.get('keepsake') or {}
+            check('G6b pickKeepsake real path picked the highest-rarity injected piece (验尸剑 r4 over the r0 filler)',
+                  ks.get('name') == '验尸剑' and ks.get('rarity') == 4,
+                  f"keepsake={ks.get('name')} rarity={ks.get('rarity')}")
+            # Closed loop, second half: trim the pool to exactly this record (determinism),
+            # start a NEW run through the real death-screen UI, draw the echo at F2
+            # (35% gate, bounded 20 rolls + deterministic push fallback — G1 crib),
+            # step on it: THIS run's epitaph greets the next run.
+            page.evaluate("""async () => {
+              const meta = await import('/src/meta.ts');
+              const m = meta.getMeta();
+              const rec = m.echoes[0];
+              window.__bt11rec = rec;
+              meta.saveMeta({ ...m, echoes: [rec] });
+            }""")
+            restart_from_death(page)
+            seed = page.evaluate("""async () => {
+              const st = await import('/src/state.ts');
+              const cfg = await import('/src/config.ts');
+              const game = await import('/src/game.ts');
+              const { t } = await import('/src/i18n.ts');
+              const g = st.G;
+              const rec = window.__bt11rec;
+              let natural = null, rolls = 0;
+              for (let i = 0; i < 20 && !natural; i++) {
+                game.enterFloor(2, true); rolls++;
+                natural = g.items.find(it => it.npc === 'echo' && it.echo) || null;
+              }
+              let ent = natural;
+              if (!ent) {
+                const p = g.player;
+                let spot = null;
+                for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                  const x = p.x + dx, y = p.y + dy;
+                  if (x < 0 || y < 0 || x >= cfg.MW || y >= cfg.MH) continue;
+                  if (g.dungeon.map[y][x] !== cfg.TL.FLOOR) continue;
+                  if (g.items.some(i => i.x === x && i.y === y)) continue;
+                  spot = { x, y }; break;
+                }
+                if (!spot) return { ok: false, why: 'no clean neighbor for the fallback push' };
+                ent = { type: 'consumable', name: t('ev.echoTitle'), ch: 'Ω', c: '#9d8df1', desc: '',
+                        x: spot.x, y: spot.y, rarity: 2, npc: 'echo', echo: rec, spriteKind: 'ECHO' };
+                g.items.push(ent);
+              }
+              g.enemies = []; g.traps = [];
+              g.dungeon.map[ent.y][ent.x] = cfg.TL.FLOOR;
+              g.items = g.items.filter(i => !(i.x === ent.x && i.y === ent.y && !i.npc));
+              let stand = null;
+              for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                const x = ent.x + dx, y = ent.y + dy;
+                if (x < 0 || y < 0 || x >= cfg.MW || y >= cfg.MH) continue;
+                if (g.dungeon.map[y][x] !== cfg.TL.FLOOR) continue;
+                stand = { x, y }; break;
+              }
+              if (!stand) return { ok: false, why: 'echo has no walkable neighbor' };
+              g.player.x = stand.x; g.player.y = stand.y;
+              return { ok: true, natural: !!natural, rolls,
+                       dx: ent.x - stand.x, dy: ent.y - stand.y,
+                       floor: g.floor, tpl: rec.epitaph.template };
+            }""")
+            if not seed or not seed.get('ok'):
+                check('G6c echo spawn seed (35% gate, bounded rolls + fallback)', False, str(seed))
+            else:
+                page.evaluate("async () => { const { movePlayer } = await import('/src/player.ts'); movePlayer(%d, %d); }" % (seed['dx'], seed['dy']))
+                page.wait_for_timeout(150)
+                pop = page.evaluate("""(() => ({
+                  disp: document.getElementById('event-popup').style.display,
+                  title: document.getElementById('ev-title').textContent,
+                  desc: document.getElementById('ev-desc').textContent,
+                }))()""")
+                title_ok = '回响' in pop['title'] or 'Echo of the Fallen' in pop['title']
+                check('G6c closed loop: the NEXT run meets this death on the map — popup carries the real epitaph (killer on screen)',
+                      pop['disp'] == 'block' and title_ok and '闭环验证者' in pop['desc'] and seed['tpl'] in pop['desc']
+                      and seed['floor'] == 2,
+                      f"disp={pop['disp']} title={pop['title']} natural={seed['natural']} rolls={seed['rolls']} desc={pop['desc'][:44]}")
+            # Restore the pre-G6 pool — G1's crafted records stay, this group leaves
+            # no trace (the script must be re-runnable with identical state).
+            restored = page.evaluate("""async () => {
+              const meta = await import('/src/meta.ts');
+              const m = meta.getMeta();
+              meta.saveMeta({ ...m, echoes: window.__bt11pool });
+              return (JSON.parse(localStorage.getItem('dh_meta') || '{}').echoes || []).length;
+            }""")
+            check('G6 teardown restores the pre-G6 echo pool (re-runnable, no pollution)',
+                  restored == death['beforeLen'], f"restored={restored} before={death['beforeLen']}")
+
+        group(page, 'G6 真死亡回响闭环', g6)
 
         browser.close()
 
