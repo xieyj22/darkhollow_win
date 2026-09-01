@@ -57,4 +57,24 @@ describe('批11 B DOM 委托 tooltip 第三 anchor', () => {
     expect(tt().style.display).toBe('none');
     expect(tt().innerHTML).toBe('');
   });
+  // final-review rider: 上面对称锁了"焦点元素被吞 → 隐藏";这里锁 focusin 侧的
+  // ttDomEl = null 所有权切换 —— 焦点 tooltip 存活期间,旧 DOM 行(hotbar .hb-slot)
+  // 被重渲染吞掉绝不能隐藏它。该结果当且仅当 focusin 真的清了 ttDomEl 才成立
+  // (否则 validateTooltip 走 ttDomEl 的 document.contains 分支误隐焦点 tooltip)。
+  it('所有权切换(focusin 侧): hotbar mouseover 后 focusin 接管;旧 DOM 行被移除(焦点元素仍在)后 validateTooltip 不隐藏', () => {
+    const slot = document.querySelector<HTMLElement>('.hb-slot')!;
+    slot.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, clientX: 10, clientY: 10 }));
+    expect(tt().style.display).toBe('block');
+    expect(tt().innerHTML).toContain('宝石'); // DOM tooltip 确实显示过(ttDomEl = slot)
+    const btn = document.createElement('button');
+    btn.title = '焦点说明';
+    document.body.appendChild(btn);
+    btn.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(tt().style.display).toBe('block'); // focus 接管,tooltip 仍显示
+    expect(tt().innerHTML).toContain('焦点说明');
+    slot.remove(); // 模拟 renderHotbar 重渲染吞掉旧 .hb-slot 行;焦点元素仍在文档中
+    validateTooltip();
+    expect(tt().style.display).toBe('block'); // 若 focusin 未清 ttDomEl,这里会被误隐
+    expect(tt().innerHTML).toContain('焦点说明');
+  });
 });

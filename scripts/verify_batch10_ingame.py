@@ -17,7 +17,9 @@
 #   G2 宝藏双价签 (dual price tags): crafted treasure merchant at floor 5
 #      renders 💰 AND 🩸 legs per item (-460💰/-🩸10 for r3, -920💰/-🩸20 for
 #      r4); corruption purchase: corruption +10, gold byte-unchanged, stock
-#      spliced; gold leg regression: gold -920, corruption untouched.
+#      spliced, LIVE ev.boughtCorrupt('10') message lock (batch11 A, G5b
+#      crib); gold leg regression: gold -920, corruption untouched, keeps the
+#      ORIGINAL ev.boughtTreasure(name, 920) message (exact-element diff).
 #   G3 神龛暗黑契约 (shrine dark pact): corruption-0 player steps a SHRINE
 #      tile → two-choice popup → [2] dark pact → baseAtk +4 (baseDef +4,
 #      baseMaxHp +20) and corruption 15.
@@ -379,36 +381,55 @@ def main():
                   btn_txt[:120])
             page.screenshot(path=os.path.join(OUT, 'dual_shop.png'))
             # 🩸 purchase (r3): corruption +10, gold byte-unchanged, stock spliced.
+            # msgs snapshot BEFORE the click (G5b crib) — the message lock below
+            # diffs the slice added by this purchase only.
+            pre_b = page.evaluate("(async () => { const { G } = await import('/src/state.ts'); return G.msgs.length; })()")
             click_btn(page, '#ev-buttons .evb:nth-child(2)')
             page.wait_for_timeout(150)
             bought = page.evaluate("""(async () => {
               const st = await import('/src/state.ts');
+              const i18n = await import('/src/i18n.ts');
               const ent = window.__bt10shop;
               const p = st.G.player;
               const it = window.__bt10r3;   // the pre-splice stock identity
               const held = p.inv.includes(it) || Object.values(p.eq || {}).includes(it);
               return { c: p.corruption, gold: p.gold, stock: ent.stock.length, held,
                        disp: document.getElementById('event-popup').style.display,
-                       btns: document.querySelectorAll('#ev-buttons .evb').length };
-            })()""")
+                       btns: document.querySelectorAll('#ev-buttons .evb').length,
+                       msgs: st.G.msgs.slice(%d).map(m => m.text),
+                       expect: i18n.tMsg('ev.boughtCorrupt', '10') };
+            })()""" % pre_b)
             check('G2b 🩸 purchase: corruption +10, gold unchanged, stock spliced, item held, popup re-rendered',
                   bought['c'] == 10 and bought['gold'] == 2000 and bought['stock'] == 1 and bought['held']
                   and bought['disp'] == 'block' and bought['btns'] == 3,
                   f"corruption={bought['c']} gold={bought['gold']} stock={bought['stock']} held={bought['held']} btns={bought['btns']} disp={bought['disp']}")
+            check('G2b2 🩸 leg success message = LIVE ev.boughtCorrupt with the 🩸 figure 10 (batch11 A lock; gold figure would fail)',
+                  bought['expect'] in bought['msgs'],
+                  f"msgs={bought['msgs'][:2]}")
             # 💰 leg regression (r4 at 920): gold -920, corruption untouched.
+            # Message lock mirrors G5b: the gold leg keeps its ORIGINAL
+            # ev.boughtTreasure(name, price) message — batch11 A must have
+            # touched only the corruption leg.
+            pre_g = page.evaluate("(async () => { const { G } = await import('/src/state.ts'); return G.msgs.length; })()")
             click_btn(page, '#ev-buttons .evb:nth-child(1)')
             page.wait_for_timeout(150)
             gold_leg = page.evaluate("""(async () => {
               const st = await import('/src/state.ts');
+              const i18n = await import('/src/i18n.ts');
               const ent = window.__bt10shop;
               const p = st.G.player;
               return { c: p.corruption, gold: p.gold, stock: ent.stock.length,
                        held: p.inv.some(i => i.name === '冒烟神刃') || Object.values(p.eq || {}).some(i => i && i.name === '冒烟神刃'),
-                       disp: document.getElementById('event-popup').style.display };
-            })()""")
+                       disp: document.getElementById('event-popup').style.display,
+                       msgs: st.G.msgs.slice(%d).map(m => m.text),
+                       expect: i18n.tMsg('ev.boughtTreasure', '冒烟神刃', '920') };
+            })()""" % pre_g)
             check('G2c 💰 leg regression: gold -920, corruption untouched, sold-out shop closes',
                   gold_leg['gold'] == 1080 and gold_leg['c'] == 10 and gold_leg['stock'] == 0 and gold_leg['held'] and gold_leg['disp'] == 'none',
                   f"gold=2000 -> {gold_leg['gold']} corruption={gold_leg['c']} stock={gold_leg['stock']} held={gold_leg['held']} disp={gold_leg['disp']}")
+            check('G2c2 💰 leg keeps the ORIGINAL gold message: LIVE ev.boughtTreasure(冒烟神刃, 920) in its msgs diff',
+                  gold_leg['expect'] in gold_leg['msgs'],
+                  f"msgs={gold_leg['msgs'][:3]}")
 
         group(page, 'G2 宝藏双价签', g2)
 
