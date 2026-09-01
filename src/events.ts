@@ -524,10 +524,23 @@ export function openEchoEvent(entity: Item): void {
     `<button class="evb" data-ea="0">[1] ${hasK ? tMsg('ev.echoLoot', String(rec.keepsake!.name)) : t('ev.echoLootEmpty')}</button>` +
     `<button class="evb" data-ea="1">[2] ${t('ev.echoPurify')}</button>` +
     `<button class="evb" data-ea="2">[3] ${t('ev.echoInherit')}</button>`;
+  // 终审 I1: 掠夺是本批唯一未过 95 硬线的腐化入账口（addCorruption 直调只 clamp
+  // 不判死，100 会留下活着的守渊人档）——同商店腐化价签双门：渲染时置灰 +
+  // 闭包复验（键盘数字键绕过 disabled 按钮直达闭包）；超度/继承不受限，
+  // 是被封锁玩家的脱困出口。
+  if (!canPayCorruption(G.player.corruption, hasK ? 10 : 5)) {
+    const lootBtn = document.querySelector<HTMLButtonElement>('#ev-buttons .evb[data-ea="0"]');
+    if (lootBtn) { lootBtn.disabled = true; lootBtn.style.opacity = '.45'; lootBtn.title = t('ev.tooCorrupted'); }
+  }
   const actions: Array<() => void> = [
-    () => {   // 掠夺：吃进腐化，取遗物；无遗物降级为残渣
-      if (rec.keepsake) { addCorruption(p, 10); addItemWithOverflow(rec.keepsake); }
-      else { addCorruption(p, 5); p.gold += 50; }
+    () => {   // 掠夺：吃进腐化，取遗物；无遗物降级为残渣（95 硬线复验，未过不关弹窗）
+      if (rec.keepsake) {
+        if (!canPayCorruption(p.corruption, 10)) { addMsg(t('ev.tooCorrupted'), 'mi'); return; }
+        addCorruption(p, 10); addItemWithOverflow(rec.keepsake);
+      } else {
+        if (!canPayCorruption(p.corruption, 5)) { addMsg(t('ev.tooCorrupted'), 'mi'); return; }
+        addCorruption(p, 5); p.gold += 50;
+      }
       addMsg(t('ev.echoLootDone'), 'mi'); closeEvent(); updateUI();
     },
     () => {   // 超度：负向走正门（修正链对负增量本就不作用），回血 40%

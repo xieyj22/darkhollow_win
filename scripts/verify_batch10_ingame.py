@@ -11,7 +11,9 @@
 #      it → popup with the epitaph → all three interactions on fresh echoes:
 #      掠夺 (+10🩸 + keepsake lands in inv), 超度 (-10🩸 + 40% maxHp heal),
 #      继承 (dh_meta soulEchoes +30) — plus the keepsake-less 掠夺 fallback
-#      (+5🩸 +50💰).
+#      (+5🩸 +50💰), and the 95-hard-line block (final-review I1): corruption
+#      pinned 90 → loot rendered disabled+dimmed, attempt changes nothing and
+#      the popup stays open; 超度 is the escape.
 #   G2 宝藏双价签 (dual price tags): crafted treasure merchant at floor 5
 #      renders 💰 AND 🩸 legs per item (-460💰/-🩸10 for r3, -920💰/-🩸20 for
 #      r4); corruption purchase: corruption +10, gold byte-unchanged, stock
@@ -231,6 +233,38 @@ def main():
             check('G1d 掠夺: corruption +10 and the keepsake lands in inv',
                   post['c'] == 22 and post['hasK'] and post['disp'] == 'none',
                   f"corruption {pre['c']} -> {post['c']} hasK={post['hasK']} disp={post['disp']}")
+            # --- 掠夺 blocked by the 95 hard line (final-review I1): pin 90, the
+            # loot button renders disabled+dimmed; the digit key '1' (input.ts
+            # dispatches eventActions[0] past any disabled button) hits the
+            # closure re-validation — nothing changes, popup stays open; then
+            # 超度 (data-ea=1) works as the escape. ---
+            page.evaluate("async () => { window.__bt10rec2 = window.__bt10rec; }")
+            # Pin 90 BEFORE the step: the render-time disable is computed when
+            # the popup opens (90+10 > 95 hard line).
+            page.evaluate("(async () => { const { G } = await import('/src/state.ts'); G.player.corruption = 90; })()")
+            spot = page.evaluate(PLACE_ECHO)
+            page.evaluate("async () => { const { movePlayer } = await import('/src/player.ts'); movePlayer(%d, %d); }" % (spot['dx'], spot['dy']))
+            page.wait_for_timeout(150)
+            blocked = page.evaluate("""async () => {
+              const { G } = await import('/src/state.ts');
+              const b = document.querySelector('#ev-buttons .evb[data-ea="0"]');
+              return { c: G.player.corruption, invLen: G.player.inv.length,
+                       dis: b.disabled, op: b.style.opacity,
+                       disp: document.getElementById('event-popup').style.display };
+            }""")
+            page.keyboard.press('1')
+            page.wait_for_timeout(150)
+            post = page.evaluate("(async () => { const { G } = await import('/src/state.ts'); return { c: G.player.corruption, invLen: G.player.inv.length, disp: document.getElementById('event-popup').style.display }; })()")
+            check('G1d2 掠夺 blocked at the 95 line: rendered disabled+dimmed, digit-key attempt changes nothing, popup stays open',
+                  blocked['dis'] and blocked['op'] == '0.45' and post['c'] == 90
+                  and post['invLen'] == blocked['invLen'] and post['disp'] == 'block',
+                  f"disabled={blocked['dis']} opacity={blocked['op']} corruption {blocked['c']} -> {post['c']} inv {blocked['invLen']} -> {post['invLen']} disp={post['disp']}")
+            click_btn(page, '#ev-buttons .evb[data-ea="1"]')
+            page.wait_for_timeout(150)
+            esc = page.evaluate("(async () => { const { G } = await import('/src/state.ts'); return { c: G.player.corruption, disp: document.getElementById('event-popup').style.display }; })()")
+            check('G1d3 超度 is the escape from the blocked loot: corruption -10 and the popup closes',
+                  esc['c'] == 80 and esc['disp'] == 'none',
+                  f"corruption 90 -> {esc['c']} disp={esc['disp']}")
             # --- 超度 (purify): -10 corruption + 40% maxHp heal ---
             page.evaluate("async () => { window.__bt10rec2 = window.__bt10rec; }")
             spot = page.evaluate(PLACE_ECHO)

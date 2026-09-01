@@ -71,6 +71,13 @@ describe('批10 B2 三交互（source-gate + 行为桩）', () => {
     expect(e).toContain('addCorruption(p, 5)');
     expect(e).toContain('50');
   });
+  it('掠夺过 95 硬线双门：闭包复验 + 渲染置灰（终审 I1，同商店腐化价签）', () => {
+    expect(e).toContain('canPayCorruption(p.corruption, 10)');
+    expect(e).toContain('canPayCorruption(p.corruption, 5)');
+    expect(e).toContain('canPayCorruption(G.player.corruption, hasK ? 10 : 5)');
+    expect(e).toContain('lootBtn.disabled = true');
+    expect(e).toContain("lootBtn.style.opacity = '.45'");
+  });
 });
 
 describe('批10 B2 T_ECHO 模板', () => {

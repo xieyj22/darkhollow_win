@@ -40,7 +40,7 @@ interface EchoRecord {
 
 - `game.ts` `enterFloor` 注入区：`floor >= 2 && Math.random() < 0.35 && getMeta().echoes.length` 时随机取一条，`placeEntity` 同型闭包 push `{ npc: 'echo', echo: <record快照>, spriteKind: 'ECHO', … }`。消费端零改动（`npcPersists('echo') === false` → 踩上即消耗，宝箱同款）。
 - `events.ts` `triggerNpc` 加分支 → `openEchoEvent(entity)`：弹窗标题=「回响」，desc=墓志铭 template + flavor；三动作（全部经 `addCorruption`/`applyCorruption(-n)` 正负各自正确入口）：
-  - **掠夺**：+10 腐化，keepsake 经 `addItemWithOverflow` 入包（null 则该动作降级为 +5 腐化换 50 金的残渣）
+  - **掠夺**：+10 腐化，keepsake 经 `addItemWithOverflow` 入包（null 则该动作降级为 +5 腐化换 50 金的残渣）。终审 I1 后过 `canPayCorruption` 95 硬线**双门**：渲染时按钮置灰（`disabled` + `.45` 透明度）+ 闭包内复验，被封锁时不关弹窗可改选超度/继承（终审裁定：95 线对全部腐化入账口 UNIVERSAL）
   - **超度**：`applyCorruption(-10)`（负向走正门，圣物/meta 修正链对负增量本就不作用），回复 40% maxHp
   - **继承**：`creditSoulEchoes(30)`（复用现成 meta 货币，零新机制）
 - `sprites.ts`：新 `T_ECHO` 模板 + 调色（批3c 模式，刻意**不进** THEME_PAL 承重墙）。
@@ -69,7 +69,7 @@ export function payCorruption(p: Player, cost: number): boolean {
 ### A2 双价签（宝藏 + endless 商人）
 
 - 两店每个 gear/relic 条目渲染**双买键**：`[n] 💰价` 与 `[n+1] 🩸corruptionPriceOf(价)`；`canPayCorruption` 不满足时腐化键禁用并提示（`ev.tooCorrupted`）。
-- 按钮预算：3 条目 ×2 + leave = 7 actions ≤ 9 键 ✓（endless purge/heal 维持金币单键）。
+- 按钮预算：宝藏 3 条目 ×2 + leave = **7 actions，全部带 1-9 数字键** ✓；endless 带 relic 时 = **11 actions**（3 gear ×2 + relic ×2 + purge + heal + leave），>9 的动作经 `keyTag` 省略数字前缀（4dbfcb8 裁定：不可按的假键标比缺键更糟），heal/leave 可经 鼠标点击 / Tab 焦点 / 手柄焦点 / ESC 到达。
 - 流浪商人/事件站**不加**双价签（保持廉价日常店定位，腐化消费集中在 premium 场景=回响/宝藏/endless/神龛）。
 - 数值锚：F5 宝藏 460/920 金 → 🩸10/20；endless F45 gear 3600 → 封顶 25。预算张力=离 50 锁线与 100 死亡线的距离，v1 不改腐化获取渠道（tunable 留给 playtest）。
 
@@ -126,7 +126,7 @@ Battery 新组（`verify_batch10_ingame.py`，crib 批9 脚本骨架）：①自
 - **购物致死**：`canPayCorruption` 95 硬线让支付永不触发 100 死亡；代价是极致黑契约玩家少 5 点可用额度（可调）。
 - **平衡面**：腐化价全表 tunable 常量集中在 `cost.ts`；v1 不动获取渠道，playtest 后再调。
 - **旧档/云兼容**：`echoes` 缺失字段迁移兜底；旧版本读新 `dh_meta` 会忽略未知字段（JSON 直读，无 schema 校验）——无害。
-- **popup 按钮数**：endless 双键后 7 actions，1-9 键内；手柄 `eventActions` 路径零改动。
+- **popup 按钮数**：宝藏 7 actions 全键内；endless 带 relic 11 actions，>9 经 `keyTag` 省略数字前缀，heal/leave 走 鼠标/Tab/手柄焦点/ESC；手柄 `eventActions` 路径零改动。
 - **回响实体进存档**：record 快照内嵌实体（不存 meta 索引，避免 cap 轮转漂移）；`dh_save` JSON 往返已由 stock 先例证明。
 
 ## Follow-ups
