@@ -334,6 +334,8 @@ export const L: Record<string, I18nText | I18nText[]> = {
   // Batch10 A2: dual price tags — corruption as a second currency at the premium shops.
   "ev.corruptPay": { en: "Pay in corruption", zh: "以腐化支付" },
   "ev.tooCorrupted": { en: "Your body cannot hold more corruption.", zh: "你的身体已容不下更多腐化。" },
+  // 批11 A: corruption purchases report the 🩸 price actually paid, never the gold figure.
+  "ev.boughtCorrupt": { en: "Bought with corruption — {} 🩸 settled into you.", zh: "以腐化购得——{} 🩸 沉进了你的身体。" },
   // Batch10 B: echo of a past run's death — loot/purify/inherit three-way choice.
   "ev.echoTitle": { en: "Echo of the Fallen", zh: "回响" },
   "ev.echoLoot": { en: "Loot the keepsake ({}) (+10🩸)", zh: "掠夺遗物（{}）(+10🩸)" },

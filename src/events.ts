@@ -384,14 +384,17 @@ function buyTreasure(entity: Item, idx: number, pay: 'gold' | 'corruption' = 'go
   const it = entity.stock[idx];
   if (!it) return;
   const price = treasurePrice(it);
+  // 批11 A: the success message must match the currency actually paid — the
+  // corruption leg reports the 🩸 price, not the gold figure.
   if (pay === 'corruption') {
     const cPrice = corruptionPriceOf(price);
     if (!payCorruption(G.player, cPrice)) { addMsg(t('ev.tooCorrupted'), 'mi'); return; }
+    addMsg(tMsg('ev.boughtCorrupt', String(cPrice)), 'me');
   } else {
     if (G.player.gold < price) { addMsg(t('merchantNoGold'), 'mi'); return; }
     G.player.gold -= price;
+    addMsg(tMsg('ev.boughtTreasure', String(it.name), String(price)), 'me');
   }
-  addMsg(tMsg('ev.boughtTreasure', String(it.name), String(price)), 'me');
   addItemWithOverflow(it);
   entity.stock.splice(idx, 1);
   snd('pickup');
@@ -480,8 +483,9 @@ function buyEndless(entity: Item, idx: number, pay: 'gold' | 'corruption' = 'gol
   const e = entries[idx];
   if (!e) return;
   // 批10 A2: 腐化支付只对 gear/relic 生效（purge/heal 恒走金币分支）。
-  if (pay === 'corruption' && (e.kind === 'gear' || e.kind === 'relic')) {
-    const cPrice = corruptionPriceOf(e.price);
+  // 批11 A: cPrice 结算后同时驱动成功消息——腐化腿报 🩸 价，不报金币数字。
+  const cPrice = pay === 'corruption' && (e.kind === 'gear' || e.kind === 'relic') ? corruptionPriceOf(e.price) : 0;
+  if (cPrice) {
     if (!payCorruption(G.player, cPrice)) { addMsg(t('ev.tooCorrupted'), 'mi'); return; }
   } else {
     if (G.player.gold < e.price) { addMsg(t('merchantNoGold'), 'mi'); return; }
@@ -489,10 +493,10 @@ function buyEndless(entity: Item, idx: number, pay: 'gold' | 'corruption' = 'gol
   }
   if (e.kind === 'gear' && e.item) {
     addItemWithOverflow(e.item);
-    addMsg(tMsg('enm.boughtGear', String(e.item.name), String(e.price)), 'me');
+    addMsg(cPrice ? tMsg('ev.boughtCorrupt', String(cPrice)) : tMsg('enm.boughtGear', String(e.item.name), String(e.price)), 'me');
   } else if (e.kind === 'relic' && e.relicId) {
     grantRelic(e.relicId, G.player.x, G.player.y);
-    addMsg(tMsg('enm.boughtRelic', String(e.label), String(e.price)), 'me');
+    addMsg(cPrice ? tMsg('ev.boughtCorrupt', String(cPrice)) : tMsg('enm.boughtRelic', String(e.label), String(e.price)), 'me');
   } else if (e.kind === 'purge') {
     applyCorruption(-20);
     addMsg(tMsg('enm.purged', String(e.price)), 'mh');
