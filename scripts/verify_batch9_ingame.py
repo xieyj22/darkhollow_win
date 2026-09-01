@@ -22,7 +22,9 @@
 #   S3 tooltip 死亡: dispatch a real mousemove over an adjacent live enemy's
 #      tile (the same rect math initTooltip uses) -> after the 250ms debounce
 #      #tooltip shows the enemy; remove the enemy + real updateUI() ->
-#      validateTooltip hides it within that one pass.
+#      validateTooltip hides it within that one pass. Batch11 B rider: real
+#      hover on .hb-slot -> delegated tooltip shows; one real wait-turn ->
+#      renderHotbar rebuild retires it (third anchor ttDomEl).
 #   S4 道具栏: .hb-slot computed width === 50px; focusing a slot carrying an
 #      item syncs the full name into #hb-name (container-delegated focusin);
 #      no .hb-slot carries a native title attribute.
@@ -274,6 +276,37 @@ def main():
           return document.getElementById('tooltip').style.display;
         }""")
         check('S3c kill + updateUI hides the tooltip in one pass', killed == 'none', killed)
+        # Batch11 B rider: the DOM-delegated hotbar tooltip (third anchor ttDomEl)
+        # — REAL hover over .hb-slot shows it; consuming the hovered item via the
+        # hotbar's own '1' key (useQuickSlot -> useItem -> endTurn -> updateUI ->
+        # renderHotbar rebuild) retires it via validateTooltip. NOTE: a plain wait
+        # turn also retires the anchor mid-turn, but Chrome then re-fires
+        # mouseover on the rebuilt slot under the stationary cursor (probed:
+        # #hotbar mouseover count 1 -> 2 with no mouse move) and legitimately
+        # re-shows the SAME still-slotted item — so the retire assertion uses
+        # the consume path, where the re-fire hits an empty slot (resolve ->
+        # null). That empty-slot case is exactly the stale-entry bug the fix
+        # kills: the tooltip must not outlive the item it describes.
+        hb_place = page.evaluate("""async () => {
+          const st = await import('/src/state.ts');
+          const items = await import('/src/items.ts');
+          st.G.player.inv.length = 0;   // deterministic: after the consume, no auto-refill candidate
+          const it = { type: 'potion', name: '冒烟锚点药剂', ch: '!', c: '#7ec8e3',
+                       desc: 'battery anchor item', rarity: 2, ef: 'heal', val: 30, x: 0, y: 0 };
+          st.G.player.inv.push(it);        // quick items must live in inv too — renderHotbar
+          st.G.player.quickSlots[0] = it;  // nulls slots whose item left the inventory
+          items.renderHotbar();
+          return !!document.querySelector('.hb-slot[data-qs="0"] .hb-sub');   // filled slots carry .hb-sub
+        }""")
+        check('S3d hotbar rendered with a quick item in slot 0', hb_place, str(hb_place))
+        page.hover('.hb-slot[data-qs="0"]')   # real mouse move -> delegated mouseover
+        page.wait_for_timeout(150)
+        hb_shown = page.evaluate("(() => { const t = document.getElementById('tooltip'); return { disp: t.style.display, txt: t.textContent }; })()")
+        check('S3e real hover on .hb-slot shows the delegated tooltip', hb_shown['disp'] == 'block' and '冒烟锚点药剂' in hb_shown['txt'], str(hb_shown)[:100])
+        page.keyboard.press('1')   # use quick slot 1 — REAL turn (endTurn inside useItem); slot 0 empties
+        page.wait_for_timeout(250)
+        hb_gone = page.evaluate("(() => { const t = document.getElementById('tooltip'); return { disp: t.style.display, html: t.innerHTML }; })()")
+        check('S3f consuming the hovered item retires the tooltip (row re-rendered away)', hb_gone['disp'] == 'none' and hb_gone['html'] == '', str(hb_gone)[:100])
 
         # ---- S4  道具栏 -------------------------------------------------------------
         hb = page.evaluate("""async () => {

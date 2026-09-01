@@ -98,6 +98,11 @@ export function renderKeyHints(): void {
 // anchored to (so re-renders that swallow it silently are detected).
 let ttTile: { mx: number; my: number } | null = null;
 let ttFocusEl: HTMLElement | null = null;
+// 批11 B: 第三 anchor — DOM 委托 tooltip(hotbar/背包行)的行元素。renderHotbar/renderInv
+// 每回合 innerHTML 重建会静默替换行节点(mouseleave 不会 fire — 根容器仍在),tooltip
+// 残留过期条目;document.contains 校验照 ttFocusEl 先例;刻意不重推导内容 —— 元素被换
+// 就是新条目,藏等下一次 mouseover 重新解析,与 focus 路径语义一致。
+let ttDomEl: HTMLElement | null = null;
 
 // Batch9 ⑧: the enemy/item/trap/tile lookup chain shared by showTooltip and
 // validateTooltip. Returns null when nothing showable is at (mx, my) — the
@@ -121,6 +126,8 @@ export function validateTooltip(): void {
   const tt = document.getElementById('tooltip');
   if (!tt || tt.style.display === 'none') return;
   if (ttFocusEl && !document.contains(ttFocusEl)) { tt.style.display = 'none'; tt.innerHTML = ''; return; }
+  // 批11 B: DOM 委托行 anchor — innerHTML 清空对齐 focus 分支(tile 分支不清是既有差异)。
+  if (ttDomEl && !document.contains(ttDomEl)) { tt.style.display = 'none'; tt.innerHTML = ''; return; }
   if (ttTile && G && !findTtTarget(ttTile.mx, ttTile.my)) { tt.style.display = 'none'; tt.style.borderColor = ''; }
 }
 
@@ -141,6 +148,7 @@ export function initTooltip(): void {
     if (!hit) { tt.style.display = 'none'; tt.style.borderColor = ''; ttTile = null; return; }
     ttTile = { mx, my }; // Batch9 ⑧: remember where this tooltip came from
     ttFocusEl = null;    // …and claim ownership: a canvas tooltip is not focus-anchored
+    ttDomEl = null;      // 批11 B: …nor DOM-row-anchored(所有权切换,对齐互斥置 null)
     const { enemy, item, trap, tile } = hit;
     if (enemy) {
       tt.style.display = 'block'; tt.style.left = (e.clientX + 15) + 'px'; tt.style.top = (e.clientY + 15) + 'px';
@@ -185,7 +193,7 @@ export function initTooltip(): void {
   // removed the native `title` from hotbar slots (OS-delayed, double popup);
   // this delegation takes over — instant on mouseover, no debounce (the
   // 250ms canvas debounce above stays: sweeping the map ≠ hovering a slot).
-  const bindDom = (root: HTMLElement | null, resolve: (el: HTMLElement) => { name: string; desc: string; color: string } | null) => {
+  const bindDom = (root: HTMLElement | null, selector: string, resolve: (el: HTMLElement) => { name: string; desc: string; color: string } | null) => {
     if (!root) return;
     root.addEventListener('mouseover', (e) => {
       const hit = resolve(e.target as HTMLElement);
@@ -193,15 +201,18 @@ export function initTooltip(): void {
       tt.innerHTML = `<div class="ttn" style="color:${hit.color}">◆ ${hit.name}</div><div class="ttd">${hit.desc}</div>`;
       tt.style.display = 'block'; tt.style.left = (e.clientX + 15) + 'px'; tt.style.top = (e.clientY + 15) + 'px';
       ttTile = null; ttFocusEl = null; // ownership: this tooltip is neither tile- nor focus-anchored
+      // 批11 B: 命中的行元素即第三 anchor,交 validateTooltip 按 document.contains 退役
+      ttDomEl = (e.target as HTMLElement).closest?.(selector) ?? null;
     });
-    root.addEventListener('mouseleave', () => { tt.style.display = 'none'; tt.innerHTML = ''; });
+    // 批11 B: mouseleave 卫生清 anchor(对齐 focusout 清 ttFocusEl)
+    root.addEventListener('mouseleave', () => { tt.style.display = 'none'; tt.innerHTML = ''; ttDomEl = null; });
   };
-  bindDom(document.getElementById('hotbar'), (el) => {
+  bindDom(document.getElementById('hotbar'), '.hb-slot', (el) => {
     const qs = el.closest?.('.hb-slot')?.getAttribute('data-qs');
     const item = qs != null && G ? G.player.quickSlots[+qs] : null;
     return item ? { name: item.name, desc: item.desc, color: RARITY_C[item.rarity] } : null;
   });
-  bindDom(document.getElementById('inv-content'), (el) => {
+  bindDom(document.getElementById('inv-content'), '.ii', (el) => {
     const idxAttr = el.closest?.('.ii')?.querySelector('canvas[data-idx]')?.getAttribute('data-idx');
     const item = idxAttr != null && G ? G.player.inv[+idxAttr] : null;
     return item ? { name: item.name, desc: item.desc, color: RARITY_C[item.rarity] } : null;
@@ -227,11 +238,13 @@ export function initFocusTooltips(): void {
     tt.style.top = (r.bottom + 90 > window.innerHeight ? Math.max(4, r.top - 90) : r.bottom + 8) + 'px';
     ttFocusEl = el; // Batch9 ⑧: remember the anchor for per-turn validation
     ttTile = null;  // …and drop any stale canvas-anchor (ownership switch)
+    ttDomEl = null; // 批11 B: …and any stale DOM-row anchor(所有权切换)
   });
   document.addEventListener('focusout', () => {
     tt.style.display = 'none';
     tt.innerHTML = '';
     ttFocusEl = null;
+    ttDomEl = null; // 批11 B: 防御 — 彼时本应已 null(focusin 已让位)
   });
 }
 
