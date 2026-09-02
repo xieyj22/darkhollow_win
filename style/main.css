@@ -395,10 +395,13 @@ body.reduced-motion .toggle .track,body.reduced-motion .toggle .thumb{transition
 body.reduced-motion .vol-slider::-webkit-slider-thumb{transition:none}
 /* Follow-up sweep: the 5 settings-wave controls that still carried bare transition:all. */
 body.reduced-motion #opt-reset,body.reduced-motion .kb-rebind,body.reduced-motion .kb-reset,body.reduced-motion .hb-slot,body.reduced-motion .forge-tab,body.reduced-motion .sb-btn,body.reduced-motion .mc-btn,body.reduced-motion #keys-toggle,body.reduced-motion .close-btn,body.reduced-motion .evb,body.reduced-motion .fu-buy,body.reduced-motion .tb,body.reduced-motion #lang-btn,body.reduced-motion .inv-act{transition:none}
-/* 批12 sweep: closure for every selector the 批11E/③/批12 gates restore — the
-      manual toggle gets the same static states (body.reduced-motion specificity
-      beats the media gates for its targets). .ii/.sk-row were restored by the
-      批11E gate but never swept — closed here. */
+/* 批12 sweep: COMPLETES the manual-toggle closure — together with the sweeps
+      above (391-397), whose union covers every gated selector. Do not prune
+      the older sweep lines as "redundant": they still carry .opt-tab/.opt-row/
+      .seg button/.toggle track+thumb/.vol-slider thumb/.hb-slot. The
+      body.reduced-motion specificity (0,2,0) beats the media gates (0,1,0) for
+      its targets. .ii/.sk-row were restored by the 批11E gate but never
+      swept — closed here. */
 body.reduced-motion .menu-btn,body.reduced-motion .bar .fill,body.reduced-motion canvas#game-canvas,body.reduced-motion .overlay,body.reduced-motion .obj-bar .fill,body.reduced-motion .talent-cell,body.reduced-motion .forge-upgrade,body.reduced-motion #sidebar,body.reduced-motion #btn-sidebar-toggle,body.reduced-motion .ii,body.reduced-motion .sk-row{transition:none}
 @keyframes ft-fade{from{opacity:1}to{opacity:0}}
 @keyframes smoke-fade{from{opacity:.7}to{opacity:0}}
@@ -441,14 +444,16 @@ body.hc .hb-slot.empty:hover{background:#1a1a2e}
 .death-wardens .epw-row{display:inline-block;margin:2px 10px 2px 0;color:#756f8f}
 
 /* ===== 批9: UI 温和精修 — unified control feedback ===== */
-/* 批12: legacy transition 全量收编 — every remaining rule that carried its own
-      bare `transition:` (the ones 批11 E's note below pointed at) moves into this
-      gate, 批11 E style: rule bodies lose the property, the gate restores it
-      verbatim for motion-allowing systems, so allow-motion rendering is
-      byte-identical to before while system reduced-motion users go static
-      regardless of whether the body.reduced-motion class propagated.
-      .menu-btn joins by user ruling — its hover-scale is the family's strongest
-      vestibular stimulus. The 批12 sweep below covers the manual toggle.
+/* 批12: legacy transition 全量收编 — the remaining rules that carried their own
+      bare `transition:` (the ones 批11 E's note below pointed at) split two ways:
+      the 16 non-token rules move into THIS gate, 批11 E style — rule bodies lose
+      the property, the gate restores it verbatim for motion-allowing systems, so
+      allow-motion rendering is byte-identical to before while system
+      reduced-motion users go static regardless of whether the body.reduced-motion
+      class propagated. The 9 ③-family rules are body-stripped only — ③ below
+      stays their only transition source. .menu-btn joins by user ruling — its
+      hover-scale is the family's strongest vestibular stimulus. The 批12 sweep
+      below covers the manual toggle.
       Values are locked verbatim by src/__tests__/batch12-motion-gate.test.ts. */
 @media (prefers-reduced-motion: no-preference){
   .menu-btn{transition:all .3s}
@@ -477,7 +482,8 @@ body.hc .hb-slot.empty:hover{background:#1a1a2e}
 }
 /* ③ One fast token transition for the button family. Wrapped in prefers-reduced-motion:
       no-preference — matching systems get this token list (it wins by source order
-      over the 批12 gate's plain values for the ③ members that appear in both).
+      over the 批11 E gate's plain all .15s for .sb-btn/.close-btn, the two members
+      that appear in both gates; the 批12 gate above shares no selector with ③).
       Since 批12 the family's own rule bodies carry no transition at all: this gate
       is their only source, so system reduced-motion users go fully static, and the
       body.reduced-motion sweep above covers the manual toggle.

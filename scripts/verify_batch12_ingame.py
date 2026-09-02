@@ -55,8 +55,9 @@ def start_game(page):
 # (selector, label) — main-menu family first, then in-game family.
 # .toggle .track is settings-panel-only DOM (absent in-game); its CSS is locked
 # by the batch12 static gate test, so the runtime battery skips it here.
+# .mc-btn probes a rule whose body was stripped this batch (minimap buttons).
 MENU_SEL = ['.menu-btn', 'canvas#game-canvas', '.overlay']
-GAME_SEL = ['.sb-btn', '.hb-slot', '.bar .fill', '#sidebar']
+GAME_SEL = ['.sb-btn', '.hb-slot', '.bar .fill', '#sidebar', '.mc-btn']
 
 
 def durations(page, sels):
@@ -81,7 +82,7 @@ def main():
               all(d == '0s' for d in menu_d), str(menu_d))
         start_game(page)
         game_d = durations(page, GAME_SEL)
-        check('S1b system-rm in-game static (.sb-btn/.hb-slot/.bar .fill/#sidebar all 0s)',
+        check('S1b system-rm in-game static (.sb-btn/.hb-slot/.bar .fill/#sidebar/.mc-btn all 0s)',
               all(d == '0s' for d in game_d), str(game_d))
         page.screenshot(path=os.path.join(OUT, 'rm_game.png'))
 
@@ -104,19 +105,22 @@ def main():
         arm_page(page)
         page.goto(BASE)
         page.wait_for_selector('#btn-new', state='visible')
-        nm_menu = durations(page, ['.menu-btn', 'canvas#game-canvas'])
+        nm_menu = durations(page, ['.menu-btn', 'canvas#game-canvas', '.overlay'])
         check('S2a allow-motion .menu-btn keeps 0.3s', nm_menu[0] == '0.3s', str(nm_menu))
         check('S2b allow-motion canvas keeps 0.05s, 0.25s', nm_menu[1] == '0.05s, 0.25s', str(nm_menu))
+        check('S2b2 allow-motion .overlay keeps --dur-med 0.2s', nm_menu[2] == '0.2s', str(nm_menu))
         start_game(page)
         page.screenshot(path=os.path.join(OUT, 'nm_game.png'))
         nm_game = page.evaluate("""() => {
           const d = s => { const el = document.querySelector(s); return el ? getComputedStyle(el).transitionDuration : null; };
           return { hb: d('.hb-slot'), bar: d('.bar .fill'), side: d('#sidebar'),
-                   sb: d('.sb-btn'), close: d('.close-btn') };
+                   sb: d('.sb-btn'), close: d('.close-btn'), mc: d('.mc-btn') };
         }""")
         check('S2c .hb-slot keeps 0.15s', nm_game['hb'] == '0.15s', str(nm_game))
         check('S2d .bar .fill keeps 0.35s', nm_game['bar'] == '0.35s', str(nm_game))
         check('S2e #sidebar keeps 0.3s ×4', nm_game['side'] == '0.3s, 0.3s, 0.3s, 0.3s', str(nm_game))
+        check('S2e2 .mc-btn (stripped-③ member) keeps ③ token 0.12s ×5',
+              nm_game['mc'] == '0.12s, 0.12s, 0.12s, 0.12s, 0.12s', str(nm_game))
         check('S2f ③ token family: .sb-btn === .close-btn === 0.12s ×5, non-zero',
               nm_game['sb'] == '0.12s, 0.12s, 0.12s, 0.12s, 0.12s' and nm_game['close'] == '0.12s, 0.12s, 0.12s, 0.12s, 0.12s', str(nm_game))
 
