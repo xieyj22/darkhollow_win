@@ -126,6 +126,60 @@ describe('批13 A: gamepad D-pad held-direction repeat', () => {
     pad.buttons[15].pressed = false;
     pollGamepad();
   });
+
+  // Review I2: a vertical tap that carries focus OFF a range input must still
+  // arm the cooldown (the pre-fix code read a pre-edge-loop onRange snapshot,
+  // skipped the arm, and the held-repeat double-stepped 60ms later).
+  it('vertical tap leaving a slider moves focus exactly one step', () => {
+    document.body.innerHTML = `<div id="o" class="overlay active">
+      <input type="range" id="s" min="0" max="100" step="10" value="50">
+      <button id="u">up</button></div>`;
+    pollGamepad();
+    pad.buttons[13].pressed = true;    // D-pad down — but the range is FIRST in
+    pollGamepad();                     // DOM order, so focus anchors there and
+    // the spatial move goes... anchor happens on this poll too. Set up the
+    // interesting state explicitly: focus the range, then tap down.
+    pad.buttons[13].pressed = false;
+    pollGamepad();
+    (document.getElementById('s') as HTMLInputElement).focus();
+    pad.buttons[13].pressed = true;    // vertical edge FROM the range
+    pollGamepad();                     // edge → focus moves off (arm now unconditional)
+    expect(document.activeElement!.id).toBe('u');
+    pad.buttons[13].pressed = true;    // still held one more poll (a ~120ms tap)
+    pollGamepad();
+    expect(document.activeElement!.id, 'held inside the arm window: no second step').toBe('u');
+    pad.buttons[13].pressed = false;
+    pollGamepad();
+  });
+
+  // Review I1: an overlay-opening edge on the exact poll where the walking
+  // repeat's cooldown drains must NOT also step the player — that would run a
+  // full enemy turn under an open overlay. bridge.openPause's real effect is
+  // menuOpen=true + pause-overlay.active; the mock reproduces both.
+  it('overlay opened on a drain poll: held-repeat does not step the player under it', async () => {
+    const { bridge } = await import('../bridge.js');
+    (bridge.openPause as any).mockImplementation(() => {
+      mockState.menuOpen = true;
+      const ov = document.getElementById('pause-overlay');
+      ov?.classList.add('active');
+    });
+    document.body.innerHTML = `<div id="pause-overlay" class="overlay">
+      <button id="p1">Resume</button></div>`;
+    mockState.menuOpen = false;
+    pollGamepad();
+    pad.buttons[15].pressed = true;    // D-pad right — walking
+    pollGamepad();                     // edge → step 1, arms cd=8
+    expect(movePlayer).toHaveBeenCalledTimes(1);
+    for (let i = 0; i < 7; i++) pollGamepad();   // polls 2..8: cooldown drains
+    // Poll 9 is the drain poll — open pause on it: Start edge + held right.
+    pad.buttons[9].pressed = true;     // Start (pause) — edge fires first
+    pollGamepad();
+    expect(movePlayer, 'no repeat step under the just-opened overlay').toHaveBeenCalledTimes(1);
+    pad.buttons[15].pressed = false;
+    pad.buttons[9].pressed = false;
+    pollGamepad();
+    mockState.menuOpen = false;        // restore for other tests
+  });
 });
 
 // ===== B) reduced-motion enterFloor =====

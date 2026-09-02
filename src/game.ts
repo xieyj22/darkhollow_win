@@ -185,6 +185,17 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     // 批13: reduced motion — the CSS fade is already static (batch12 gated the
     // canvas transition); skip the 200ms timer too so floor changes land
     // instantly instead of flashing a dead black gap for the timer's length.
+    //
+    // SANCTIONED divergence (批13 review I3): running setup() synchronously
+    // changes the ordering descendStairs sees — applyCorruption(1)/_endTurn()
+    // after this call now act on the NEW floor, whereas the classic fade path
+    // defers setup by 200ms so they act on the old one (final poison tick,
+    // parting enemy turn, float-text at the old position). The rm ordering is
+    // the SAME one the pre-existing synchronous paths use (floor-1 entry and
+    // exitBranch's skipFade), so it is the saner of the two — but know that
+    // reduced motion shifts turn-simulation timing, not just presentation.
+    // The synchronicity itself (which implies this ordering) is pinned by the
+    // batch13 unit test.
     setup();
     // Same late-bound re-render the fade path does on completion.
     if (bridge.render) bridge.render();
