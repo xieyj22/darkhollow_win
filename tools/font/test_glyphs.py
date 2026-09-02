@@ -26,7 +26,7 @@ for ch in 'AOHK27':
     check(f'{ch} ink 10%-72% sanity', 0.10 <= g.ink_ratio() <= 0.72, f'{g.ink_ratio():.2f}')
 
 # Task 3 增补：全字符集 85
-FULL = set(string.ascii_letters + string.digits + ".,:;!?-'\"-+/()<>= ♥✦★")
+FULL = set(string.ascii_letters + string.digits + ".,:;!?-'\"-+/()<>= %*#♥✦★")
 errs = validate_glyphs(FULL)
 check('full charset 85 complete', len(errs) == 0, f'missing={sorted(set(e.split()[-1] for e in errs))[:5]}' if errs else '')
 check('charset cardinality', len(FULL & set(GLYPHS)) >= 85, str(len(FULL & set(GLYPHS))))

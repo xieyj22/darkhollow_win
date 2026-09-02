@@ -157,10 +157,10 @@ def _caps() -> dict:
     g = cap()                                             # V：双斜汇聚
     diag(g, 1, 0, 5, 13); diag(g, 8, 0, 5, 13); G['V'] = g
 
-    g = cap()                                             # W：双竖 + Λ 形底连
-    vline(g, 0, 0, 11); vline(g, 7, 0, 11)
+    g = cap()                                             # W：双竖到底 + Λ 形底连
+    vline(g, 0, 0, 13); vline(g, 7, 0, 13)
     serif_tip(g, 0, 0, -1); serif_tip(g, 7, 0, 1)
-    diag(g, 2, 11, 5, 7); diag(g, 5, 7, 8, 11); G['W'] = g
+    diag(g, 2, 12, 5, 8); diag(g, 5, 8, 8, 12); G['W'] = g
 
     g = cap()                                             # X：双对角交叉
     diag(g, 1, 1, 8, 13); diag(g, 8, 1, 1, 13); G['X'] = g
@@ -222,7 +222,207 @@ def _digits() -> dict:
     return G
 
 
-GLYPHS: dict = {**_caps(), **_digits()}
+# ---- 小写 8×11, baseline=8（ascender y0..8 / x-height y2..8 / descender 尾 y9..10；
+#      构建期按各字形 baseline 换算，与大写基线自动对齐；小写无 serif） ----
+
+def _lower() -> dict:
+    G = {}
+
+    def low() -> Glyph:
+        return Glyph(8, 11, 8)
+
+    g = low()                                             # a：腔 + 右下出口
+    hline(g, 2, 1, 6); vline(g, 1, 3, 7); vline(g, 5, 3, 8)
+    hline(g, 7, 1, 6); hline(g, 7, 5, 7); G['a'] = g
+
+    g = low()                                             # b：左竖全高 + 腔
+    vline(g, 0, 0, 8); hline(g, 4, 0, 7); vline(g, 5, 4, 8); hline(g, 7, 0, 7); G['b'] = g
+
+    g = low()                                             # c：顶/底横 + 左竖
+    hline(g, 2, 1, 6); hline(g, 7, 1, 6); vline(g, 1, 3, 6); G['c'] = g
+
+    g = low()                                             # d：右竖全高 + 腔（b 镜像）
+    vline(g, 5, 0, 8); hline(g, 4, 0, 7); vline(g, 1, 4, 8); hline(g, 7, 0, 7); G['d'] = g
+
+    g = low()                                             # e：左竖 + 三横
+    vline(g, 1, 2, 7); hline(g, 2, 1, 6); hline(g, 5, 1, 6); hline(g, 7, 1, 6); G['e'] = g
+
+    g = low()                                             # f：竖 + 顶横 + 中钩
+    vline(g, 4, 0, 8); hline(g, 0, 1, 7); hline(g, 4, 4, 7); G['f'] = g
+
+    g = low()                                             # g：o 腔 + 下沉尾
+    hline(g, 2, 1, 6); vline(g, 1, 2, 6); vline(g, 5, 2, 10); hline(g, 7, 1, 6); G['g'] = g
+
+    g = low()                                             # h：左竖全高 + 拱 + 右腿
+    vline(g, 0, 0, 8); hline(g, 5, 0, 5); vline(g, 5, 5, 8); G['h'] = g
+
+    g = low()                                             # i：短竖 + 顶点
+    vline(g, 2, 2, 8); g.set(2, 0); g.set(3, 0); G['i'] = g
+
+    g = low()                                             # j：右短竖 + 底钩 + 顶点
+    vline(g, 5, 2, 8); hline(g, 9, 1, 5); g.set(5, 0); g.set(6, 0); G['j'] = g
+
+    g = low()                                             # k：左竖全高 + 双斜腿
+    vline(g, 0, 0, 8); diag(g, 2, 5, 5, 2); diag(g, 2, 5, 5, 8); G['k'] = g
+
+    g = low()                                             # l：中竖全高
+    vline(g, 3, 0, 8); G['l'] = g
+
+    g = low()                                             # m：左竖 + 双拱
+    vline(g, 0, 2, 8); hline(g, 5, 0, 6); vline(g, 3, 5, 8); vline(g, 6, 5, 8); G['m'] = g
+
+    g = low()                                             # n：左竖 + 拱 + 右腿
+    vline(g, 0, 2, 8); hline(g, 5, 0, 5); vline(g, 5, 5, 8); G['n'] = g
+
+    g = low()                                             # o：腔
+    vline(g, 1, 2, 7); vline(g, 5, 2, 7); hline(g, 2, 1, 6); hline(g, 7, 1, 6); G['o'] = g
+
+    g = low()                                             # p：左竖下沉 + 腔
+    vline(g, 0, 2, 10); hline(g, 4, 0, 7); vline(g, 5, 4, 8); hline(g, 7, 0, 7); G['p'] = g
+
+    g = low()                                             # q：右竖下沉 + 腔（p 镜像）
+    vline(g, 5, 2, 10); hline(g, 4, 0, 7); vline(g, 1, 4, 8); hline(g, 7, 0, 7); G['q'] = g
+
+    g = low()                                             # r：左竖 + 上斜
+    vline(g, 0, 2, 8); diag(g, 2, 4, 5, 2); G['r'] = g
+
+    g = low()                                             # s：三横 + 两短竖（S 缩窄）
+    hline(g, 2, 1, 6); hline(g, 5, 1, 6); hline(g, 8, 1, 6)
+    vline(g, 1, 3, 4); vline(g, 6, 6, 7); G['s'] = g
+
+    g = low()                                             # t：竖 + 中横
+    vline(g, 3, 0, 7); hline(g, 4, 1, 6); G['t'] = g
+
+    g = low()                                             # u：双竖 + 底横
+    vline(g, 0, 2, 8); vline(g, 5, 2, 8); hline(g, 7, 0, 7); G['u'] = g
+
+    g = low()                                             # v：双斜汇聚
+    diag(g, 1, 2, 4, 8); diag(g, 6, 2, 4, 8); G['v'] = g
+
+    g = low()                                             # w：双竖 + Λ 底连
+    vline(g, 0, 2, 7); vline(g, 6, 2, 7); diag(g, 1, 7, 3, 4); diag(g, 3, 4, 5, 7); G['w'] = g
+
+    g = low()                                             # x：双对角交叉
+    diag(g, 1, 3, 6, 8); diag(g, 6, 3, 1, 8); G['x'] = g
+
+    g = low()                                             # y：v 形 + 下沉尾
+    diag(g, 1, 2, 4, 6); diag(g, 6, 2, 4, 6); diag(g, 4, 6, 1, 10); G['y'] = g
+
+    g = low()                                             # z：双横 + 主对角（Z 缩窄）
+    hline(g, 2, 1, 6); hline(g, 7, 1, 6); diag(g, 5, 3, 2, 7); G['z'] = g
+
+    return G
+
+
+# ---- 符号（网格各异，baseline 与大写 13 语义对齐） ----
+
+def _symbols() -> dict:
+    G = {}
+    big = lambda w, h, b: Glyph(w, h, b)
+
+    g = big(4, 14, 13)                                    # . 方点
+    for x in (1, 2):
+        for y in (12, 13): g.set(x, y)
+    G['.'] = g
+
+    g = big(4, 14, 13)                                    # , 点 + 左斜尾
+    for x in (1, 2):
+        for y in (11, 12): g.set(x, y)
+    g.set(0, 13); G[','] = g
+
+    g = big(4, 14, 13)                                    # : 双点
+    for x in (1, 2):
+        for y in (5, 6, 11, 12): g.set(x, y)
+    G[':'] = g
+
+    g = big(4, 14, 13)                                    # ; 双点 + 尾
+    for x in (1, 2):
+        for y in (5, 6, 11, 12): g.set(x, y)
+    g.set(0, 13); G[';'] = g
+
+    g = big(4, 14, 13)                                    # ! 竖 + 点
+    vline(g, 1, 0, 9)
+    for x in (1, 2):
+        for y in (12, 13): g.set(x, y)
+    G['!'] = g
+
+    g = big(8, 14, 13)                                    # ? 钩 + 点
+    hline(g, 0, 1, 6); vline(g, 5, 1, 4); diag(g, 5, 4, 2, 7); vline(g, 2, 7, 9)
+    for x in (2, 3):
+        for y in (12, 13): g.set(x, y)
+    G['?'] = g
+
+    g = big(4, 14, 13)                                    # ' 短竖点
+    for x in (1, 2):
+        for y in (0, 1, 2): g.set(x, y)
+    G["'"] = g
+
+    g = big(6, 14, 13)                                    # " 双点
+    for x in (1, 2, 4, 5):
+        for y in (0, 1, 2): g.set(x, y)
+    G['"'] = g
+
+    g = big(8, 6, 5)                                      # - 连字横（视觉中线）
+    hline(g, 2, 0, 7); G['-'] = g
+
+    g = big(8, 10, 7)                                     # + 十字
+    hline(g, 4, 0, 7); vline(g, 3, 1, 8); G['+'] = g
+
+    g = big(8, 14, 13)                                    # / 全高斜
+    diag(g, 0, 13, 7, 0); G['/'] = g
+
+    g = big(6, 14, 13)                                    # ( 左弧
+    diag(g, 4, 0, 1, 6); diag(g, 1, 6, 4, 13); G['('] = g
+
+    g = big(6, 14, 13)                                    # ) 右弧
+    diag(g, 1, 0, 4, 6); diag(g, 4, 6, 1, 13); G[')'] = g
+
+    g = big(8, 12, 9)                                     # < 左角
+    diag(g, 6, 1, 1, 6); diag(g, 1, 6, 6, 11); G['<'] = g
+
+    g = big(8, 12, 9)                                     # > 右角
+    diag(g, 1, 1, 6, 6); diag(g, 6, 6, 1, 11); G['>'] = g
+
+    g = big(8, 10, 7)                                     # = 双横
+    hline(g, 3, 0, 7); hline(g, 6, 0, 7); G['='] = g
+
+    g = big(8, 14, 13)                                    # % 双实心小方 + 主斜
+    diag(g, 0, 13, 7, 0)
+    for x in range(0, 3):
+        for y in range(1, 4): g.set(x, y)
+    for x in range(5, 8):
+        for y in range(9, 12): g.set(x, y)
+    G['%'] = g
+
+    g = big(8, 10, 7)                                     # * 六向星
+    vline(g, 3, 1, 8); hline(g, 4, 0, 7); diag(g, 1, 1, 6, 6); diag(g, 6, 1, 1, 6); G['*'] = g
+
+    g = big(8, 14, 13)                                    # # 双竖 + 双横
+    vline(g, 1, 1, 12); vline(g, 5, 1, 12); hline(g, 4, 0, 6); hline(g, 8, 0, 6); G['#'] = g
+
+    G[' '] = Glyph(4, 4, 2)                               # ␣ 空字形（仅 advance）
+
+    g = big(9, 9, 8)                                      # ♥ 像素心（经典 9×9 模板逐行）
+    g.set(2, 0); g.set(6, 0)
+    for x in (1, 7): g.set(x, 1)
+    for x in (0, 8):
+        for y in (2, 3, 4): g.set(x, y)
+    for y in range(1, 5):
+        for x in range(1, 8): g.set(x, y)
+    for x in range(1, 8): g.set(x, 5)
+    for x in range(2, 7): g.set(x, 6)
+    for x in range(3, 6): g.set(x, 7)
+    g.set(4, 8)
+    G['♥'] = g
+
+    g = big(9, 9, 8)                                      # ✦ 四向星芒
+    hline(g, 4, 0, 8); vline(g, 4, 0, 8); diag(g, 2, 2, 6, 6); diag(g, 6, 2, 2, 6); G['✦'] = g
+
+    g = big(9, 9, 8)                                      # ★ 五角星（中竖+横杠+双腿+底收）
+    vline(g, 4, 0, 6); hline(g, 3, 1, 7)
+    diag(g, 1, 4, 3, 8); diag(g, 7, 4, 5, 8); hline(g, 7, 3, 5); G['★'] = g
+
+    return G
 
 
 def validate_glyphs(chars: set) -> list:
@@ -241,9 +441,14 @@ def validate_glyphs(chars: set) -> list:
     return errs
 
 
+GLYPHS: dict = {**_caps(), **_digits(), **_lower(), **_symbols()}
+
+
 if __name__ == '__main__':
-    # 开发目检：python glyphs.py A H
-    import sys
+    # 开发目检：python glyphs.py A H（Win 控制台 cp936 坑 → 强制 UTF-8）
+    import sys, io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     for ch in sys.argv[1:]:
         print(f'--- {ch} ({GLYPHS[ch].width}x{GLYPHS[ch].height}) ---')
         print(GLYPHS[ch].render_ascii())
+
