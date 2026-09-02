@@ -340,7 +340,7 @@ canvas.hb-icon{width:24px;height:24px}
 #talent-header{color:var(--accent-green);font-size:14px;margin:8px 0 4px}
 
 /* ===== Meta Progression — The Forge ===== */
-#title-h1{font-family:var(--font-eroded);font-size:2.6em;letter-spacing:6px;color:var(--accent-red);text-shadow:0 0 24px #e6394666,0 2px 4px #000;margin:0 0 8px}
+#title-h1{font-family:var(--font-eroded);font-size:56px;letter-spacing:10px;color:var(--accent-red);text-shadow:0 0 24px #e6394666,0 2px 4px #000;margin:0 0 8px}
 #title-h2{font-family:var(--font-runes);font-size:1.05em;letter-spacing:3px;color:var(--text-secondary);margin:0 0 28px}
 
 .title-stats{font-family:var(--font-runes);display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin-top:15px;font-size:.8em;color:var(--text-secondary)}

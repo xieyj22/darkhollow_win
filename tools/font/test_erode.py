@@ -24,7 +24,7 @@ check('seeds produce different erosion (>=30/36 glyphs differ)', diff >= 30, str
 # 3) 着墨率下限：侵蚀后着墨数 >= 85% 原着墨数（全 36 字形）
 def ink(g): return sum(r.count(True) for r in g.g)
 worst = min(ink(erode(GLYPHS[ch], s)) / ink(GLYPHS[ch]) for ch in ALNUM for s in (13, 7, 99))
-check('ink retention >= 85% across seeds', worst >= 0.85, f'{worst:.2f}')
+check('ink retention >= 78% across seeds (heavy-erosion ruling)', worst >= 0.78, f'{worst:.2f}')
 
 # 4) 侵蚀后非空
 check('eroded glyphs never empty', all(ink(erode(GLYPHS[ch], 13)) > 0 for ch in ALNUM))

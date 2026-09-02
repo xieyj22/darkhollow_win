@@ -24,21 +24,21 @@ def _ink(g: Glyph) -> int:
     return sum(row.count(True) for row in g.g)
 
 
-def erode(g: Glyph, seed: int, keep: float = 0.85) -> Glyph:
+def erode(g: Glyph, seed: int, keep: float = 0.78) -> Glyph:
     rng = random.Random(seed)
     out = Glyph(g.width, g.height, g.baseline)
     out.g = [row[:] for row in g.g]
     base_ink = _ink(g)
     floor_ink = keep * base_ink
 
-    # 1) 边缘啃噬：每个边缘点 18% 概率挖除
+    # 1) 边缘啃噬：每个边缘点 32% 概率挖除（重侵蚀裁决）
     edge = _edge_points(g)
     for x, y in edge:
-        if rng.random() < 0.18:
+        if rng.random() < 0.32:
             out.g[y][x] = False
 
-    # 2) 笔划断裂：≤1 处 —— 随机着墨点挖 2×1 缺口（70% 字形才发生）
-    if base_ink and rng.random() < 0.7:
+    # 2) 笔划断裂：≤1 处 —— 随机着墨点挖 2×1 缺口（85% 字形才发生）
+    if base_ink and rng.random() < 0.85:
         inked = [(x, y) for y in range(g.height) for x in range(g.width) if g.px(x, y)]
         x, y = rng.choice(inked)
         out.g[y][x] = False
@@ -57,11 +57,11 @@ def erode(g: Glyph, seed: int, keep: float = 0.85) -> Glyph:
     if _ink(out) >= floor_ink:
         return out
 
-    # 门控降级：重开一个同种子流，只施加 9% 啃噬，跳过断裂与裂纹
+    # 门控降级：重开一个同种子流，只施加 16% 啃噬，跳过断裂与裂纹
     rng2 = random.Random(seed)
     out2 = Glyph(g.width, g.height, g.baseline)
     out2.g = [row[:] for row in g.g]
     for x, y in edge:
-        if rng2.random() < 0.09:
+        if rng2.random() < 0.16:
             out2.g[y][x] = False
     return out2 if _ink(out2) >= floor_ink else g

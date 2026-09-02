@@ -444,6 +444,59 @@ def validate_glyphs(chars: set) -> list:
 GLYPHS: dict = {**_caps(), **_digits(), **_lower(), **_symbols()}
 
 
+
+
+def chisel_all() -> None:
+    """批14 目检轮1 强化：所有大写+数字的首/末着墨行左右各伸 1px（凿刻角全字系化）。
+    在 GLYPHS 组装后调用，直接改写位图。"""
+    import string
+    for ch in string.ascii_uppercase + string.digits:
+        g = GLYPHS[ch]
+        for y in (0, g.height - 1):
+            inked = [x for x in range(g.width) if g.g[y][x]]
+            if not inked:
+                continue
+            lo, hi = min(inked), max(inked)
+            if lo - 1 >= 0: g.set(lo - 1, y)
+            if hi + 1 < g.width: g.set(hi + 1, y)
+
+
+chisel_all()
+
+
+
+def runicize() -> None:
+    """批14 目检轮2：半符文化 —— 部分大写改北欧符文形（spec 风格"铭文石刻"的最高形态）。
+    只改形状仍可辨识的字母；DEPTHS OF DARKHOLLOW 里 D/E/P/T/H/S/O/F/R/K/L/W。"""
+    import glyphs as _self
+
+    def blank(): return _self.Glyph(10, 14, 13)
+
+    # T → ᛏ：全高竖 + 顶部上箭头（两短斜）
+    g = blank(); _self.vline(g, 4, 0, 13); _self.diag(g, 1, 3, 4, 0); _self.diag(g, 9, 3, 6, 0)
+    _self.GLYPHS['T'] = g
+
+    # F → ᚠ：全高竖 + 两条上斜枝
+    g = blank(); _self.vline(g, 2, 0, 13); _self.diag(g, 4, 2, 9, 0); _self.diag(g, 4, 8, 9, 6)
+    _self.GLYPHS['F'] = g
+
+    # N → ᚾ：全高竖 + 一条上斜枝（不出竖右界）
+    g = blank(); _self.vline(g, 2, 0, 13); _self.diag(g, 4, 8, 9, 1)
+    _self.GLYPHS['N'] = g
+
+    # A → ᚨ：全高竖 + 两条全对角贯穿斜线
+    g = blank(); _self.vline(g, 0, 0, 13)
+    _self.diag(g, 0, 2, 8, 11); _self.diag(g, 0, 8, 8, 13)
+    _self.GLYPHS['A'] = g
+
+    # R → ᚱ：竖 + 三角腔 + 斜腿（原 R 强化斜腔）
+    g = blank(); _self.vline(g, 0, 0, 13)
+    _self.diag(g, 1, 0, 7, 4); _self.diag(g, 7, 4, 1, 8); _self.diag(g, 2, 8, 9, 13)
+    _self.GLYPHS['R'] = g
+
+
+runicize()
+
 if __name__ == '__main__':
     # 开发目检：python glyphs.py A H（Win 控制台 cp936 坑 → 强制 UTF-8）
     import sys, io
