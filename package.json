@@ -1,6 +1,6 @@
 {
   "name": "darkhollow",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": true,
   "description": "Depths of Darkhollow — A Roguelike Dungeon Crawler",
   "main": "electron/main.cjs",
