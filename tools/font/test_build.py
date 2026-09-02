@@ -29,6 +29,14 @@ if os.path.isfile(REG) and os.path.isfile(ERO):
         advs = {hm[ch][0] for ch in f.getGlyphOrder() if ch != '.notdef'}
         check(f'{family}: unified advance', len(advs) == 1, str(advs))
 
+# M5: artifact-drift pin —— glyphs.py/erode.py/build_font.py 改动后必须重跑 build_font.py，
+# 否则此断言失败（防 stale woff2 静默上线）。
+import hashlib
+PIN = {'reg': 'a4ebdba5e43f7c62', 'ero': '137bf671c3e64661'}
+def _h(p): return hashlib.sha256(open(p, 'rb').read()).hexdigest()[:16]
+check('artifact drift pin (regular)', _h(REG) == PIN['reg'], _h(REG))
+check('artifact drift pin (eroded)', _h(ERO) == PIN['ero'], _h(ERO))
+
 fails = [n for n, ok in RESULTS if not ok]
 print(f"TOTAL {len(RESULTS)-len(fails)}/{len(RESULTS)}")
 sys.exit(1 if fails else 0)

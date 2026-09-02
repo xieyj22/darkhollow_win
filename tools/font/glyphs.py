@@ -446,22 +446,6 @@ GLYPHS: dict = {**_caps(), **_digits(), **_lower(), **_symbols()}
 
 
 
-def chisel_all() -> None:
-    """批14 目检轮1 强化：所有大写+数字的首/末着墨行左右各伸 1px（凿刻角全字系化）。
-    在 GLYPHS 组装后调用，直接改写位图。"""
-    import string
-    for ch in string.ascii_uppercase + string.digits:
-        g = GLYPHS[ch]
-        for y in (0, g.height - 1):
-            inked = [x for x in range(g.width) if g.g[y][x]]
-            if not inked:
-                continue
-            lo, hi = min(inked), max(inked)
-            if lo - 1 >= 0: g.set(lo - 1, y)
-            if hi + 1 < g.width: g.set(hi + 1, y)
-
-
-chisel_all()
 
 
 
@@ -496,6 +480,22 @@ def runicize() -> None:
 
 
 runicize()
+def chisel_all() -> None:
+    """批14 强化：所有大写+数字（含 runicize 后的符文字形 —— review M3）的
+    首/末着墨行左右各伸 1px（凿刻角全字系化）。直接改写 GLYPHS 位图。"""
+    import string
+    for ch in string.ascii_uppercase + string.digits:
+        g = GLYPHS[ch]
+        for y in (0, g.height - 1):
+            inked = [x for x in range(g.width) if g.g[y][x]]
+            if not inked:
+                continue
+            lo, hi = min(inked), max(inked)
+            if lo - 1 >= 0: g.set(lo - 1, y)
+            if hi + 1 < g.width: g.set(hi + 1, y)
+
+
+chisel_all()
 
 if __name__ == '__main__':
     # 开发目检：python glyphs.py A H（Win 控制台 cp936 坑 → 强制 UTF-8）

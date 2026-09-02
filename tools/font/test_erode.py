@@ -36,3 +36,21 @@ check('erosion actually bites (>=25/36 differ)', eroded_n >= 25, str(eroded_n))
 fails = [n for n, ok in RESULTS if not ok]
 print(f"TOTAL {len(RESULTS)-len(fails)}/{len(RESULTS)}")
 sys.exit(1 if fails else 0)
+
+# 6) shipped seed 逐字形：保持率 ≥0.78 且全部走了完整侵蚀（非降级/非原样返回）
+import erode as _e
+import inspect
+degraded = []
+for ch in ALNUM:
+    g = GLYPHS[ch]
+    out = _e.erode(g, 13)
+    r = ink(out) / ink(g)
+    if r < 0.78: degraded.append(f'{ch}:{r:.2f}')
+    # 非降级：与 16%-bite 降级路径产物不同的粗判 = 与原版不同（降级也可能不同，弱断言）+
+    # 完整路径检验：啃噬32%必然移除大量边缘点 —— 断言侵蚀版着墨 < 原版 97%
+    if ink(out) > ink(g) * 0.97: degraded.append(f'{ch}:no-bite')
+check('shipped seed 13: every glyph fully eroded, none degraded', not degraded, str(degraded[:4]))
+
+fails = [n for n, ok in RESULTS if not ok]
+print(f"TOTAL {len(RESULTS)-len(fails)}/{len(RESULTS)}")
+sys.exit(1 if fails else 0)

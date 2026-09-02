@@ -36,8 +36,9 @@ describe('批14 T6: runes font wiring (CSS source gate)', () => {
 
   // 接入位清单（spec §6）：(selector, variable)
   const ANCHORS: Array<[string, string]> = [
-    ['#title-h1', '--font-eroded'],
+    ['#title-screen h1', '--font-eroded'],  // 原生规则位（特异性高于 #title-h1——曾把 56px 压回 2.8em）
     ['#title-h2', '--font-runes'],
+    ['#char-sel h2', '--font-runes'],  // I3: 选人屏标题（.panel h2 够不到它）
     ['.menu-btn', '--font-runes'],
     ['.title-stats', '--font-runes'],
     ['#floor-label', '--font-runes'],

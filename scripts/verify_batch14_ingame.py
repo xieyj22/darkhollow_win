@@ -50,13 +50,24 @@ def main():
         loaded = page.evaluate("""async () => {
           await document.fonts.load("16px 'Darkhollow Runes'", 'A');
           await document.fonts.load("16px 'Darkhollow Runes Eroded'", 'A');
+          const c = document.createElement('canvas').getContext('2d');
+          const w = (f) => { c.font = `56px ${f}`; return c.measureText('DEPTHS OF DARKHOLLOW').width; };
           return {
-            reg: document.fonts.check("16px 'Darkhollow Runes'"),
-            ero: document.fonts.check("16px 'Darkhollow Runes Eroded'"),
+            size: document.fonts.size,
+            families: [...document.fonts].map(f => f.family),
+            // measureText 差分（review C2）：单 family 名无 fallback 串会量到默认字体——
+            // 必须带 fallback 对照，两串等宽 = 字体未注册
+            diff: w("'Darkhollow Runes', monospace") - w('monospace'),
           };
         }""")
-        check('S1a both families load', loaded['reg'] and loaded['ero'], str(loaded))
+        check('S1a fonts REGISTERED at desktop viewport (size>=2, families present, measureText differs)',
+              loaded['size'] >= 2
+              and any('Darkhollow Runes' == f for f in loaded['families'])
+              and any('Eroded' in f for f in loaded['families'])
+              and abs(loaded['diff']) > 1, str(loaded))
 
+        h1h = page.evaluate("() => document.getElementById('title-h1').getBoundingClientRect().height")
+        check('S1b title-h1 renders at 56px-era geometry (M1 version guard)', 50 <= h1h <= 70, str(h1h))
         h1 = fam(page, '#title-h1')
         h2 = fam(page, '#title-h2')
         mb = fam(page, '.menu-btn')

@@ -16,12 +16,13 @@ SEED = 13             # 侵蚀种子（spec：固定种子=确定性）
 OUT_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'public', 'fonts')
 
 
-def _bitmap_to_glyph(g, pen: TTGlyphPen):
-    """每着墨像素画一个 1px 方形 contour（重叠无碍，non-zero fill）。"""
+def _bitmap_to_glyph(g, pen: TTGlyphPen, x_off: int = 0):
+    """每着墨像素画一个 1px 方形 contour（重叠无碍，non-zero fill）。
+    x_off：字形在 advance 内的水平偏移（窄字形居中 —— spec §5，review I2）。"""
     for y in range(g.height):
         for x in range(g.width):
             if g.g[y][x]:
-                x0, y0 = x * SCALE, (g.baseline - y) * SCALE
+                x0, y0 = (x + x_off) * SCALE, (g.baseline - y) * SCALE
                 pen.moveTo((x0, y0))
                 pen.lineTo((x0 + SCALE, y0))
                 pen.lineTo((x0 + SCALE, y0 + SCALE))
@@ -37,20 +38,24 @@ def build(subset: dict, family: str, style: str, woff2_path: str) -> None:
     fb = FontBuilder(UPM, isTTF=True)
     adv = ADV * SCALE
     glyph_order = ['.notdef'] + [ch if ch != ' ' else 'space' for ch in subset]
-    cmap = {ord(ch): (ch if ch != ' ' else 'space') for ch in subset if ch != ' '}
+    cmap = {ord(ch): (ch if ch != ' ' else 'space') for ch in subset}  # M2: 空格也映射（本字体 advance）
 
     fb.setupGlyphOrder(glyph_order)
     fb.setupCharacterMap(cmap)
 
     glyphs = {'.notdef': TTGlyphPen(None).glyph()}
+    offs = {}
     for ch, g in subset.items():
         pen = TTGlyphPen(None)
-        _bitmap_to_glyph(g, pen)
+        offs[ch] = max(0, (ADV - g.width) // 2)      # review I2: 窄字形居中
+        _bitmap_to_glyph(g, pen, offs[ch])
         glyphs[ch if ch != ' ' else 'space'] = pen.glyph()
     fb.setupGlyf(glyphs)
-    fb.setupHorizontalMetrics({name: (adv, 0) for name in glyph_order})
-    fb.setupHorizontalHeader(ascent=13 * SCALE, descent=-3 * SCALE)
-    fb.setupOS2(sTypoAscender=13 * SCALE, sTypoDescender=-3 * SCALE, usWinAscent=13 * SCALE, usWinDescent=3 * SCALE)
+    hm = {'.notdef': (adv, 0)}
+    hm.update({(ch if ch != ' ' else 'space'): (adv, offs[ch] * SCALE) for ch in subset})
+    fb.setupHorizontalMetrics(hm)
+    fb.setupHorizontalHeader(ascent=14 * SCALE, descent=-3 * SCALE)
+    fb.setupOS2(sTypoAscender=14 * SCALE, sTypoDescender=-3 * SCALE, usWinAscent=14 * SCALE, usWinDescent=3 * SCALE)
     fb.setupNameTable({
         'familyName': family,
         'styleName': style,
