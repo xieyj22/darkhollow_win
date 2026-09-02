@@ -52,7 +52,7 @@ def start_game(page):
     assert page.evaluate("document.getElementById('game-container').style.display") == 'flex', 'game did not start'
 
 
-# (selector, label) — main-menu family first, then in-game family.
+# (selectors) — main-menu family first, then in-game family.
 # .toggle .track is settings-panel-only DOM (absent in-game); its CSS is locked
 # by the batch12 static gate test, so the runtime battery skips it here.
 # .mc-btn probes a rule whose body was stripped this batch (minimap buttons).
@@ -111,11 +111,8 @@ def main():
         check('S2b2 allow-motion .overlay keeps --dur-med 0.2s', nm_menu[2] == '0.2s', str(nm_menu))
         start_game(page)
         page.screenshot(path=os.path.join(OUT, 'nm_game.png'))
-        nm_game = page.evaluate("""() => {
-          const d = s => { const el = document.querySelector(s); return el ? getComputedStyle(el).transitionDuration : null; };
-          return { hb: d('.hb-slot'), bar: d('.bar .fill'), side: d('#sidebar'),
-                   sb: d('.sb-btn'), close: d('.close-btn'), mc: d('.mc-btn') };
-        }""")
+        nm_game = dict(zip(['hb', 'bar', 'side', 'sb', 'close', 'mc'],
+                           durations(page, ['.hb-slot', '.bar .fill', '#sidebar', '.sb-btn', '.close-btn', '.mc-btn'])))
         check('S2c .hb-slot keeps 0.15s', nm_game['hb'] == '0.15s', str(nm_game))
         check('S2d .bar .fill keeps 0.35s', nm_game['bar'] == '0.35s', str(nm_game))
         check('S2e #sidebar keeps 0.3s ×4', nm_game['side'] == '0.3s, 0.3s, 0.3s, 0.3s', str(nm_game))
@@ -132,20 +129,14 @@ def main():
                       " setReducedMotion(true); applyAll(); })")
         page.wait_for_timeout(60)
         has_cls = page.evaluate("document.body.classList.contains('reduced-motion')")
-        rm_d = page.evaluate("""() => {
-          const d = s => { const el = document.querySelector(s); return el ? getComputedStyle(el).transitionDuration : null; };
-          return ['.sb-btn', '.hb-slot', '.bar .fill', '#sidebar', '.menu-btn'].map(d);
-        }""")
+        rm_d = durations(page, ['.sb-btn', '.hb-slot', '.bar .fill', '#sidebar', '.menu-btn'])
         check('S3a manual rm: body class set + all representatives 0s',
               has_cls and all(d == '0s' for d in rm_d), f"cls={has_cls} {rm_d}")
         page.evaluate("(async () => { const { setReducedMotion } = await import('/src/state.ts');"
                       " const { applyAll } = await import('/src/settings.ts');"
                       " setReducedMotion(false); applyAll(); })")
         page.wait_for_timeout(60)
-        back = page.evaluate("""() => {
-          const d = s => { const el = document.querySelector(s); return el ? getComputedStyle(el).transitionDuration : null; };
-          return { hb: d('.hb-slot'), sb: d('.sb-btn') };
-        }""")
+        back = dict(zip(['hb', 'sb'], durations(page, ['.hb-slot', '.sb-btn'])))
         check('S3b un-toggle restores durations (.hb-slot 0.15s / .sb-btn 0.12s ×5)',
               back['hb'] == '0.15s' and back['sb'] == '0.12s, 0.12s, 0.12s, 0.12s, 0.12s', str(back))
         ctx_nm.close()

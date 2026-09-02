@@ -66,15 +66,22 @@ while (at !== -1) {
 
 // Bare ones are legal only as body.reduced-motion kill rules; harvest their
 // selectors (minus the body.reduced-motion prefix) for the closure check.
+// Violations are recorded (not thrown) so they surface as a named failing
+// test below instead of a suite-level unhandled error.
 const sweepSelectors = new Set<string>();
+const badBare: string[] = [];
 for (const r of bare) {
   const parts = r.selector.split(',').map((s) => s.trim()).filter(Boolean);
   for (const p of parts) {
     if (p === 'body.reduced-motion') continue; // bare-class rule, no transition expected
-    if (!p.startsWith('body.reduced-motion '))
-      throw new Error(`bare transition outside gate and sweep: ${p} → ${r.value}`);
-    if (r.value !== 'none')
-      throw new Error(`sweep rule with a non-none transition: ${p} → ${r.value}`);
+    if (!p.startsWith('body.reduced-motion ')) {
+      badBare.push(`bare transition outside gate and sweep: ${p} → ${r.value}`);
+      continue;
+    }
+    if (r.value !== 'none') {
+      badBare.push(`sweep rule with a non-none transition: ${p} → ${r.value}`);
+      continue;
+    }
     sweepSelectors.add(p.replace(/^body\.reduced-motion /, ''));
   }
 }
@@ -93,9 +100,10 @@ for (const [a, b] of gateRanges) {
 
 describe('批12 T4: every transition is motion-gated or swept', () => {
   it('no bare transition declarations survive outside the gates', () => {
-    // The loop above throws on the first offender; reaching here with every
-    // bare rule being a kill rule is the pass condition. Keep a hard count
-    // so a future silent empty-parse can't fake a pass (批5 A0 lesson).
+    // Reaching here with badBare empty means every bare rule is a kill rule.
+    // Keep a hard count so a future silent empty-parse can't fake a pass
+    // (批5 A0 lesson).
+    expect(badBare, badBare.join('; ')).toEqual([]);
     expect(bare.length).toBeGreaterThanOrEqual(6); // 392-395+397 sweep lines + 批12 sweep
     expect([...sweepSelectors].length).toBeGreaterThanOrEqual(20);
   });
@@ -134,12 +142,18 @@ describe('批12 T4: every transition is motion-gated or swept', () => {
     ['#btn-sidebar-toggle', 'transition:left .3s'],
   ];
 
-  it.each(EXPECTED)('%s restored verbatim inside a no-preference gate', (sel, decl) => {
+  it.each(EXPECTED)('%s restored verbatim inside a no-preference gate (same-rule pairing)', (sel, decl) => {
+    // Pair selector and value at the RULE level, not by gate-body co-occurrence —
+    // a value swapped between two sibling rules inside one gate must fail here.
     const hit = gateRanges.some(([a, b]) => {
       const body = css.slice(a + 1, b);
-      return body.includes(decl) && body.includes(sel);
+      for (const m of body.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+        const sels = m[1].split(',').map((s) => s.replace(/\s+/g, ' ').trim());
+        if (sels.includes(sel) && m[2].includes(decl)) return true;
+      }
+      return false;
     });
-    expect(hit, `${sel}: ${decl} not found in any gate`).toBe(true);
+    expect(hit, `${sel}: ${decl} not paired in any single gate rule`).toBe(true);
   });
 
   // ③-family members had their own `transition:all .15s` deleted from the rule
