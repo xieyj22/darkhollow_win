@@ -15,7 +15,7 @@ check('eroded woff2 exists', os.path.isfile(ERO))
 if os.path.isfile(REG) and os.path.isfile(ERO):
     from fontTools.ttLib import TTFont
     for path, family, coverage in ((REG, 'Darkhollow Runes', 'A09a%'),
-                                   (ERO, 'Darkhollow Runes Eroded', 'A09%')):  # Eroded 无小写
+                                   (ERO, 'Darkhollow Runes Eroded', 'A09')):  # Eroded 仅大写+数字，无小写无符号
         f = TTFont(path)
         check(f'{family}: woff2 flavor', f.flavor == 'woff2')
         sz = os.path.getsize(path)
