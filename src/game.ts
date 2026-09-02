@@ -1,6 +1,6 @@
 // Game initialization and floor entry
 import type { GameState, Item } from './types.js';
-import { G, setGameState, lang } from './state.js';
+import { G, setGameState, lang, reducedMotion } from './state.js';
 import { MH, MW, FINAL, TL } from './config.js';
 import { genDungeon, updatePlayerFOV } from './dungeon.js';
 import { spawnEnemies, spawnBranchEnemies, spawnWarden } from './enemies.js';
@@ -181,7 +181,15 @@ export function enterFloor(floor: number, skipFade?: boolean): void {
     autoSave();
   };
 
-  if (doTransition) {
+  if (doTransition && reducedMotion) {
+    // 批13: reduced motion — the CSS fade is already static (batch12 gated the
+    // canvas transition); skip the 200ms timer too so floor changes land
+    // instantly instead of flashing a dead black gap for the timer's length.
+    setup();
+    // Same late-bound re-render the fade path does on completion.
+    if (bridge.render) bridge.render();
+    if (bridge.updateUI) bridge.updateUI();
+  } else if (doTransition) {
     cvs.style.opacity = '0';
     setTimeout(() => {
       setup();

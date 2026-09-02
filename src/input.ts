@@ -357,6 +357,20 @@ export function pollGamepad(): void {
       const first = focusablesIn(menu)[0];
       if (first) gpFocus(first);
     }
+    // 批13: held-direction scan comes FIRST — the stick-centering reset below
+    // and the held-repeat block after the edge loop both need it. Without the
+    // !hx/!hy guard on that reset, a stick that never left center would zero
+    // the D-pad-armed cooldown every poll and turn the repeat into per-poll
+    // steps.
+    let hx: -1 | 0 | 1 = 0, hy: -1 | 0 | 1 = 0;
+    for (let i = 0; i < gp.buttons.length; i++) {
+      if (!(gp.buttons[i] && gp.buttons[i].pressed)) continue;
+      const a = buttonToAction(i);
+      if (a === 'move_left') hx = -1;
+      else if (a === 'move_right') hx = 1;
+      else if (a === 'move_up') hy = -1;
+      else if (a === 'move_down') hy = 1;
+    }
     // Left stick — directional focus movement, same repeat cooldown as walking.
     const axes = gp!.axes || [];
     const ax = axes[0] || 0, ay = axes[1] || 0;
@@ -366,18 +380,24 @@ export function pollGamepad(): void {
         Math.abs(ay) > 0.5 ? Math.sign(ay) as -1 | 1 : 0);
       gpMoveCd = 8;
     }
-    if (gpMoveCd > 0 && Math.abs(ax) <= 0.5 && Math.abs(ay) <= 0.5) gpMoveCd = 0;
+    if (gpMoveCd > 0 && Math.abs(ax) <= 0.5 && Math.abs(ay) <= 0.5 && !hx && !hy) gpMoveCd = 0;
     // Buttons — edge-triggered, reinterpreted through the user's own bindings:
     // move_* = spatial focus, wait = activate, overlay_close = back,
     // quaff/descend (LB/RB) = sequential focus, pause stays pause.
+    // 批13: a first move_* press steps once and arms the shared walking
+    // cooldown — the held-repeat block below then re-steps on every drain,
+    // the same rhythm the left stick uses. Range inputs are exempt (the
+    // slider block keeps its own faster rhythm).
+    const ae = document.activeElement as HTMLElement | null;
+    const onRange = !!(ae && menu.contains(ae) && ae instanceof HTMLInputElement && ae.type === 'range');
     for (let i = 0; i < gp.buttons.length; i++) {
       if (!edge(i)) continue;
       const a = buttonToAction(i);
       if (!a) continue;
-      if (a === 'move_up') menuMoveFocus(menu, 0, -1);
-      else if (a === 'move_down') menuMoveFocus(menu, 0, 1);
-      else if (a === 'move_left') menuMoveFocus(menu, -1, 0);
-      else if (a === 'move_right') menuMoveFocus(menu, 1, 0);
+      if (a === 'move_up') { menuMoveFocus(menu, 0, -1); if (!onRange) gpMoveCd = 8; }
+      else if (a === 'move_down') { menuMoveFocus(menu, 0, 1); if (!onRange) gpMoveCd = 8; }
+      else if (a === 'move_left') { menuMoveFocus(menu, -1, 0); if (!onRange) gpMoveCd = 8; }
+      else if (a === 'move_right') { menuMoveFocus(menu, 1, 0); if (!onRange) gpMoveCd = 8; }
       else if (a === 'wait') {
         const el = document.activeElement as HTMLElement | null;
         if (el && menu.contains(el)) el.click();
@@ -390,12 +410,16 @@ export function pollGamepad(): void {
         else if (G && !G.gameOver) bridge.openPause?.();
       }
     }
+    // 批13: held-direction repeat at the walking cadence — while a bound
+    // move_* direction stays pressed (no fresh edge), each gpMoveCd drain
+    // re-steps the focus. A single click stays exactly one step: the edge
+    // above armed cd=8 and a release inside that window never gets here.
+    // (hx/hy come from the scan at the top of the menu branch.)
+    if (!onRange && (hx || hy) && gpMoveCd <= 0) { menuMoveFocus(menu, hx, hy); gpMoveCd = 8; }
     // 批7: slider long-press — while a range input is focused and the user's bound
     // left/right direction is HELD, repeat stepRange after an initial ~360ms delay
     // then every ~120ms (poll ≈ 60ms ⇒ cds 5 / 1; review M1). The edge loop above
     // already did the first step via menuMoveFocus, so a fresh press only arms the timer.
-    const ae = document.activeElement as HTMLElement | null;
-    const onRange = !!(ae && menu.contains(ae) && ae instanceof HTMLInputElement && ae.type === 'range');
     if (!onRange) { gpSlideDir = 0; gpSlideCd = 0; }
     else {
       let held: -1 | 0 | 1 = 0;
@@ -411,6 +435,17 @@ export function pollGamepad(): void {
     }
   } else if (G && !G.gameOver) {
     // ---- gameplay dispatch (pre-batch3A behavior, unchanged) ----
+    // 批13: held-direction scan first (menu branch comment above explains the
+    // !hx/!hy guard on the stick-centering reset).
+    let hx: -1 | 0 | 1 = 0, hy: -1 | 0 | 1 = 0;
+    for (let i = 0; i < gp.buttons.length; i++) {
+      if (!(gp.buttons[i] && gp.buttons[i].pressed)) continue;
+      const a = buttonToAction(i);
+      if (a === 'move_left') hx = -1;
+      else if (a === 'move_right') hx = 1;
+      else if (a === 'move_up') hy = -1;
+      else if (a === 'move_down') hy = 1;
+    }
     // Left stick — 8-direction, 0.5 deadzone, repeat cooldown (NOT a button action)
     const axes = gp!.axes || [];
     const ax = axes[0] || 0, ay = axes[1] || 0;
@@ -420,14 +455,23 @@ export function pollGamepad(): void {
       movePlayer(dx, dy);
       gpMoveCd = 8; // ~480ms at 60ms poll — controllable stepping pace
     }
-    if (gpMoveCd > 0 && Math.abs(ax) <= 0.5 && Math.abs(ay) <= 0.5) gpMoveCd = 0;
+    if (gpMoveCd > 0 && Math.abs(ax) <= 0.5 && Math.abs(ay) <= 0.5 && !hx && !hy) gpMoveCd = 0;
     // Action buttons (edge-triggered) — dispatch via table lookup.
+    // 批13: a first directional press arms the shared cooldown so the
+    // held-repeat below keeps one rhythm with the stick path above.
     for (let i = 0; i < gp.buttons.length; i++) {
       if (edge(i)) {
         const a = buttonToAction(i);
-        if (a) dispatchGamepadAction(a, false);
+        if (a) {
+          dispatchGamepadAction(a, false);
+          if (a === 'move_up' || a === 'move_down' || a === 'move_left' || a === 'move_right') gpMoveCd = 8;
+        }
       }
     }
+    // 批13: held-direction repeat — the same walking cadence the stick uses.
+    // Diagonals: pressing two bound directions at once moves both axes, like
+    // the stick's 8-direction handling above. (hx/hy from the branch-top scan.)
+    if ((hx || hy) && gpMoveCd <= 0) { movePlayer(hx, hy); gpMoveCd = 8; }
   }
   if (gpMoveCd > 0) gpMoveCd--;
   gpPrevBtn = gp.buttons.map(b => !!(b && b.pressed));
