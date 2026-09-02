@@ -86,10 +86,143 @@ def _caps() -> dict:
     vline(g, 0, 0, 13)
     hline(g, 0, 0, 9); hline(g, 6, 0, 8); hline(g, 12, 0, 9); G['E'] = g
 
+    # ---- Task 2: 余下大写（plan 结构表逐字） ----
+    g = cap()                                             # A：双竖 + 顶拱 + 中横
+    vline(g, 1, 0, 13); vline(g, 6, 0, 13)
+    hline(g, 0, 1, 8); hline(g, 6, 1, 8); G['A'] = g
+
+    g = cap()                                             # B：左竖 + 三横 + 右双腔竖
+    vline(g, 0, 0, 13)
+    hline(g, 0, 0, 7); hline(g, 6, 0, 7); hline(g, 12, 0, 7)
+    vline(g, 7, 1, 5); vline(g, 7, 7, 11); G['B'] = g
+
+    g = cap()                                             # C：顶/底横 + 左竖
+    hline(g, 0, 1, 8); hline(g, 12, 1, 8); vline(g, 1, 2, 11); G['C'] = g
+
+    g = cap()                                             # D：左竖 + 顶/底横 + 右竖
+    vline(g, 0, 0, 13); serif_tip(g, 0, 0, -1); serif_tip(g, 0, 13, -1)
+    hline(g, 0, 0, 6); hline(g, 12, 0, 6); vline(g, 7, 2, 11); G['D'] = g
+
+    g = cap()                                             # F：E 去底横
+    vline(g, 0, 0, 13)
+    hline(g, 0, 0, 9); hline(g, 6, 0, 8); G['F'] = g
+
+    g = cap()                                             # G：C + 右下竖 + 入笔横
+    hline(g, 0, 1, 8); hline(g, 12, 1, 8); vline(g, 1, 2, 11)
+    vline(g, 7, 7, 11); hline(g, 7, 5, 7); G['G'] = g
+
+    g = cap()                                             # J：右竖 + 底横 + 左短竖
+    vline(g, 7, 0, 11); hline(g, 12, 2, 9); vline(g, 2, 10, 11); G['J'] = g
+
+    g = cap()                                             # K：左竖 + 双对角腿
+    vline(g, 0, 0, 13); serif_tip(g, 0, 0, -1); serif_tip(g, 0, 13, -1)
+    diag(g, 3, 5, 9, 0); diag(g, 3, 5, 9, 13); G['K'] = g
+
+    g = cap()                                             # M：双竖 + V 形穹顶
+    vline(g, 0, 0, 13); vline(g, 7, 0, 13)
+    serif_tip(g, 0, 0, -1); serif_tip(g, 0, 13, -1); serif_tip(g, 7, 0, 1); serif_tip(g, 7, 13, 1)
+    diag(g, 2, 2, 5, 6); diag(g, 5, 6, 8, 2); G['M'] = g
+
+    g = cap()                                             # N：双竖 + 主对角
+    vline(g, 0, 0, 13); vline(g, 7, 0, 13)
+    serif_tip(g, 0, 0, -1); serif_tip(g, 0, 13, -1); serif_tip(g, 7, 0, 1); serif_tip(g, 7, 13, 1)
+    diag(g, 2, 2, 8, 13); G['N'] = g
+
+    g = cap()                                             # O：左/右竖 + 顶/底横
+    vline(g, 1, 2, 11); vline(g, 6, 2, 11)
+    hline(g, 0, 1, 8); hline(g, 12, 1, 8); G['O'] = g
+
+    g = cap()                                             # P：左竖 + 顶/中横 + 右上竖
+    vline(g, 0, 0, 13); serif_tip(g, 0, 0, -1); serif_tip(g, 0, 13, -1)
+    hline(g, 0, 0, 7); hline(g, 6, 0, 7); vline(g, 7, 1, 6); G['P'] = g
+
+    g = cap()                                             # Q：O + 对角尾
+    vline(g, 1, 2, 11); vline(g, 6, 2, 11)
+    hline(g, 0, 1, 8); hline(g, 12, 1, 8); diag(g, 5, 10, 9, 13); G['Q'] = g
+
+    g = cap()                                             # R：P + 对角腿
+    vline(g, 0, 0, 13); serif_tip(g, 0, 0, -1); serif_tip(g, 0, 13, -1)
+    hline(g, 0, 0, 7); hline(g, 6, 0, 7); vline(g, 7, 1, 6)
+    diag(g, 3, 7, 9, 13); G['R'] = g
+
+    g = cap()                                             # S：三横 + 左上/右下短竖
+    hline(g, 0, 1, 8); hline(g, 6, 1, 8); hline(g, 12, 1, 8)
+    vline(g, 1, 1, 5); vline(g, 7, 7, 11); G['S'] = g
+
+    g = cap()                                             # U：双竖 + 底横
+    vline(g, 0, 0, 13); vline(g, 7, 0, 13)
+    serif_tip(g, 0, 0, -1); serif_tip(g, 7, 0, 1)
+    hline(g, 12, 0, 9); G['U'] = g
+
+    g = cap()                                             # V：双斜汇聚
+    diag(g, 1, 0, 5, 13); diag(g, 8, 0, 5, 13); G['V'] = g
+
+    g = cap()                                             # W：双竖 + Λ 形底连
+    vline(g, 0, 0, 11); vline(g, 7, 0, 11)
+    serif_tip(g, 0, 0, -1); serif_tip(g, 7, 0, 1)
+    diag(g, 2, 11, 5, 7); diag(g, 5, 7, 8, 11); G['W'] = g
+
+    g = cap()                                             # X：双对角交叉
+    diag(g, 1, 1, 8, 13); diag(g, 8, 1, 1, 13); G['X'] = g
+
+    g = cap()                                             # Y：双斜 + 中竖
+    diag(g, 1, 0, 5, 6); diag(g, 9, 0, 5, 6); vline(g, 5, 6, 13); G['Y'] = g
+
+    g = cap()                                             # Z：顶/底横 + 主对角
+    hline(g, 0, 0, 9); hline(g, 12, 0, 9); diag(g, 8, 1, 1, 12); G['Z'] = g
+
     return G
 
 
-GLYPHS: dict = {**_caps()}
+# ---- 数字 8×14, baseline=13 ----
+
+def _digits() -> dict:
+    G = {}
+
+    def dig() -> Glyph:
+        return Glyph(8, 14, 13)
+
+    g = dig()                                             # 0：双竖 + 顶/底横
+    vline(g, 0, 2, 11); vline(g, 5, 2, 11)
+    hline(g, 0, 0, 7); hline(g, 12, 0, 7); G['0'] = g
+
+    g = dig()                                             # 1：中竖 + 顶入笔斜 + 底横
+    vline(g, 3, 2, 11); diag(g, 1, 3, 3, 1); hline(g, 12, 0, 7); G['1'] = g
+
+    g = dig()                                             # 2：顶横+右上竖+中对角+左下竖+底横
+    hline(g, 0, 0, 7); vline(g, 5, 1, 5)
+    diag(g, 5, 5, 0, 9); vline(g, 0, 8, 11); hline(g, 12, 0, 7); G['2'] = g
+
+    g = dig()                                             # 3：顶/中/底横 + 右竖两段
+    hline(g, 0, 0, 7); hline(g, 6, 0, 6); hline(g, 12, 0, 7)
+    vline(g, 5, 1, 6); vline(g, 5, 7, 11); G['3'] = g
+
+    g = dig()                                             # 4：左竖上半 + 中横 + 右竖全高
+    vline(g, 0, 0, 7); hline(g, 6, 0, 5); vline(g, 5, 0, 13); G['4'] = g
+
+    g = dig()                                             # 5：左竖上段 + 顶/中横 + 右下竖 + 底横
+    vline(g, 0, 0, 6); hline(g, 0, 0, 7); hline(g, 6, 0, 6)
+    vline(g, 5, 7, 11); hline(g, 12, 0, 7); G['5'] = g
+
+    g = dig()                                             # 6：左竖全高 + 顶/中横 + 右下竖 + 底横
+    vline(g, 0, 0, 13); hline(g, 0, 0, 7); hline(g, 6, 0, 6)
+    vline(g, 5, 7, 11); hline(g, 12, 0, 7); G['6'] = g
+
+    g = dig()                                             # 7：顶横 + 长斜腿
+    hline(g, 0, 0, 7); diag(g, 6, 1, 1, 13); G['7'] = g
+
+    g = dig()                                             # 8：左竖全高 + 三横 + 右竖两段
+    vline(g, 0, 0, 13); hline(g, 0, 0, 7); hline(g, 6, 0, 7); hline(g, 12, 0, 7)
+    vline(g, 5, 1, 5); vline(g, 5, 7, 11); G['8'] = g
+
+    g = dig()                                             # 9：左竖上段 + 顶/中横 + 右竖全高 + 底横
+    vline(g, 0, 0, 6); hline(g, 0, 0, 7); hline(g, 6, 0, 6)
+    vline(g, 5, 0, 13); hline(g, 12, 0, 7); G['9'] = g
+
+    return G
+
+
+GLYPHS: dict = {**_caps(), **_digits()}
 
 
 def validate_glyphs(chars: set) -> list:

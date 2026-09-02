@@ -9,7 +9,7 @@ from glyphs import Glyph, GLYPHS, validate_glyphs, VW, HW, ADV
 
 check('glyph H exists and is 10x14', 'H' in GLYPHS and GLYPHS['H'].width == 10 and GLYPHS['H'].height == 14)
 check('validate passes for the seeded set', validate_glyphs(set('HIELT')) == [])
-bad = validate_glyphs({'X'})  # X not seeded yet in Task 1
+bad = validate_glyphs({'Ø'})  # a glyph that will never exist
 check('validate flags missing glyph', bad != [])
 check('H ink present on both stems', GLYPHS['H'].px(1, 7) and GLYPHS['H'].px(7, 7))
 check('stem width is 3 (竖笔，取纯竖行 y=4 避开中横)', GLYPHS['H'].px(0, 4) and GLYPHS['H'].px(1, 4) and GLYPHS['H'].px(2, 4) and not GLYPHS['H'].px(3, 4))
@@ -22,7 +22,8 @@ errs = validate_glyphs(ALNUM)
 check('A-Z + 0-9 complete (36 glyphs)', errs == [], str(errs[:3]))
 for ch in 'AOHK27':
     g = GLYPHS[ch]
-    check(f'{ch} ink 10%-60% sanity', 0.10 <= g.ink_ratio() <= 0.60, f'{g.ink_ratio():.2f}')
+    # 双竖全高字形（H/A/O）竖 3px×2 已占 6/10 列，着墨率上限放宽到 72%
+    check(f'{ch} ink 10%-72% sanity', 0.10 <= g.ink_ratio() <= 0.72, f'{g.ink_ratio():.2f}')
 
 # Task 3 增补：全字符集 85
 FULL = set(string.ascii_letters + string.digits + ".,:;!?-'\"-+/()<>= ♥✦★")
