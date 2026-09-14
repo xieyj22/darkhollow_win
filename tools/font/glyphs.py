@@ -529,6 +529,7 @@ if __name__ == '__main__':
     # 开发目检：python glyphs.py A H（Win 控制台 cp936 坑 → 强制 UTF-8）
     # 批15 修复：runicize() 经 `import glyphs as _self` 改的是 glyphs 模块的 GLYPHS，
     # __main__ 命名空间的 GLYPHS 从未被符文化 —— 直接打印会显示旧字形。改从 glyphs 模块取。
+    # （__main__ 自身的 GLYPHS/runicize/chisel 仍会先跑一遍，副本被丢弃——只为保持模块可独立执行）
     import sys, io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     import glyphs as _g

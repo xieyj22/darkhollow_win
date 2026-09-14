@@ -37,6 +37,17 @@ jobs:
         with:
           python-version: '3.12'
 
+      # 批15：字体三件套进 CI。版本必须 pin——test_build 的字节级三向门
+      # （重建==pin==产物）隐含绑定 fontTools/brotli 编码器版本，换版本会假红。
+      - name: Install font toolchain (pinned)
+        run: pip install fonttools==4.63.0 brotli==1.2.0
+
+      - name: Font pipeline tests (glyphs + erosion + 3-way artifact sync gate)
+        run: |
+          python tools/font/test_glyphs.py
+          python tools/font/test_erode.py
+          python tools/font/test_build.py
+
       - name: Install Playwright (library only — smoke uses system Chrome)
         run: pip install playwright
 

@@ -42,17 +42,20 @@ PIN = {'reg': '9d6a912d184cbe12', 'ero': 'b472f97744d734d3'}
 def _h(p): return hashlib.sha256(open(p, 'rb').read()).hexdigest()[:16]
 check('artifact drift pin (regular)', _h(REG) == PIN['reg'], _h(REG))
 check('artifact drift pin (eroded)', _h(ERO) == PIN['ero'], _h(ERO))
-# 三向同步：从当前源码重建（落临时目录，不触碰 public/），重建结果须与 pin 一致
+# 三向同步：从当前源码重建（落临时目录，不触碰 public/），重建结果须与 pin 一致。
+# 字节级 pin 隐含绑定 fontTools/brotli 编码器版本 —— 换版本致重建 hash 漂移时，
+# 先升级本机与 CI 的 pin 版本再重 build（本 pin 产自 fontTools 4.63.0 + brotli 1.2.0）。
 with tempfile.TemporaryDirectory() as td:
-    env = dict(os.environ)
     code = (
         'import sys, os; sys.path.insert(0, %r); import build_font as bf\n'
         'bf.OUT_DIR = %r\n'
         'bf.main()' % (os.path.dirname(os.path.abspath(__file__)), td)
     )
-    r = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, env=env)
-    rb_reg = _h(os.path.join(td, 'darkhollow-runes.woff2'))
-    rb_ero = _h(os.path.join(td, 'darkhollow-runes-eroded.woff2'))
+    r = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True)
+    # rc!=0 时产物可能缺失——先判存在再 hash，保证 FAIL 行能打出 stderr 尾部而非 traceback
+    _reg_p, _ero_p = os.path.join(td, 'darkhollow-runes.woff2'), os.path.join(td, 'darkhollow-runes-eroded.woff2')
+    rb_reg = _h(_reg_p) if os.path.isfile(_reg_p) else ''
+    rb_ero = _h(_ero_p) if os.path.isfile(_ero_p) else ''
     check('rebuild-from-source is deterministic & matches pin (regular)', r.returncode == 0 and rb_reg == PIN['reg'],
           f'rc={r.returncode} {rb_reg}' + (r.stderr[-200:] if r.returncode else ''))
     check('rebuild-from-source is deterministic & matches pin (eroded)', r.returncode == 0 and rb_ero == PIN['ero'],

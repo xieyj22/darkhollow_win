@@ -36,7 +36,6 @@ check('erosion actually bites (>=25/36 differ)', eroded_n >= 25, str(eroded_n))
 # 6) shipped seed 逐字形：保持率 ≥0.78 且全部走了完整侵蚀（非降级/非原样返回）
 # （批15 修复：原中间 exit 块让本 check 成为死代码，M4 门从未生效——删之）
 import erode as _e
-import inspect
 degraded = []
 for ch in ALNUM:
     g = GLYPHS[ch]
@@ -44,11 +43,14 @@ for ch in ALNUM:
     r = ink(out) / ink(g)
     if r < 0.78: degraded.append(f'{ch}:{r:.2f}')
     # 非降级：与原版不同（降级也可能不同，弱断言）+ 啃噬量与边缘点规模相称：
-    # "32% 啃噬必然移除大量"只对边缘点多的字形成立 —— O 形（回字双线环）全字仅 4 个
-    # ≥2 空邻的边缘点，完整路径也只咬 1-2 点，故边缘点 <8 的字形只要求"确实发生了侵蚀"
+    # "32% 啃噬必然移除大量"只对边缘点多的字形成立。批15 review 实测（seed 13）：
+    #   厚封闭环仅 4 个 ≥2 空邻边缘点 → O(0.98) 0(0.97) 8(0.97) 真需豁免 97% 啃噬检查；
+    #   6-7 边缘点的 C/J/Q/U/9/P/4/6 实测保持率 0.88-0.93，无需豁免也能过线；
+    #   ≥8 边缘点（B/E/H/I/3 等）保持率 0.88-0.93，规则实际咬合。
+    # 故阈值取 6：豁免集恰为 O/0/8，全部仍受 untouched 检查保护。
     n_edge = len(_e._edge_points(g))
     if out.g == g.g: degraded.append(f'{ch}:untouched')
-    elif n_edge >= 8 and ink(out) > ink(g) * 0.97: degraded.append(f'{ch}:no-bite')
+    elif n_edge >= 6 and ink(out) > ink(g) * 0.97: degraded.append(f'{ch}:no-bite')
 check('shipped seed 13: every glyph fully eroded, none degraded', not degraded, str(degraded[:4]))
 
 fails = [n for n, ok in RESULTS if not ok]

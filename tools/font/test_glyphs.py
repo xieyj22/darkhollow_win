@@ -19,8 +19,8 @@ check('unified advance is 12px', ADV == 12)
 # ---- 批15：runicize 扩展 +6（Lᛚ Hᚻ Kᚲ Wᚹ Sᛋ Pᛈ）特征断言 ----
 check('L runic ᛚ: full-height stem + low diagonal branch, no bottom bar',
       GLYPHS['L'].px(3, 0) and GLYPHS['L'].px(8, 13) and not GLYPHS['L'].px(5, 12))
-check('K runic ᚲ: stem + twin short down-diagonals',
-      GLYPHS['K'].px(3, 0) and GLYPHS['K'].px(6, 4) and GLYPHS['K'].px(6, 9))
+check('K runic ᚲ: stem + twin short down-diagonals (direction pinned — mirror fails)',
+      GLYPHS['K'].px(3, 0) and GLYPHS['K'].px(6, 4) and GLYPHS['K'].px(6, 9) and not GLYPHS['K'].px(6, 2))
 check('W runic ᚹ: stem + rising apex arm, clean below',
       GLYPHS['W'].px(3, 7) and GLYPHS['W'].px(7, 2) and not GLYPHS['W'].px(7, 10))
 check('S runic ᛋ: two offset steep strokes, no full-height stem',
@@ -36,7 +36,7 @@ errs = validate_glyphs(ALNUM)
 check('A-Z + 0-9 complete (36 glyphs)', errs == [], str(errs[:3]))
 for ch in 'AOHK27':
     g = GLYPHS[ch]
-    # 双竖全高字形（H/A/O）竖 3px×2 已占 6/10 列，着墨率上限放宽到 72%
+    # 批15 后仅 O 保留双竖全高；Hᚻ/Aᚨ 已单竖化，72% 上限沿用（O 竖 3px×2 占 6/10 列仍是最密）
     check(f'{ch} ink 10%-72% sanity', 0.10 <= g.ink_ratio() <= 0.72, f'{g.ink_ratio():.2f}')
 
 # Task 3 增补：全字符集 85
