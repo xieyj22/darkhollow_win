@@ -29,13 +29,34 @@ if os.path.isfile(REG) and os.path.isfile(ERO):
         advs = {hm[ch][0] for ch in f.getGlyphOrder() if ch != '.notdef'}
         check(f'{family}: unified advance', len(advs) == 1, str(advs))
 
-# M5: artifact-drift pin —— glyphs.py/erode.py/build_font.py 改动后必须重跑 build_font.py，
-# 否则此断言失败（防 stale woff2 静默上线）。
+# M5: artifact-drift pin（批15 重制为真同步门）——
+# 批14 版缺陷①：fontTools 默认 recalcTimestamp 使每次 build 字节必变，pin 语义反转
+# （"改字形不 build"时产物未变反而绿、正常 rebuild 必红）。缺陷②：即便字节稳定，
+# pin 只比对"已提交产物 vs 常量"，仍检测不到"改了 glyphs.py 但没重 build"。
+# 现构建已确定性（STAMP 常量 + recalcTimestamp=False），门升级为三向同步：
+# 源码重建 hash == pin == 已提交产物。任一侧漂移即红。
 import hashlib
-PIN = {'reg': 'a4ebdba5e43f7c62', 'ero': '137bf671c3e64661'}
+import subprocess
+import tempfile
+PIN = {'reg': '9d6a912d184cbe12', 'ero': 'b472f97744d734d3'}
 def _h(p): return hashlib.sha256(open(p, 'rb').read()).hexdigest()[:16]
 check('artifact drift pin (regular)', _h(REG) == PIN['reg'], _h(REG))
 check('artifact drift pin (eroded)', _h(ERO) == PIN['ero'], _h(ERO))
+# 三向同步：从当前源码重建（落临时目录，不触碰 public/），重建结果须与 pin 一致
+with tempfile.TemporaryDirectory() as td:
+    env = dict(os.environ)
+    code = (
+        'import sys, os; sys.path.insert(0, %r); import build_font as bf\n'
+        'bf.OUT_DIR = %r\n'
+        'bf.main()' % (os.path.dirname(os.path.abspath(__file__)), td)
+    )
+    r = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, env=env)
+    rb_reg = _h(os.path.join(td, 'darkhollow-runes.woff2'))
+    rb_ero = _h(os.path.join(td, 'darkhollow-runes-eroded.woff2'))
+    check('rebuild-from-source is deterministic & matches pin (regular)', r.returncode == 0 and rb_reg == PIN['reg'],
+          f'rc={r.returncode} {rb_reg}' + (r.stderr[-200:] if r.returncode else ''))
+    check('rebuild-from-source is deterministic & matches pin (eroded)', r.returncode == 0 and rb_ero == PIN['ero'],
+          f'rc={r.returncode} {rb_ero}')
 
 fails = [n for n, ok in RESULTS if not ok]
 print(f"TOTAL {len(RESULTS)-len(fails)}/{len(RESULTS)}")

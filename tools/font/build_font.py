@@ -13,6 +13,10 @@ from erode import erode
 SCALE = 64            # 1px = 64 units
 UPM = 1024            # units per em（=16px 语义网格）
 SEED = 13             # 侵蚀种子（spec：固定种子=确定性）
+# 批15 修复：head 时间戳固定常量（2026-09-02，批14 spec 日；Mac epoch 1904 起）。
+# 原本 fontTools 写入构建时刻 → 同源码每次 build 字节 hash 必变 → M5 pin 语义反转
+# （"改字形不 build"反而绿、正常 rebuild 必红）。固定后同字形=同字节，pin 恢复本义。
+STAMP = 3871152000
 OUT_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'public', 'fonts')
 
 
@@ -67,10 +71,16 @@ def build(subset: dict, family: str, style: str, woff2_path: str) -> None:
     # format 3.0（无 glyph 名）—— ♥✦★ 等字形名超出 latin-1，format 2.0 会炸
     fb.setupPost(keepGlyphNames=False)
 
+    # 批15：TTFont.save 默认 recalcTimestamp=True 会把 head.modified 刷成当前时刻
+    # （覆盖 STAMP 赋值，连带 checkSumAdjustment 漂移）—— 两处 save 都必须关掉
+    fb.font.recalcTimestamp = False
+    fb.font['head'].created = STAMP
+    fb.font['head'].modified = STAMP
+
     ttf_tmp = woff2_path + '.tmp.ttf'
     fb.save(ttf_tmp)
 
-    f = TTFont(ttf_tmp)
+    f = TTFont(ttf_tmp, recalcTimestamp=False)
     f.flavor = 'woff2'
     f.save(woff2_path)
     os.remove(ttf_tmp)
