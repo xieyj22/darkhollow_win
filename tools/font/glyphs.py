@@ -451,32 +451,60 @@ GLYPHS: dict = {**_caps(), **_digits(), **_lower(), **_symbols()}
 
 def runicize() -> None:
     """批14 目检轮2：半符文化 —— 部分大写改北欧符文形（spec 风格"铭文石刻"的最高形态）。
-    只改形状仍可辨识的字母；DEPTHS OF DARKHOLLOW 里 D/E/P/T/H/S/O/F/R/K/L/W。"""
-    import glyphs as _self
-
-    def blank(): return _self.Glyph(10, 14, 13)
+    只改形状仍可辨识的字母；DEPTHS OF DARKHOLLOW 里 D/E/P/T/H/S/O/F/R/K/L/W。
+    批15 中庸+6（用户裁决）：Lᛚ Hᚻ Kᚲ Wᚹ Sᛋ Pᛈ —— 家族语法保持"单竖主干 + 斜枝/角枝"
+    （Sᛋ 闪电形破例无竖，Z 系构图），可辨性靠"有无横线/封闭腔"与 Z/D 区分。"""
+    def blank(): return Glyph(10, 14, 13)
 
     # T → ᛏ：全高竖 + 顶部上箭头（两短斜）
-    g = blank(); _self.vline(g, 4, 0, 13); _self.diag(g, 1, 3, 4, 0); _self.diag(g, 9, 3, 6, 0)
-    _self.GLYPHS['T'] = g
+    g = blank(); vline(g, 4, 0, 13); diag(g, 1, 3, 4, 0); diag(g, 9, 3, 6, 0)
+    GLYPHS['T'] = g
 
     # F → ᚠ：全高竖 + 两条上斜枝
-    g = blank(); _self.vline(g, 2, 0, 13); _self.diag(g, 4, 2, 9, 0); _self.diag(g, 4, 8, 9, 6)
-    _self.GLYPHS['F'] = g
+    g = blank(); vline(g, 2, 0, 13); diag(g, 4, 2, 9, 0); diag(g, 4, 8, 9, 6)
+    GLYPHS['F'] = g
 
     # N → ᚾ：全高竖 + 一条上斜枝（不出竖右界）
-    g = blank(); _self.vline(g, 2, 0, 13); _self.diag(g, 4, 8, 9, 1)
-    _self.GLYPHS['N'] = g
+    g = blank(); vline(g, 2, 0, 13); diag(g, 4, 8, 9, 1)
+    GLYPHS['N'] = g
 
     # A → ᚨ：全高竖 + 两条全对角贯穿斜线
-    g = blank(); _self.vline(g, 0, 0, 13)
-    _self.diag(g, 0, 2, 8, 11); _self.diag(g, 0, 8, 8, 13)
-    _self.GLYPHS['A'] = g
+    g = blank(); vline(g, 0, 0, 13)
+    diag(g, 0, 2, 8, 11); diag(g, 0, 8, 8, 13)
+    GLYPHS['A'] = g
 
     # R → ᚱ：竖 + 三角腔 + 斜腿（原 R 强化斜腔）
-    g = blank(); _self.vline(g, 0, 0, 13)
-    _self.diag(g, 1, 0, 7, 4); _self.diag(g, 7, 4, 1, 8); _self.diag(g, 2, 8, 9, 13)
-    _self.GLYPHS['R'] = g
+    g = blank(); vline(g, 0, 0, 13)
+    diag(g, 1, 0, 7, 4); diag(g, 7, 4, 1, 8); diag(g, 2, 8, 9, 13)
+    GLYPHS['R'] = g
+
+    # ---- 批15 扩展（中庸+6）----
+
+    # L → ᛚ：全高竖 + 低起点右下斜枝（斜枝取代拉丁 L 的底横）
+    g = blank(); vline(g, 2, 0, 13); diag(g, 4, 8, 8, 13)
+    GLYPHS['L'] = g
+
+    # H → ᚻ：全高竖 + 双横枝（横枝与 Kᚲ 的斜枝拉开方向差；旧双竖形退役）
+    g = blank(); vline(g, 2, 0, 13); hline(g, 2, 4, 8); hline(g, 8, 4, 8)
+    GLYPHS['H'] = g
+
+    # K → ᚲ：全高竖 + 双短陡下斜枝（短枝与 Aᚨ 的长贯穿枝拉开斜率差）
+    g = blank(); vline(g, 2, 0, 13)
+    diag(g, 4, 2, 8, 7); diag(g, 4, 7, 8, 12)
+    GLYPHS['K'] = g
+
+    # W → ᚹ：全高竖 + ∧ 尖角枝（尖顶呼应 W 双峰；与 Fᚠ 下斜枝方向相反）
+    g = blank(); vline(g, 2, 0, 13)
+    diag(g, 4, 7, 7, 2); diag(g, 7, 2, 9, 7)
+    GLYPHS['W'] = g
+
+    # S → ᛋ：双平行陡斜线错位连接（闪电形，无横线与 Z 区分、无竖骨架 Z 系破例）
+    g = blank(); diag(g, 1, 0, 6, 6); diag(g, 3, 7, 8, 13)
+    GLYPHS['S'] = g
+
+    # P → ᛈ：全高竖 + 右壁 + 底横、顶口敞开（骰子杯形；与 D 的封闭鼓形区分）
+    g = blank(); vline(g, 2, 0, 13); vline(g, 7, 3, 9); hline(g, 8, 4, 7)
+    GLYPHS['P'] = g
 
 
 runicize()
@@ -499,9 +527,12 @@ chisel_all()
 
 if __name__ == '__main__':
     # 开发目检：python glyphs.py A H（Win 控制台 cp936 坑 → 强制 UTF-8）
+    # 批15 修复：runicize() 经 `import glyphs as _self` 改的是 glyphs 模块的 GLYPHS，
+    # __main__ 命名空间的 GLYPHS 从未被符文化 —— 直接打印会显示旧字形。改从 glyphs 模块取。
     import sys, io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    import glyphs as _g
     for ch in sys.argv[1:]:
-        print(f'--- {ch} ({GLYPHS[ch].width}x{GLYPHS[ch].height}) ---')
-        print(GLYPHS[ch].render_ascii())
+        print(f'--- {ch} ({_g.GLYPHS[ch].width}x{_g.GLYPHS[ch].height}) ---')
+        print(_g.GLYPHS[ch].render_ascii())
 
