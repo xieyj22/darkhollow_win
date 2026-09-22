@@ -9,11 +9,12 @@ vi.mock('../state.js', () => ({
 }));
 
 // Mock attack() to mirror the real damage formula without dragging in
-// talents/relics/meta/corruption. Real attack() does `dmg = max(1, atk - def)`
-// (ignoring the rng(-2,2) jitter for deterministic tests) then `def.hp -= dmg`.
+// talents/relics/meta/corruption. Real attack() (batch17 T1) does
+// `dmg = max(1, floor(atk * 100 / (100 + def)))` (ignoring the rng(-2,2)
+// jitter for deterministic tests) then `def.hp -= dmg`.
 vi.mock('../combat.js', () => ({
   attack: (atk: { atk: number }, def: { hp: number; def: number }, _isP: boolean): boolean => {
-    const dmg = Math.max(1, atk.atk - def.def);
+    const dmg = Math.max(1, Math.floor(atk.atk * 100 / (100 + def.def)));
     def.hp -= dmg;
     return def.hp <= 0;
   },
@@ -109,7 +110,7 @@ describe('executeEnemySkill', () => {
     const e = mk({ atk: 20, x: 1, y: 0 });
     G().player.x = 0; G().player.y = 0; G().player.def = 0;
     executeEnemySkill(e, { name: { en: 'Z', zh: 'Z' }, effect: 'dmg_bolt', chance: 1, cd: 1, dmg: 2 });
-    expect(G().player.hp).toBeLessThan(100);   // 20*2 - 0 = 40 dmg
+    expect(G().player.hp).toBeLessThan(100);   // floor((20*2)*100/(100+0)) = 40 dmg
   });
 
   it('dmg_aoe: hits player ignoring dodge + damages ally directly', () => {

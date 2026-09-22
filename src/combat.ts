@@ -82,7 +82,10 @@ export function endlessLootIsExclusive(
 
 export function attack(atk: Combatant, def: Combatant, isP: boolean): boolean {
   if (!G) return false;
-  let dmg = Math.max(1, atk.atk - def.def + rng(-2, 2));
+  // batch17 T1: percentage mitigation (K=100) — def=100 ⇒ 50% 减伤, 单调无 1-dmg 墙;
+  // 低层 def≤3 时与旧减法差 <1 (F1-15 体感不变)。调参入口=此常量 100。
+  const MITIG_K = 100;
+  let dmg = Math.max(1, Math.floor((atk.atk + rng(-2, 2)) * MITIG_K / (MITIG_K + def.def)));
 
   // Dodge / ward — player dodging enemy attack
   if (!isP && G.player.warded) {
