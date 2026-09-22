@@ -33,15 +33,40 @@ if all(os.path.isfile(p) for p in (ART, OFL, SRC)):
     cs = subset_zh.scan_charset(subset_zh.default_sources(ROOT))
     check('charset extraction non-trivial (1000..5000)', 1000 < len(cs) < 5000, f'{len(cs)} chars')
     cmap = f.getBestCmap()
-    missing = [c for c in cs if ord(c) not in cmap]
-    check('game charset 100% covered (缺失=0, 未来新字靠 fallback 雅黑兜底)', len(missing) == 0, ''.join(missing[:20]))
+    src_cmap = TTFont(SRC).getBestCmap()
+    # 覆盖语义（review I1 后）：源字体有的字形必须全收；源没有的（emoji/符文等）按设计
+    # 过滤 → CSS 栈 fallback 系统 emoji 字体，不算缺失
+    missing = [c for c in cs if ord(c) not in cmap and ord(c) in src_cmap]
+    skipped = ''.join(c for c in cs if ord(c) not in src_cmap)[:30]
+    check('source-covered charset 100% in artifact (源有必收)', len(missing) == 0, ''.join(missing[:20]))
+    check('source-absent chars intentionally skipped to fallback', all(ord(c) not in cmap for c in cs if ord(c) not in src_cmap), skipped)
+    # review I1: zh 串里的伴随符号（⚒ — … ·）必须收编——否则像素标题里混 JBM 入侵者。
+    # 伴随符号 = 出现在「含汉字的字面量」里的全部非 ASCII；en 独有符号不收（en 模式锚位零扰动）。
+    for sym in ['⚒', '—', '…', '·']:
+        check(f'companion symbol {sym!r} collected (review I1)', sym in cs)
 
-    # —— 确定性三向门（批15 纪律：recalcTimestamp=False + 固定源 → 字节可复现）——
+    # —— 扫描器行为锁定（字符串字面量粒度, RED-first）——
+    import tempfile, pathlib as _pl
+    with tempfile.TemporaryDirectory() as td:
+        probe = _pl.Path(td) / 'probe.ts'
+        probe.write_text(
+            "// 注释里的汉字铸不收\n"
+            "const enOnly = '★ Soul Forge';\n"
+            "const zhLit = '⚒ 铸魂炉 — 永久';\n"
+            "const url = 'https://x//深渊.example';\n",
+            encoding='utf-8')
+        got = subset_zh.scan_charset([probe])
+        check('scanner: zh literal companions collected (⚒—)', '⚒' in got and '—' in got)
+        check('scanner: en-only literal symbols excluded (★)', '★' not in got)
+        check('scanner: comment zh excluded', '注' not in got)
+        check('scanner: // inside string literal does not truncate scan (深渊 after // collected)',
+              '深' in got and '渊' in got)
+
+    # —— 确定性门（批15 纪律：recalcTimestamp=False + 固定源 → 字节可复现）——
+    # 单次重建对比产物即可证确定性（产物由上次运行产出 = 跨进程对照）;省 CI ~30s（review M3）
     def _h(b): return hashlib.sha256(b).hexdigest()[:16]
     art_bytes = open(ART, 'rb').read()
     b1 = subset_zh.build_subset(SRC, cs)
-    b2 = subset_zh.build_subset(SRC, cs)
-    check('rebuild deterministic (two in-process builds identical)', b1 == b2)
     check('rebuild == committed artifact (3-way sync)', b1 == art_bytes, f'rebuilt={_h(b1)} art={_h(art_bytes)}')
 
 fails = [n for n, ok in RESULTS if not ok]

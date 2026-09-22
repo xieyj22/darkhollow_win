@@ -7,7 +7,8 @@
 #   C4 面板标题 .panel h2 24px (开局开背包面板)
 #   C0 全程零 console error (favicon 404 按 location 白名单 — 批7 M7 纪律)
 # 产物: E:/tmp/batch16-title.png + batch16-death.png (用户目检)
-import subprocess, time, sys, os
+import subprocess, time, sys, os, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 from playwright.sync_api import sync_playwright
 
 URL = 'http://localhost:5173'
@@ -63,6 +64,26 @@ with sync_playwright() as p:
     pg.screenshot(path=f'{OUT}/batch16-title.png')
 
     # —— 进局 + C4 面板标题 ——
+    # —— C5 伴随符号真在像素字体里（review I1 复发守卫: 样本不含汉字, 缺字形则与 monospace 全等）——
+    symdiff = pg.evaluate("""(() => {
+      const c = document.createElement('canvas').getContext('2d');
+      c.font = '24px "Darkhollow Zh Pixel", monospace';
+      const m1 = c.measureText('⚒—…·');
+      c.font = '24px monospace';
+      const m2 = c.measureText('⚒—…·');
+      return m1.fontBoundingBoxAscent - m2.fontBoundingBoxAscent;
+    })()""")
+    check('C5 companion symbols (⚒—…·) render from ZhPixel', abs(symdiff) > 0.5, f'diff={symdiff}')
+
+    # —— C6 铸魂炉面（reviewer 点名的混排面）: 标题像素化 + 截图 ——
+    pg.click('#btn-forge'); pg.wait_for_timeout(400)
+    ft = pg.evaluate("getComputedStyle(document.getElementById('forge-title'))")
+    ftt = pg.evaluate("document.getElementById('forge-title').textContent")
+    check('C6a forge title stack contains ZhPixel', 'Darkhollow Zh Pixel' in ft['fontFamily'], ft['fontFamily'])
+    check('C6b forge title is zh text', '铸魂炉' in ftt, ftt)
+    pg.screenshot(path=f'{OUT}/batch16-forge.png')
+    pg.click('#btn-close-forge'); pg.wait_for_timeout(200)
+
     pg.click('#btn-new'); pg.wait_for_timeout(400)
     cs = pg.evaluate("getComputedStyle(document.querySelector('#char-sel h2'))")
     check('C4a #char-sel h2 stack contains ZhPixel', 'Darkhollow Zh Pixel' in cs['fontFamily'], cs['fontFamily'])

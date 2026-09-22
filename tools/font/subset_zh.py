@@ -25,6 +25,12 @@ def _is_zh(c: str) -> bool:
     return (0x2E80 <= o <= 0x9FFF) or (0xFF00 <= o <= 0xFFEF) or (0x3000 <= o <= 0x303F)
 
 
+# 字符串字面量提取（review I1）：只从「含汉字的字面量」收集全部非 ASCII——
+# 伴随符号（⚒ — … ·）随中文串收编避免像素标题混 JBM 入侵者；en 独有符号不收
+# （en 模式锚位零扰动）；注释里的汉字天然不进字面量。不处理转义/插值=优雅降级（漏→fallback）。
+_LIT_RE = re.compile(r"'([^'\\\n]*)'|\"([^\"\\\n]*)\"|`([^`\\]*)`")
+
+
 def default_sources(root: str) -> list:
     src = pathlib.Path(root) / 'src'
     files = [p for p in src.rglob('*.ts') if not p.name.endswith('.test.ts')]
@@ -36,9 +42,10 @@ def scan_charset(files) -> str:
     chars = set()
     for p in files:
         txt = p.read_text(encoding='utf-8')
-        txt = re.sub(r'//[^\n]*', '', txt)                     # 行注释
-        txt = re.sub(r'/\*.*?\*/', '', txt, flags=re.S)        # 块注释
-        chars.update(c for c in txt if _is_zh(c))
+        for m in _LIT_RE.finditer(txt):
+            lit = next(g for g in m.groups() if g is not None)
+            if any(_is_zh(c) for c in lit):
+                chars.update(c for c in lit if ord(c) > 0x7E)
     return ''.join(sorted(chars))
 
 
@@ -51,8 +58,10 @@ def build_subset(src_font: str, charset: str) -> bytes:
     opts.drop_tables += ['DSIG']
     font = TTFont(src_font)
     font.recalcTimestamp = False    # 保留源内时间戳 → 同源重建字节一致
+    # 源没有的字形（如 emoji）静默跳过 → 留在 CSS 栈 fallback（系统 emoji 字体）
+    have = ''.join(c for c in charset if ord(c) in font.getBestCmap())
     ss = subset.Subsetter(options=opts)
-    ss.populate(text=charset)
+    ss.populate(text=have)
     ss.subset(font)
     # 改名（OFL 无 RFN → Modified Version 可改名）；Mac(1,0,0)+Win(3,1,0x409) 双记录
     nm = font['name']
