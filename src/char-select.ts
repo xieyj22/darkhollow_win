@@ -31,7 +31,7 @@ export function showCharSelect(deps: CharSelDeps): void {
   ];
   const modeHtml = modeOpts.map((m, i) =>
     opt('mode-opt', i, `<b>${m.n}</b> <span style="color:#666;font-size:.9em">${m.d}</span>`)).join('');
-  ov.innerHTML = `<h2 style="color:#e63946;margin-bottom:20px;font-size:1.8em">${t('createHero')}</h2>
+  ov.innerHTML = `<h2 style="color:#e63946;margin-bottom:20px;font-size:round(nearest,1.8em,12px)">${t('createHero')}</h2>
   <div style="display:flex;gap:30px;margin-bottom:20px;flex-wrap:wrap;justify-content:center">
   <div><h3 style="color:#8888aa;margin-bottom:10px">${t('race')}</h3>${raceHtml}</div>
   <div><h3 style="color:#8888aa;margin-bottom:10px">${t('cls')}</h3>${classHtml}</div>

@@ -47,6 +47,7 @@ jobs:
           python tools/font/test_glyphs.py
           python tools/font/test_erode.py
           python tools/font/test_build.py
+          python tools/font/test_subset_zh.py
 
       - name: Install Playwright (library only — smoke uses system Chrome)
         run: pip install playwright

@@ -4,6 +4,7 @@
    （带空格），patch 匹配无空格 ':root{' 命中了 media 块内同名规则。 */
 @font-face{font-family:'Darkhollow Runes';src:url('/fonts/darkhollow-runes.woff2') format('woff2');font-weight:normal;font-style:normal;font-display:swap}
 @font-face{font-family:'Darkhollow Runes Eroded';src:url('/fonts/darkhollow-runes-eroded.woff2') format('woff2');font-weight:normal;font-style:normal;font-display:swap}
+@font-face{font-family:'Darkhollow Zh Pixel';src:url('/fonts/darkhollow-zh-pixel.woff2') format('woff2');font-weight:normal;font-style:normal;font-display:swap}
 
 /* ===== Theme Variables ===== */
 :root {
@@ -34,6 +35,8 @@
   /* 批14: 专属字体栈（拉丁/数字位吃 Runes，中文位自然落 mono 的系统 fallback —— spec §6） */
   --font-runes: 'Darkhollow Runes', var(--font-mono);
   --font-eroded: 'Darkhollow Runes Eroded', var(--font-runes);
+  /* 批16: 中文像素字体（Fusion Pixel 12px 子集，OFL）——只上大字号锚位（12px 整数倍才锐利） */
+  --font-zh-px: 'Darkhollow Zh Pixel';
   --shadow-panel: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 20px rgba(0,0,0,0.5);
   --shadow-glow-red: 0 0 12px rgba(230,57,70,0.15);
   --shadow-glow-gold: 0 0 12px rgba(255,215,0,0.1);
@@ -79,9 +82,9 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:var(--font-
 #title-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,var(--bg-card) 0%,var(--bg-deep) 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:var(--z-modal)}
 #title-screen h1{font-family:var(--font-eroded);font-size:56px;color:var(--accent-red);text-shadow:0 0 20px #e6394688,0 0 40px #e6394644;margin-bottom:10px;letter-spacing:10px;animation:pt 3s ease-in-out infinite}
 @keyframes pt{0%,100%{text-shadow:0 0 20px #e6394688,0 0 40px #e6394644}50%{text-shadow:0 0 30px #e6394666,0 0 60px #e6394622}}
-#title-screen h2{color:#8888aa;font-size:1.1em;margin-bottom:30px;font-weight:normal}
+#title-screen h2{color:#8888aa;font-size:round(up, 1.1em, 12px);margin-bottom:30px;font-weight:normal}
 .title-particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
-.menu-btn{background:none;border:2px solid var(--accent-red);color:var(--accent-red);padding:12px 40px;font-family:var(--font-runes);font-size:1.1em;cursor:pointer;margin:6px;min-width:220px;border-left-width:0;border-radius:var(--radius-sm)}
+.menu-btn{background:none;border:2px solid var(--accent-red);color:var(--accent-red);padding:12px 40px;font-family:var(--font-zh-px), var(--font-runes);font-size:round(up, 1.1em, 12px);cursor:pointer;margin:6px;min-width:220px;border-left-width:0;border-radius:var(--radius-sm)}
 .menu-btn:hover{background:#e6394622;color:#ff6b6b;transform:scale(1.05);border-left-width:3px;box-shadow:var(--shadow-glow-red)}
 .menu-btn:active{transform:scale(.98)}
 #title-screen .controls-hint{color:var(--text-muted);font-size:.75em;margin-top:30px;max-width:420px;text-align:center;line-height:1.6}
@@ -134,7 +137,7 @@ canvas#game-canvas{image-rendering:pixelated}
 .overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-overlay);z-index:var(--z-overlay);align-items:center;justify-content:center;opacity:0}
 .overlay.active{opacity:1}
 .panel{background:linear-gradient(180deg,#1c1c30 0%,#16162a 100%);border:1px solid var(--border-bright);border-top:2px solid var(--accent-red);padding:22px;min-width:500px;max-width:620px;max-height:80vh;overflow-y:auto;border-radius:var(--radius-md);zoom:var(--ui-zoom,1);box-shadow:var(--shadow-panel),0 0 40px rgba(0,0,0,0.8),0 0 1px rgba(230,57,70,0.15)}
-.panel h2{font-family:var(--font-runes);color:var(--accent-red);margin-bottom:12px;font-size:1.4em;letter-spacing:2px;text-shadow:0 0 10px #e6394633}
+.panel h2{font-family:var(--font-zh-px), var(--font-runes);color:var(--accent-red);margin-bottom:12px;font-size:round(nearest, 1.4em, 12px);letter-spacing:2px;text-shadow:0 0 10px #e6394633}
 .is{margin:10px 0}.is h4{color:var(--text-secondary);margin-bottom:6px;font-size:var(--fs-sm);letter-spacing:.05em;border-bottom:1px solid var(--border-default);padding-bottom:3px}
 .ii{padding:5px 8px;margin:2px 0;cursor:pointer;border:1px solid transparent;border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center}
 .ii:hover{border-color:var(--accent-red-dim);background:#ffffff08}
@@ -158,7 +161,7 @@ canvas#game-canvas{image-rendering:pixelated}
 #death-screen,#victory-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:900;flex-direction:column;align-items:center;justify-content:center}
 #death-screen{background:rgba(10,0,0,.92);animation:df 1s ease}
 @keyframes df{from{opacity:0}to{opacity:1}}
-#death-screen h1{font-size:3em;color:var(--accent-red);margin-bottom:20px;animation:death-title 1.5s ease-out forwards}
+#death-screen h1{font-family:var(--font-zh-px), var(--font-mono);font-size:round(nearest, 3em, 12px);color:var(--accent-red);margin-bottom:20px;animation:death-title 1.5s ease-out forwards}
 @keyframes death-title{0%{opacity:0;transform:scale(1.4);letter-spacing:12px}50%{opacity:1}100%{transform:scale(1);letter-spacing:4px}}
 .death-stats,.death-echoes{animation:fade-in-up 1s ease 1s both}
 @keyframes fade-in-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -166,7 +169,7 @@ canvas#game-canvas{image-rendering:pixelated}
 /* ===== Victory Screen ===== */
 #victory-screen{background:rgba(10,10,0,.92);animation:vg 2s ease infinite alternate}
 @keyframes vg{from{background:rgba(10,10,0,.92)}to{background:rgba(20,15,5,.92)}}
-#victory-screen h1{font-size:3em;color:var(--accent-gold);margin-bottom:10px;text-shadow:0 0 30px #ffd70066;animation:victory-title 1.5s ease-out forwards}
+#victory-screen h1{font-family:var(--font-zh-px), var(--font-mono);font-size:round(nearest, 3em, 12px);color:var(--accent-gold);margin-bottom:10px;text-shadow:0 0 30px #ffd70066;animation:victory-title 1.5s ease-out forwards}
 @keyframes victory-title{0%{opacity:0;transform:scale(1.5);letter-spacing:12px}50%{opacity:1}100%{transform:scale(1);letter-spacing:2px}}
 .victory-stats,.victory-echoes{animation:fade-in-up 1s ease 1s both}
 #victory-screen h2{color:var(--accent-red);font-size:1.4em;margin-bottom:20px}
@@ -190,7 +193,7 @@ canvas#game-canvas{image-rendering:pixelated}
 /* ===== Floating Text ===== */
 .ft{position:fixed;pointer-events:none;z-index:var(--z-toast);font-family:var(--font-runes);font-weight:bold;font-size:16px;animation:fu 1s ease-out forwards;text-shadow:1px 1px 2px rgba(0,0,0,0.8)}
 @keyframes fu{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:.8;transform:translateY(-25px) scale(1.1)}100%{opacity:0;transform:translateY(-50px) scale(.8)}}
-.ft.crit{font-size:22px;animation:fu-crit 1s ease-out forwards}
+.ft.crit{font-family:var(--font-zh-px), var(--font-runes);font-size:24px;animation:fu-crit 1s ease-out forwards}
 @keyframes fu-crit{0%{opacity:1;transform:translateY(0) scale(1)}20%{transform:translateY(-10px) scale(1.4)}100%{opacity:0;transform:translateY(-55px) scale(.7)}}
 .ft.heal{animation:fu-heal 1s ease-out forwards}
 @keyframes fu-heal{0%{opacity:1;transform:translateY(0) scale(1)}30%{transform:translateY(-15px) scale(1.2)}100%{opacity:0;transform:translateY(-50px) scale(.8)}}
@@ -343,8 +346,8 @@ canvas.hb-icon{width:24px;height:24px}
 #talent-header{color:var(--accent-green);font-size:14px;margin:8px 0 4px}
 
 /* ===== Meta Progression — The Forge ===== */
-#char-sel h2{font-family:var(--font-runes)}
-#title-h2{font-family:var(--font-runes);font-size:1.05em;letter-spacing:3px;color:var(--text-secondary);margin:0 0 28px}
+#char-sel h2{font-family:var(--font-zh-px), var(--font-runes)}
+#title-h2{font-family:var(--font-zh-px), var(--font-runes);font-size:round(up, 1.05em, 12px);letter-spacing:3px;color:var(--text-secondary);margin:0 0 28px}
 
 .title-stats{font-family:var(--font-runes);display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin-top:15px;font-size:.8em;color:var(--text-secondary)}
 .title-stats .ts-item b{color:var(--accent-gold)}

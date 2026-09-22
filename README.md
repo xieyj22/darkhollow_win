@@ -42,6 +42,10 @@ TypeScript 5 · Vite 6 · Canvas 2D · Electron 42 · electron-builder 26 · Web
 
 MIT。
 
+游戏内嵌第三方字体资产:
+
+- **Darkhollow Zh Pixel** — 基于 [Fusion Pixel Font](https://github.com/TakWolf/fusion-pixel-font) 12px monospaced 简中子集(改名词族),版权 TakWolf,依 [SIL OFL 1.1](public/fonts/FusionPixel-OFL.txt) 授权(无 Reserved Font Name,子集+改名+随商业游戏分发合法;新增中文内容后可 `python tools/font/subset_zh.py` 重建子集)。
+
 ## 上架 Steam(代码侧已就绪)
 
 **dev 测试三步**(拿到 AppID 后):
