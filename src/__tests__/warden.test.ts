@@ -25,7 +25,7 @@ import { spawnWarden } from '../enemies.js';
 
 describe('wardenStats', () => {
   it('floor 1 (fs=1): deterministic baseline', () => {
-    const s = wardenStats(1);            // fs = 1 + 0*.12 = 1
+    const s = wardenStats(1);            // fs = 1 + 0*.10 = 1
     expect(s.hp).toBe(50);               // (45 + 1*5) * 1
     expect(s.maxHp).toBe(50);
     expect(s.atk).toBe(11);              // floor((10 + 1*1.6) * 1) = floor(11.6)
@@ -33,9 +33,9 @@ describe('wardenStats', () => {
     expect(s.exp).toBe(44);              // 40 + 1*4
   });
   it('floor 10 scales hp/atk by fs, def stays linear', () => {
-    const s = wardenStats(10);           // fs = 1 + 9*.12 = 2.08
-    expect(s.hp).toBe(Math.floor((45 + 50) * 2.08));   // 197
-    expect(s.atk).toBe(Math.floor((10 + 16) * 2.08));  // floor(54.08) = 54
+    const s = wardenStats(10);           // fs = 1 + 9*.10 = 1.9
+    expect(s.hp).toBe(Math.floor((45 + 50) * 1.9));    // 180
+    expect(s.atk).toBe(Math.floor((10 + 16) * 1.9));   // floor(49.4) = 49
     expect(s.def).toBe(Math.floor(4 + 10 * 0.6));      // 10
     expect(s.exp).toBe(80);             // 40 + 40
   });

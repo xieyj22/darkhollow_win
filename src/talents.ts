@@ -242,7 +242,9 @@ export function onEnemyHitPlayer(attacker: Enemy): void {
 
   // w_retaliation: 10% chance counter-attack
   if (tr(p, 'w_retaliation') > 0 && Math.random() < 0.1) {
-    const counterDmg = Math.max(1, p.atk - attacker.def);
+    // batch17 T1 semantics: mirror attack()'s percentage mitigation (K=100),
+    // incl. the rng(-2,2) jitter — def no longer hard-walls the counter at 1.
+    const counterDmg = Math.max(1, Math.floor((p.atk + rng(-2, 2)) * 100 / (100 + attacker.def)));
     attacker.hp -= counterDmg;
     flt(attacker.x, attacker.y, `-${counterDmg}↩`, '#ffd700');
     // tx() inline literal: zh/en interpoland orders differ ([name,dmg] vs [dmg,name]),

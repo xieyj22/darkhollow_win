@@ -4,11 +4,11 @@
 // owns the math + pick/sequence helpers it + combat.ts consume.
 import type { I18nText } from './types.js';
 
-// fs matches spawnEnemies: 1 + (floor-1)*.12 (area bonus intentionally omitted —
+// fs matches spawnEnemies: 1 + (floor-1)*.10 (area bonus intentionally omitted —
 // the Warden is a universal threat, not biome-scaled). def is NOT fs-scaled
 // (keeps it pierceable by a deep player's attack), matching the spec formula.
 export function wardenStats(floor: number): { hp: number; maxHp: number; atk: number; def: number; exp: number } {
-  const fs = 1 + (floor - 1) * 0.12;
+  const fs = 1 + (floor - 1) * 0.10;
   const hp = Math.floor((45 + floor * 5) * fs);
   return {
     hp, maxHp: hp,

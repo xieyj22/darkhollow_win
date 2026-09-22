@@ -36,7 +36,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
     const x = rng(rm.x + 1, rm.x + rm.w - 2), y = rng(rm.y + 1, rm.y + rm.h - 2);
     const se = el.filter(e => e.mf <= floor && e.mf >= Math.max(1, floor - 4) && e.mf >= 1);
     const base = se.length > 0 ? pick(se) : (pickWeightedByMf(el, floor) ?? pick(el));
-    const fs = 1 + (floor - 1) * .12 + (area ? area.enemyScaleBonus : 0);
+    const fs = 1 + (floor - 1) * .10 + (area ? area.enemyScaleBonus : 0);
     let nm = tx(base.n);
     let hpM = 1, atkM = 1, defM = 1, expM = 1, goldM = 1, isElite = false;
     if (floor >= 3 && Math.random() < Math.min(.25, .05 + floor * .01)) {
@@ -71,7 +71,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
   // it self-guarding regardless.
   if (floor > FINAL && floor % 5 === 0 && G && G.endless) {
     const base = pick(endlessBossPool());
-    const fs = 1 + (floor - 1) * .1; // boss scale (.1), not enemy scale (.12)
+    const fs = 1 + (floor - 1) * .1; // boss scale (.1), not enemy scale (.10)
     const br = rooms.length > 2 ? rooms[rooms.length - 2] : rooms[rooms.length - 1];
     ens.push(makeEnemy(base, br.cx, br.cy, fs, { isBoss: true }, tx(base.n)));
   }
@@ -85,7 +85,7 @@ export function spawnEnemies(floor: number, rooms: Room[]): Enemy[] {
 export function spawnBranchEnemies(rooms: Room[], entryFloor: number): Enemy[] {
   const pool = ENEMIES.filter(e => e.mf === 0);
   if (!pool.length) return [];
-  const fs = 1 + (entryFloor - 1) * .12;
+  const fs = 1 + (entryFloor - 1) * .10;
   const ens: Enemy[] = [];
   // Branch enemies are tuned ~0.7x main-line strength (side content, not critical path).
   const otherRooms = rooms.filter(r => r !== rooms[0]);
@@ -309,7 +309,7 @@ export function processEnemies(): void {
           const summonPool = ENEMIES.filter(en => en.mf <= fl && en.mf >= Math.max(1, fl - 6) && en.ai !== 'summon');
           if (summonPool.length > 0) {
             const base = pick(summonPool);
-            const fs = 1 + (fl - 1) * .12;
+            const fs = 1 + (fl - 1) * .10;
             // Spawn near the summoner
             const sx = e.x + rng(-2, 2), sy = e.y + rng(-2, 2);
             if (sx >= 0 && sx < MW && sy >= 0 && sy < MH &&
@@ -400,7 +400,7 @@ function bossSummonAdd(boss: Enemy): void {
     base = pool.length ? pick(pool) : undefined;
   }
   if (!base) return;
-  const fs = 1 + (fl - 1) * .12;
+  const fs = 1 + (fl - 1) * .10;
   for (let attempt = 0; attempt < 8; attempt++) {
     const sx = boss.x + rng(-2, 2), sy = boss.y + rng(-2, 2);
     if (sx < 0 || sx >= MW || sy < 0 || sy >= MH) continue;

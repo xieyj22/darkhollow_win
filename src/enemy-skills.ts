@@ -66,7 +66,8 @@ function castDamageAoe(caster: Enemy, sk: EnemySkill, col: string): void {
   // Allies in radius: direct damage (attack() would treat ally as player — see spec §2.4).
   const allies = G.enemies.filter(a => a.isAlly && a !== caster && dst(caster.x, caster.y, a.x, a.y) <= radius);
   for (const ally of allies) {
-    const raw = Math.max(1, caster.atk - ally.def);
+    // batch17 T1 semantics: mirror attack()'s percentage mitigation (K=100).
+    const raw = Math.max(1, Math.floor((caster.atk + rng(-2, 2)) * 100 / (100 + ally.def)));
     ally.hp -= raw; flt(ally.x, ally.y, `-${raw}`, col);
     if (ally.hp <= 0) { fxBurst(ally.x, ally.y, ally.c, 10, 0.8); }
   }

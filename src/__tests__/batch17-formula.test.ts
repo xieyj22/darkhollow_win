@@ -85,7 +85,7 @@ vi.mock('../meta.js', () => ({
 }));
 
 import { attack } from '../combat.js';
-import type { Enemy, Player } from '../types.js';
+import type { Enemy, EnemySkill, Player } from '../types.js';
 
 const mkEnemy = (hp: number, def: number): Enemy =>
   ({ name: 'T', x: 2, y: 2, hp, maxHp: hp, atk: 1, def, exp: 5, goldDrop: 5, el: 'none', res: {}, isAlly: false } as unknown as Enemy);
@@ -123,5 +123,56 @@ describe('batch17 T1 percentage-mitigation formula', () => {
     seedG({ atk: 0, def: 50, maxHp: 999, hp: 999, warded: false } as Partial<Player>, e);
     attack(e as any, (globalThis as any).G.player, false);
     expect(999 - (globalThis as any).G.player.hp).toBe(40);  // floor(60*100/150)=40 (old: 10)
+  });
+});
+
+// batch17 T2: enemy fs slope .12 → .10 (enemies.ts 4 sites + warden mirror) and
+// sanctum/endless area-bonus trim. data.js/warden.js are mocked above (combat.ts
+// import surface), so pin the real math via vi.importActual.
+describe('batch17 T2 enemy scale slope', () => {
+  it('sanctum area bonus 0.12 → 0.05, endless 0.15 → 0.10', async () => {
+    const { AREAS } = await vi.importActual<typeof import('../data.js')>('../data.js');
+    const sanctum = AREAS.find(a => a.id === 'sanctum')!;
+    const endless = AREAS.find(a => a.id === 'endless')!;
+    expect(sanctum.enemyScaleBonus).toBe(0.05);
+    expect(endless.enemyScaleBonus).toBe(0.10);
+  });
+
+  it('wardenStats mirrors .10 slope (fs = 1 + 10*.10 = 2.0 at F11)', async () => {
+    const { wardenStats } = await vi.importActual<typeof import('../warden.js')>('../warden.js');
+    const s = wardenStats(11);  // fs = 1 + 10*0.10 = 2.0
+    expect(s.atk).toBe(Math.floor((10 + 11 * 1.6) * 2.0));   // floor(55.2) = 55 (warden.ts base atk)
+    expect(s.hp).toBe(Math.floor((45 + 11 * 5) * 2.0));      // floor(200) = 200
+  });
+});
+
+// batch17 R6 riders (spec T1 global-formula semantics): the two remaining
+// subtraction-formula copies switch to percentage mitigation, K=100.
+describe('batch17 R6 formula-mirror riders', () => {
+  it('w_retaliation counter: atk10 vs def3 → max(1,floor((atk+rng(-2,2))*100/103)) = 7..11 (old: 7)', async () => {
+    const { onEnemyHitPlayer } = await vi.importActual<typeof import('../talents.js')>('../talents.js');
+    for (let i = 0; i <= 4; i++) {                 // rng sweep: Math.random=i/5 → rng(-2,2)=i-2
+      const attacker = mkEnemy(999, 3);
+      (globalThis as any).G = {
+        player: { atk: 10, talents: { talents: { w_retaliation: 1 } } } as unknown as Player,
+        enemies: [attacker], gameOver: false,
+      };
+      let calls = 0;
+      Math.random = () => (calls++ === 0 ? 0 : i / 5);   // 1st roll < 0.1 fires the counter
+      onEnemyHitPlayer(attacker);
+      expect(999 - attacker.hp).toBe(7 + i);      // floor((8+i)*100/103) = 7+i for i∈[0,4]
+    }
+  });
+
+  it('dmg_aoe ally direct damage: atk10 vs def3, rng=0 → floor(10*100/103) = 9 (old: 7)', async () => {
+    const { executeEnemySkill } = await import('../enemy-skills.js');   // not mocked in this file
+    Math.random = () => 0.5;                       // rng(-2,2) = 0
+    const caster = mkEnemy(999, 0); caster.atk = 10;
+    const ally = mkEnemy(999, 3); ally.isAlly = true; ally.x = 2; ally.y = 3;  // dst(caster)=1 ≤ radius
+    seedG({ atk: 0, def: 0, hp: 999, maxHp: 999, warded: false } as Partial<Player>, caster);
+    (globalThis as any).G.enemies = [caster, ally];
+    const sk: EnemySkill = { name: { en: 'Z', zh: 'Z' }, effect: 'dmg_aoe', chance: 1, cd: 1, dmg: 1, aoe: 2 };
+    executeEnemySkill(caster, sk);
+    expect(999 - ally.hp).toBe(9);
   });
 });

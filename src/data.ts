@@ -610,7 +610,7 @@ export const AREAS: AreaDef[] = [
   {
     id: 'sanctum', n: { en: 'The Final Sanctum', zh: '最终圣殿' }, floorStart: 36, floorEnd: 40,
     wallColor: '#3a3a10', floorColor: '#2a2a10', corrColor: '#1a1a05', bgColor: '#0a0a00',
-    wallChar: '█', floorChar: '·', enemyScaleBonus: 0.12,
+    wallChar: '█', floorChar: '·', enemyScaleBonus: 0.05,
     specialTiles: { type: TL.CRYSTAL, ch: '◆', fg: '#ffd700', bg: '#1a1a05', count: [2, 4] },
     lore: [
       { en: 'Divine light fills the halls. This is the end.', zh: '神圣的光芒充满殿堂。这是尽头。' },
@@ -636,7 +636,7 @@ export const AREAS: AreaDef[] = [
   {
     id: 'endless', n: { en: 'Endless Abyss', zh: '无尽深渊' }, floorStart: 41, floorEnd: 9999,
     wallColor: '#1a0a2a', floorColor: '#150a20', corrColor: '#0a0510', bgColor: '#05000a',
-    wallChar: '▓', floorChar: '·', enemyScaleBonus: 0.15,
+    wallChar: '▓', floorChar: '·', enemyScaleBonus: 0.10,
     specialTiles: { type: TL.VOID_FLOOR, ch: ' ', fg: '#2a0040', bg: '#0a0010', count: [3, 8] },
     lore: [
       { en: 'Reality frays at the edges. There is no bottom.', zh: '现实在边缘磨损。这里没有尽头。' },

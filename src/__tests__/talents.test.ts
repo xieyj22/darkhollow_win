@@ -29,7 +29,7 @@ function mkPlayer(): Player {
   return { atk: 10, talents: { talents: { w_retaliation: 1 } } } as unknown as Player;
 }
 function mkEnemy(hp: number): Enemy {
-  // counter dmg = max(1, p.atk - def) = max(1, 10-3) = 7 → kills an hp=5 foe
+  // counter dmg (batch17 R6) = max(1, floor((10 + rng(-2,2)=0)*100/103)) = 9 → kills an hp=5 foe
   return { name: 'Brute', x: 2, y: 2, hp, maxHp: 20, def: 3, exp: 5, goldDrop: 5 } as unknown as Enemy;
 }
 
