@@ -30,10 +30,19 @@ export function isConsumable(it: Item): boolean {
   return it.type === 'scroll' || it.type === 'consumable' || it.type === 'potion';
 }
 
+// batch17 T5: rarity-vs-floor weighting — deeper floors favor higher rarity,
+// so F40 drops r4 at 5× the r0 rate instead of uniform. mr gate unchanged.
+export function pickWeighted<T extends { r: number }>(pool: T[], f: number): T {
+  const ws = pool.map(b => 1 + b.r * (1 + f / 40));
+  let roll = Math.random() * ws.reduce((s, w) => s + w, 0);
+  for (let i = 0; i < pool.length; i++) { roll -= ws[i]; if (roll < 0) return pool[i]; }
+  return pool[pool.length - 1];
+}
+
 export function genWeapon(f: number): Item {
   const mr = Math.min(4, Math.floor(f / 3));
   const el = ALL_WEAPONS.filter(w => w.r <= mr);
-  const b = pick(el);
+  const b = pickWeighted(el, f);
   // Rarity scales bonus: higher rarity = larger bonus multiplier
   const rarityMult = 1 + b.r * 0.4;
   const bn = f > 5 ? Math.floor(rng(0, Math.floor(f / 5)) * rarityMult) : 0;
@@ -44,7 +53,7 @@ export function genWeapon(f: number): Item {
 export function genArmor(f: number): Item {
   const mr = Math.min(4, Math.floor(f / 3));
   const el = ALL_ARMORS.filter(a => a.r <= mr);
-  const b = pick(el);
+  const b = pickWeighted(el, f);
   const rarityMult = 1 + b.r * 0.4;
   const bn = f > 5 ? Math.floor(rng(0, Math.floor(f / 5)) * rarityMult) : 0;
   const d = b.d + bn;
@@ -54,7 +63,7 @@ export function genArmor(f: number): Item {
 export function genAcc(f: number): Item {
   const mr = Math.min(4, Math.floor(f / 4));
   const el = ALL_ACCESSORIES.filter(a => a.r <= mr);
-  const b = pick(el);
+  const b = pickWeighted(el, f);
   return { type: 'accessory', id: b.id, name: itemName(b), atk: b.a, def: b.d, hp: b.h, rarity: b.r, ch: b.ch, c: rarityTint('#06d6a0', b.r), desc: tMsg('ig.accStats', String(b.a), String(b.d), String(b.h)), x: 0, y: 0, set: b.set, subType: b.subType };
 }
 
