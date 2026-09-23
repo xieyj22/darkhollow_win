@@ -30,8 +30,8 @@ export function isConsumable(it: Item): boolean {
   return it.type === 'scroll' || it.type === 'consumable' || it.type === 'potion';
 }
 
-// batch17 T5: rarity-vs-floor weighting — deeper floors favor higher rarity,
-// so F40 drops r4 at 5× the r0 rate instead of uniform. mr gate unchanged.
+// batch17 T5: rarity-vs-floor weighting — deeper floors favor higher rarity:
+// w = 1 + r*(1 + f/40)，F40 时 r4 权重 9 = r0 权重 1 的 9 倍（不再均匀）。mr gate unchanged.
 export function pickWeighted<T extends { r: number }>(pool: T[], f: number): T {
   const ws = pool.map(b => 1 + b.r * (1 + f / 40));
   let roll = Math.random() * ws.reduce((s, w) => s + w, 0);

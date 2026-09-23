@@ -155,17 +155,18 @@ export function applyMetaUpgrades(p: Player, endless: boolean): void {
   const meta = getMeta();
   const u = meta.upgrades;
 
-  // Stats
-  if (u['start_hp']) { const v = u['start_hp'] * 10; p.maxHp += v; p.hp += v; p.baseMaxHp += v; }
+  // Stats — batch17 T8 C1: 倍率单一来源 META_UPGRADES.valuePerLevel（旧硬编码 10/1/1/0.03/0.02 漂移已被行为锁测试钉死）
+  const vp = (id: string) => META_UPGRADES.find(u => u.id === id)!.valuePerLevel;
+  if (u['start_hp']) { const v = u['start_hp'] * vp('start_hp'); p.maxHp += v; p.hp += v; p.baseMaxHp += v; }
   if (u['start_mp']) { const v = u['start_mp'] * 5; p.maxMp += v; p.mp += v; }
-  if (u['start_atk']) { const v = u['start_atk']; p.atk += v; p.baseAtk += v; }
-  if (u['start_def']) { const v = u['start_def']; p.def += v; p.baseDef += v; }
+  if (u['start_atk']) { const v = u['start_atk'] * vp('start_atk'); p.atk += v; p.baseAtk += v; }
+  if (u['start_def']) { const v = u['start_def'] * vp('start_def'); p.def += v; p.baseDef += v; }
   if (u['start_gold']) { p.gold += u['start_gold'] * 15; }
   if (u['start_food']) { p.hunger = Math.min(p.maxHunger, p.hunger + u['start_food'] * 20); }
 
-  // Derived stats
-  if (u['crit_bonus']) { const v = u['crit_bonus'] * 0.03; p.critChance += v; p.baseCritChance += v; }
-  if (u['dodge_bonus']) { const v = u['dodge_bonus'] * 0.02; p.dodgeChance += v; p.baseDodgeChance += v; }
+  // Derived stats — crit/dodge 的 valuePerLevel 是百分数（4 → 4%）
+  if (u['crit_bonus']) { const v = u['crit_bonus'] * vp('crit_bonus') / 100; p.critChance += v; p.baseCritChance += v; }
+  if (u['dodge_bonus']) { const v = u['dodge_bonus'] * vp('dodge_bonus') / 100; p.dodgeChance += v; p.baseDodgeChance += v; }
   if (u['heal_bonus']) { p.healBonus += u['heal_bonus'] * 0.05; }
 
   // Talent points

@@ -3,8 +3,8 @@
 // 常量互指：MITIG_K 与 combat.ts 的局部常量同值（改一处须同步另一处，曲线门会红）。
 //
 // 模型假设（可在带内调整——带是硬门，假设不是；来源：scripts/balance_audit.mts spike）：
-//  - 每层交战 ~70% 敌人、击杀掉落 30% → gear 期望表取自 docs/balance-audit-2026-09-22.json
-//    的 gear 快照（均匀池 MC 假设，T5 加权掉落后实际略强 → 带有余量；重跑审计脚本可刷新）
+//  - 每层交战 ~70% 敌人、击杀掉落 30% → gear 期望表见下方 GEAR_SNAPSHOT（T5 加权掉落
+//    **前**的均匀池审计输出，加权后实际略强 → 带有余量；出处警示见快照处注释）
 //  - 施法频率 ~3 次/层（CD10 限战斗窗，探索回合不施法；回退 50% 概率时 mage@F40=80 必越带）
 //  - 净化 ~2.5/层有效（喷泉/神龛/净水 T6 新值 15/25/30 × 60% 使用率摊 40 层）
 import { ENEMIES, BOSSES, CLASSES, ELITE_PREFIX, AREAS } from './data.js';
@@ -12,8 +12,8 @@ import type { EnemyDef } from './types.js';
 
 export const MITIG_K = 100;
 
-// gear 期望快照（至今最佳装备均值，来源 docs/balance-audit-2026-09-22.json gear 表，
-// 均匀掉落池 MC 2000 局——R2 裁决保持，加权掉落让实际更强故带余量单调安全）
+// gear 期望快照（至今最佳装备均值）— 来源=T5 加权掉落**前**的均匀池审计输出（保守方向）；
+// 现行 docs/balance-audit-2026-09-22.json 已是加权池数据，勿直接回填本快照，除非重校带状区间。
 export interface GearRun { wAtk: number; aDef: number; accA: number; accD: number; accH: number }
 const GEAR_SNAPSHOT: Record<number, GearRun> = {
   5: { wAtk: 7, aDef: 4, accA: 1, accD: 1, accH: 7 }, 10: { wAtk: 11, aDef: 7, accA: 2, accD: 2, accH: 14 },

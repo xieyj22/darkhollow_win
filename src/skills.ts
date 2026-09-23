@@ -188,9 +188,8 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
       fxFlash(p.x, p.y, '#80ed99', 1.5); flt(p.x, p.y, `+${heal} ❤️`, '#80ed99'); snd('heal');
 
       // batch17 T7: Holy Light 附带神圣伤害 — Paladin 零伤害技能在 def 墙时代掉队,
-      // 给 120% ATK 神圣伤害(≤4 距离全体), 与 p_consecrate 天赋叠加规则:
-      // alsoHolyDmg 存在时由天赋块处理更强的版本, 此基础段跳过防双算。
-      if (!mods.alsoHolyDmg) {
+      // 给 120% ATK 神圣伤害(≤4 距离全体); consecrate 天赋段在其后叠加（'also'语义）。
+      {
         const foes = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 4);
         for (const e of foes) {
           const dmg = Math.floor(p.atk * 1.2);

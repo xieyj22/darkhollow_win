@@ -2,8 +2,21 @@
 // T8: start_hp 10→15 / start_atk 1→2 / start_def 1→2 / crit_bonus 3→4 / dodge_bonus 2→3
 // T9: Void Titan 42→44 / Doom Seraph 45→48 / Entropy Beast 48→52 / Abyssal Tyrant 50→56
 // （F55 窗口 [51,55] 由 Entropy Beast(52) 直供，消除 F50→F55 难度倒挂）
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { META_UPGRADES, ENEMIES } from '../data.js';
+
+// C1 行为锁：applyMetaUpgrades 真实调用（meta.js 依赖侧 mocked，数值链路不 mock）
+vi.mock('../state.js', () => ({
+  get G(): unknown { return (globalThis as { G?: unknown }).G; },
+  lang: 'en',
+}));
+vi.mock('../audio.js', () => ({ snd: () => {}, setBgmScene: () => {} }));
+vi.mock('../i18n.js', () => ({
+  t: (k: string) => k,
+  tx: (f: { en?: string } | string) => (typeof f === 'string' ? f : (f && f.en) || ''),
+}));
+
+import { applyMetaUpgrades } from '../meta.js';
 
 describe('batch17 T8/T9 meta & endless window', () => {
   it('meta values buffed', () => {
@@ -27,5 +40,22 @@ describe('batch17 T8/T9 meta & endless window', () => {
     // F55 窗口 [51,55] 有 Entropy Beast(52) 直供
     const win = ENEMIES.filter((e: any) => e.mf <= 55 && e.mf >= 51);
     expect(win.some((e: any) => e.n.en === 'Entropy Beast')).toBe(true);
+  });
+
+  it('applyMetaUpgrades behavior lock: multipliers consume valuePerLevel, not stale hardcoded ones', () => {
+    // C1: T8 后 valuePerLevel=15/2/4（hp/atk/crit%）。旧硬编码 10/1/0.03 若回归：
+    // maxHp=130 / atk=7 / crit=0.11 → 三断言全红。
+    localStorage.setItem('dh_meta', JSON.stringify({
+      version: 1, soulEchoes: 0, totalSpent: 0,
+      upgrades: { start_hp: 3, start_atk: 2, crit_bonus: 2 }, achievements: [],
+      stats: { totalRuns: 0, bestFloor: 0, totalKills: 0, totalBossKills: 0, totalGold: 0, totalTurns: 0, wins: 0, deaths: 0, bestStreak: 0, highestLevel: 0, classesWon: [], bestEndlessFloor: 0 },
+      runHistory: [], endlessLeaderboard: [], unlockedLore: [], wardens: [],
+    }));
+    const p = { maxHp: 100, hp: 100, baseMaxHp: 100, atk: 5, baseAtk: 5, critChance: 0.05, baseCritChance: 0.05 } as any;
+    applyMetaUpgrades(p, false);
+    expect(p.maxHp).toBe(145); // 100 + 3 × 15
+    expect(p.hp).toBe(145);
+    expect(p.atk).toBe(9);     // 5 + 2 × 2
+    expect(p.critChance).toBeCloseTo(0.13); // 0.05 + 2 × 4/100
   });
 });

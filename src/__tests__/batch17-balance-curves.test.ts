@@ -38,13 +38,13 @@ describe('batch17 balance curves (spec §2 bands)', () => {
     }
   });
 
-  it('boss h2d: F5 ≥7 / F25 ≥3.8 / F40 ≥2', () => {
+  it('boss h2d: F5 ≥7 / F25 ≥3.8 / F40 ≥2.1', () => {
     const c = curves('estab');
     const g = c.boss['Goblin King'], d = c.boss['Dragon Emperor'], cr = c.boss['The Creator'];
     for (const cls of Object.keys(g)) {
       expect(g[cls].h2d, `${cls} F5 boss h2d`).toBeGreaterThanOrEqual(7);
       expect(d[cls].h2d, `${cls} F25 boss h2d`).toBeGreaterThanOrEqual(3.8);
-      expect(cr[cls].h2d, `${cls} F40 boss h2d`).toBeGreaterThanOrEqual(2);
+      expect(cr[cls].h2d, `${cls} F40 boss h2d`).toBeGreaterThanOrEqual(2.1);
     }
   });
 
