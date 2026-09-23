@@ -582,6 +582,7 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "sk.consecrate": { en: "✨ Consecrate! {} enemies take holy dmg!", zh: "✨ 净化！{}个敌人受到神圣伤害！" },
   "sk.judgment": { en: "⚡ Judgment! {} stunned for 2 turns!", zh: "⚡ 审判！{}被眩晕2回合！" },
   "sk.holyNova": { en: "💫 Holy Nova! Healed {} allies!", zh: "💫 神圣新星！治疗了{}个友方！" },
+  "sk.holyNovaDmg": { en: "✨ Holy Light scorches {} foe(s) with holy dmg!", zh: "✨ 圣光灼烧{}个敌人，造成神圣伤害！" },
   "sk.smokeScreen": { en: "💨 Smoke Screen! {} enemies blinded!", zh: "💨 烟幕！{}个敌人被致盲！" },
   "ta.assassinate": { en: "💀 Assassinate! {} is instantly killed!", zh: "💀 暗杀！{}被一击必杀！" },
   "ta.poisonBlade": { en: "🐍 Poison Blade! +{} poison dmg!", zh: "🐍 毒刃效果！额外{}毒素伤害！" },

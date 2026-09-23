@@ -104,9 +104,9 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
       const e = findNearestEnemy();
       if (e) {
         let dmg = Math.floor(p.atk * 2.5 * mods.dmgMult);
-        // Death mark: force crit
+        // Death mark: force crit (batch17 T7: ×1.75, was ×2)
         if (mods.forceCrit) {
-          dmg = Math.floor(dmg * 2);
+          dmg = Math.floor(dmg * 1.75);
           addMsg(t('sk.deathMarkCrit'), 'mc');
         }
         // AOE: fan of knives
@@ -114,7 +114,7 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
           const enemies = G.enemies.filter(en => !en.isAlly && dst(p.x, p.y, en.x, en.y) <= 3);
           const killed: Enemy[] = [];
           for (const en of enemies) {
-            const d = mods.forceCrit ? Math.floor(p.atk * 2.5 * mods.dmgMult * 2) : Math.floor(p.atk * 2.5 * mods.dmgMult);
+            const d = mods.forceCrit ? Math.floor(p.atk * 2.5 * mods.dmgMult * 1.75) : Math.floor(p.atk * 2.5 * mods.dmgMult);
             en.hp -= d; fxFlash(en.x, en.y, '#9b5de5'); flt(en.x, en.y, `-${d} 💀`, '#9b5de5');
             if (en.hp <= 0) killed.push(en);
           }
@@ -186,6 +186,20 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
       p.hp = Math.min(p.maxHp, p.hp + heal); p.poisonTurns = 0;
       addMsg(tMsg('sk.holyLight', String(heal)), 'mh');
       fxFlash(p.x, p.y, '#80ed99', 1.5); flt(p.x, p.y, `+${heal} ❤️`, '#80ed99'); snd('heal');
+
+      // batch17 T7: Holy Light 附带神圣伤害 — Paladin 零伤害技能在 def 墙时代掉队,
+      // 给 120% ATK 神圣伤害(≤4 距离全体), 与 p_consecrate 天赋叠加规则:
+      // alsoHolyDmg 存在时由天赋块处理更强的版本, 此基础段跳过防双算。
+      if (!mods.alsoHolyDmg) {
+        const foes = G.enemies.filter(e => !e.isAlly && dst(p.x, p.y, e.x, e.y) <= 4);
+        for (const e of foes) {
+          const dmg = Math.floor(p.atk * 1.2);
+          e.hp -= dmg; flt(e.x, e.y, `-${dmg}`, '#ffd700');
+          if (e.hp <= 0) killEnemy(e);
+        }
+        G.enemies = G.enemies.filter(e => e.hp > 0 || e.isAlly);
+        if (foes.length) addMsg(tMsg('sk.holyNovaDmg', String(foes.length)), 'msk');
+      }
 
       // Consecrate: also deal holy damage to nearby enemies
       if (mods.alsoHolyDmg) {

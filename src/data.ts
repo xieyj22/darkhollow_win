@@ -18,10 +18,10 @@ export const CLASSES: ClassDef[] = [
     skill: { name: { en: 'Shield Bash', zh: '盾击' }, desc: { en: 'Deal 150% ATK dmg + stun 2 turns (5 MP, CD:8)', zh: '造成150%ATK伤害并眩晕2回合(5MP,CD:8)' }, cost: 5, cd: 8, effect: 'stun' } },
   { name: { en: 'Rogue', zh: '盗贼' }, hp: 35, mp: 15, atk: 8, def: 1, desc: { en: 'High ATK, crit', zh: '高攻击暴击' },
     skill: { name: { en: 'Shadow Strike', zh: '暗影突袭' }, desc: { en: 'Deal 250% ATK dmg (4 MP, CD:6)', zh: '造成250%ATK伤害(4MP,CD:6)' }, cost: 4, cd: 6, effect: 'burst' } },
-  { name: { en: 'Mage', zh: '法师' }, hp: 30, mp: 40, atk: 3, def: 1, desc: { en: 'High MP, spells', zh: '高魔力法术' },
+  { name: { en: 'Mage', zh: '法师' }, hp: 38, mp: 40, atk: 3, def: 1, desc: { en: 'High MP, spells', zh: '高魔力法术' },
     skill: { name: { en: 'Arcane Blast', zh: '奥术爆破' }, desc: { en: 'Deal magic dmg to all nearby enemies (8 MP, CD:10)', zh: '对所有附近敌人造成魔法伤害(8MP,CD:10)' }, cost: 8, cd: 10, effect: 'aoe' } },
   { name: { en: 'Paladin', zh: '圣骑士' }, hp: 45, mp: 20, atk: 5, def: 4, desc: { en: 'Balanced tank', zh: '均衡坦克' },
-    skill: { name: { en: 'Holy Light', zh: '圣光术' }, desc: { en: 'Heal 40% maxHP + cleanse (6 MP, CD:9)', zh: '恢复40%最大HP并净化(6MP,CD:9)' }, cost: 6, cd: 9, effect: 'heal' } },
+    skill: { name: { en: 'Holy Light', zh: '圣光术' }, desc: { en: 'Heal 40% maxHP + cleanse, 120% ATK holy dmg to nearby foes (6 MP, CD:9)', zh: '恢复40%最大HP并净化，对附近敌人造成120%ATK神圣伤害(6MP,CD:9)' }, cost: 6, cd: 9, effect: 'heal' } },
 ];
 
 export const WEAPONS: WeaponDef[] = [
