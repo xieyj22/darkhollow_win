@@ -213,3 +213,27 @@ describe('batch17 R6 fix round 1: enemies.ts ranged/ally MITIG', () => {
     }
   });
 });
+
+// batch17 T3/T4: boss atk ×0.75 (fl≥25) + phase atkM cap 1.6 + levelup hp rng(6,14)
+// data.js is mocked at the top of this file (combat.ts import surface), so pull
+// the real BOSSES table via vi.importActual — same pattern as the T2 test above.
+describe('batch17 T3/T4 boss atk & levelup hp', () => {
+  it('F25+ boss atk cut + atkM cap', async () => {
+    const { BOSSES } = await vi.importActual<typeof import('../data.js')>('../data.js');
+    const byName = (fl: number) => BOSSES.find((b: any) => b.fl === fl)!;
+    expect(byName(25).atk).toBe(21);
+    expect(byName(30).atk).toBe(26);
+    expect(byName(35).atk).toBe(34);
+    expect(byName(40).atk).toBe(41);
+    expect(byName(35).phases![0]!.atkM).toBe(1.6);
+    expect(byName(40).phases![1]!.atkM).toBe(1.6);
+    // 未动的: 龙皇 1.6 相位不在此列(25 的 phase atkM 本为 1.6 不改), Leviathan 1.5 不改
+    expect(byName(30).phases![0]!.atkM).toBe(1.5);
+  });
+  it('checkLevelUp hp roll is rng(6,14) — source-level pin', async () => {
+    const fs = await import('node:fs');
+    const src = fs.readFileSync('src/combat.ts', 'utf-8');
+    expect(src).toMatch(/rng\(6, 14\)/);
+    expect(src).not.toMatch(/rng\(5, 12\)/);  // dungeon.ts 的同形 rng 不在本文件
+  });
+});

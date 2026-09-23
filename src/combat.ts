@@ -245,7 +245,7 @@ export function checkLevelUp(): void {
   const p = G.player;
   while (p.exp >= p.expNext) {
     p.exp -= p.expNext; p.level++; p.expNext = Math.floor(p.expNext * 1.5);
-    const hg = rng(5, 12) + (p.ci === 0 ? 5 : p.ci === 3 ? 3 : 0);
+    const hg = rng(6, 14) + (p.ci === 0 ? 5 : p.ci === 3 ? 3 : 0);
     const mg = rng(2, 6) + (p.ci === 2 ? 5 : 0);
     const ag = rng(1, 3); const dg = rng(0, 2);
     p.maxHp += hg; p.maxMp += mg;

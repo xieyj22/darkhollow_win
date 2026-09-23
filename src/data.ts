@@ -271,27 +271,27 @@ export const BOSSES: BossDef[] = [
     skill: { name: { en: 'Necrotic Burst', zh: '死灵爆发' }, effect: 'dmg_aoe', chance: 0.3, cd: 5, range: 6, dmg: 1.3, aoe: 2 },
     summon: { chance: 0.4, cd: 3, maxAdds: 3, kind: 'Skeleton' },
     phases: [{ hpThreshold: 0.5, atkM: 1.4, newAi: 'ranged' }] },
-  { n: { en: 'Dragon Emperor', zh: '龙皇' }, ch: '♜', c: '#ff8c00', hp: 200, atk: 28, def: 14, exp: 600, g: [250, 500], fl: 25, el: 'fire', spriteKind: 'B_DRAGON_EMPEROR',
+  { n: { en: 'Dragon Emperor', zh: '龙皇' }, ch: '♜', c: '#ff8c00', hp: 200, atk: 21, def: 14, exp: 600, g: [250, 500], fl: 25, el: 'fire', spriteKind: 'B_DRAGON_EMPEROR',
     skill: { name: { en: 'Dragon Breath', zh: '龙息' }, effect: 'dmg_bolt', chance: 0.35, cd: 4, range: 6, dmg: 1.7, el: 'fire' },
     summon: { chance: 0.35, cd: 4, maxAdds: 2, kind: 'Dragon Whelp' },
     phases: [{ hpThreshold: 0.3, atkM: 1.6, newAi: 'chase', newEl: 'fire' }] },
   // === New bosses ===
-  { n: { en: 'Leviathan', zh: '利维坦' }, ch: '≈', c: '#00ced1', hp: 280, atk: 35, def: 14, exp: 800, g: [200, 400], fl: 30, el: 'ice', spriteKind: 'B_LEVIATHAN',
+  { n: { en: 'Leviathan', zh: '利维坦' }, ch: '≈', c: '#00ced1', hp: 280, atk: 26, def: 14, exp: 800, g: [200, 400], fl: 30, el: 'ice', spriteKind: 'B_LEVIATHAN',
     skill: { name: { en: 'Abyssal Call', zh: '深渊呼唤' }, effect: 'summon', chance: 0.3, cd: 6, range: 6 },
     phases: [
       { hpThreshold: 0.5, atkM: 1.5, newAi: 'chase' },
     ] },
-  { n: { en: 'Void Sovereign', zh: '虚空君主' }, ch: '◈', c: '#9400d3', hp: 400, atk: 45, def: 18, exp: 1200, g: [300, 600], fl: 35, el: 'shadow', spriteKind: 'B_VOID_SOVEREIGN',
+  { n: { en: 'Void Sovereign', zh: '虚空君主' }, ch: '◈', c: '#9400d3', hp: 400, atk: 34, def: 18, exp: 1200, g: [300, 600], fl: 35, el: 'shadow', spriteKind: 'B_VOID_SOVEREIGN',
     skill: { name: { en: 'Void Solidify', zh: '虚空凝固' }, effect: 'debuff_stun', chance: 0.3, cd: 6, range: 5, aoe: 1 },
     phases: [
-      { hpThreshold: 0.3, atkM: 2, newAi: 'chase', newEl: 'shadow' },
+      { hpThreshold: 0.3, atkM: 1.6, newAi: 'chase', newEl: 'shadow' },
     ],
     summon: { chance: 0.45, cd: 3, maxAdds: 3, kind: 'Void Wraith' } },
-  { n: { en: 'The Creator', zh: '创世者' }, ch: 'Ω', c: '#ffffff', hp: 600, atk: 55, def: 22, exp: 2000, g: [500, 1000], fl: 40, el: 'holy', spriteKind: 'B_CREATOR',
+  { n: { en: 'The Creator', zh: '创世者' }, ch: 'Ω', c: '#ffffff', hp: 600, atk: 41, def: 22, exp: 2000, g: [500, 1000], fl: 40, el: 'holy', spriteKind: 'B_CREATOR',
     skill: { name: { en: 'Reconstruction', zh: '重构' }, effect: 'heal', chance: 0.25, cd: 8, range: 9, dmg: 1.5 },
     phases: [
       { hpThreshold: 0.6, atkM: 1.4 },
-      { hpThreshold: 0.25, atkM: 2, newAi: 'chase' },
+      { hpThreshold: 0.25, atkM: 1.6, newAi: 'chase' },
     ],
     summon: { chance: 0.5, cd: 3, maxAdds: 4, kind: 'Seraphim' } },
   // === Wave 6c: Fungal Hollow mini-boss (fl 0 = branch-only, never resolves via
