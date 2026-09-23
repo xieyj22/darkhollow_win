@@ -15,6 +15,11 @@ S.addEventListener = S.addEventListener ?? (() => {});
 S.window = S;
 S.document = { documentElement: { lang: 'en' } };
 
+// batch17 T0: mulberry32 种子化 MC (seed 13) — fixSim 表可复现（连跑两遍 diff 为空验证过）。
+let _s = 13;
+const _mr = () => { _s |= 0; _s = _s + 0x6D2B79F5 | 0; let t = Math.imul(_s ^ _s >>> 15, 1 | _s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+Math.random = _mr;
+
 const { ENEMIES, BOSSES, CLASSES, RACES, ALL_WEAPONS, ALL_ARMORS, ALL_ACCESSORIES, ELITE_PREFIX, AREAS, ENDLESS_GEAR, EQUIPMENT_SETS } = await import('../src/data.js');
 const gen = await import('../src/item-gen.js');
 
