@@ -186,7 +186,7 @@ export function checkTiles(): void {
       if (b === 1) { G.player.baseAtk += rng(1, 2); addMsg(t('ev.shrineAtk'), 'ml'); }
       else if (b === 2) { G.player.baseDef += rng(1, 2); addMsg(t('ev.shrineDef'), 'ml'); }
       else { G.player.maxHp += rng(5, 10); G.player.baseMaxHp += rng(5, 10); G.player.hp += rng(5, 10); addMsg(t('ev.shrineHp'), 'ml'); }
-      if (G.player.corruption > 0) { applyCorruption(-20); addMsg(t('ev.shrinePurify'), 'md'); }
+      if (G.player.corruption > 0) { applyCorruption(-25); addMsg(t('ev.shrinePurify'), 'md'); }
       recalc(); snd('levelup'); flt(G.player.x, G.player.y, '+STAT', '#ffd700');
       G.dungeon.map[G.player.y][G.player.x] = TL.FLOOR;
     } else {

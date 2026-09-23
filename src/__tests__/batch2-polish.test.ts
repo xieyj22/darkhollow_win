@@ -1,6 +1,6 @@
 // 批2 ⑨⑩: shrine outcome + cleanse-direction fx. ⑨ rewritten by 批10 A3:
 // clean players get a two-choice popup (clean bless / dark pact, +15🩸);
-// corrupted players keep the classic 3-way roll + applyCorruption(-20) cleanse.
+// corrupted players keep the classic 3-way roll + applyCorruption(-25) cleanse.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('../state.js', () => ({
@@ -92,12 +92,12 @@ describe('⑨ shrine two-way choice (批10 A3 replaced the 20% roll)', () => {
     expect(addMsg).toHaveBeenCalledWith('sh.darkFallback', 'mi');
     expect((globalThis as any).G.dungeon.map[0][0]).toBe(TL.FLOOR);
     expect(document.getElementById('event-popup')!.style.display).toBe('none');
-    // corruption>0 (55): classic 3-way roll + applyCorruption(-20) cleanse, no popup.
+    // corruption>0 (55): classic 3-way roll + applyCorruption(-25) cleanse, no popup.
     (globalThis as any).G = mkG(TL.SHRINE);
     checkTiles();
     const q = (globalThis as any).G.player;
     expect(q.baseAtk).toBe(6);            // 5 + rng(1,2)=1
-    expect(q.corruption).toBe(35);        // real combat.js: 55 - 20
+    expect(q.corruption).toBe(30);        // real combat.js: 55 - 25 (batch17 T6)
     expect(document.getElementById('event-popup')!.style.display).toBe('none');
   });
 });

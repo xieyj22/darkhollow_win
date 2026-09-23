@@ -128,7 +128,7 @@ export const CONSUMABLES: ConsumableDef[] = [
     flavor: { en: 'A spherical powder pot from the dwarven powder-makers; its fuse burns damp, and has unseated a hundred siege-walls.', zh: '矮人爆破匠量产的球形火药罐，引信潮湿地燃烧，曾在无数次围城中掀开城墙。' } },
   { id: 'throwing_knife', n: { en: 'Throwing Knife', zh: '飞刀' }, ef: 'throw_knife', v: 20, c: '#c0c0c0', ch: '†', subType: 'tool', r: 0, desc: { en: 'Throw at nearest enemy', zh: '投向最近的敌人' },
     flavor: { en: 'A well-balanced throwing knife, the grip wound with thread for easy pulling; the silent opening of partisans and fleeing men.', zh: '平衡精准的轻掷刀，刀柄缠线以利拔出，是游击手与逃亡者无声的开场白。' } },
-  { id: 'purified_water', n: { en: 'Purified Water', zh: '净水' }, ef: 'purify', v: 20, c: '#7ec8e3', ch: '💧', subType: 'pouch', r: 1, desc: { en: 'Cleanses 20 corruption', zh: '净化 20 腐化' },
+  { id: 'purified_water', n: { en: 'Purified Water', zh: '净水' }, ef: 'purify', v: 30, c: '#7ec8e3', ch: '💧', subType: 'pouch', r: 1, desc: { en: 'Cleanses 30 corruption', zh: '净化 30 腐化' },
     flavor: { en: 'Water blessed by the order; it briefly rinses the corruption from the soul, and a thin ring of light clings to the flask\'s inner wall.', zh: '教团祝圣过的清水，能短暂洗去灵魂上的腐化，瓶壁内侧凝着一圈极细的光环。' } },
   { id: 'torch', n: { en: 'Torch', zh: '火把' }, ef: 'torch', v: 5, c: '#f4845f', ch: '☀', subType: 'tool', r: 0, desc: { en: '+5 FOV for 30 turns', zh: '视野+5持续30回合' }, dur: 30,
     flavor: { en: 'A coarse hemp torch dipped in pitch; the plainest answer to the dark below, and the only company when loneliness sets in.', zh: '浸过松脂的粗麻火把，是下山者对抗黑暗的最朴素的手段，也是孤独时唯一的伴侣。' } },

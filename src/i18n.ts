@@ -314,7 +314,7 @@ export const L: Record<string, I18nText | I18nText[]> = {
   "ev.fountainQuiet": { en: "The fountain flows quietly; you need no restoration.", zh: "魔法喷泉静静流淌，你已无需恢复。" },
   "ev.fountainRestore": { en: "Fountain restores {} HP!", zh: "魔法喷泉恢复了{}HP！" },
   "ev.fountainPurify": { en: "✨ The clear water washes away corruption! (-15)", zh: "✨ 清泉洗去腐化！（-15）" },
-  "ev.shrinePurify": { en: "✨ The shrine's blessing purifies you! (-20 corruption)", zh: "✨ 神龛的祝福净化了你！（腐化-20）" },
+  "ev.shrinePurify": { en: "✨ The shrine's blessing purifies you! (-25 corruption)", zh: "✨ 神龛的祝福净化了你！（腐化-25）" },
   "ev.shrineAtk": { en: "Shrine +ATK", zh: "神殿强化！+ATK" },
   "ev.shrineDef": { en: "Shrine +DEF", zh: "神殿强化！+DEF" },
   "ev.shrineHp": { en: "Shrine +HP", zh: "神殿强化！+HP" },

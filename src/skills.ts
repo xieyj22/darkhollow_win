@@ -55,7 +55,10 @@ export function executeSkill(sk: { cost: number; effect: string; cd: number }): 
   const p = G.player;
   if (p.mp < sk.cost || p.skillCd > 0) { addMsg(t('sk.cdNoMp'), 'mi'); return; }
   p.mp -= sk.cost; p.skillCd = sk.cd; snd('spell');
-  applyCorruption(1); // drawing on the seal's power corrupts (Playtest #9)
+  // batch17 T6: 施法腐化概率化(50%) — drawing on the seal's power corrupts
+  // (Playtest #9). 法师每层~4 施法不再线性爆 100，Guardian 结局(<50) 对施法
+  // 系可达；近战职业施法稀疏，影响可忽略。
+  if (Math.random() < 0.5) applyCorruption(1);
 
   const mods = getSkillModifiers(p.ci);
 

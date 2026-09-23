@@ -1,4 +1,4 @@
-// ② reconnect: fountains/shrines must CLEANSE corruption (the -15/-20 values
+// ② reconnect: fountains/shrines must CLEANSE corruption (the -15/-25 values
 // lived in dead popup code). Unit boundary: assert checkTiles' decisions —
 // applyCorruption mock records the call; its math is covered elsewhere.
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -68,9 +68,9 @@ describe('② fountain cleanses corruption', () => {
 });
 
 describe('② shrine cleanses corruption', () => {
-  it('corruption>0: blessing fires + applyCorruption(-20)', () => {
+  it('corruption>0: blessing fires + applyCorruption(-25)', () => {
     // Determinism: the 3-way blessing roll is pinned by the preamble's utils
-    // mock (rng() => 1 → the atk branch fires and always reaches the -20
+    // mock (rng() => 1 → the atk branch fires and always reaches the -25
     // cleanse). The Math.random spy below is a leftover from the long-removed
     // 20% powerful-blessing gate — nothing on this path reads it anymore; kept
     // as a harmless belt-and-braces pin.
@@ -78,7 +78,7 @@ describe('② shrine cleanses corruption', () => {
     (globalThis as any).G = mkG(TL.SHRINE, 30);
     checkTiles();
     roll.mockRestore();
-    expect(applyCorruption).toHaveBeenCalledWith(-20);
+    expect(applyCorruption).toHaveBeenCalledWith(-25);   // batch17 T6: -20 → -25
     expect((globalThis as any).G.dungeon.map[0][0]).toBe(TL.FLOOR);
   });
 });

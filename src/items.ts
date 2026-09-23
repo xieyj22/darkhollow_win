@@ -154,7 +154,7 @@ export function useItem(idx: number): void {
       case 'ward': p.warded = true; fxFlash(p.x, p.y, '#4895ef', 1.2); addMsg(t('it.wardOn'), 'mi'); break;
       case 'haste': p.freeTurn = true; fxFlash(p.x, p.y, '#ffd700', 1.2); addMsg(t('it.hasteMsg'), 'mi'); break;
       case 'antidote': p.poisonTurns = 0; p.poisonDmg = 0; p.buffs.push({ name: t('it.antidoteBuff'), type: 'antidote', value: 0, turns: 15 }); addMsg(t('it.poisonCured'), 'mi'); fxBurst(p.x, p.y, '#80ed99', 14); snd('heal'); break;
-      case 'purify': applyCorruption(-(item.val || 20)); fxAura(p.x, p.y, '#7ec8e3'); addMsg(tMsg('it.purified', String(item.val || 20)), 'mi'); snd('heal'); break;
+      case 'purify': applyCorruption(-(item.val || 30)); fxAura(p.x, p.y, '#7ec8e3'); addMsg(tMsg('it.purified', String(item.val || 30)), 'mi'); snd('heal'); break;
       case 'holy_water': {
         const e = _findNearestEntity();
         if (e) { fxBolt(p.x, p.y, e.x, e.y, '#ffd700'); const isHolyWeak = (e.tags?.includes('undead') || e.tags?.includes('demon') || e.el === 'shadow'); const mult = isHolyWeak ? 2 : 1; const d = Math.floor((item.val || 0) * mult); e.hp -= d; flt(e.x, e.y, `-${d}✨`, '#ffd700'); addMsg(tMsg('it.holyWaterHit', e.name, String(d)), 'mc'); snd('spell'); if (e.hp <= 0) killEnemy(e); }

@@ -61,6 +61,6 @@ describe('批10 A3 神龛（source-gate）', () => {
     expect(e).toContain('sh.darkFallback');
   });
   it('有腐化净化路径保留（回归锚）', () => {
-    expect(e).toContain('applyCorruption(-20)');
+    expect(e).toContain('applyCorruption(-25)');   // batch17 T6: -20 → -25
   });
 });
