@@ -248,10 +248,10 @@ export const ENEMIES: EnemyDef[] = [
   { n: { en: 'Fungal Knight', zh: '菌骑' }, ch: '✟', c: '#8a7a6a', hp: 65, atk: 20, def: 10, exp: 50, g: [15, 35], ai: 'chase', mf: 0, el: 'shadow', tags: ['fungi', 'undead'] },
   { n: { en: 'Glow Slime', zh: '荧光史莱姆' }, ch: '◉', c: '#5fdf8a', hp: 60, atk: 12, def: 9, exp: 32, g: [8, 20], ai: 'wander', mf: 0, tags: ['slime'] },
   // === Wave 6d: Endless mode (F41+) — mf 40+ exclusive strong foes ===
-  { n: { en: 'Void Titan', zh: '虚空泰坦' }, ch: '⊛', c: '#3a1a5a', hp: 220, atk: 48, def: 16, exp: 200, g: [60, 120], ai: 'chase', mf: 42, el: 'shadow', tags: ['aberration'] },
-  { n: { en: 'Doom Seraph', zh: '末日炽天使' }, ch: '♰', c: '#b0b0ff', hp: 260, atk: 54, def: 14, exp: 240, g: [80, 140], ai: 'ranged', mf: 45, el: 'holy', tags: ['seraph', 'demon'], skill: { name: { en: 'Doom Aura', zh: '末日光环' }, effect: 'dmg_aoe', chance: 0.4, cd: 5, dmg: 1.7, aoe: 3, range: 6, el: 'holy' } },
-  { n: { en: 'Entropy Beast', zh: '熵兽' }, ch: '✺', c: '#ff1493', hp: 300, atk: 58, def: 18, exp: 280, g: [90, 160], ai: 'erratic', mf: 48, el: 'shadow', tags: ['aberration'] },
-  { n: { en: 'Abyssal Tyrant', zh: '深渊暴君' }, ch: '⛐', c: '#1a0033', hp: 380, atk: 64, def: 22, exp: 350, g: [120, 200], ai: 'chase', mf: 50, el: 'shadow', tags: ['demon'] },
+  { n: { en: 'Void Titan', zh: '虚空泰坦' }, ch: '⊛', c: '#3a1a5a', hp: 220, atk: 48, def: 16, exp: 200, g: [60, 120], ai: 'chase', mf: 44, el: 'shadow', tags: ['aberration'] },
+  { n: { en: 'Doom Seraph', zh: '末日炽天使' }, ch: '♰', c: '#b0b0ff', hp: 260, atk: 54, def: 14, exp: 240, g: [80, 140], ai: 'ranged', mf: 48, el: 'holy', tags: ['seraph', 'demon'], skill: { name: { en: 'Doom Aura', zh: '末日光环' }, effect: 'dmg_aoe', chance: 0.4, cd: 5, dmg: 1.7, aoe: 3, range: 6, el: 'holy' } },
+  { n: { en: 'Entropy Beast', zh: '熵兽' }, ch: '✺', c: '#ff1493', hp: 300, atk: 58, def: 18, exp: 280, g: [90, 160], ai: 'erratic', mf: 52, el: 'shadow', tags: ['aberration'] },
+  { n: { en: 'Abyssal Tyrant', zh: '深渊暴君' }, ch: '⛐', c: '#1a0033', hp: 380, atk: 64, def: 22, exp: 350, g: [120, 200], ai: 'chase', mf: 56, el: 'shadow', tags: ['demon'] },
 ];
 
 export const BOSSES: BossDef[] = [
@@ -747,12 +747,12 @@ export const META_UPGRADES: MetaUpgradeDef[] = [
   // 🎒→T_BOOT brown, 💎→T_COIN cyan, 💀→T_SKULL); icons without a clear
   // template fall back by category (utility→T_RUNE, endless→T_SHADOW). The
   // cyan base #4ad6c0 marks soul-echo meta-resource entries.
-  { id: 'start_hp', n: { en: 'Vitality', zh: '生命强化' }, d: { en: '+10 Max HP per level', zh: '每级+10最大HP' }, icon: '❤', maxLevel: 5, costs: [10, 15, 25, 40, 60], effect: 'start_hp', valuePerLevel: 10, category: 'stats', tpl: 'T_HEART', hue: '#e05560' },
+  { id: 'start_hp', n: { en: 'Vitality', zh: '生命强化' }, d: { en: '+15 Max HP per level', zh: '每级+15最大HP' }, icon: '❤', maxLevel: 5, costs: [10, 15, 25, 40, 60], effect: 'start_hp', valuePerLevel: 15, category: 'stats', tpl: 'T_HEART', hue: '#e05560' },
   { id: 'start_mp', n: { en: 'Arcane Reserves', zh: '魔力储备' }, d: { en: '+5 Max MP per level', zh: '每级+5最大MP' }, icon: '💧', maxLevel: 3, costs: [10, 20, 35], effect: 'start_mp', valuePerLevel: 5, category: 'stats', tpl: 'T_FLASK', hue: '#5a8ad6' },
-  { id: 'start_atk', n: { en: 'Martial Training', zh: '武技' }, d: { en: '+1 ATK per level', zh: '每级+1攻击' }, icon: '⚔', maxLevel: 3, costs: [15, 30, 50], effect: 'start_atk', valuePerLevel: 1, category: 'stats', tpl: 'T_SWORD', hue: '#e05545' },
-  { id: 'start_def', n: { en: 'Toughness', zh: '坚韧' }, d: { en: '+1 DEF per level', zh: '每级+1防御' }, icon: '🛡', maxLevel: 3, costs: [15, 30, 50], effect: 'start_def', valuePerLevel: 1, category: 'stats', tpl: 'T_SHIELD', hue: '#6a8ad6' },
-  { id: 'crit_bonus', n: { en: 'Keen Edge', zh: '锐锋' }, d: { en: '+3% crit chance per level', zh: '每级+3%暴击' }, icon: '🗡', maxLevel: 3, costs: [20, 35, 55], effect: 'crit_bonus', valuePerLevel: 3, category: 'stats', tpl: 'T_SWORD', hue: '#ff9a3c' },
-  { id: 'dodge_bonus', n: { en: 'Nimble', zh: '灵巧' }, d: { en: '+2% dodge chance per level', zh: '每级+2%闪避' }, icon: '💨', maxLevel: 3, costs: [20, 35, 55], effect: 'dodge_bonus', valuePerLevel: 2, category: 'stats', tpl: 'T_BOOT', hue: '#6cc46c' },
+  { id: 'start_atk', n: { en: 'Martial Training', zh: '武技' }, d: { en: '+2 ATK per level', zh: '每级+2攻击' }, icon: '⚔', maxLevel: 3, costs: [15, 30, 50], effect: 'start_atk', valuePerLevel: 2, category: 'stats', tpl: 'T_SWORD', hue: '#e05545' },
+  { id: 'start_def', n: { en: 'Toughness', zh: '坚韧' }, d: { en: '+2 DEF per level', zh: '每级+2防御' }, icon: '🛡', maxLevel: 3, costs: [15, 30, 50], effect: 'start_def', valuePerLevel: 2, category: 'stats', tpl: 'T_SHIELD', hue: '#6a8ad6' },
+  { id: 'crit_bonus', n: { en: 'Keen Edge', zh: '锐锋' }, d: { en: '+4% crit chance per level', zh: '每级+4%暴击' }, icon: '🗡', maxLevel: 3, costs: [20, 35, 55], effect: 'crit_bonus', valuePerLevel: 4, category: 'stats', tpl: 'T_SWORD', hue: '#ff9a3c' },
+  { id: 'dodge_bonus', n: { en: 'Nimble', zh: '灵巧' }, d: { en: '+3% dodge chance per level', zh: '每级+3%闪避' }, icon: '💨', maxLevel: 3, costs: [20, 35, 55], effect: 'dodge_bonus', valuePerLevel: 3, category: 'stats', tpl: 'T_BOOT', hue: '#6cc46c' },
   { id: 'start_gold', n: { en: 'Inheritance', zh: '遗产' }, d: { en: '+15 starting gold per level', zh: '每级+15初始金币' }, icon: '💰', maxLevel: 3, costs: [10, 20, 35], effect: 'start_gold', valuePerLevel: 15, category: 'survival', tpl: 'T_COIN', hue: '#ffd54a' },
   { id: 'heal_bonus', n: { en: 'Regeneration', zh: '再生' }, d: { en: '+5% healing from all sources', zh: '所有治疗效果+5%' }, icon: '💚', maxLevel: 3, costs: [20, 40, 65], effect: 'heal_bonus', valuePerLevel: 5, category: 'survival', tpl: 'T_HEART', hue: '#5ad46a' },
   { id: 'start_food', n: { en: 'Well Fed', zh: '饱食' }, d: { en: '+20 starting hunger per level', zh: '每级+20初始饱食度' }, icon: '🍖', maxLevel: 2, costs: [10, 20], effect: 'start_food', valuePerLevel: 20, category: 'survival', tpl: 'T_MEAT', hue: '#c47a4a' },
