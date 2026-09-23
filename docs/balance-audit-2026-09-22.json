@@ -12,112 +12,112 @@
    "aDef": 3,
    "accA": 1,
    "accD": 1,
-   "accH": 6
+   "accH": 7
   },
   "10": {
-   "wAtk": 10,
-   "aDef": 7,
+   "wAtk": 12,
+   "aDef": 8,
    "accA": 2,
-   "accD": 2,
-   "accH": 14
+   "accD": 3,
+   "accH": 16
   },
   "15": {
-   "wAtk": 18,
-   "aDef": 12,
-   "accA": 3,
-   "accD": 4,
-   "accH": 25
+   "wAtk": 21,
+   "aDef": 13,
+   "accA": 4,
+   "accD": 5,
+   "accH": 28
   },
   "20": {
-   "wAtk": 23,
-   "aDef": 15,
+   "wAtk": 26,
+   "aDef": 16,
    "accA": 6,
-   "accD": 6,
-   "accH": 38
+   "accD": 7,
+   "accH": 44
   },
   "25": {
-   "wAtk": 26,
-   "aDef": 17,
-   "accA": 7,
-   "accD": 7,
-   "accH": 47
-  },
-  "30": {
    "wAtk": 29,
    "aDef": 19,
    "accA": 8,
    "accD": 8,
-   "accH": 52
+   "accH": 54
   },
-  "35": {
+  "30": {
    "wAtk": 31,
    "aDef": 21,
-   "accA": 8,
-   "accD": 9,
-   "accH": 57
-  },
-  "40": {
-   "wAtk": 33,
-   "aDef": 23,
    "accA": 9,
    "accD": 9,
    "accH": 61
   },
-  "45": {
-   "wAtk": 35,
+  "35": {
+   "wAtk": 33,
+   "aDef": 23,
+   "accA": 10,
+   "accD": 10,
+   "accH": 65
+  },
+  "40": {
+   "wAtk": 36,
    "aDef": 25,
-   "accA": 9,
-   "accD": 10,
-   "accH": 63
-  },
-  "50": {
-   "wAtk": 37,
-   "aDef": 27,
-   "accA": 10,
-   "accD": 10,
-   "accH": 66
-  },
-  "55": {
-   "wAtk": 39,
-   "aDef": 29,
-   "accA": 10,
-   "accD": 10,
-   "accH": 67
-  },
-  "60": {
-   "wAtk": 41,
-   "aDef": 31,
    "accA": 10,
    "accD": 11,
-   "accH": 69
+   "accH": 68
   },
-  "65": {
-   "wAtk": 43,
-   "aDef": 33,
+  "45": {
+   "wAtk": 38,
+   "aDef": 27,
    "accA": 11,
    "accD": 11,
    "accH": 71
   },
-  "70": {
-   "wAtk": 45,
-   "aDef": 34,
-   "accA": 11,
-   "accD": 11,
-   "accH": 72
-  },
-  "75": {
-   "wAtk": 47,
-   "aDef": 36,
+  "50": {
+   "wAtk": 40,
+   "aDef": 29,
    "accA": 11,
    "accD": 11,
    "accH": 73
   },
-  "80": {
-   "wAtk": 49,
-   "aDef": 39,
+  "55": {
+   "wAtk": 42,
+   "aDef": 31,
    "accA": 11,
    "accD": 11,
    "accH": 74
+  },
+  "60": {
+   "wAtk": 44,
+   "aDef": 33,
+   "accA": 11,
+   "accD": 11,
+   "accH": 75
+  },
+  "65": {
+   "wAtk": 46,
+   "aDef": 35,
+   "accA": 12,
+   "accD": 12,
+   "accH": 76
+  },
+  "70": {
+   "wAtk": 48,
+   "aDef": 37,
+   "accA": 12,
+   "accD": 12,
+   "accH": 77
+  },
+  "75": {
+   "wAtk": 50,
+   "aDef": 39,
+   "accA": 12,
+   "accD": 12,
+   "accH": 78
+  },
+  "80": {
+   "wAtk": 52,
+   "aDef": 41,
+   "accA": 12,
+   "accD": 12,
+   "accH": 78
   }
  },
  "levels": {
@@ -135,8 +135,8 @@
   "55": 24,
   "60": 25,
   "65": 25,
-  "70": 25,
-  "75": 25,
+  "70": 26,
+  "75": 26,
   "80": 26
  },
  "classes": {
@@ -157,106 +157,106 @@
     "eDef": 3,
     "dps": 34,
     "ttk": 0.7,
-    "hitsToDie": 130
+    "hitsToDie": 131.1
    },
    {
     "f": 10,
     "eHp": 97,
     "eAtk": 32,
     "eDef": 14,
-    "dps": 47,
-    "ttk": 2.1,
-    "hitsToDie": 58.9
+    "dps": 50,
+    "ttk": 2,
+    "hitsToDie": 109.8
    },
    {
     "f": 15,
     "eHp": 188,
     "eAtk": 60,
     "eDef": 26,
-    "dps": 62,
-    "ttk": 3,
-    "hitsToDie": 13.9
+    "dps": 67,
+    "ttk": 2.8,
+    "hitsToDie": 15.4
    },
    {
     "f": 20,
     "eHp": 337,
     "eAtk": 105,
     "eDef": 42,
-    "dps": 60,
-    "ttk": 5.6,
-    "hitsToDie": 5.9
+    "dps": 64,
+    "ttk": 5.2,
+    "hitsToDie": 6.2
    },
    {
     "f": 25,
     "eHp": 470,
     "eAtk": 143,
     "eDef": 51,
-    "dps": 62,
-    "ttk": 7.6,
-    "hitsToDie": 4.2
+    "dps": 67,
+    "ttk": 7,
+    "hitsToDie": 4.4
    },
    {
     "f": 30,
     "eHp": 420,
     "eAtk": 115,
     "eDef": 45,
-    "dps": 76,
-    "ttk": 5.5,
-    "hitsToDie": 6.8
+    "dps": 80,
+    "ttk": 5.2,
+    "hitsToDie": 7.3
    },
    {
     "f": 35,
     "eHp": 569,
     "eAtk": 184,
     "eDef": 61,
-    "dps": 64,
-    "ttk": 8.9,
-    "hitsToDie": 3.4
+    "dps": 69,
+    "ttk": 8.2,
+    "hitsToDie": 3.6
    },
    {
     "f": 40,
-    "eHp": 982,
-    "eAtk": 260,
-    "eDef": 96,
-    "dps": 35,
-    "ttk": 28.2,
-    "hitsToDie": 2.3
+    "eHp": 971,
+    "eAtk": 257,
+    "eDef": 94,
+    "dps": 41,
+    "ttk": 23.5,
+    "hitsToDie": 2.4
    },
    {
     "f": 45,
-    "eHp": 1669,
-    "eAtk": 355,
-    "eDef": 102,
+    "eHp": 1518,
+    "eAtk": 331,
+    "eDef": 108,
     "dps": 33,
-    "ttk": 50.8,
-    "hitsToDie": 1.6
+    "ttk": 45.8,
+    "hitsToDie": 1.8
    },
    {
     "f": 50,
-    "eHp": 2584,
-    "eAtk": 464,
-    "eDef": 149,
-    "dps": 30,
-    "ttk": 84.9,
-    "hitsToDie": 1.2
+    "eHp": 1962,
+    "eAtk": 408,
+    "eDef": 104,
+    "dps": 43,
+    "ttk": 45.4,
+    "hitsToDie": 1.5
    },
    {
     "f": 55,
-    "eHp": 673,
-    "eAtk": 190,
-    "eDef": 70,
-    "dps": 79,
-    "ttk": 8.5,
-    "hitsToDie": 4.2
+    "eHp": 2459,
+    "eAtk": 475,
+    "eDef": 145,
+    "dps": 33,
+    "ttk": 75.5,
+    "hitsToDie": 1.3
    },
    {
     "f": 60,
-    "eHp": 726,
-    "eAtk": 204,
-    "eDef": 75,
-    "dps": 79,
-    "ttk": 9.2,
-    "hitsToDie": 4
+    "eHp": 3361,
+    "eAtk": 566,
+    "eDef": 191,
+    "dps": 34,
+    "ttk": 100,
+    "hitsToDie": 1.1
    }
   ],
   "Rogue_fresh": [
@@ -276,106 +276,106 @@
     "eDef": 3,
     "dps": 49,
     "ttk": 0.5,
-    "hitsToDie": 98.2
+    "hitsToDie": 99.4
    },
    {
     "f": 10,
     "eHp": 97,
     "eAtk": 32,
     "eDef": 14,
-    "dps": 74,
-    "ttk": 1.3,
-    "hitsToDie": 15.7
+    "dps": 79,
+    "ttk": 1.2,
+    "hitsToDie": 19
    },
    {
     "f": 15,
     "eHp": 188,
     "eAtk": 60,
     "eDef": 26,
-    "dps": 92,
-    "ttk": 2,
-    "hitsToDie": 8.1
+    "dps": 102,
+    "ttk": 1.8,
+    "hitsToDie": 8.8
    },
    {
     "f": 20,
     "eHp": 337,
     "eAtk": 105,
     "eDef": 42,
-    "dps": 95,
-    "ttk": 3.6,
-    "hitsToDie": 4.3
+    "dps": 102,
+    "ttk": 3.3,
+    "hitsToDie": 4.5
    },
    {
     "f": 25,
     "eHp": 470,
     "eAtk": 143,
     "eDef": 51,
-    "dps": 100,
-    "ttk": 4.7,
-    "hitsToDie": 3.3
+    "dps": 110,
+    "ttk": 4.3,
+    "hitsToDie": 3.5
    },
    {
     "f": 30,
     "eHp": 420,
     "eAtk": 115,
     "eDef": 45,
-    "dps": 125,
-    "ttk": 3.4,
-    "hitsToDie": 5.1
+    "dps": 132,
+    "ttk": 3.2,
+    "hitsToDie": 5.5
    },
    {
     "f": 35,
     "eHp": 569,
     "eAtk": 184,
     "eDef": 61,
-    "dps": 108,
-    "ttk": 5.3,
-    "hitsToDie": 2.7
+    "dps": 118,
+    "ttk": 4.8,
+    "hitsToDie": 2.9
    },
    {
     "f": 40,
-    "eHp": 982,
-    "eAtk": 260,
-    "eDef": 96,
-    "dps": 77,
-    "ttk": 12.8,
-    "hitsToDie": 1.9
+    "eHp": 971,
+    "eAtk": 257,
+    "eDef": 94,
+    "dps": 80,
+    "ttk": 12.1,
+    "hitsToDie": 2
    },
    {
     "f": 45,
-    "eHp": 1669,
-    "eAtk": 355,
-    "eDef": 102,
-    "dps": 80,
-    "ttk": 20.9,
-    "hitsToDie": 1.3
+    "eHp": 1518,
+    "eAtk": 331,
+    "eDef": 108,
+    "dps": 84,
+    "ttk": 18,
+    "hitsToDie": 1.5
    },
    {
     "f": 50,
-    "eHp": 2584,
-    "eAtk": 464,
-    "eDef": 149,
-    "dps": 84,
-    "ttk": 30.7,
-    "hitsToDie": 1
+    "eHp": 1962,
+    "eAtk": 408,
+    "eDef": 104,
+    "dps": 87,
+    "ttk": 22.4,
+    "hitsToDie": 1.2
    },
    {
     "f": 55,
-    "eHp": 673,
-    "eAtk": 190,
-    "eDef": 70,
-    "dps": 138,
-    "ttk": 4.9,
-    "hitsToDie": 3.4
+    "eHp": 2459,
+    "eAtk": 475,
+    "eDef": 145,
+    "dps": 91,
+    "ttk": 27.1,
+    "hitsToDie": 1.1
    },
    {
     "f": 60,
-    "eHp": 726,
-    "eAtk": 204,
-    "eDef": 75,
-    "dps": 139,
-    "ttk": 5.2,
-    "hitsToDie": 3.2
+    "eHp": 3361,
+    "eAtk": 566,
+    "eDef": 191,
+    "dps": 94,
+    "ttk": 35.7,
+    "hitsToDie": 0.9
    }
   ],
   "Mage_fresh": [
@@ -386,7 +386,7 @@
     "eDef": 1,
     "dps": 5,
     "ttk": 2,
-    "hitsToDie": 41.6
+    "hitsToDie": 50
    },
    {
     "f": 5,
@@ -395,106 +395,106 @@
     "eDef": 3,
     "dps": 17,
     "ttk": 1.5,
-    "hitsToDie": 82.6
+    "hitsToDie": 92.1
    },
    {
     "f": 10,
     "eHp": 97,
     "eAtk": 32,
     "eDef": 14,
-    "dps": 28,
-    "ttk": 3.4,
-    "hitsToDie": 12.2
+    "dps": 31,
+    "ttk": 3.2,
+    "hitsToDie": 15.7
    },
    {
     "f": 15,
     "eHp": 188,
     "eAtk": 60,
     "eDef": 26,
-    "dps": 34,
-    "ttk": 5.5,
-    "hitsToDie": 6.4
+    "dps": 38,
+    "ttk": 4.9,
+    "hitsToDie": 7.3
    },
    {
     "f": 20,
     "eHp": 337,
     "eAtk": 105,
     "eDef": 42,
-    "dps": 31,
-    "ttk": 11,
-    "hitsToDie": 3.4
+    "dps": 34,
+    "ttk": 9.9,
+    "hitsToDie": 3.7
    },
    {
     "f": 25,
     "eHp": 470,
     "eAtk": 143,
     "eDef": 51,
-    "dps": 31,
-    "ttk": 15,
-    "hitsToDie": 2.6
+    "dps": 36,
+    "ttk": 13.1,
+    "hitsToDie": 2.8
    },
    {
     "f": 30,
     "eHp": 420,
     "eAtk": 115,
     "eDef": 45,
-    "dps": 45,
-    "ttk": 9.3,
-    "hitsToDie": 4
+    "dps": 49,
+    "ttk": 8.6,
+    "hitsToDie": 4.5
    },
    {
     "f": 35,
     "eHp": 569,
     "eAtk": 184,
     "eDef": 61,
-    "dps": 32,
-    "ttk": 17.5,
-    "hitsToDie": 2.2
+    "dps": 37,
+    "ttk": 15.4,
+    "hitsToDie": 2.4
    },
    {
     "f": 40,
-    "eHp": 982,
-    "eAtk": 260,
-    "eDef": 96,
+    "eHp": 971,
+    "eAtk": 257,
+    "eDef": 94,
     "dps": 15,
-    "ttk": 66.7,
-    "hitsToDie": 1.5
+    "ttk": 64.3,
+    "hitsToDie": 1.6
    },
    {
     "f": 45,
-    "eHp": 1669,
-    "eAtk": 355,
-    "eDef": 102,
-    "dps": 15,
-    "ttk": 108.5,
-    "hitsToDie": 1.1
+    "eHp": 1518,
+    "eAtk": 331,
+    "eDef": 108,
+    "dps": 16,
+    "ttk": 95.8,
+    "hitsToDie": 1.2
    },
    {
     "f": 50,
-    "eHp": 2584,
-    "eAtk": 464,
-    "eDef": 149,
+    "eHp": 1962,
+    "eAtk": 408,
+    "eDef": 104,
     "dps": 16,
-    "ttk": 160.4,
-    "hitsToDie": 0.8
+    "ttk": 119.1,
+    "hitsToDie": 1
    },
    {
     "f": 55,
-    "eHp": 673,
-    "eAtk": 190,
-    "eDef": 70,
-    "dps": 45,
-    "ttk": 14.8,
-    "hitsToDie": 2.7
+    "eHp": 2459,
+    "eAtk": 475,
+    "eDef": 145,
+    "dps": 17,
+    "ttk": 143.6,
+    "hitsToDie": 0.9
    },
    {
     "f": 60,
-    "eHp": 726,
-    "eAtk": 204,
-    "eDef": 75,
-    "dps": 44,
-    "ttk": 16.3,
-    "hitsToDie": 2.6
+    "eHp": 3361,
+    "eAtk": 566,
+    "eDef": 191,
+    "dps": 18,
+    "ttk": 189.1,
+    "hitsToDie": 0.7
    }
   ],
   "Paladin_fresh": [
@@ -514,106 +514,106 @@
     "eDef": 3,
     "dps": 25,
     "ttk": 1,
-    "hitsToDie": 114.2
+    "hitsToDie": 115.3
    },
    {
     "f": 10,
     "eHp": 97,
     "eAtk": 32,
     "eDef": 14,
-    "dps": 30,
-    "ttk": 3.2,
-    "hitsToDie": 59.3
+    "dps": 33,
+    "ttk": 3,
+    "hitsToDie": 148.1
    },
    {
     "f": 15,
     "eHp": 188,
     "eAtk": 60,
     "eDef": 26,
-    "dps": 34,
-    "ttk": 5.6,
-    "hitsToDie": 13
+    "dps": 38,
+    "ttk": 4.9,
+    "hitsToDie": 14.5
    },
    {
     "f": 20,
     "eHp": 337,
     "eAtk": 105,
     "eDef": 42,
-    "dps": 29,
-    "ttk": 11.6,
-    "hitsToDie": 5.3
+    "dps": 32,
+    "ttk": 10.5,
+    "hitsToDie": 5.6
    },
    {
     "f": 25,
     "eHp": 470,
     "eAtk": 143,
     "eDef": 51,
-    "dps": 28,
-    "ttk": 16.6,
-    "hitsToDie": 3.8
+    "dps": 32,
+    "ttk": 14.5,
+    "hitsToDie": 4
    },
    {
     "f": 30,
     "eHp": 420,
     "eAtk": 115,
     "eDef": 45,
-    "dps": 41,
-    "ttk": 10.2,
-    "hitsToDie": 6.1
+    "dps": 44,
+    "ttk": 9.5,
+    "hitsToDie": 6.6
    },
    {
     "f": 35,
     "eHp": 569,
     "eAtk": 184,
     "eDef": 61,
-    "dps": 28,
-    "ttk": 20.4,
-    "hitsToDie": 3.1
+    "dps": 32,
+    "ttk": 17.7,
+    "hitsToDie": 3.2
    },
    {
     "f": 40,
-    "eHp": 982,
-    "eAtk": 260,
-    "eDef": 96,
-    "dps": 1,
-    "ttk": 935.7,
-    "hitsToDie": 2
+    "eHp": 971,
+    "eAtk": 257,
+    "eDef": 94,
+    "dps": 3,
+    "ttk": 350.9,
+    "hitsToDie": 2.1
    },
    {
     "f": 45,
-    "eHp": 1669,
-    "eAtk": 355,
-    "eDef": 102,
+    "eHp": 1518,
+    "eAtk": 331,
+    "eDef": 108,
     "dps": 1,
-    "ttk": 1589.1,
-    "hitsToDie": 1.4
+    "ttk": 1445.4,
+    "hitsToDie": 1.6
    },
    {
     "f": 50,
-    "eHp": 2584,
-    "eAtk": 464,
-    "eDef": 149,
-    "dps": 1,
-    "ttk": 2461.3,
-    "hitsToDie": 1.1
+    "eHp": 1962,
+    "eAtk": 408,
+    "eDef": 104,
+    "dps": 2,
+    "ttk": 860.2,
+    "hitsToDie": 1.3
    },
    {
     "f": 55,
-    "eHp": 673,
-    "eAtk": 190,
-    "eDef": 70,
-    "dps": 38,
-    "ttk": 17.7,
-    "hitsToDie": 3.8
+    "eHp": 2459,
+    "eAtk": 475,
+    "eDef": 145,
+    "dps": 1,
+    "ttk": 2341.7,
+    "hitsToDie": 1.1
    },
    {
     "f": 60,
-    "eHp": 726,
-    "eAtk": 204,
-    "eDef": 75,
-    "dps": 37,
-    "ttk": 19.9,
-    "hitsToDie": 3.6
+    "eHp": 3361,
+    "eAtk": 566,
+    "eDef": 191,
+    "dps": 1,
+    "ttk": 3200.9,
+    "hitsToDie": 1
    }
   ],
   "Warrior_estab": [
@@ -633,106 +633,106 @@
     "eDef": 3,
     "dps": 39,
     "ttk": 0.6,
-    "hitsToDie": 185.2
+    "hitsToDie": 186.3
    },
    {
     "f": 10,
     "eHp": 97,
     "eAtk": 32,
     "eDef": 14,
-    "dps": 61,
-    "ttk": 1.6,
-    "hitsToDie": 221.8
+    "dps": 64,
+    "ttk": 1.5,
+    "hitsToDie": 303.3
    },
    {
     "f": 15,
     "eHp": 188,
     "eAtk": 60,
     "eDef": 26,
-    "dps": 69,
-    "ttk": 2.7,
-    "hitsToDie": 18.4
+    "dps": 74,
+    "ttk": 2.5,
+    "hitsToDie": 20.7
    },
    {
     "f": 20,
     "eHp": 337,
     "eAtk": 105,
     "eDef": 42,
-    "dps": 67,
-    "ttk": 5,
-    "hitsToDie": 7
+    "dps": 71,
+    "ttk": 4.7,
+    "hitsToDie": 7.4
    },
    {
     "f": 25,
     "eHp": 470,
     "eAtk": 143,
     "eDef": 51,
-    "dps": 68,
-    "ttk": 6.9,
-    "hitsToDie": 4.9
+    "dps": 74,
+    "ttk": 6.4,
+    "hitsToDie": 5.2
    },
    {
     "f": 30,
     "eHp": 420,
     "eAtk": 115,
     "eDef": 45,
-    "dps": 84,
-    "ttk": 5,
-    "hitsToDie": 8
+    "dps": 88,
+    "ttk": 4.8,
+    "hitsToDie": 8.6
    },
    {
     "f": 35,
     "eHp": 569,
     "eAtk": 184,
     "eDef": 61,
-    "dps": 70,
-    "ttk": 8.1,
-    "hitsToDie": 3.9
+    "dps": 76,
+    "ttk": 7.5,
+    "hitsToDie": 4.1
    },
    {
     "f": 40,
-    "eHp": 982,
-    "eAtk": 260,
-    "eDef": 96,
-    "dps": 39,
-    "ttk": 24.9,
-    "hitsToDie": 2.6
+    "eHp": 971,
+    "eAtk": 257,
+    "eDef": 94,
+    "dps": 46,
+    "ttk": 21,
+    "hitsToDie": 2.7
    },
    {
     "f": 45,
-    "eHp": 1669,
-    "eAtk": 355,
-    "eDef": 102,
+    "eHp": 1518,
+    "eAtk": 331,
+    "eDef": 108,
     "dps": 37,
-    "ttk": 44.8,
-    "hitsToDie": 1.8
+    "ttk": 40.5,
+    "hitsToDie": 2
    },
    {
     "f": 50,
-    "eHp": 2584,
-    "eAtk": 464,
-    "eDef": 149,
-    "dps": 31,
-    "ttk": 82.6,
-    "hitsToDie": 1.4
+    "eHp": 1962,
+    "eAtk": 408,
+    "eDef": 104,
+    "dps": 48,
+    "ttk": 40.8,
+    "hitsToDie": 1.6
    },
    {
     "f": 55,
-    "eHp": 673,
-    "eAtk": 190,
-    "eDef": 70,
-    "dps": 86,
-    "ttk": 7.8,
-    "hitsToDie": 4.8
+    "eHp": 2459,
+    "eAtk": 475,
+    "eDef": 145,
+    "dps": 33,
+    "ttk": 73.6,
+    "hitsToDie": 1.4
    },
    {
     "f": 60,
-    "eHp": 726,
-    "eAtk": 204,
-    "eDef": 75,
-    "dps": 85,
-    "ttk": 8.5,
-    "hitsToDie": 4.5
+    "eHp": 3361,
+    "eAtk": 566,
+    "eDef": 191,
+    "dps": 34,
+    "ttk": 97.6,
+    "hitsToDie": 1.2
    }
   ],
   "Rogue_estab": [
@@ -752,106 +752,106 @@
     "eDef": 3,
     "dps": 57,
     "ttk": 0.4,
-    "hitsToDie": 151.3
+    "hitsToDie": 152.7
    },
    {
     "f": 10,
     "eHp": 97,
     "eAtk": 32,
     "eDef": 14,
-    "dps": 84,
+    "dps": 89,
     "ttk": 1.1,
-    "hitsToDie": 27
+    "hitsToDie": 34.7
    },
    {
     "f": 15,
     "eHp": 188,
     "eAtk": 60,
     "eDef": 26,
-    "dps": 102,
-    "ttk": 1.8,
-    "hitsToDie": 11.3
+    "dps": 112,
+    "ttk": 1.7,
+    "hitsToDie": 12.3
    },
    {
     "f": 20,
     "eHp": 337,
     "eAtk": 105,
     "eDef": 42,
-    "dps": 104,
-    "ttk": 3.2,
-    "hitsToDie": 5.4
+    "dps": 112,
+    "ttk": 3,
+    "hitsToDie": 5.8
    },
    {
     "f": 25,
     "eHp": 470,
     "eAtk": 143,
     "eDef": 51,
-    "dps": 110,
-    "ttk": 4.3,
-    "hitsToDie": 4
+    "dps": 120,
+    "ttk": 3.9,
+    "hitsToDie": 4.3
    },
    {
     "f": 30,
     "eHp": 420,
     "eAtk": 115,
     "eDef": 45,
-    "dps": 136,
-    "ttk": 3.1,
-    "hitsToDie": 6.3
+    "dps": 143,
+    "ttk": 2.9,
+    "hitsToDie": 6.8
    },
    {
     "f": 35,
     "eHp": 569,
     "eAtk": 184,
     "eDef": 61,
-    "dps": 118,
-    "ttk": 4.8,
-    "hitsToDie": 3.3
+    "dps": 128,
+    "ttk": 4.5,
+    "hitsToDie": 3.5
    },
    {
     "f": 40,
-    "eHp": 982,
-    "eAtk": 260,
-    "eDef": 96,
-    "dps": 79,
-    "ttk": 12.4,
-    "hitsToDie": 2.2
+    "eHp": 971,
+    "eAtk": 257,
+    "eDef": 94,
+    "dps": 85,
+    "ttk": 11.4,
+    "hitsToDie": 2.4
    },
    {
     "f": 45,
-    "eHp": 1669,
-    "eAtk": 355,
-    "eDef": 102,
-    "dps": 83,
-    "ttk": 20.2,
-    "hitsToDie": 1.6
+    "eHp": 1518,
+    "eAtk": 331,
+    "eDef": 108,
+    "dps": 87,
+    "ttk": 17.5,
+    "hitsToDie": 1.8
    },
    {
     "f": 50,
-    "eHp": 2584,
-    "eAtk": 464,
-    "eDef": 149,
-    "dps": 87,
-    "ttk": 29.8,
-    "hitsToDie": 1.2
+    "eHp": 1962,
+    "eAtk": 408,
+    "eDef": 104,
+    "dps": 92,
+    "ttk": 21.3,
+    "hitsToDie": 1.5
    },
    {
     "f": 55,
-    "eHp": 673,
-    "eAtk": 190,
-    "eDef": 70,
-    "dps": 149,
-    "ttk": 4.5,
-    "hitsToDie": 4.1
+    "eHp": 2459,
+    "eAtk": 475,
+    "eDef": 145,
+    "dps": 93,
+    "ttk": 26.3,
+    "hitsToDie": 1.3
    },
    {
     "f": 60,
-    "eHp": 726,
-    "eAtk": 204,
-    "eDef": 75,
-    "dps": 150,
-    "ttk": 4.8,
-    "hitsToDie": 3.9
+    "eHp": 3361,
+    "eAtk": 566,
+    "eDef": 191,
+    "dps": 97,
+    "ttk": 34.8,
+    "hitsToDie": 1.1
    }
   ],
   "Mage_estab": [
@@ -862,7 +862,7 @@
     "eDef": 1,
     "dps": 9,
     "ttk": 1.2,
-    "hitsToDie": 76.4
+    "hitsToDie": 85.2
    },
    {
     "f": 5,
@@ -871,106 +871,106 @@
     "eDef": 3,
     "dps": 21,
     "ttk": 1.2,
-    "hitsToDie": 119.2
+    "hitsToDie": 129.1
    },
    {
     "f": 10,
     "eHp": 97,
     "eAtk": 32,
     "eDef": 14,
-    "dps": 33,
-    "ttk": 2.9,
-    "hitsToDie": 20.7
+    "dps": 36,
+    "ttk": 2.7,
+    "hitsToDie": 28
    },
    {
     "f": 15,
     "eHp": 188,
     "eAtk": 60,
     "eDef": 26,
-    "dps": 39,
-    "ttk": 4.8,
-    "hitsToDie": 8.7
+    "dps": 44,
+    "ttk": 4.3,
+    "hitsToDie": 9.9
    },
    {
     "f": 20,
     "eHp": 337,
     "eAtk": 105,
     "eDef": 42,
-    "dps": 36,
-    "ttk": 9.5,
-    "hitsToDie": 4.2
+    "dps": 39,
+    "ttk": 8.6,
+    "hitsToDie": 4.6
    },
    {
     "f": 25,
     "eHp": 470,
     "eAtk": 143,
     "eDef": 51,
-    "dps": 36,
-    "ttk": 13,
-    "hitsToDie": 3.1
+    "dps": 41,
+    "ttk": 11.5,
+    "hitsToDie": 3.4
    },
    {
     "f": 30,
     "eHp": 420,
     "eAtk": 115,
     "eDef": 45,
-    "dps": 51,
-    "ttk": 8.3,
-    "hitsToDie": 4.9
+    "dps": 54,
+    "ttk": 7.7,
+    "hitsToDie": 5.5
    },
    {
     "f": 35,
     "eHp": 569,
     "eAtk": 184,
     "eDef": 61,
-    "dps": 37,
-    "ttk": 15.3,
-    "hitsToDie": 2.6
+    "dps": 42,
+    "ttk": 13.6,
+    "hitsToDie": 2.8
    },
    {
     "f": 40,
-    "eHp": 982,
-    "eAtk": 260,
-    "eDef": 96,
+    "eHp": 971,
+    "eAtk": 257,
+    "eDef": 94,
     "dps": 15,
-    "ttk": 65.2,
-    "hitsToDie": 1.7
+    "ttk": 62.9,
+    "hitsToDie": 1.9
    },
    {
     "f": 45,
-    "eHp": 1669,
-    "eAtk": 355,
-    "eDef": 102,
+    "eHp": 1518,
+    "eAtk": 331,
+    "eDef": 108,
     "dps": 16,
-    "ttk": 106.2,
-    "hitsToDie": 1.2
+    "ttk": 93.8,
+    "hitsToDie": 1.4
    },
    {
     "f": 50,
-    "eHp": 2584,
-    "eAtk": 464,
-    "eDef": 149,
-    "dps": 16,
-    "ttk": 157.1,
-    "hitsToDie": 1
+    "eHp": 1962,
+    "eAtk": 408,
+    "eDef": 104,
+    "dps": 17,
+    "ttk": 116.7,
+    "hitsToDie": 1.2
    },
    {
     "f": 55,
-    "eHp": 673,
-    "eAtk": 190,
-    "eDef": 70,
-    "dps": 51,
-    "ttk": 13.3,
-    "hitsToDie": 3.2
+    "eHp": 2459,
+    "eAtk": 475,
+    "eDef": 145,
+    "dps": 17,
+    "ttk": 140.8,
+    "hitsToDie": 1
    },
    {
     "f": 60,
-    "eHp": 726,
-    "eAtk": 204,
-    "eDef": 75,
-    "dps": 50,
-    "ttk": 14.6,
-    "hitsToDie": 3
+    "eHp": 3361,
+    "eAtk": 566,
+    "eDef": 191,
+    "dps": 18,
+    "ttk": 185.6,
+    "hitsToDie": 0.9
    }
   ],
   "Paladin_estab": [
@@ -990,106 +990,106 @@
     "eDef": 3,
     "dps": 30,
     "ttk": 0.8,
-    "hitsToDie": 152.2
+    "hitsToDie": 153.3
    },
    {
     "f": 10,
     "eHp": 97,
     "eAtk": 32,
     "eDef": 14,
-    "dps": 35,
-    "ttk": 2.7,
-    "hitsToDie": 273.6
+    "dps": 38,
+    "ttk": 2.6,
+    "hitsToDie": 275.8
    },
    {
     "f": 15,
     "eHp": 188,
     "eAtk": 60,
     "eDef": 26,
-    "dps": 39,
-    "ttk": 4.8,
-    "hitsToDie": 17.6
+    "dps": 44,
+    "ttk": 4.3,
+    "hitsToDie": 19.9
    },
    {
     "f": 20,
     "eHp": 337,
     "eAtk": 105,
     "eDef": 42,
-    "dps": 34,
-    "ttk": 9.9,
-    "hitsToDie": 6.5
+    "dps": 37,
+    "ttk": 9,
+    "hitsToDie": 6.8
    },
    {
     "f": 25,
     "eHp": 470,
     "eAtk": 143,
     "eDef": 51,
-    "dps": 33,
-    "ttk": 14.2,
-    "hitsToDie": 4.5
+    "dps": 38,
+    "ttk": 12.5,
+    "hitsToDie": 4.7
    },
    {
     "f": 30,
     "eHp": 420,
     "eAtk": 115,
     "eDef": 45,
-    "dps": 47,
-    "ttk": 8.9,
-    "hitsToDie": 7.3
+    "dps": 50,
+    "ttk": 8.3,
+    "hitsToDie": 7.9
    },
    {
     "f": 35,
     "eHp": 569,
     "eAtk": 184,
     "eDef": 61,
-    "dps": 33,
-    "ttk": 17.3,
-    "hitsToDie": 3.6
+    "dps": 37,
+    "ttk": 15.3,
+    "hitsToDie": 3.7
    },
    {
     "f": 40,
-    "eHp": 982,
-    "eAtk": 260,
-    "eDef": 96,
-    "dps": 1,
-    "ttk": 885.1,
-    "hitsToDie": 2.3
+    "eHp": 971,
+    "eAtk": 257,
+    "eDef": 94,
+    "dps": 6,
+    "ttk": 155.2,
+    "hitsToDie": 2.4
    },
    {
     "f": 45,
-    "eHp": 1669,
-    "eAtk": 355,
-    "eDef": 102,
+    "eHp": 1518,
+    "eAtk": 331,
+    "eDef": 108,
     "dps": 1,
-    "ttk": 1503.2,
-    "hitsToDie": 1.6
+    "ttk": 1367.2,
+    "hitsToDie": 1.8
    },
    {
     "f": 50,
-    "eHp": 2584,
-    "eAtk": 464,
-    "eDef": 149,
-    "dps": 1,
-    "ttk": 2328.3,
-    "hitsToDie": 1.2
+    "eHp": 1962,
+    "eAtk": 408,
+    "eDef": 104,
+    "dps": 6,
+    "ttk": 341.8,
+    "hitsToDie": 1.5
    },
    {
     "f": 55,
-    "eHp": 673,
-    "eAtk": 190,
-    "eDef": 70,
-    "dps": 44,
-    "ttk": 15.4,
-    "hitsToDie": 4.3
+    "eHp": 2459,
+    "eAtk": 475,
+    "eDef": 145,
+    "dps": 1,
+    "ttk": 2215.1,
+    "hitsToDie": 1.3
    },
    {
     "f": 60,
-    "eHp": 726,
-    "eAtk": 204,
-    "eDef": 75,
-    "dps": 42,
-    "ttk": 17.3,
-    "hitsToDie": 4.1
+    "eHp": 3361,
+    "eAtk": 566,
+    "eDef": 191,
+    "dps": 1,
+    "ttk": 3027.9,
+    "hitsToDie": 1.1
    }
   ]
  },
@@ -1100,28 +1100,28 @@
     "name": "Goblin King",
     "hp": 84,
     "ttk": 2,
-    "hitsToDie": 185.2
+    "hitsToDie": 186.3
    },
    "Rogue": {
     "fl": 5,
     "name": "Goblin King",
     "hp": 84,
     "ttk": 2,
-    "hitsToDie": 22.9
+    "hitsToDie": 23.1
    },
    "Mage": {
     "fl": 5,
     "name": "Goblin King",
     "hp": 84,
     "ttk": 5,
-    "hitsToDie": 18.1
+    "hitsToDie": 19.6
    },
    "Paladin": {
     "fl": 5,
     "name": "Goblin King",
     "hp": 84,
     "ttk": 3,
-    "hitsToDie": 152.2
+    "hitsToDie": 153.3
    }
   },
   "Spider Queen": {
@@ -1130,28 +1130,28 @@
     "name": "Spider Queen",
     "hp": 171,
     "ttk": 3,
-    "hitsToDie": 84.1
+    "hitsToDie": 192
    },
    "Rogue": {
     "fl": 10,
     "name": "Spider Queen",
     "hp": 171,
     "ttk": 2,
-    "hitsToDie": 21.8
+    "hitsToDie": 26.7
    },
    "Mage": {
     "fl": 10,
     "name": "Spider Queen",
     "hp": 171,
     "ttk": 5,
-    "hitsToDie": 16.8
+    "hitsToDie": 21.5
    },
    "Paladin": {
     "fl": 10,
     "name": "Spider Queen",
     "hp": 171,
     "ttk": 4,
-    "hitsToDie": 106.1
+    "hitsToDie": 275.8
    }
   },
   "Vampire Lord": {
@@ -1160,28 +1160,28 @@
     "name": "Vampire Lord",
     "hp": 288,
     "ttk": 4,
-    "hitsToDie": 23.6
+    "hitsToDie": 27.4
    },
    "Rogue": {
     "fl": 15,
     "name": "Vampire Lord",
     "hp": 288,
-    "ttk": 3,
-    "hitsToDie": 13.3
+    "ttk": 2,
+    "hitsToDie": 14.8
    },
    "Mage": {
     "fl": 15,
     "name": "Vampire Lord",
     "hp": 288,
-    "ttk": 7,
-    "hitsToDie": 10.3
+    "ttk": 6,
+    "hitsToDie": 11.9
    },
    "Paladin": {
     "fl": 15,
     "name": "Vampire Lord",
     "hp": 288,
     "ttk": 6,
-    "hitsToDie": 22.9
+    "hitsToDie": 26.9
    }
   },
   "Elder Lich": {
@@ -1190,28 +1190,28 @@
     "name": "Elder Lich",
     "hp": 435,
     "ttk": 5,
-    "hitsToDie": 9.7
+    "hitsToDie": 10.4
    },
    "Rogue": {
     "fl": 20,
     "name": "Elder Lich",
     "hp": 435,
     "ttk": 3,
-    "hitsToDie": 7.2
+    "hitsToDie": 7.7
    },
    "Mage": {
     "fl": 20,
     "name": "Elder Lich",
     "hp": 435,
-    "ttk": 10,
-    "hitsToDie": 5.6
+    "ttk": 9,
+    "hitsToDie": 6.2
    },
    "Paladin": {
     "fl": 20,
     "name": "Elder Lich",
     "hp": 435,
-    "ttk": 9,
-    "hitsToDie": 9
+    "ttk": 8,
+    "hitsToDie": 9.6
    }
   },
   "Dragon Emperor": {
@@ -1220,28 +1220,28 @@
     "name": "Dragon Emperor",
     "hp": 680,
     "ttk": 9,
-    "hitsToDie": 4.4
+    "hitsToDie": 7.7
    },
    "Rogue": {
     "fl": 25,
     "name": "Dragon Emperor",
     "hp": 680,
-    "ttk": 6,
-    "hitsToDie": 3.7
+    "ttk": 5,
+    "hitsToDie": 6.1
    },
    "Mage": {
     "fl": 25,
     "name": "Dragon Emperor",
     "hp": 680,
-    "ttk": 20,
-    "hitsToDie": 2.9
+    "ttk": 18,
+    "hitsToDie": 4.9
    },
    "Paladin": {
     "fl": 25,
     "name": "Dragon Emperor",
     "hp": 680,
-    "ttk": 18,
-    "hitsToDie": 4.1
+    "ttk": 16,
+    "hitsToDie": 7.1
    }
   },
   "Leviathan": {
@@ -1249,29 +1249,29 @@
     "fl": 30,
     "name": "Leviathan",
     "hp": 1092,
-    "ttk": 15,
-    "hitsToDie": 3.1
+    "ttk": 14,
+    "hitsToDie": 5.1
    },
    "Rogue": {
     "fl": 30,
     "name": "Leviathan",
     "hp": 1092,
     "ttk": 9,
-    "hitsToDie": 2.7
+    "hitsToDie": 4.3
    },
    "Mage": {
     "fl": 30,
     "name": "Leviathan",
     "hp": 1092,
-    "ttk": 33,
-    "hitsToDie": 2.1
+    "ttk": 30,
+    "hitsToDie": 3.4
    },
    "Paladin": {
     "fl": 30,
     "name": "Leviathan",
     "hp": 1092,
-    "ttk": 30,
-    "hitsToDie": 2.8
+    "ttk": 28,
+    "hitsToDie": 4.7
    }
   },
   "Void Sovereign": {
@@ -1279,29 +1279,29 @@
     "fl": 35,
     "name": "Void Sovereign",
     "hp": 1760,
-    "ttk": 35,
-    "hitsToDie": 1.4
+    "ttk": 31,
+    "hitsToDie": 2.8
    },
    "Rogue": {
     "fl": 35,
     "name": "Void Sovereign",
     "hp": 1760,
-    "ttk": 20,
-    "hitsToDie": 1.3
+    "ttk": 18,
+    "hitsToDie": 2.4
    },
    "Mage": {
     "fl": 35,
     "name": "Void Sovereign",
     "hp": 1760,
-    "ttk": 172,
-    "hitsToDie": 1
+    "ttk": 119,
+    "hitsToDie": 2
    },
    "Paladin": {
     "fl": 35,
     "name": "Void Sovereign",
     "hp": 1760,
-    "ttk": 134,
-    "hitsToDie": 1.3
+    "ttk": 100,
+    "hitsToDie": 2.5
    }
   },
   "The Creator": {
@@ -1309,29 +1309,29 @@
     "fl": 40,
     "name": "The Creator",
     "hp": 2940,
-    "ttk": 102,
-    "hitsToDie": 1.3
+    "ttk": 94,
+    "hitsToDie": 2.2
    },
    "Rogue": {
     "fl": 40,
     "name": "The Creator",
     "hp": 2940,
-    "ttk": 37,
-    "hitsToDie": 1.1
+    "ttk": 36,
+    "hitsToDie": 1.9
    },
    "Mage": {
     "fl": 40,
     "name": "The Creator",
     "hp": 2940,
-    "ttk": 395,
-    "hitsToDie": 0.9
+    "ttk": 386,
+    "hitsToDie": 1.5
    },
    "Paladin": {
     "fl": 40,
     "name": "The Creator",
     "hp": 2940,
     "ttk": 2649,
-    "hitsToDie": 1.1
+    "hitsToDie": 2
    }
   }
  },
@@ -1362,161 +1362,161 @@
  "panels": {
   "Warrior@F10": {
    "level": 11,
-   "atk": 56,
-   "def": 31,
-   "maxHp": 274,
+   "atk": 58,
+   "def": 33,
+   "maxHp": 276,
    "crit": 11,
    "dodge": 9
   },
   "Rogue@F10": {
    "level": 11,
-   "atk": 43,
-   "def": 23,
-   "maxHp": 164,
+   "atk": 45,
+   "def": 25,
+   "maxHp": 166,
    "crit": 36,
    "dodge": 35
   },
   "Mage@F10": {
    "level": 11,
-   "atk": 38,
-   "def": 23,
-   "maxHp": 159,
+   "atk": 40,
+   "def": 25,
+   "maxHp": 169,
    "crit": 11,
    "dodge": 9
   },
   "Paladin@F10": {
    "level": 11,
-   "atk": 46,
-   "def": 32,
-   "maxHp": 249,
+   "atk": 48,
+   "def": 34,
+   "maxHp": 251,
    "crit": 11,
    "dodge": 9
   },
   "Warrior@F20": {
    "level": 16,
-   "atk": 83,
-   "def": 48,
-   "maxHp": 366,
+   "atk": 86,
+   "def": 50,
+   "maxHp": 372,
    "crit": 11,
    "dodge": 9
   },
   "Rogue@F20": {
    "level": 16,
-   "atk": 70,
-   "def": 40,
-   "maxHp": 231,
+   "atk": 73,
+   "def": 42,
+   "maxHp": 237,
    "crit": 36,
    "dodge": 35
   },
   "Mage@F20": {
    "level": 16,
-   "atk": 65,
-   "def": 40,
-   "maxHp": 226,
+   "atk": 68,
+   "def": 42,
+   "maxHp": 240,
    "crit": 11,
    "dodge": 9
   },
   "Paladin@F20": {
    "level": 16,
-   "atk": 73,
-   "def": 49,
-   "maxHp": 331,
+   "atk": 76,
+   "def": 51,
+   "maxHp": 337,
    "crit": 11,
    "dodge": 9
   },
   "Warrior@F30": {
    "level": 19,
-   "atk": 97,
-   "def": 57,
-   "maxHp": 420,
+   "atk": 100,
+   "def": 60,
+   "maxHp": 429,
    "crit": 11,
    "dodge": 9
   },
   "Rogue@F30": {
    "level": 19,
-   "atk": 84,
-   "def": 49,
-   "maxHp": 270,
+   "atk": 87,
+   "def": 52,
+   "maxHp": 279,
    "crit": 36,
    "dodge": 35
   },
   "Mage@F30": {
    "level": 19,
-   "atk": 79,
-   "def": 49,
-   "maxHp": 265,
+   "atk": 82,
+   "def": 52,
+   "maxHp": 282,
    "crit": 11,
    "dodge": 9
   },
   "Paladin@F30": {
    "level": 19,
-   "atk": 87,
-   "def": 58,
-   "maxHp": 379,
+   "atk": 90,
+   "def": 61,
+   "maxHp": 388,
    "crit": 11,
    "dodge": 9
   },
   "Warrior@F40": {
    "level": 21,
-   "atk": 106,
-   "def": 64,
-   "maxHp": 456,
+   "atk": 110,
+   "def": 68,
+   "maxHp": 463,
    "crit": 11,
    "dodge": 9
   },
   "Rogue@F40": {
    "level": 21,
-   "atk": 93,
-   "def": 56,
-   "maxHp": 296,
+   "atk": 97,
+   "def": 60,
+   "maxHp": 303,
    "crit": 36,
    "dodge": 35
   },
   "Mage@F40": {
    "level": 21,
-   "atk": 88,
-   "def": 56,
-   "maxHp": 291,
+   "atk": 92,
+   "def": 60,
+   "maxHp": 306,
    "crit": 11,
    "dodge": 9
   },
   "Paladin@F40": {
    "level": 21,
-   "atk": 96,
-   "def": 65,
-   "maxHp": 411,
+   "atk": 100,
+   "def": 69,
+   "maxHp": 418,
    "crit": 11,
    "dodge": 9
   },
   "Warrior@F60": {
    "level": 25,
-   "atk": 123,
-   "def": 78,
-   "maxHp": 518,
+   "atk": 127,
+   "def": 80,
+   "maxHp": 524,
    "crit": 11,
    "dodge": 9
   },
   "Rogue@F60": {
    "level": 25,
-   "atk": 110,
-   "def": 70,
-   "maxHp": 338,
+   "atk": 114,
+   "def": 72,
+   "maxHp": 344,
    "crit": 36,
    "dodge": 35
   },
   "Mage@F60": {
    "level": 25,
-   "atk": 105,
-   "def": 70,
-   "maxHp": 333,
+   "atk": 109,
+   "def": 72,
+   "maxHp": 347,
    "crit": 11,
    "dodge": 9
   },
   "Paladin@F60": {
    "level": 25,
-   "atk": 113,
-   "def": 79,
-   "maxHp": 465,
+   "atk": 117,
+   "def": 81,
+   "maxHp": 471,
    "crit": 11,
    "dodge": 9
   }
@@ -1532,62 +1532,62 @@
     {
      "f": 5,
      "ttk": 0.6,
-     "h2d": 25.7
+     "h2d": 25.9
     },
     {
      "f": 10,
-     "ttk": 1.3,
-     "h2d": 14.1
+     "ttk": 1.2,
+     "h2d": 14.4
     },
     {
      "f": 15,
-     "ttk": 2.1,
-     "h2d": 9.9
+     "ttk": 2,
+     "h2d": 10.1
     },
     {
      "f": 20,
-     "ttk": 3.4,
-     "h2d": 6.8
+     "ttk": 3.3,
+     "h2d": 7
     },
     {
      "f": 25,
-     "ttk": 4.4,
-     "h2d": 5.7
+     "ttk": 4.2,
+     "h2d": 6
     },
     {
      "f": 30,
-     "ttk": 3.6,
-     "h2d": 7.7
+     "ttk": 3.5,
+     "h2d": 8
     },
     {
      "f": 35,
-     "ttk": 5,
-     "h2d": 5.2
+     "ttk": 4.8,
+     "h2d": 5.4
     },
     {
      "f": 40,
-     "ttk": 9.1,
-     "h2d": 3.9
+     "ttk": 8.8,
+     "h2d": 4.1
     },
     {
      "f": 45,
-     "ttk": 15.3,
-     "h2d": 3.1
+     "ttk": 13.7,
+     "h2d": 3.4
     },
     {
      "f": 50,
-     "ttk": 25.7,
-     "h2d": 2.5
+     "ttk": 16.9,
+     "h2d": 2.9
     },
     {
      "f": 55,
-     "ttk": 5.1,
-     "h2d": 6.4
+     "ttk": 22.9,
+     "h2d": 2.6
     },
     {
      "f": 60,
-     "ttk": 5.3,
-     "h2d": 6.2
+     "ttk": 33.2,
+     "h2d": 2.3
     }
    ],
    "Rogue": [
@@ -1599,129 +1599,129 @@
     {
      "f": 5,
      "ttk": 0.4,
-     "h2d": 20
+     "h2d": 20.2
     },
     {
      "f": 10,
      "ttk": 0.9,
-     "h2d": 11.5
+     "h2d": 11.8
     },
     {
      "f": 15,
-     "ttk": 1.4,
-     "h2d": 8.3
+     "ttk": 1.3,
+     "h2d": 8.6
     },
     {
      "f": 20,
-     "ttk": 2.2,
-     "h2d": 5.9
+     "ttk": 2.1,
+     "h2d": 6.1
     },
     {
      "f": 25,
-     "ttk": 2.8,
-     "h2d": 5
+     "ttk": 2.7,
+     "h2d": 5.3
     },
     {
      "f": 30,
-     "ttk": 2.3,
-     "h2d": 6.8
+     "ttk": 2.2,
+     "h2d": 7.2
     },
     {
      "f": 35,
-     "ttk": 3.1,
-     "h2d": 4.6
+     "ttk": 3,
+     "h2d": 4.8
     },
     {
      "f": 40,
-     "ttk": 5.5,
-     "h2d": 3.5
+     "ttk": 5.3,
+     "h2d": 3.7
     },
     {
      "f": 45,
-     "ttk": 9.2,
-     "h2d": 2.7
+     "ttk": 8.1,
+     "h2d": 3
     },
     {
      "f": 50,
-     "ttk": 14.9,
-     "h2d": 2.2
+     "ttk": 9.9,
+     "h2d": 2.6
     },
     {
      "f": 55,
-     "ttk": 3.1,
-     "h2d": 5.7
+     "ttk": 13,
+     "h2d": 2.4
     },
     {
      "f": 60,
-     "ttk": 3.2,
-     "h2d": 5.6
+     "ttk": 18.6,
+     "h2d": 2.1
     }
    ],
    "Mage": [
     {
      "f": 1,
      "ttk": 1.2,
-     "h2d": 32.5
+     "h2d": 35.8
     },
     {
      "f": 5,
      "ttk": 1,
-     "h2d": 16.9
+     "h2d": 18.2
     },
     {
      "f": 10,
-     "ttk": 2,
-     "h2d": 9.2
+     "ttk": 1.9,
+     "h2d": 9.9
     },
     {
      "f": 15,
-     "ttk": 3,
-     "h2d": 6.7
+     "ttk": 2.8,
+     "h2d": 7.1
     },
     {
      "f": 20,
-     "ttk": 4.8,
-     "h2d": 4.7
+     "ttk": 4.6,
+     "h2d": 5
     },
     {
      "f": 25,
-     "ttk": 6.1,
-     "h2d": 4
+     "ttk": 5.8,
+     "h2d": 4.3
     },
     {
      "f": 30,
-     "ttk": 4.9,
-     "h2d": 5.5
+     "ttk": 4.7,
+     "h2d": 5.9
     },
     {
      "f": 35,
-     "ttk": 6.8,
-     "h2d": 3.7
+     "ttk": 6.5,
+     "h2d": 3.9
     },
     {
      "f": 40,
-     "ttk": 12.5,
-     "h2d": 2.8
+     "ttk": 12,
+     "h2d": 3
     },
     {
      "f": 45,
-     "ttk": 20.7,
-     "h2d": 2.2
+     "ttk": 18.5,
+     "h2d": 2.5
     },
     {
      "f": 50,
-     "ttk": 35.6,
-     "h2d": 1.8
+     "ttk": 22.6,
+     "h2d": 2.1
     },
     {
      "f": 55,
-     "ttk": 6.7,
-     "h2d": 4.6
+     "ttk": 31.3,
+     "h2d": 1.9
     },
     {
      "f": 60,
-     "ttk": 7,
-     "h2d": 4.5
+     "ttk": 46,
+     "h2d": 1.7
     }
    ],
    "Paladin": [
@@ -1733,62 +1733,62 @@
     {
      "f": 5,
      "ttk": 0.7,
-     "h2d": 21.5
+     "h2d": 21.7
     },
     {
      "f": 10,
      "ttk": 1.7,
-     "h2d": 13
+     "h2d": 13.3
     },
     {
      "f": 15,
-     "ttk": 2.7,
-     "h2d": 9.1
+     "ttk": 2.5,
+     "h2d": 9.3
     },
     {
      "f": 20,
-     "ttk": 4.3,
-     "h2d": 6.2
+     "ttk": 4.2,
+     "h2d": 6.4
     },
     {
      "f": 25,
-     "ttk": 5.7,
-     "h2d": 5.3
+     "ttk": 5.4,
+     "h2d": 5.5
     },
     {
      "f": 30,
-     "ttk": 4.6,
-     "h2d": 7
+     "ttk": 4.4,
+     "h2d": 7.3
     },
     {
      "f": 35,
-     "ttk": 6.4,
-     "h2d": 4.7
+     "ttk": 6.1,
+     "h2d": 4.9
     },
     {
      "f": 40,
-     "ttk": 11.9,
-     "h2d": 3.6
+     "ttk": 11.3,
+     "h2d": 3.7
     },
     {
      "f": 45,
-     "ttk": 19.8,
-     "h2d": 2.8
+     "ttk": 17.7,
+     "h2d": 3.1
     },
     {
      "f": 50,
-     "ttk": 33.9,
-     "h2d": 2.3
+     "ttk": 21.7,
+     "h2d": 2.6
     },
     {
      "f": 55,
-     "ttk": 6.4,
-     "h2d": 5.8
+     "ttk": 29.9,
+     "h2d": 2.4
     },
     {
      "f": 60,
-     "ttk": 6.8,
-     "h2d": 5.7
+     "ttk": 44.6,
+     "h2d": 2.1
     }
    ]
   },
@@ -1796,145 +1796,145 @@
    "Goblin King": {
     "Warrior": {
      "ttk": 2,
-     "h2d": 11.9
+     "h2d": 12
     },
     "Rogue": {
      "ttk": 2,
-     "h2d": 9.3
+     "h2d": 9.4
     },
     "Mage": {
      "ttk": 4,
-     "h2d": 7.9
+     "h2d": 8.4
     },
     "Paladin": {
      "ttk": 2,
-     "h2d": 10
+     "h2d": 10.1
     }
    },
    "Spider Queen": {
     "Warrior": {
      "ttk": 2,
-     "h2d": 12
+     "h2d": 12.3
     },
     "Rogue": {
      "ttk": 2,
-     "h2d": 9.8
+     "h2d": 10.1
     },
     "Mage": {
      "ttk": 4,
-     "h2d": 7.9
+     "h2d": 8.5
     },
     "Paladin": {
      "ttk": 3,
-     "h2d": 11.1
+     "h2d": 11.3
     }
    },
    "Vampire Lord": {
     "Warrior": {
      "ttk": 3,
-     "h2d": 9.5
+     "h2d": 9.7
     },
     "Rogue": {
      "ttk": 2,
-     "h2d": 8
+     "h2d": 8.2
     },
     "Mage": {
      "ttk": 5,
-     "h2d": 6.4
+     "h2d": 6.9
     },
     "Paladin": {
      "ttk": 4,
-     "h2d": 8.7
+     "h2d": 8.9
     }
    },
    "Elder Lich": {
     "Warrior": {
      "ttk": 5,
-     "h2d": 7.1
+     "h2d": 7.3
     },
     "Rogue": {
      "ttk": 3,
-     "h2d": 6.1
+     "h2d": 6.3
     },
     "Mage": {
      "ttk": 7,
-     "h2d": 4.9
+     "h2d": 5.2
     },
     "Paladin": {
      "ttk": 6,
-     "h2d": 6.5
+     "h2d": 6.7
     }
    },
    "Dragon Emperor": {
     "Warrior": {
      "ttk": 7,
-     "h2d": 6.3
+     "h2d": 8.7
     },
     "Rogue": {
-     "ttk": 5,
-     "h2d": 5.5
+     "ttk": 4,
+     "h2d": 7.7
     },
     "Mage": {
      "ttk": 11,
-     "h2d": 4.4
+     "h2d": 6.3
     },
     "Paladin": {
-     "ttk": 10,
-     "h2d": 5.7
+     "ttk": 9,
+     "h2d": 8
     }
    },
    "Leviathan": {
     "Warrior": {
-     "ttk": 12,
-     "h2d": 5
+     "ttk": 11,
+     "h2d": 7
     },
     "Rogue": {
      "ttk": 7,
-     "h2d": 4.4
+     "h2d": 6.3
     },
     "Mage": {
-     "ttk": 18,
-     "h2d": 3.6
+     "ttk": 17,
+     "h2d": 5.2
     },
     "Paladin": {
-     "ttk": 15,
-     "h2d": 4.6
+     "ttk": 14,
+     "h2d": 6.4
     }
    },
    "Void Sovereign": {
     "Warrior": {
-     "ttk": 20,
-     "h2d": 3.5
+     "ttk": 19,
+     "h2d": 4.8
     },
     "Rogue": {
      "ttk": 12,
-     "h2d": 3.1
+     "h2d": 4.3
     },
     "Mage": {
-     "ttk": 31,
-     "h2d": 2.5
+     "ttk": 30,
+     "h2d": 3.5
     },
     "Paladin": {
-     "ttk": 26,
-     "h2d": 3.2
+     "ttk": 25,
+     "h2d": 4.4
     }
    },
    "The Creator": {
     "Warrior": {
-     "ttk": 35,
-     "h2d": 2.9
+     "ttk": 34,
+     "h2d": 4
     },
     "Rogue": {
-     "ttk": 21,
-     "h2d": 2.6
+     "ttk": 20,
+     "h2d": 3.6
     },
     "Mage": {
-     "ttk": 56,
-     "h2d": 2.1
+     "ttk": 53,
+     "h2d": 3
     },
     "Paladin": {
-     "ttk": 46,
-     "h2d": 2.6
+     "ttk": 44,
+     "h2d": 3.7
     }
    }
   },
