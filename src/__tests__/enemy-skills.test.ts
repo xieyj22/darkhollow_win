@@ -179,6 +179,26 @@ describe('executeEnemySkill', () => {
       vi.mocked(makeEnemy).mockReset();
     }
   });
+
+  // batch17 T2/R6 fix round 1: castSummon fs mirrors spawnEnemies' enemy slope
+  // .10 (Crypt Summoner mf17 + Leviathan F30 are live casters of this effect).
+  it('summon: fs mirrors spawnEnemies slope .10 (F11 → makeEnemy fs = 2.0)', () => {
+    G().dungeon = { map: floorMap(), rooms: [], stair: { x: 0, y: 0 }, traps: [] };
+    G().floor = 11;                     // pool filter: mf ∈ [5, 11]
+    G().player.x = 0; G().player.y = 0;
+    G().enemies = [];
+    vi.mocked(makeEnemy).mockReturnValue(mk({ name: 'Imp' }));
+    (ENEMIES as Array<{ mf?: number; tags?: string[] }>).push({ mf: 11 });
+    try {
+      const caster = mk({ x: 5, y: 5 });
+      executeEnemySkill(caster, { name: { en: 'Z', zh: 'Z' }, effect: 'summon', chance: 1, cd: 1 });
+      expect(G().enemies.length).toBe(1);
+      expect(vi.mocked(makeEnemy).mock.calls[0][3]).toBe(2.0);   // 1 + 10*0.10 (old .12 → 2.2)
+    } finally {
+      (ENEMIES as Array<unknown>).pop();
+      vi.mocked(makeEnemy).mockReset();
+    }
+  });
 });
 
 describe('executeEnemySkill — heal target faction (P1-6)', () => {

@@ -19,6 +19,9 @@ vi.mock('../messages.js', () => ({ addMsg: () => {} }));
 vi.mock('../audio.js', () => ({ snd: () => {}, setBgmScene: () => {} }));
 vi.mock('../effects.js', () => ({ flt: () => {}, shake: () => {} }));
 vi.mock('../fx.js', () => ({ fxFlash: () => {}, fxBurst: () => {}, fxAura: () => {} }));
+// R6 fix round 1: vi.importActual('../enemies.js') (processEnemies) imports
+// setEnemyTween from render.js — mock it so the real render module never loads.
+vi.mock('../render.js', () => ({ setEnemyTween: () => {} }));
 vi.mock('../enemies.js', () => ({ processBossPhase: () => {} }));
 vi.mock('../data.js', () => ({ ACH_DEFS: [], EQUIPMENT_SETS: [] }));
 vi.mock('../steam.js', () => ({ unlockAchievement: () => {} }));
@@ -174,5 +177,39 @@ describe('batch17 R6 formula-mirror riders', () => {
     const sk: EnemySkill = { name: { en: 'Z', zh: 'Z' }, effect: 'dmg_aoe', chance: 1, cd: 1, dmg: 1, aoe: 2 };
     executeEnemySkill(caster, sk);
     expect(999 - ally.hp).toBe(9);
+  });
+});
+
+// batch17 R6 fix round 1 (controller ruling): the last two subtraction formulas
+// inside enemies.ts itself switch to percentage mitigation — ranged direct
+// damage (keeping the 0.7 coefficient + rng(-1,1) jitter) and processAlly.
+describe('batch17 R6 fix round 1: enemies.ts ranged/ally MITIG', () => {
+  const vis = () => Array.from({ length: 30 }, () => Array(30).fill(true));
+
+  it('ranged direct damage: atk20×.7 vs def10 → floor((14±1)*100/110) = 11..13 (old: 3..5)', async () => {
+    const { processEnemies } = await vi.importActual<typeof import('../enemies.js')>('../enemies.js');
+    for (let i = 0; i <= 2; i++) {                  // rng(-1,1) sweep: random=i/3 → i-1
+      const shooter = mkEnemy(999, 0);
+      Object.assign(shooter, { ai: 'ranged', atk: 20, x: 8, y: 5 });
+      seedG({ atk: 0, def: 10, hp: 999, maxHp: 999, warded: false, x: 5, y: 5, visible: vis() } as Partial<Player>, shooter);
+      Math.random = () => i / 3;                     // dodge roll (chance 0) + formula rng
+      processEnemies();                             // d=3 ∈ [2,7) & visible → ranged branch
+      expect(999 - (globalThis as any).G.player.hp).toBe(11 + i);  // floor((13+i)*100/110)
+    }
+  });
+
+  it('processAlly: atk10 vs def3 → floor((10±1)*100/103) = 8..10 (old: 6..8)', async () => {
+    const { processEnemies } = await vi.importActual<typeof import('../enemies.js')>('../enemies.js');
+    for (let i = 0; i <= 2; i++) {                  // rng(-1,1) sweep: random=i/3 → i-1
+      const ally = mkEnemy(999, 0);
+      Object.assign(ally, { isAlly: true, atk: 10, x: 5, y: 5 });
+      const foe = mkEnemy(999, 3);
+      Object.assign(foe, { stunned: 1, x: 6, y: 5 });   // stunned: skips its own turn, no map needed
+      seedG({ atk: 0, def: 0, hp: 999, maxHp: 999, warded: false, x: 20, y: 20, visible: vis() } as Partial<Player>, foe);
+      (globalThis as any).G.enemies = [ally, foe];  // ally first: one Math.random call (the rng)
+      Math.random = () => i / 3;
+      processEnemies();                             // dst(ally,foe)=1 ≤ 1.5 → direct hit
+      expect(999 - foe.hp).toBe(8 + i);             // floor((9+i)*100/103)
+    }
   });
 });

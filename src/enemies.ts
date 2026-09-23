@@ -277,7 +277,9 @@ export function processEnemies(): void {
             relicOnDodge(); // relic trigger: wind_step
             break;
           }
-          let dmg = Math.max(1, Math.floor(e.atk * .7) - G.player.def + rng(-1, 1));
+          // batch17 T1 semantics: percentage mitigation (K=100), keeping the 0.7
+          // ranged coefficient + rng(-1,1) jitter — def no longer walls ranged at 1.
+          let dmg = Math.max(1, Math.floor((e.atk * .7 + rng(-1, 1)) * 100 / (100 + G.player.def)));
           // Ranged attacks previously bypassed attack() — apply Mana Shield here
           // so the talent isn't useless against ranged enemies.
           const msr = getManaShieldReduction();
@@ -356,7 +358,9 @@ function processAlly(ally: Enemy): void {
   let nearest: Enemy | null = null, nd = 999;
   for (const e of G.enemies) { if (e.isAlly) continue; const d = dst(ally.x, ally.y, e.x, e.y); if (d < nd) { nd = d; nearest = e; } }
   if (nearest && nd <= 1.5) {
-    const dmg = Math.max(1, ally.atk - nearest.def + rng(-1, 1));
+    // batch17 T1 semantics: percentage mitigation (K=100) — ally hits no longer
+    // wall at 1 against high-def foes.
+    const dmg = Math.max(1, Math.floor((ally.atk + rng(-1, 1)) * 100 / (100 + nearest.def)));
     nearest.hp -= dmg;
     addMsg(t('allyHit') + nearest.name + ' -' + dmg, 'mc');
     flt(nearest.x, nearest.y, `-${dmg}`, '#06d6a0');

@@ -145,13 +145,14 @@ function castBlink(caster: Enemy): void {
 }
 
 function castSummon(caster: Enemy): void {
-  // v1: no caster uses this effect yet (see spec §7 follow-ups); kept complete per spec §2.2 deliverable.
+  // Live casters: Crypt Summoner (mf17 "Raise Dead") + Leviathan (F30 "Abyssal
+  // Call"). fs mirrors spawnEnemies' enemy slope: 1 + (fl-1)*0.10 (batch17 T2).
   if (!G || G.enemies.length >= 30) return;
   const fl = G.floor;
   const pool = ENEMIES.filter(en => en.mf <= fl && en.mf >= Math.max(1, fl - 6) && !en.tags?.includes('boss'));
   if (!pool.length) return;
   const base = pick(pool);
-  const fs = 1 + (fl - 1) * 0.12;
+  const fs = 1 + (fl - 1) * 0.10;
   for (let attempt = 0; attempt < 8; attempt++) {
     const sx = caster.x + rng(-2, 2), sy = caster.y + rng(-2, 2);
     if (sx < 0 || sx >= MW || sy < 0 || sy >= MH) continue;
