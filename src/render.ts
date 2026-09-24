@@ -1,5 +1,5 @@
 // Canvas rendering + minimap
-import { G, canvas, ctx, miniCtx, minimapScale, lang, reducedMotion } from './state.js';
+import { G, canvas, ctx, miniCtx, minimapScale, lang, reducedMotion, uiZoom } from './state.js';
 import { setCanvas, setMiniCanvas } from './state.js';
 import { TS, MW, MH, TL, FINAL } from './config.js';
 import { clamp, dst, darken, darkenTinted } from './utils.js';
@@ -243,8 +243,17 @@ export function resizeCanvas(): void {
   setMiniCanvas(mc);
   mc.width = MW * minimapScale;
   mc.height = MH * minimapScale;
-  c.width = Math.floor((area.clientWidth - 20) / TS) * TS;
-  c.height = Math.floor((area.clientHeight - 20) / TS) * TS;
+  // 批18: game canvas follows the UI-zoom setting. Backing store keeps whole
+  // tiles (cols*TS); the CSS size scales by uiZoom so each tile renders at
+  // TS*uiZoom screen pixels and the camera (c.width/TS) sees fewer tiles at
+  // higher zoom — same magnify semantics the sidebar/hotbar get from CSS zoom.
+  // Floors keep the view sane on tiny windows × high zoom.
+  const cols = Math.max(8, Math.floor((area.clientWidth - 20) / (TS * uiZoom)));
+  const rows = Math.max(6, Math.floor((area.clientHeight - 20) / (TS * uiZoom)));
+  c.width = cols * TS;
+  c.height = rows * TS;
+  c.style.width = (cols * TS * uiZoom) + 'px';
+  c.style.height = (rows * TS * uiZoom) + 'px';
   // Invalidate cached scanline overlay since canvas size changed
   scanlineCanvas = null;
   vignetteCanvas = null;

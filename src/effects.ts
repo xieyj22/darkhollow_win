@@ -13,6 +13,9 @@ export function flt(x: number, y: number, txt: string, col: string, type?: 'crit
   const sx = (x - G.vx) * TS + TS / 2;
   const sy = (y - G.vy) * TS;
   const r = canvas.getBoundingClientRect();
+  // 批18: canvas CSS size is now backing*uiZoom — map tile-space to screen
+  // space via the live display scale instead of assuming 1:1.
+  const k = canvas.width ? r.width / canvas.width : 1;
   let d: HTMLDivElement;
   if (activeFts.length >= MAX_FT) {
     d = activeFts.shift()!;
@@ -24,8 +27,8 @@ export function flt(x: number, y: number, txt: string, col: string, type?: 'crit
   d.className = 'ft' + (type ? ' ' + type : '');
   d.textContent = txt;
   d.style.color = col;
-  d.style.left = (r.left + sx) + 'px';
-  d.style.top = (r.top + sy) + 'px';
+  d.style.left = (r.left + sx * k) + 'px';
+  d.style.top = (r.top + sy * k) + 'px';
   document.body.appendChild(d);
   activeFts.push(d);
   ftTimers.set(d, setTimeout(() => {
@@ -82,8 +85,9 @@ export function resetShake(): void {
 export function burstSmoke(x: number, y: number): void {
   if (!G || !canvas || reducedMotion) return;
   const r = canvas.getBoundingClientRect();
-  const cx = r.left + (x - G.vx) * TS + TS / 2;
-  const cy = r.top + (y - G.vy) * TS + TS / 2;
+  const k = canvas.width ? r.width / canvas.width : 1;
+  const cx = r.left + ((x - G.vx) * TS + TS / 2) * k;
+  const cy = r.top + ((y - G.vy) * TS + TS / 2) * k;
   for (let i = 0; i < 20; i++) {
     const d = document.createElement('div');
     d.className = 'smoke-p';

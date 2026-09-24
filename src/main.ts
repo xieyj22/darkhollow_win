@@ -193,6 +193,14 @@ function bindButtons(): void {
   // Options + pause menu entries (audio/zoom/safe/motion now live in the Options panel)
   on('btn-options', () => openOptions('game'));
   on('btn-options-title', () => openOptions('title'));
+  // Quit closes the Electron window (main.cjs window-all-closed → app.quit()).
+  // In a plain browser window.close() is a no-op for tabs we didn't open —
+  // remove the button + its separator dot there.
+  on('btn-quit', () => window.close());
+  if (!/electron/i.test(navigator.userAgent)) {
+    document.getElementById('btn-quit')?.remove();
+    document.getElementById('dot-quit')?.remove();
+  }
   on('btn-close-options', closeOptions);
   on('btn-close-pause', closePause);
   on('btn-pause-resume', closePause);

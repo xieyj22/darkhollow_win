@@ -87,6 +87,19 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:var(--font-
 .menu-btn{background:none;border:2px solid var(--accent-red);color:var(--accent-red);padding:12px 40px;font-family:var(--font-zh-px), var(--font-runes);font-size:round(up, 1.1em, 12px);cursor:pointer;margin:6px;min-width:220px;border-left-width:0;border-radius:var(--radius-sm)}
 .menu-btn:hover{background:#e6394622;color:#ff6b6b;transform:scale(1.05);border-left-width:3px;box-shadow:var(--shadow-glow-red)}
 .menu-btn:active{transform:scale(.98)}
+/* 批18: title hierarchy — primary actions filled, secondary outlined-dim,
+   records/codex compact pair, help/options/quit as a text-link footer row. */
+.title-main{display:flex;flex-direction:column;align-items:center}
+.menu-btn.primary{background:var(--accent-red);border-color:var(--accent-red);color:#0a0a0f;min-width:260px;padding:14px 40px;font-weight:bold}
+.menu-btn.primary:hover{background:#ff6b6b;border-color:#ff6b6b;color:#0a0a0f}
+.menu-btn.secondary{color:var(--text-bright);border-color:var(--border-bright);min-width:200px}
+.menu-btn.secondary:hover{color:var(--text-bright);border-color:var(--accent-red);background:#e6394611}
+.menu-btn.small{min-width:150px;padding:8px 20px;font-size:round(up, .95em, 12px)}
+.title-row{display:flex;gap:12px}
+.title-footer{display:flex;gap:10px;align-items:center;margin-top:26px}
+.title-link{background:none;border:none;color:var(--text-muted);font-family:var(--font-zh-px), var(--font-runes);font-size:.85em;cursor:pointer;padding:6px 10px;border-radius:var(--radius-sm)}
+.title-link:hover{color:var(--accent-red);text-shadow:0 0 8px #e6394666}
+.title-footer .dot{color:var(--text-muted);user-select:none}
 #title-screen .controls-hint{color:var(--text-muted);font-size:.75em;margin-top:30px;max-width:420px;text-align:center;line-height:1.6}
 #title-screen .controls-hint span{color:#e6394688}
 #lang-btn{position:fixed;top:var(--safe);right:var(--safe);background:var(--bg-card);border:1px solid var(--accent-red-dim);color:var(--accent-red);padding:6px 14px;cursor:pointer;font-family:inherit;font-size:.85em;z-index:var(--z-lang);border-radius:var(--radius-sm)}

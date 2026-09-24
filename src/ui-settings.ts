@@ -24,6 +24,10 @@ export function updateLangUI(): void {
   $('btn-records')!.textContent = t('us.recordsBtn');
   $('btn-codex')!.textContent = t('us.codexBtn');
   $('lang-btn')!.textContent = t('us.langSwitchTo');
+  // 批18: footer links (Quit is removed at startup in non-Electron builds —
+  // textContent on a missing node would throw, hence the guard).
+  const q = $('btn-quit'); if (q) q.textContent = t('btnQuit');
+  const ot = $('btn-options-title'); if (ot) ot.textContent = t('options');
   $('sb-hero')!.textContent = '⚔ ' + t('hero'); $('sb-nl')!.textContent = t('name'); $('sb-rl')!.textContent = t('race');
   $('sb-cl')!.textContent = t('cls'); $('sb-lv')!.textContent = t('level');
   $('sb-gl')!.textContent = t('gold'); $('sb-fl')!.textContent = t('floor'); $('sb-tl')!.textContent = t('turns');

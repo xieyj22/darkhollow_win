@@ -9,6 +9,7 @@ export const L: Record<string, I18nText | I18nText[]> = {
   btnNew: { en: 'New Game', zh: '新游戏' },
   btnCont: { en: 'Continue', zh: '继续游戏' },
   btnHelp: { en: 'How to Play', zh: '游戏说明' },
+  btnQuit: { en: 'Quit', zh: '退出' },
   hero: { en: 'Hero', zh: '英雄' },
   name: { en: 'Name', zh: '名字' }, race: { en: 'Race', zh: '种族' }, cls: { en: 'Class', zh: '职业' },
   level: { en: 'Level', zh: '等级' }, gold: { en: 'Gold', zh: '金币' }, floor: { en: 'Floor', zh: '楼层' },

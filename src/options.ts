@@ -9,11 +9,11 @@
 // (async/DOM-read), legend, keys (ui-panels togglers) — remain hand-rendered.
 
 import { t } from './i18n.js';
-import { legendVisible, keysVisible, minimapScale } from './state.js';
+import { G, legendVisible, keysVisible, minimapScale } from './state.js';
 import { SETTING_DEFS, resetDefaults } from './settings.js';
 import type { SettingDef, SettingTab } from './settings.js';
 import { MW, MH } from './config.js';
-import { renderMinimap } from './render.js';
+import { renderMinimap, resizeCanvas, render } from './render.js';
 import { showOverlay, hideOverlay, toggleLegend, toggleKeys } from './ui-panels.js';
 import { bridge } from './bridge.js';
 import { bindingsFor, buttonBindingsFor, resetKeybinds, setCapturing } from './keybinds.js';
@@ -35,6 +35,13 @@ function applyMinimap(): void {
   c.width = MW * minimapScale;
   c.height = MH * minimapScale;
   renderMinimap();
+}
+
+// 批18: UI zoom now scales the game canvas too — recompute the backing store
+// and redraw so the view doesn't go blank until the next turn.
+function applyMapZoom(): void {
+  resizeCanvas();
+  if (G) render();
 }
 
 export function toggleFullscreen(): void {
@@ -226,7 +233,7 @@ function bindToggle(input: HTMLInputElement, fn: (checked: boolean) => void): vo
  * Post-change hooks for settings whose DOM side-effects can't live in
  * settings.ts (minimap canvas resize needs render.ts + config.ts imports).
  */
-const POST_CHANGE: Record<string, () => void> = { minimap: applyMinimap };
+const POST_CHANGE: Record<string, () => void> = { minimap: applyMinimap, zoom: applyMapZoom };
 
 /**
  * Schema-driven tab renderer: filters SETTING_DEFS by tab, emits a row per def
@@ -253,6 +260,9 @@ function renderSchemaTab(body: HTMLElement, tab: SettingTab): void {
       const v = parseFloat(sl.value);
       d.set(v);
       d.apply?.();
+      // 批18: sliders with registered post-hooks (zoom resizes the game
+      // canvas) — no panel re-render, so drag focus is preserved.
+      POST_CHANGE[d.key]?.();
       // Keep aria in sync with the drag (render-time attrs alone go stale):
       // valuenow is the raw slider value, valuetext the human-readable form.
       const display = d.toDisplay ? d.toDisplay(v) : String(v);
